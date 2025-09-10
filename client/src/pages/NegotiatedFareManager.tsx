@@ -784,7 +784,10 @@ export default function NegotiatedFareManager() {
                   },
                 ]}
               >
-                <DatePicker style={{ width: "100%" }} />
+                <DatePicker 
+                  style={{ width: "100%" }} 
+                  format="DD MM YYYY"
+                />
               </AntForm.Item>
             </Col>
             <Col span={12}>
@@ -795,7 +798,10 @@ export default function NegotiatedFareManager() {
                   { required: true, message: "Please select booking end date" },
                 ]}
               >
-                <DatePicker style={{ width: "100%" }} />
+                <DatePicker 
+                  style={{ width: "100%" }}
+                  format="DD MM YYYY"
+                />
               </AntForm.Item>
             </Col>
           </Row>
@@ -812,7 +818,10 @@ export default function NegotiatedFareManager() {
                   },
                 ]}
               >
-                <DatePicker style={{ width: "100%" }} />
+                <DatePicker 
+                  style={{ width: "100%" }}
+                  format="DD MM YYYY"
+                />
               </AntForm.Item>
             </Col>
             <Col span={12}>
@@ -823,7 +832,10 @@ export default function NegotiatedFareManager() {
                   { required: true, message: "Please select travel end date" },
                 ]}
               >
-                <DatePicker style={{ width: "100%" }} />
+                <DatePicker 
+                  style={{ width: "100%" }}
+                  format="DD MM YYYY"
+                />
               </AntForm.Item>
             </Col>
           </Row>
@@ -899,6 +911,7 @@ export default function NegotiatedFareManager() {
               multiple
               style={{ width: "100%" }}
               placeholder={["Select blackout dates", ""]}
+              format="DD MM YYYY"
             />
           </AntForm.Item>
 
@@ -1360,7 +1373,10 @@ export default function NegotiatedFareManager() {
                   },
                 ]}
               >
-                <DatePicker style={{ width: "100%" }} />
+                <DatePicker 
+                  style={{ width: "100%" }}
+                  format="DD MM YYYY"
+                />
               </AntForm.Item>
             </Col>
             <Col span={12}>
@@ -1371,7 +1387,10 @@ export default function NegotiatedFareManager() {
                   { required: true, message: "Please select booking end date" },
                 ]}
               >
-                <DatePicker style={{ width: "100%" }} />
+                <DatePicker 
+                  style={{ width: "100%" }}
+                  format="DD MM YYYY"
+                />
               </AntForm.Item>
             </Col>
           </Row>
@@ -1388,7 +1407,10 @@ export default function NegotiatedFareManager() {
                   },
                 ]}
               >
-                <DatePicker style={{ width: "100%" }} />
+                <DatePicker 
+                  style={{ width: "100%" }}
+                  format="DD MM YYYY"
+                />
               </AntForm.Item>
             </Col>
             <Col span={12}>
@@ -1399,7 +1421,10 @@ export default function NegotiatedFareManager() {
                   { required: true, message: "Please select travel end date" },
                 ]}
               >
-                <DatePicker style={{ width: "100%" }} />
+                <DatePicker 
+                  style={{ width: "100%" }}
+                  format="DD MM YYYY"
+                />
               </AntForm.Item>
             </Col>
           </Row>
@@ -1475,6 +1500,7 @@ export default function NegotiatedFareManager() {
               multiple
               style={{ width: "100%" }}
               placeholder={["Select blackout dates", ""]}
+              format="DD MM YYYY"
             />
           </AntForm.Item>
 

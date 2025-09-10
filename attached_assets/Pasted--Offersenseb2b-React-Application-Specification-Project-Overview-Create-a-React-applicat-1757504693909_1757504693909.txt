@@ -1,0 +1,80 @@
+# Offersenseb2b React Application Specification
+
+## 📌 Project Overview
+
+Create a **React** application named `Offersenseb2b` using **Ant Design (antd)** as the UI framework. The application should feature a modern, clean, and responsive layout inspired by the attached screenshot. Focus on usability, clarity, and seamless navigation while ensuring it adapts well to different screen sizes.
+
+---
+
+## ✅ Key Requirements
+
+### Frameworks & Libraries
+- React (latest stable version)
+- Ant Design (antd) for UI components and styling
+- React Router for navigation
+- Optional: TypeScript for type safety and scalability
+
+---
+
+## 🎨 UI & Design Guidelines
+
+- Follow Ant Design’s design principles for consistency and accessibility.
+- Implement a collapsible sidebar that smoothly transitions between expanded and compact states.
+- Use appropriate spacing, font sizes, and iconography to enhance readability and navigation.
+- Apply colors, typography, and layout styling as shown in the attached screenshot while improving visual hierarchy where possible.
+- Ensure responsiveness across devices (desktop, tablet, mobile).
+- Include hover states, active states, and smooth animations for interactive elements.
+
+---
+
+## 📂 Sidebar / Navigation Menu
+
+The sidebar should include the following menu items. Each should route to a placeholder page displaying its name prominently.
+
+1. **Negotiated Fare Manager**
+2. **Dynamic Discount Engine (API/GDS/NDC fares)**
+3. **Air Ancillaries Discounting**
+4. **Non-Air Ancillaries Markup/Discounting**
+5. **Ancillary Bundling Engine**
+6. **Offer Rule Builder (No-Code)**
+7. **Offer Composer for Agents**
+8. **Agent & Channel Manager**
+9. **Cohort Manager**
+10. **Agent Tier Manager**
+11. **Campaign Manager**
+12. **Logs & Version History**
+13. **Dashboard**
+14. **Analytics & Simulation**
+
+---
+
+## ✅ Functional Requirements
+
+- Sidebar should collapse/expand on user action.
+- Clicking on each menu item should navigate to its respective placeholder page.
+- Placeholder pages should display the section title clearly in the header.
+- Layout should be adaptive and maintain a consistent structure across pages.
+
+---
+
+## 🚀 Additional Enhancements (Optional but Recommended)
+
+- Implement dark/light mode toggle.
+- Add breadcrumbs for navigation tracking.
+- Ensure keyboard accessibility and screen reader friendliness.
+- Use lazy loading for routes to optimize performance.
+- Apply a theme with customized primary and secondary colors aligning with branding guidelines.
+
+---
+
+## 📦 Deliverables
+
+1. Fully functional React app named `Offersenseb2b`.
+2. Sidebar navigation with smooth collapse/expand functionality.
+3. Placeholder pages for each menu item.
+4. Responsive layout adhering to Ant Design guidelines.
+5. Clean, scalable, and maintainable codebase.
+
+---
+
+Attach the screenshot before starting the implementation to ensure alignment on the layout and design expectations.

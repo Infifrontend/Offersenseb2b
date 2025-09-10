@@ -327,17 +327,6 @@ export default function NegotiatedFareManager() {
       {/* Header Section */}
       <div className="bg-white border-b">
         <div className="px-6 py-4">
-          <div className="flex justify-between items-start mb-4">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground mb-2">
-                Fare Manager
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Manage airline fares, validate pricing rules, and handle fare uploads
-              </p>
-            </div>
-          </div>
-
           {/* Action Buttons */}
           <div className="flex gap-3">
             <Button

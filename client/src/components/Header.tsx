@@ -42,7 +42,17 @@ export default function Header({ onToggleSidebar, isMobile }: HeaderProps) {
           </button>
         )}
         
-        
+        {/* Page Title Section */}
+        {location === "/negotiated-fare-manager" && (
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">
+              Fare Manager
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Manage airline fares, validate pricing rules, and handle fare uploads
+            </p>
+          </div>
+        )}
       </div>
 
       {/* User Actions */}

@@ -141,6 +141,73 @@ export default function NegotiatedFareManager() {
     },
   });
 
+  // Dummy data for default display
+  const dummyFares = [
+    {
+      id: "1",
+      airlineCode: "DE",
+      fareCode: "FAREDYNAMICTRIGGER",
+      origin: "DEL",
+      destination: "SHJ",
+      tripType: "ROUND_TRIP",
+      cabinClass: "PREMIUM_ECONOMY",
+      baseNetFare: "500.00",
+      currency: "USD",
+      bookingStartDate: "2024-01-01",
+      bookingEndDate: "2024-12-31",
+      travelStartDate: "2024-02-01",
+      travelEndDate: "2024-11-30",
+      pos: ["US", "IN"],
+      eligibleAgentTiers: ["GOLD", "PLATINUM"],
+      remarks: "Premium dynamic fare",
+      status: "ACTIVE",
+      createdAt: "2024-01-01T00:00:00Z",
+      updatedAt: "2024-01-01T00:00:00Z"
+    },
+    {
+      id: "2",
+      airlineCode: "SH",
+      fareCode: "SHJ-MAA-ECO-01",
+      origin: "SHJ",
+      destination: "MAA",
+      tripType: "ONE_WAY",
+      cabinClass: "ECONOMY",
+      baseNetFare: "179.00",
+      currency: "USD",
+      bookingStartDate: "2024-01-01",
+      bookingEndDate: "2024-12-31",
+      travelStartDate: "2024-02-01",
+      travelEndDate: "2024-11-30",
+      pos: ["IN", "US"],
+      eligibleAgentTiers: ["SILVER", "GOLD"],
+      remarks: "Economy class special",
+      status: "ACTIVE",
+      createdAt: "2024-01-01T00:00:00Z",
+      updatedAt: "2024-01-01T00:00:00Z"
+    },
+    {
+      id: "3",
+      airlineCode: "SI",
+      fareCode: "SIN-KUL-ECO-01",
+      origin: "SIN",
+      destination: "KUL",
+      tripType: "ONE_WAY",
+      cabinClass: "ECONOMY",
+      baseNetFare: "89.00",
+      currency: "USD",
+      bookingStartDate: "2024-01-01",
+      bookingEndDate: "2024-12-31",
+      travelStartDate: "2024-02-01",
+      travelEndDate: "2024-11-30",
+      pos: ["SG", "US"],
+      eligibleAgentTiers: ["BRONZE", "SILVER"],
+      remarks: "Regional economy fare",
+      status: "ACTIVE",
+      createdAt: "2024-01-01T00:00:00Z",
+      updatedAt: "2024-01-01T00:00:00Z"
+    }
+  ];
+
   // API calls
   const { data: fares, isLoading } = useQuery({
     queryKey: ["/api/negofares", filters],
@@ -151,6 +218,9 @@ export default function NegotiatedFareManager() {
       return response.json();
     },
   });
+
+  // Use dummy data if no API data is available
+  const displayFares = fares || dummyFares;
 
   const createFareMutation = useMutation({
     mutationFn: async (data: FareFormData) => {
@@ -250,65 +320,7 @@ export default function NegotiatedFareManager() {
     createFareMutation.mutate(formattedData);
   };
 
-  const createSampleFares = () => {
-    const sampleFares = [
-      {
-        airlineCode: "DE",
-        fareCode: "FAREDYNAMICTRIGGER",
-        origin: "DEL",
-        destination: "SHJ",
-        tripType: "ROUND_TRIP",
-        cabinClass: "PREMIUM_ECONOMY",
-        baseNetFare: "500.00",
-        currency: "USD",
-        bookingStartDate: "2024-01-01",
-        bookingEndDate: "2024-12-31",
-        travelStartDate: "2024-02-01",
-        travelEndDate: "2024-11-30",
-        pos: ["US", "IN"],
-        eligibleAgentTiers: ["GOLD", "PLATINUM"],
-        remarks: "Premium dynamic fare",
-      },
-      {
-        airlineCode: "SH",
-        fareCode: "SHJ-MAA-ECO-01",
-        origin: "SHJ",
-        destination: "MAA",
-        tripType: "ONE_WAY",
-        cabinClass: "ECONOMY",
-        baseNetFare: "179.00",
-        currency: "USD",
-        bookingStartDate: "2024-01-01",
-        bookingEndDate: "2024-12-31",
-        travelStartDate: "2024-02-01",
-        travelEndDate: "2024-11-30",
-        pos: ["IN", "US"],
-        eligibleAgentTiers: ["SILVER", "GOLD"],
-        remarks: "Economy class special",
-      },
-      {
-        airlineCode: "SI",
-        fareCode: "SIN-KUL-ECO-01",
-        origin: "SIN",
-        destination: "KUL",
-        tripType: "ONE_WAY",
-        cabinClass: "ECONOMY",
-        baseNetFare: "89.00",
-        currency: "USD",
-        bookingStartDate: "2024-01-01",
-        bookingEndDate: "2024-12-31",
-        travelStartDate: "2024-02-01",
-        travelEndDate: "2024-11-30",
-        pos: ["SG", "US"],
-        eligibleAgentTiers: ["BRONZE", "SILVER"],
-        remarks: "Regional economy fare",
-      },
-    ];
-
-    sampleFares.forEach((fare) => {
-      createFareMutation.mutate(fare);
-    });
-  };
+  
 
   return (
     <div className="space-y-6">
@@ -404,7 +416,7 @@ export default function NegotiatedFareManager() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {fares?.map((fare: NegotiatedFare) => (
+                {displayFares?.map((fare: NegotiatedFare) => (
                   <TableRow key={fare.id}>
                     <TableCell className="font-medium">
                       {fare.fareCode}

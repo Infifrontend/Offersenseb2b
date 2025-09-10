@@ -496,7 +496,7 @@ export default function NegotiatedFareManager() {
             </Table>
           )}
         </div>
-      )
+      </div>
 
       <Modal
         title="Create New Negotiated Fare"

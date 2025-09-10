@@ -939,123 +939,273 @@ export default function NegotiatedFareManager() {
 
       {/* View Fare Modal */}
       <Modal
-        title="View Fare Details"
+        title={
+          <div className="flex items-center gap-3 pb-4 border-b">
+            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+              <Eye className="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Fare Details</h3>
+              <p className="text-sm text-gray-500">Complete fare information and settings</p>
+            </div>
+          </div>
+        }
         open={isViewModalOpen}
         onCancel={() => {
           setIsViewModalOpen(false);
           setSelectedFare(null);
         }}
         footer={[
-          <AntButton key="close" onClick={() => {
-            setIsViewModalOpen(false);
-            setSelectedFare(null);
-          }}>
-            Close
-          </AntButton>
+          <div key="footer" className="flex justify-between items-center w-full pt-4 border-t">
+            <div className="text-xs text-gray-500">
+              Created: {selectedFare ? new Date(selectedFare.createdAt).toLocaleDateString() : ''}
+            </div>
+            <AntButton 
+              key="close" 
+              type="primary"
+              onClick={() => {
+                setIsViewModalOpen(false);
+                setSelectedFare(null);
+              }}
+            >
+              Close
+            </AntButton>
+          </div>
         ]}
-        width={800}
+        width={900}
+        className="fare-details-modal"
       >
         {selectedFare && (
-          <div className="space-y-4">
-            <Row gutter={16}>
-              <Col span={8}>
-                <div>
-                  <strong>Airline Code:</strong> {selectedFare.airlineCode}
-                </div>
-              </Col>
-              <Col span={8}>
-                <div>
-                  <strong>Fare Code:</strong> {selectedFare.fareCode}
-                </div>
-              </Col>
-              <Col span={8}>
-                <div>
-                  <strong>Currency:</strong> {selectedFare.currency}
-                </div>
-              </Col>
-            </Row>
-            <Row gutter={16}>
-              <Col span={8}>
-                <div>
-                  <strong>Origin:</strong> {selectedFare.origin}
-                </div>
-              </Col>
-              <Col span={8}>
-                <div>
-                  <strong>Destination:</strong> {selectedFare.destination}
-                </div>
-              </Col>
-              <Col span={8}>
-                <div>
-                  <strong>Base Net Fare:</strong> {selectedFare.baseNetFare}
-                </div>
-              </Col>
-            </Row>
-            <Row gutter={16}>
-              <Col span={12}>
-                <div>
-                  <strong>Trip Type:</strong> {selectedFare.tripType.replace('_', ' ')}
-                </div>
-              </Col>
-              <Col span={12}>
-                <div>
-                  <strong>Cabin Class:</strong> {selectedFare.cabinClass.replace('_', ' ')}
-                </div>
-              </Col>
-            </Row>
-            <Row gutter={16}>
-              <Col span={12}>
-                <div>
-                  <strong>Booking Period:</strong> {selectedFare.bookingStartDate} to {selectedFare.bookingEndDate}
-                </div>
-              </Col>
-              <Col span={12}>
-                <div>
-                  <strong>Travel Period:</strong> {selectedFare.travelStartDate} to {selectedFare.travelEndDate}
-                </div>
-              </Col>
-            </Row>
-            <div>
-              <strong>Point of Sale:</strong> {selectedFare.pos?.join(', ') || 'N/A'}
+          <div className="space-y-6 pt-4">
+            {/* Status Badge */}
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                  selectedFare.status === "ACTIVE" 
+                    ? "bg-green-100 text-green-800" 
+                    : "bg-red-100 text-red-800"
+                }`}>
+                  <div className={`w-2 h-2 rounded-full mr-2 ${
+                    selectedFare.status === "ACTIVE" ? "bg-green-400" : "bg-red-400"
+                  }`}></div>
+                  {selectedFare.status}
+                </span>
+              </div>
+              <div className="text-sm text-gray-500">
+                ID: {selectedFare.id}
+              </div>
             </div>
-            <div>
-              <strong>Eligible Agent Tiers:</strong> {selectedFare.eligibleAgentTiers?.join(', ') || 'N/A'}
+
+            {/* Main Fare Information */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-100">
+              <h4 className="text-lg font-semibold text-gray-900 mb-4">Fare Information</h4>
+              <Row gutter={[24, 16]}>
+                <Col span={8}>
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Airline Code</label>
+                    <div className="text-lg font-bold text-gray-900">{selectedFare.airlineCode}</div>
+                  </div>
+                </Col>
+                <Col span={8}>
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Fare Code</label>
+                    <div className="text-lg font-bold text-blue-600">{selectedFare.fareCode}</div>
+                  </div>
+                </Col>
+                <Col span={8}>
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Base Fare</label>
+                    <div className="text-lg font-bold text-green-600">{selectedFare.currency} {selectedFare.baseNetFare}</div>
+                  </div>
+                </Col>
+              </Row>
             </div>
-            {selectedFare.eligibleCohorts && selectedFare.eligibleCohorts.length > 0 && (
-              <div>
-                <strong>Eligible Cohorts:</strong> {selectedFare.eligibleCohorts.join(', ')}
+
+            {/* Route Information */}
+            <div className="bg-gray-50 rounded-lg p-6 border">
+              <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                Route & Travel Details
+              </h4>
+              <Row gutter={[24, 16]}>
+                <Col span={12}>
+                  <div className="flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-gray-900">{selectedFare.origin}</div>
+                      <div className="text-xs text-gray-500">Origin</div>
+                    </div>
+                    <div className="flex-1 flex items-center">
+                      <div className="w-full h-px bg-gray-300 relative">
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="bg-white px-2 py-1 rounded-full border text-xs text-gray-600">
+                            {selectedFare.tripType.replace('_', ' ')}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-gray-900">{selectedFare.destination}</div>
+                      <div className="text-xs text-gray-500">Destination</div>
+                    </div>
+                  </div>
+                </Col>
+                <Col span={12}>
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Cabin Class</label>
+                    <div className="text-base font-semibold text-gray-900">
+                      {selectedFare.cabinClass.replace('_', ' ')}
+                    </div>
+                  </div>
+                </Col>
+              </Row>
+            </div>
+
+            {/* Date Information */}
+            <div className="grid grid-cols-2 gap-6">
+              <div className="bg-white rounded-lg p-4 border border-orange-200">
+                <h5 className="font-semibold text-orange-800 mb-3 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                  Booking Period
+                </h5>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">From:</span>
+                    <span className="font-medium">{new Date(selectedFare.bookingStartDate).toLocaleDateString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">To:</span>
+                    <span className="font-medium">{new Date(selectedFare.bookingEndDate).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-lg p-4 border border-green-200">
+                <h5 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  Travel Period
+                </h5>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">From:</span>
+                    <span className="font-medium">{new Date(selectedFare.travelStartDate).toLocaleDateString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">To:</span>
+                    <span className="font-medium">{new Date(selectedFare.travelEndDate).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Eligibility & Restrictions */}
+            <div className="bg-white rounded-lg p-6 border">
+              <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                Eligibility & Restrictions
+              </h4>
+              <Row gutter={[24, 16]}>
+                <Col span={12}>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Point of Sale</label>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {selectedFare.pos?.map((country, index) => (
+                          <span key={index} className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
+                            {country}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Agent Tiers</label>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {selectedFare.eligibleAgentTiers?.map((tier, index) => (
+                          <span key={index} className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${
+                            tier === 'PLATINUM' ? 'bg-gray-100 text-gray-800' :
+                            tier === 'GOLD' ? 'bg-yellow-100 text-yellow-800' :
+                            tier === 'SILVER' ? 'bg-gray-100 text-gray-700' :
+                            'bg-orange-100 text-orange-800'
+                          }`}>
+                            {tier}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </Col>
+                <Col span={12}>
+                  <div className="space-y-3">
+                    <Row gutter={16}>
+                      <Col span={8}>
+                        <div>
+                          <label className="text-sm font-medium text-gray-700">Seat Allotment</label>
+                          <div className="text-lg font-semibold text-gray-900">
+                            {selectedFare.seatAllotment || 'Unlimited'}
+                          </div>
+                        </div>
+                      </Col>
+                      <Col span={8}>
+                        <div>
+                          <label className="text-sm font-medium text-gray-700">Min Stay</label>
+                          <div className="text-lg font-semibold text-gray-900">
+                            {selectedFare.minStay ? `${selectedFare.minStay} days` : 'None'}
+                          </div>
+                        </div>
+                      </Col>
+                      <Col span={8}>
+                        <div>
+                          <label className="text-sm font-medium text-gray-700">Max Stay</label>
+                          <div className="text-lg font-semibold text-gray-900">
+                            {selectedFare.maxStay ? `${selectedFare.maxStay} days` : 'None'}
+                          </div>
+                        </div>
+                      </Col>
+                    </Row>
+                  </div>
+                </Col>
+              </Row>
+            </div>
+
+            {/* Additional Information */}
+            {(selectedFare.eligibleCohorts?.length > 0 || selectedFare.blackoutDates?.length > 0 || selectedFare.remarks) && (
+              <div className="bg-gray-50 rounded-lg p-6 border">
+                <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
+                  Additional Information
+                </h4>
+                <div className="space-y-4">
+                  {selectedFare.eligibleCohorts && selectedFare.eligibleCohorts.length > 0 && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Eligible Cohorts</label>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {selectedFare.eligibleCohorts.map((cohort, index) => (
+                          <span key={index} className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-indigo-100 text-indigo-800">
+                            {cohort}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {selectedFare.blackoutDates && selectedFare.blackoutDates.length > 0 && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Blackout Dates</label>
+                      <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-md">
+                        <div className="text-sm text-red-800">
+                          {selectedFare.blackoutDates.map(date => new Date(date).toLocaleDateString()).join(', ')}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {selectedFare.remarks && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Remarks</label>
+                      <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                        <div className="text-sm text-yellow-800">{selectedFare.remarks}</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
-            <Row gutter={16}>
-              <Col span={8}>
-                <div>
-                  <strong>Seat Allotment:</strong> {selectedFare.seatAllotment || 'N/A'}
-                </div>
-              </Col>
-              <Col span={8}>
-                <div>
-                  <strong>Min Stay:</strong> {selectedFare.minStay ? `${selectedFare.minStay} days` : 'N/A'}
-                </div>
-              </Col>
-              <Col span={8}>
-                <div>
-                  <strong>Max Stay:</strong> {selectedFare.maxStay ? `${selectedFare.maxStay} days` : 'N/A'}
-                </div>
-              </Col>
-            </Row>
-            {selectedFare.blackoutDates && selectedFare.blackoutDates.length > 0 && (
-              <div>
-                <strong>Blackout Dates:</strong> {selectedFare.blackoutDates.join(', ')}
-              </div>
-            )}
-            {selectedFare.remarks && (
-              <div>
-                <strong>Remarks:</strong> {selectedFare.remarks}
-              </div>
-            )}
-            <div>
-              <strong>Status:</strong> <span className="text-green-600">{selectedFare.status}</span>
-            </div>
           </div>
         )}
       </Modal>

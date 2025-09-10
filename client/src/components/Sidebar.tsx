@@ -136,7 +136,7 @@ export default function Sidebar({
             <h1 className="text-lg font-bold text-primary-foreground">
               Offersenseb2b
             </h1>
-            <p className="text-xs text-primary-foreground/80">
+            <p className="text-xs text-white text-opacity-80">
               Travel Management
             </p>
           </div>

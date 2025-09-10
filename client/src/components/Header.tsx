@@ -33,7 +33,7 @@ export default function Header({ onToggleSidebar, isMobile }: HeaderProps) {
       <div className="flex items-center space-x-4">
         {/* Mobile Menu Button */}
         {isMobile && (
-          <button 
+          <button
             onClick={onToggleSidebar}
             className="p-2 rounded-lg hover:bg-muted"
             data-testid="mobile-menu-toggle"
@@ -41,25 +41,23 @@ export default function Header({ onToggleSidebar, isMobile }: HeaderProps) {
             <Menu className="w-5 h-5" />
           </button>
         )}
-        
+
         {/* Page Title Section */}
         {location === "/dashboard" && (
           <div>
-            <h1 className="text-2xl font-bold text-foreground">
-              Dashboard
-            </h1>
+            <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
             <p className="text-sm text-muted-foreground">
-              Monitor key metrics and manage your travel offerings from this central hub
+              Monitor key metrics and manage your travel offerings from this
+              central hub
             </p>
           </div>
         )}
         {location === "/negotiated-fare-manager" && (
           <div>
-            <h1 className="text-2xl font-bold text-foreground">
-              Fare Manager
-            </h1>
+            <h1 className="text-2xl font-bold text-foreground">Fare Manager</h1>
             <p className="text-sm text-muted-foreground">
-              Manage airline fares, validate pricing rules, and handle fare uploads
+              Manage airline fares, validate pricing rules, and handle fare
+              uploads
             </p>
           </div>
         )}
@@ -187,23 +185,13 @@ export default function Header({ onToggleSidebar, isMobile }: HeaderProps) {
 
       {/* User Actions */}
       <div className="flex items-center space-x-4">
-        <button 
+        <button
           className="p-2 rounded-lg hover:bg-muted relative"
           data-testid="notifications-button"
         >
           <Bell className="w-5 h-5 text-muted-foreground" />
           <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full"></span>
         </button>
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-            <span className="text-primary-foreground text-sm font-medium">
-              JD
-            </span>
-          </div>
-          <span className="text-sm font-medium hidden sm:block">
-            John Doe
-          </span>
-        </div>
       </div>
     </header>
   );

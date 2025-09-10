@@ -162,7 +162,7 @@ export default function NegotiatedFareManager() {
       remarks: "Premium dynamic fare",
       status: "ACTIVE",
       createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-01T00:00:00Z"
+      updatedAt: "2024-01-01T00:00:00Z",
     },
     {
       id: "2",
@@ -183,7 +183,7 @@ export default function NegotiatedFareManager() {
       remarks: "Economy class special",
       status: "ACTIVE",
       createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-01T00:00:00Z"
+      updatedAt: "2024-01-01T00:00:00Z",
     },
     {
       id: "3",
@@ -204,8 +204,8 @@ export default function NegotiatedFareManager() {
       remarks: "Regional economy fare",
       status: "ACTIVE",
       createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-01T00:00:00Z"
-    }
+      updatedAt: "2024-01-01T00:00:00Z",
+    },
   ];
 
   // API calls
@@ -320,8 +320,6 @@ export default function NegotiatedFareManager() {
     createFareMutation.mutate(formattedData);
   };
 
-  
-
   return (
     <div className="space-y-6">
       {/* Header Section */}
@@ -332,7 +330,7 @@ export default function NegotiatedFareManager() {
             <Button
               onClick={() => setIsCreateModalOpen(true)}
               disabled={createFareMutation.isPending}
-              className="bg-blue-600 hover:bg-blue-700 text-white gap-2"
+              className="cls-primary-bg hover:bg-blue-700 text-white gap-2"
             >
               <Plus className="w-4 h-4" />
               Create Fare

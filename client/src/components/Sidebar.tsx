@@ -15,8 +15,10 @@ import {
   BarChart3,
   ChevronLeft,
   ChevronRight,
+  LogOut,
   Plane,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface SidebarProps {
   collapsed: boolean;
@@ -108,6 +110,10 @@ export default function Sidebar({
   onMobileClose,
 }: SidebarProps) {
   const [location] = useLocation();
+  const handleLogout = () => {
+    // logout();
+    console.log("Logged out");
+  };
 
   const sidebarWidth = collapsed ? "80px" : "250px";
   const sidebarClasses = `
@@ -123,7 +129,20 @@ export default function Sidebar({
       data-testid="sidebar"
     >
       {/* Sidebar Header */}
-      <div className="p-6 border-b border-border bg-primary">
+      <div className="p-6 border-b border-border bg-primary relative">
+        <button
+          onClick={onToggle}
+          className="absolute -right-3 top-6 bg-white rounded-full p-1.5 shadow-md hover:shadow-lg transition-shadow z-10"
+          data-testid="sidebar-toggle"
+        >
+          {collapsed && !isMobile ? (
+            <ChevronRight className="w-4 h-4" />
+          ) : (
+            <>
+              <ChevronLeft className="w-4 h-4" />
+            </>
+          )}
+        </button>
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 bg-primary-foreground rounded-lg flex items-center justify-center">
             <Plane className="text-primary w-4 h-4" />
@@ -182,28 +201,27 @@ export default function Sidebar({
       </nav>
 
       {/* Sidebar Footer */}
-      <div className="p-4 border-t border-border">
-        <button
-          onClick={onToggle}
-          className="w-full flex items-center justify-center space-x-2 px-3 py-2 rounded-lg border border-border hover:bg-muted transition-colors"
-          data-testid="sidebar-toggle"
+      <div className="mt-auto p-4 border-t border-gray-200">
+        <div className="flex items-center space-x-3 mb-3">
+          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+            <Users className="h-4 w-4 text-blue-600" />
+          </div>
+          <div className="flex-1 min-w-0  ">
+            <p className="text-sm font-medium  truncate cls-primary-clr">
+              John Doe
+            </p>
+            <p className="text-xs text-gray-700 capitalize">Administrator</p>
+          </div>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center space-x-2 text-gray-600 hover:text-gray-900"
         >
-          {collapsed && !isMobile ? (
-            <ChevronRight className="w-4 h-4" />
-          ) : (
-            <>
-              <ChevronLeft className="w-4 h-4" />
-              <span
-                className={`text-sm font-medium transition-opacity duration-300 ${
-                  collapsed && !isMobile ? "opacity-0 w-0" : "opacity-100"
-                }`}
-                style={{ display: collapsed && !isMobile ? "none" : "block" }}
-              >
-                Collapse
-              </span>
-            </>
-          )}
-        </button>
+          <LogOut className="h-4 w-4" />
+          <span>Logout</span>
+        </Button>
       </div>
     </aside>
   );

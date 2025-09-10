@@ -186,7 +186,7 @@ export default function Header({ onToggleSidebar, isMobile }: HeaderProps) {
       {/* User Actions */}
       <div className="flex items-center space-x-4">
         {/* Time Period Dropdown */}
-        <select className="px-3 py-2 text-sm border border-gray-300 rounded-md bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <select className="px-3 py-2 pr-8 text-sm border border-gray-300 rounded-md bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"6,9 12,15 18,9\"></polyline></svg>')] bg-no-repeat bg-right bg-[length:16px_16px] bg-[position:right_8px_center]">
           <option>Last 7 days</option>
           <option>Last 30 days</option>
           <option>Last 90 days</option>
@@ -194,13 +194,13 @@ export default function Header({ onToggleSidebar, isMobile }: HeaderProps) {
         </select>
 
         {/* Channels Dropdown */}
-        <select className="px-3 py-2 text-sm border border-gray-300 rounded-md bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <select className="px-3 py-2 pr-8 text-sm border border-gray-300 rounded-md bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"6,9 12,15 18,9\"></polyline></svg>')] bg-no-repeat bg-right bg-[length:16px_16px] bg-[position:right_8px_center]">
           <option>All Channels</option>
           <option>Direct</option>
           <option>GDS</option>
           <option>OTA</option>
           <option>Corporate</option>
-        </select>
+        </select></select>
 
         {/* Refresh Button */}
         <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center space-x-2">

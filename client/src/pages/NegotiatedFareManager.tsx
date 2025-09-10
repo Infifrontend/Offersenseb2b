@@ -318,6 +318,12 @@ export default function NegotiatedFareManager() {
       seatAllotment: values.seatAllotment?.toString(),
       minStay: values.minStay?.toString(),
       maxStay: values.maxStay?.toString(),
+      blackoutDates: values.blackoutDates?.map((dateRange: any) => 
+        Array.isArray(dateRange) 
+          ? dateRange.map((date: any) => date.format("YYYY-MM-DD"))
+          : [dateRange.format("YYYY-MM-DD")]
+      ).flat() || [],
+      eligibleCohorts: values.eligibleCohorts || [],
     };
     createFareMutation.mutate(formattedData);
   };
@@ -727,6 +733,23 @@ export default function NegotiatedFareManager() {
               </AntForm.Item>
             </Col>
           </Row>
+
+          <AntForm.Item label="Blackout Dates (Optional)" name="blackoutDates">
+            <DatePicker.RangePicker 
+              multiple
+              style={{ width: "100%" }}
+              placeholder={["Select blackout dates", ""]}
+            />
+          </AntForm.Item>
+
+          <AntForm.Item label="Eligible Cohorts (Optional)" name="eligibleCohorts">
+            <AntSelect
+              mode="tags"
+              placeholder="Enter cohort codes (e.g., CORP001, VIP002)"
+              style={{ width: "100%" }}
+              tokenSeparators={[',']}
+            />
+          </AntForm.Item>
 
           <AntForm.Item label="Remarks" name="remarks">
             <AntInput.TextArea placeholder="Additional notes..." rows={3} />

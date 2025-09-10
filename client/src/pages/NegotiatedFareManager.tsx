@@ -1,67 +1,22 @@
 import React, { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  Handshake,
-  Upload,
-  Plus,
-  Search,
-  Filter,
-  Download,
-  AlertCircle,
-} from "lucide-react";
+import { Handshake, Upload, Plus, Search, Filter, Download, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import {
-  Modal,
-  Form as AntForm,
-  Input as AntInput,
-  Select as AntSelect,
-  DatePicker,
-  Checkbox as AntCheckbox,
-  InputNumber,
-  Button as AntButton,
-  Row,
-  Col,
-} from "antd";
+import { Modal, Form as AntForm, Input as AntInput, Select as AntSelect, DatePicker, Checkbox as AntCheckbox, InputNumber, Button as AntButton, Row, Col } from "antd";
 import dayjs from "dayjs";
 
 // Form schemas
@@ -83,9 +38,7 @@ const fareFormSchema = z.object({
   minStay: z.string().optional(),
   maxStay: z.string().optional(),
   blackoutDates: z.array(z.string()).optional(),
-  eligibleAgentTiers: z
-    .array(z.enum(["PLATINUM", "GOLD", "SILVER", "BRONZE"]))
-    .min(1, "Select at least one tier"),
+  eligibleAgentTiers: z.array(z.enum(["PLATINUM", "GOLD", "SILVER", "BRONZE"])).min(1, "Select at least one tier"),
   eligibleCohorts: z.array(z.string()).optional(),
   remarks: z.string().optional(),
 });
@@ -141,73 +94,6 @@ export default function NegotiatedFareManager() {
     },
   });
 
-  // Dummy data for default display
-  const dummyFares = [
-    {
-      id: "1",
-      airlineCode: "DE",
-      fareCode: "FAREDYNAMICTRIGGER",
-      origin: "DEL",
-      destination: "SHJ",
-      tripType: "ROUND_TRIP",
-      cabinClass: "PREMIUM_ECONOMY",
-      baseNetFare: "500.00",
-      currency: "USD",
-      bookingStartDate: "2024-01-01",
-      bookingEndDate: "2024-12-31",
-      travelStartDate: "2024-02-01",
-      travelEndDate: "2024-11-30",
-      pos: ["US", "IN"],
-      eligibleAgentTiers: ["GOLD", "PLATINUM"],
-      remarks: "Premium dynamic fare",
-      status: "ACTIVE",
-      createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-01T00:00:00Z"
-    },
-    {
-      id: "2",
-      airlineCode: "SH",
-      fareCode: "SHJ-MAA-ECO-01",
-      origin: "SHJ",
-      destination: "MAA",
-      tripType: "ONE_WAY",
-      cabinClass: "ECONOMY",
-      baseNetFare: "179.00",
-      currency: "USD",
-      bookingStartDate: "2024-01-01",
-      bookingEndDate: "2024-12-31",
-      travelStartDate: "2024-02-01",
-      travelEndDate: "2024-11-30",
-      pos: ["IN", "US"],
-      eligibleAgentTiers: ["SILVER", "GOLD"],
-      remarks: "Economy class special",
-      status: "ACTIVE",
-      createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-01T00:00:00Z"
-    },
-    {
-      id: "3",
-      airlineCode: "SI",
-      fareCode: "SIN-KUL-ECO-01",
-      origin: "SIN",
-      destination: "KUL",
-      tripType: "ONE_WAY",
-      cabinClass: "ECONOMY",
-      baseNetFare: "89.00",
-      currency: "USD",
-      bookingStartDate: "2024-01-01",
-      bookingEndDate: "2024-12-31",
-      travelStartDate: "2024-02-01",
-      travelEndDate: "2024-11-30",
-      pos: ["SG", "US"],
-      eligibleAgentTiers: ["BRONZE", "SILVER"],
-      remarks: "Regional economy fare",
-      status: "ACTIVE",
-      createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-01T00:00:00Z"
-    }
-  ];
-
   // API calls
   const { data: fares, isLoading } = useQuery({
     queryKey: ["/api/negofares", filters],
@@ -218,9 +104,6 @@ export default function NegotiatedFareManager() {
       return response.json();
     },
   });
-
-  // Use dummy data if no API data is available
-  const displayFares = fares || dummyFares;
 
   const createFareMutation = useMutation({
     mutationFn: async (data: FareFormData) => {
@@ -268,32 +151,14 @@ export default function NegotiatedFareManager() {
 
   const downloadTemplate = () => {
     const headers = [
-      "airlineCode",
-      "fareCode",
-      "origin",
-      "destination",
-      "tripType",
-      "cabinClass",
-      "baseNetFare",
-      "currency",
-      "bookingStartDate",
-      "bookingEndDate",
-      "travelStartDate",
-      "travelEndDate",
-      "pos",
-      "seatAllotment",
-      "minStay",
-      "maxStay",
-      "blackoutDates",
-      "eligibleAgentTiers",
-      "eligibleCohorts",
-      "remarks",
+      "airlineCode", "fareCode", "origin", "destination", "tripType", "cabinClass",
+      "baseNetFare", "currency", "bookingStartDate", "bookingEndDate",
+      "travelStartDate", "travelEndDate", "pos", "seatAllotment", "minStay",
+      "maxStay", "blackoutDates", "eligibleAgentTiers", "eligibleCohorts", "remarks"
     ];
 
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      headers.join(",") +
-      "\n" +
+    const csvContent = "data:text/csv;charset=utf-8," + 
+      headers.join(",") + "\n" +
       'AA,NEGO001,NYC,LAX,ROUND_TRIP,ECONOMY,299.00,USD,2024-01-01,2024-12-31,2024-02-01,2024-11-30,"[""US"",""CA""]",50,7,30,"[]","[""GOLD"",""SILVER""]","[]","Sample negotiated fare"';
 
     const encodedUri = encodeURI(csvContent);
@@ -308,10 +173,10 @@ export default function NegotiatedFareManager() {
   const onSubmit = (values: any) => {
     const formattedData = {
       ...values,
-      bookingStartDate: values.bookingStartDate?.format("YYYY-MM-DD"),
-      bookingEndDate: values.bookingEndDate?.format("YYYY-MM-DD"),
-      travelStartDate: values.travelStartDate?.format("YYYY-MM-DD"),
-      travelEndDate: values.travelEndDate?.format("YYYY-MM-DD"),
+      bookingStartDate: values.bookingStartDate?.format('YYYY-MM-DD'),
+      bookingEndDate: values.bookingEndDate?.format('YYYY-MM-DD'),
+      travelStartDate: values.travelStartDate?.format('YYYY-MM-DD'),
+      travelEndDate: values.travelEndDate?.format('YYYY-MM-DD'),
       baseNetFare: values.baseNetFare?.toString(),
       seatAllotment: values.seatAllotment?.toString(),
       minStay: values.minStay?.toString(),
@@ -320,65 +185,135 @@ export default function NegotiatedFareManager() {
     createFareMutation.mutate(formattedData);
   };
 
-  
+  const createSampleFares = () => {
+    const sampleFares = [
+      {
+        airlineCode: "DE",
+        fareCode: "FAREDYNAMICTRIGGER",
+        origin: "DEL",
+        destination: "SHJ",
+        tripType: "ROUND_TRIP",
+        cabinClass: "PREMIUM_ECONOMY",
+        baseNetFare: "500.00",
+        currency: "USD",
+        bookingStartDate: "2024-01-01",
+        bookingEndDate: "2024-12-31",
+        travelStartDate: "2024-02-01",
+        travelEndDate: "2024-11-30",
+        pos: ["US", "IN"],
+        eligibleAgentTiers: ["GOLD", "PLATINUM"],
+        remarks: "Premium dynamic fare"
+      },
+      {
+        airlineCode: "SH",
+        fareCode: "SHJ-MAA-ECO-01",
+        origin: "SHJ",
+        destination: "MAA",
+        tripType: "ONE_WAY",
+        cabinClass: "ECONOMY",
+        baseNetFare: "179.00",
+        currency: "USD",
+        bookingStartDate: "2024-01-01",
+        bookingEndDate: "2024-12-31",
+        travelStartDate: "2024-02-01",
+        travelEndDate: "2024-11-30",
+        pos: ["IN", "US"],
+        eligibleAgentTiers: ["SILVER", "GOLD"],
+        remarks: "Economy class special"
+      },
+      {
+        airlineCode: "SI",
+        fareCode: "SIN-KUL-ECO-01",
+        origin: "SIN",
+        destination: "KUL",
+        tripType: "ONE_WAY",
+        cabinClass: "ECONOMY",
+        baseNetFare: "89.00",
+        currency: "USD",
+        bookingStartDate: "2024-01-01",
+        bookingEndDate: "2024-12-31",
+        travelStartDate: "2024-02-01",
+        travelEndDate: "2024-11-30",
+        pos: ["SG", "US"],
+        eligibleAgentTiers: ["BRONZE", "SILVER"],
+        remarks: "Regional economy fare"
+      }
+    ];
+
+    sampleFares.forEach(fare => {
+      createFareMutation.mutate(fare);
+    });
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="space-y-6">
       {/* Header Section */}
-      <div className="bg-white border-b px-6 py-6">
-        <div className="flex justify-between items-start mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Fare Manager
-            </h1>
-            <p className="text-gray-600 text-sm">
-              Manage airline fares, validate pricing rules, and handle fare uploads
-            </p>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">Last 7 days</span>
-              <Button variant="outline" size="sm" className="text-xs">
-                All Channels
-              </Button>
-              <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-white">
+      <div className="bg-white border-b">
+        <div className="px-6 py-4">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Fare Manager</h1>
+              <p className="text-sm text-muted-foreground">
+                Manage airline fares, validate pricing rules, and handle fare uploads
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <Select defaultValue="7days">
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder="Last 7 days" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7days">Last 7 days</SelectItem>
+                  <SelectItem value="30days">Last 30 days</SelectItem>
+                  <SelectItem value="90days">Last 90 days</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select defaultValue="all-channels">
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder="All Channels" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all-channels">All Channels</SelectItem>
+                  <SelectItem value="online">Online</SelectItem>
+                  <SelectItem value="offline">Offline</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Button variant="outline" size="sm" className="gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
                 Refresh
               </Button>
             </div>
           </div>
-        </div>
 
-        {/* Action Buttons Row */}
-        <div className="flex justify-between items-center">
+          {/* Action Buttons */}
           <div className="flex gap-3">
-            <Button
-              onClick={() => setIsCreateModalOpen(true)}
+            <Button 
+              onClick={() => setIsCreateModalOpen(true)} 
               disabled={createFareMutation.isPending}
-              className="bg-purple-600 hover:bg-purple-700 text-white gap-2"
+              className="bg-blue-600 hover:bg-blue-700 text-white gap-2"
             >
               <Plus className="w-4 h-4" />
               Create Fare
             </Button>
-
-            <Button
-              variant="outline"
-              onClick={downloadTemplate}
-              className="gap-2"
-            >
+            
+            <Button variant="outline" onClick={downloadTemplate} className="gap-2">
               <Download className="w-4 h-4" />
               Download Sample CSV
             </Button>
-
-            <Button
-              variant="outline"
+            
+            <Button 
+              variant="outline" 
               onClick={() => fileInputRef.current?.click()}
               className="gap-2"
             >
               <Upload className="w-4 h-4" />
               Upload CSV
             </Button>
-
+            
             <input
               ref={fileInputRef}
               type="file"
@@ -386,107 +321,88 @@ export default function NegotiatedFareManager() {
               onChange={handleFileUpload}
               className="hidden"
             />
-          </div>
 
-          <div>
-            <Select defaultValue="all-status">
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder="All Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all-status">All Status</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="ml-auto">
+              <Select defaultValue="all-status">
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder="All Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all-status">All Status</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Fare Inventory Section */}
-      <div className="px-6 py-6">
-        <div className="mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">Fare Inventory</h2>
+      <div className="px-6">
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold">Fare Inventory</h2>
         </div>
-
-        <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
+        
+        <div className="bg-white rounded-lg border">
           {isLoading ? (
             <div className="p-6">Loading fares...</div>
           ) : (
             <Table>
-              <TableHeader className="bg-gray-50">
+              <TableHeader>
                 <TableRow>
-                  <TableHead className="font-medium text-gray-700 py-4 px-6">Fare Code</TableHead>
-                  <TableHead className="font-medium text-gray-700 py-4 px-6">Route</TableHead>
-                  <TableHead className="font-medium text-gray-700 py-4 px-6">Class</TableHead>
-                  <TableHead className="font-medium text-gray-700 py-4 px-6">Trip Type</TableHead>
-                  <TableHead className="font-medium text-gray-700 py-4 px-6">Base Fare</TableHead>
-                  <TableHead className="font-medium text-gray-700 py-4 px-6">Brand</TableHead>
-                  <TableHead className="font-medium text-gray-700 py-4 px-6">Status</TableHead>
-                  <TableHead className="font-medium text-gray-700 py-4 px-6">Actions</TableHead>
+                  <TableHead>Fare Code</TableHead>
+                  <TableHead>Route</TableHead>
+                  <TableHead>Class</TableHead>
+                  <TableHead>Trip Type</TableHead>
+                  <TableHead>Base Fare</TableHead>
+                  <TableHead>Brand</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {displayFares?.map((fare: NegotiatedFare) => (
-                  <TableRow key={fare.id} className="border-b hover:bg-gray-50">
-                    <TableCell className="font-medium py-4 px-6 text-gray-900">
-                      {fare.fareCode}
+                {fares?.map((fare: NegotiatedFare) => (
+                  <TableRow key={fare.id}>
+                    <TableCell className="font-medium">{fare.fareCode}</TableCell>
+                    <TableCell>
+                      <div className="font-medium">{fare.origin} → {fare.destination}</div>
                     </TableCell>
-                    <TableCell className="py-4 px-6">
-                      <div className="text-gray-900">
-                        {fare.origin} → {fare.destination}
+                    <TableCell>{fare.cabinClass === "PREMIUM_ECONOMY" ? "Premium" : fare.cabinClass}</TableCell>
+                    <TableCell>
+                      <div className="text-sm">
+                        {fare.tripType === "ROUND_TRIP" ? "Round Trip" : 
+                         fare.tripType === "ONE_WAY" ? "One Way" : fare.tripType}
                       </div>
                     </TableCell>
-                    <TableCell className="py-4 px-6 text-gray-700">
-                      {fare.cabinClass === "PREMIUM_ECONOMY"
-                        ? "Premium"
-                        : fare.cabinClass === "ECONOMY"
-                        ? "Economy"
-                        : fare.cabinClass}
-                    </TableCell>
-                    <TableCell className="py-4 px-6">
-                      <div className="text-gray-700">
-                        {fare.tripType === "ROUND_TRIP"
-                          ? "Round Trip"
-                          : fare.tripType === "ONE_WAY"
-                            ? "One Way"
-                            : fare.tripType}
-                      </div>
-                    </TableCell>
-                    <TableCell className="py-4 px-6">
+                    <TableCell>
                       <div>
-                        <div className="text-gray-900 font-medium">{fare.currency}</div>
-                        <div className="text-gray-700">{fare.baseNetFare}</div>
+                        <div className="font-medium">{fare.currency}</div>
+                        <div className="text-sm">{fare.baseNetFare}</div>
                       </div>
                     </TableCell>
-                    <TableCell className="py-4 px-6">
-                      <div className="text-gray-700">
-                        {fare.remarks?.includes("Premium")
-                          ? "none"
-                          : fare.remarks?.includes("special")
-                            ? "LITE"
-                            : fare.remarks?.includes("Regional")
-                              ? "SELL001"
-                              : "none"}
+                    <TableCell>
+                      <div className="text-sm text-muted-foreground">
+                        {fare.remarks?.includes("Premium") ? "none" :
+                         fare.remarks?.includes("special") ? "LITE" : 
+                         fare.remarks?.includes("Regional") ? "SELL001" : "none"}
                       </div>
                     </TableCell>
-                    <TableCell className="py-4 px-6">
-                      <Badge className="bg-green-100 text-green-700 border-green-200">
+                    <TableCell>
+                      <Badge variant="default" className="bg-green-100 text-green-800">
                         Active
                       </Badge>
                     </TableCell>
-                    <TableCell className="py-4 px-6">
-                      <div className="flex items-center gap-3">
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          <Search className="w-4 h-4 text-gray-500" />
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Button variant="ghost" size="sm">
+                          <Search className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          <Upload className="w-4 h-4 text-gray-500" />
+                        <Button variant="ghost" size="sm">
+                          <Upload className="w-4 h-4" />
                         </Button>
-                        <div className="relative">
-                          <div className="w-10 h-5 bg-purple-600 rounded-full cursor-pointer">
-                            <div className="w-4 h-4 bg-white rounded-full absolute right-0.5 top-0.5 transition-all"></div>
-                          </div>
+                        <div className="w-8 h-4 bg-purple-600 rounded-full relative">
+                          <div className="w-3 h-3 bg-white rounded-full absolute right-0.5 top-0.5"></div>
                         </div>
                       </div>
                     </TableCell>
@@ -518,8 +434,8 @@ export default function NegotiatedFareManager() {
                 label="Airline Code"
                 name="airlineCode"
                 rules={[
-                  { required: true, message: "Please enter airline code" },
-                  { len: 2, message: "Airline code must be 2 characters" },
+                  { required: true, message: 'Please enter airline code' },
+                  { len: 2, message: 'Airline code must be 2 characters' }
                 ]}
               >
                 <AntInput placeholder="AA" maxLength={2} />
@@ -529,7 +445,7 @@ export default function NegotiatedFareManager() {
               <AntForm.Item
                 label="Fare Code"
                 name="fareCode"
-                rules={[{ required: true, message: "Please enter fare code" }]}
+                rules={[{ required: true, message: 'Please enter fare code' }]}
               >
                 <AntInput placeholder="NEGO001" />
               </AntForm.Item>
@@ -538,7 +454,7 @@ export default function NegotiatedFareManager() {
               <AntForm.Item
                 label="Currency"
                 name="currency"
-                rules={[{ required: true, message: "Please select currency" }]}
+                rules={[{ required: true, message: 'Please select currency' }]}
               >
                 <AntSelect placeholder="Select currency">
                   {currencies.map((currency) => (
@@ -557,8 +473,8 @@ export default function NegotiatedFareManager() {
                 label="Origin"
                 name="origin"
                 rules={[
-                  { required: true, message: "Please enter origin" },
-                  { len: 3, message: "Origin must be 3 characters" },
+                  { required: true, message: 'Please enter origin' },
+                  { len: 3, message: 'Origin must be 3 characters' }
                 ]}
               >
                 <AntInput placeholder="NYC" maxLength={3} />
@@ -569,8 +485,8 @@ export default function NegotiatedFareManager() {
                 label="Destination"
                 name="destination"
                 rules={[
-                  { required: true, message: "Please enter destination" },
-                  { len: 3, message: "Destination must be 3 characters" },
+                  { required: true, message: 'Please enter destination' },
+                  { len: 3, message: 'Destination must be 3 characters' }
                 ]}
               >
                 <AntInput placeholder="LAX" maxLength={3} />
@@ -580,14 +496,9 @@ export default function NegotiatedFareManager() {
               <AntForm.Item
                 label="Base Net Fare"
                 name="baseNetFare"
-                rules={[{ required: true, message: "Please enter base fare" }]}
+                rules={[{ required: true, message: 'Please enter base fare' }]}
               >
-                <InputNumber
-                  placeholder="299.00"
-                  min={0}
-                  step={0.01}
-                  style={{ width: "100%" }}
-                />
+                <InputNumber placeholder="299.00" min={0} step={0.01} style={{ width: '100%' }} />
               </AntForm.Item>
             </Col>
           </Row>
@@ -597,16 +508,12 @@ export default function NegotiatedFareManager() {
               <AntForm.Item
                 label="Trip Type"
                 name="tripType"
-                rules={[{ required: true, message: "Please select trip type" }]}
+                rules={[{ required: true, message: 'Please select trip type' }]}
               >
                 <AntSelect placeholder="Select trip type">
                   <AntSelect.Option value="ONE_WAY">One Way</AntSelect.Option>
-                  <AntSelect.Option value="ROUND_TRIP">
-                    Round Trip
-                  </AntSelect.Option>
-                  <AntSelect.Option value="MULTI_CITY">
-                    Multi City
-                  </AntSelect.Option>
+                  <AntSelect.Option value="ROUND_TRIP">Round Trip</AntSelect.Option>
+                  <AntSelect.Option value="MULTI_CITY">Multi City</AntSelect.Option>
                 </AntSelect>
               </AntForm.Item>
             </Col>
@@ -614,15 +521,11 @@ export default function NegotiatedFareManager() {
               <AntForm.Item
                 label="Cabin Class"
                 name="cabinClass"
-                rules={[
-                  { required: true, message: "Please select cabin class" },
-                ]}
+                rules={[{ required: true, message: 'Please select cabin class' }]}
               >
                 <AntSelect placeholder="Select cabin class">
                   <AntSelect.Option value="ECONOMY">Economy</AntSelect.Option>
-                  <AntSelect.Option value="PREMIUM_ECONOMY">
-                    Premium Economy
-                  </AntSelect.Option>
+                  <AntSelect.Option value="PREMIUM_ECONOMY">Premium Economy</AntSelect.Option>
                   <AntSelect.Option value="BUSINESS">Business</AntSelect.Option>
                   <AntSelect.Option value="FIRST">First</AntSelect.Option>
                 </AntSelect>
@@ -635,25 +538,18 @@ export default function NegotiatedFareManager() {
               <AntForm.Item
                 label="Booking Start Date"
                 name="bookingStartDate"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please select booking start date",
-                  },
-                ]}
+                rules={[{ required: true, message: 'Please select booking start date' }]}
               >
-                <DatePicker style={{ width: "100%" }} />
+                <DatePicker style={{ width: '100%' }} />
               </AntForm.Item>
             </Col>
             <Col span={12}>
               <AntForm.Item
                 label="Booking End Date"
                 name="bookingEndDate"
-                rules={[
-                  { required: true, message: "Please select booking end date" },
-                ]}
+                rules={[{ required: true, message: 'Please select booking end date' }]}
               >
-                <DatePicker style={{ width: "100%" }} />
+                <DatePicker style={{ width: '100%' }} />
               </AntForm.Item>
             </Col>
           </Row>
@@ -663,25 +559,18 @@ export default function NegotiatedFareManager() {
               <AntForm.Item
                 label="Travel Start Date"
                 name="travelStartDate"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please select travel start date",
-                  },
-                ]}
+                rules={[{ required: true, message: 'Please select travel start date' }]}
               >
-                <DatePicker style={{ width: "100%" }} />
+                <DatePicker style={{ width: '100%' }} />
               </AntForm.Item>
             </Col>
             <Col span={12}>
               <AntForm.Item
                 label="Travel End Date"
                 name="travelEndDate"
-                rules={[
-                  { required: true, message: "Please select travel end date" },
-                ]}
+                rules={[{ required: true, message: 'Please select travel end date' }]}
               >
-                <DatePicker style={{ width: "100%" }} />
+                <DatePicker style={{ width: '100%' }} />
               </AntForm.Item>
             </Col>
           </Row>
@@ -689,9 +578,7 @@ export default function NegotiatedFareManager() {
           <AntForm.Item
             label="Point of Sale (POS)"
             name="pos"
-            rules={[
-              { required: true, message: "Please select at least one POS" },
-            ]}
+            rules={[{ required: true, message: 'Please select at least one POS' }]}
           >
             <AntCheckbox.Group>
               <Row>
@@ -707,9 +594,7 @@ export default function NegotiatedFareManager() {
           <AntForm.Item
             label="Eligible Agent Tiers"
             name="eligibleAgentTiers"
-            rules={[
-              { required: true, message: "Please select at least one tier" },
-            ]}
+            rules={[{ required: true, message: 'Please select at least one tier' }]}
           >
             <AntCheckbox.Group>
               <Row>
@@ -725,29 +610,17 @@ export default function NegotiatedFareManager() {
           <Row gutter={16}>
             <Col span={8}>
               <AntForm.Item label="Seat Allotment" name="seatAllotment">
-                <InputNumber
-                  placeholder="50"
-                  min={0}
-                  style={{ width: "100%" }}
-                />
+                <InputNumber placeholder="50" min={0} style={{ width: '100%' }} />
               </AntForm.Item>
             </Col>
             <Col span={8}>
               <AntForm.Item label="Min Stay (days)" name="minStay">
-                <InputNumber
-                  placeholder="7"
-                  min={0}
-                  style={{ width: "100%" }}
-                />
+                <InputNumber placeholder="7" min={0} style={{ width: '100%' }} />
               </AntForm.Item>
             </Col>
             <Col span={8}>
               <AntForm.Item label="Max Stay (days)" name="maxStay">
-                <InputNumber
-                  placeholder="30"
-                  min={0}
-                  style={{ width: "100%" }}
-                />
+                <InputNumber placeholder="30" min={0} style={{ width: '100%' }} />
               </AntForm.Item>
             </Col>
           </Row>
@@ -757,19 +630,13 @@ export default function NegotiatedFareManager() {
           </AntForm.Item>
 
           <AntForm.Item>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "flex-end",
-                gap: "8px",
-              }}
-            >
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
               <AntButton onClick={() => setIsCreateModalOpen(false)}>
                 Cancel
               </AntButton>
-              <AntButton
-                type="primary"
-                htmlType="submit"
+              <AntButton 
+                type="primary" 
+                htmlType="submit" 
                 loading={createFareMutation.isPending}
               >
                 {createFareMutation.isPending ? "Creating..." : "Create Fare"}

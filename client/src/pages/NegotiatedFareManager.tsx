@@ -173,6 +173,66 @@ export default function NegotiatedFareManager() {
     createFareMutation.mutate(data);
   };
 
+  const createSampleFares = () => {
+    const sampleFares = [
+      {
+        airlineCode: "DE",
+        fareCode: "FAREDYNAMICTRIGGER",
+        origin: "DEL",
+        destination: "SHJ",
+        tripType: "ROUND_TRIP",
+        cabinClass: "PREMIUM_ECONOMY",
+        baseNetFare: "500.00",
+        currency: "USD",
+        bookingStartDate: "2024-01-01",
+        bookingEndDate: "2024-12-31",
+        travelStartDate: "2024-02-01",
+        travelEndDate: "2024-11-30",
+        pos: ["US", "IN"],
+        eligibleAgentTiers: ["GOLD", "PLATINUM"],
+        remarks: "Premium dynamic fare"
+      },
+      {
+        airlineCode: "SH",
+        fareCode: "SHJ-MAA-ECO-01",
+        origin: "SHJ",
+        destination: "MAA",
+        tripType: "ONE_WAY",
+        cabinClass: "ECONOMY",
+        baseNetFare: "179.00",
+        currency: "USD",
+        bookingStartDate: "2024-01-01",
+        bookingEndDate: "2024-12-31",
+        travelStartDate: "2024-02-01",
+        travelEndDate: "2024-11-30",
+        pos: ["IN", "US"],
+        eligibleAgentTiers: ["SILVER", "GOLD"],
+        remarks: "Economy class special"
+      },
+      {
+        airlineCode: "SI",
+        fareCode: "SIN-KUL-ECO-01",
+        origin: "SIN",
+        destination: "KUL",
+        tripType: "ONE_WAY",
+        cabinClass: "ECONOMY",
+        baseNetFare: "89.00",
+        currency: "USD",
+        bookingStartDate: "2024-01-01",
+        bookingEndDate: "2024-12-31",
+        travelStartDate: "2024-02-01",
+        travelEndDate: "2024-11-30",
+        pos: ["SG", "US"],
+        eligibleAgentTiers: ["BRONZE", "SILVER"],
+        remarks: "Regional economy fare"
+      }
+    ];
+
+    sampleFares.forEach(fare => {
+      createFareMutation.mutate(fare);
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="mb-6">
@@ -190,6 +250,27 @@ export default function NegotiatedFareManager() {
         </TabsList>
 
         <TabsContent value="upload" className="space-y-4">
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex gap-2">
+              <Button onClick={createSampleFares} disabled={createFareMutation.isPending}>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Fare
+              </Button>
+              <Button onClick={downloadTemplate} variant="outline">
+                <Download className="w-4 h-4 mr-2" />
+                Download Sample CSV
+              </Button>
+              <Button 
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadMutation.isPending}
+                variant="outline"
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                Upload CSV
+              </Button>
+            </div>
+          </div>
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* File Upload Section */}
             <Card>
@@ -618,54 +699,66 @@ export default function NegotiatedFareManager() {
               {isLoading ? (
                 <div>Loading fares...</div>
               ) : (
+                <div className="mb-4">
+                  <h2 className="text-xl font-semibold">Fare Inventory</h2>
+                </div>
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Airline</TableHead>
+                      <TableHead>Fare Code</TableHead>
                       <TableHead>Route</TableHead>
-                      <TableHead>Cabin</TableHead>
-                      <TableHead>Fare</TableHead>
-                      <TableHead>Validity</TableHead>
-                      <TableHead>Tiers</TableHead>
+                      <TableHead>Class</TableHead>
+                      <TableHead>Trip Type</TableHead>
+                      <TableHead>Base Fare</TableHead>
+                      <TableHead>Brand</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {fares?.map((fare: NegotiatedFare) => (
                       <TableRow key={fare.id}>
+                        <TableCell className="font-medium">{fare.fareCode}</TableCell>
                         <TableCell>
-                          <div>
-                            <div className="font-medium">{fare.airlineCode}</div>
-                            <div className="text-sm text-muted-foreground">{fare.fareCode}</div>
-                          </div>
+                          <div className="font-medium">{fare.origin} → {fare.destination}</div>
                         </TableCell>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">{fare.origin} → {fare.destination}</div>
-                            <div className="text-sm text-muted-foreground">{fare.tripType}</div>
-                          </div>
-                        </TableCell>
-                        <TableCell>{fare.cabinClass}</TableCell>
-                        <TableCell>
-                          <div className="font-medium">{fare.currency} {fare.baseNetFare}</div>
-                        </TableCell>
+                        <TableCell>{fare.cabinClass === "PREMIUM_ECONOMY" ? "Premium" : fare.cabinClass}</TableCell>
                         <TableCell>
                           <div className="text-sm">
-                            <div>Book: {fare.bookingStartDate} - {fare.bookingEndDate}</div>
-                            <div>Travel: {fare.travelStartDate} - {fare.travelEndDate}</div>
+                            {fare.tripType === "ROUND_TRIP" ? "Round Trip" : 
+                             fare.tripType === "ONE_WAY" ? "One Way" : fare.tripType}
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="space-x-1">
-                            {fare.eligibleAgentTiers.map((tier) => (
-                              <Badge key={tier} variant="secondary">{tier}</Badge>
-                            ))}
+                          <div>
+                            <div className="font-medium">{fare.currency}</div>
+                            <div className="text-sm">{fare.baseNetFare}</div>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant={fare.status === "ACTIVE" ? "default" : "destructive"}>
-                            {fare.status}
+                          <div className="text-sm text-muted-foreground">
+                            {fare.remarks?.includes("Premium") ? "none" :
+                             fare.remarks?.includes("special") ? "LITE" : 
+                             fare.remarks?.includes("Regional") ? "SELL001" : "none"}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="default" className="bg-green-100 text-green-800">
+                            Active
                           </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Button variant="ghost" size="sm">
+                              <Search className="w-4 h-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm">
+                              <Upload className="w-4 h-4" />
+                            </Button>
+                            <div className="w-8 h-4 bg-purple-600 rounded-full relative">
+                              <div className="w-3 h-3 bg-white rounded-full absolute right-0.5 top-0.5"></div>
+                            </div>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}

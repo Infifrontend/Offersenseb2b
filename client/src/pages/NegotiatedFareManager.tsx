@@ -10,14 +10,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { Modal, Form as AntForm, Input as AntInput, Select as AntSelect, DatePicker, Checkbox as AntCheckbox, InputNumber, Button as AntButton, Row, Col } from "antd";
+import dayjs from "dayjs";
 
 // Form schemas
 const fareFormSchema = z.object({
@@ -79,9 +77,10 @@ const agentTiers = ["PLATINUM", "GOLD", "SILVER", "BRONZE"];
 export default function NegotiatedFareManager() {
   const [filters, setFilters] = useState({});
   const [uploadResult, setUploadResult] = useState(null);
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
+  const [antForm] = AntForm.useForm();
 
   const form = useForm<FareFormData>({
     resolver: zodResolver(fareFormSchema),
@@ -119,8 +118,8 @@ export default function NegotiatedFareManager() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/negofares"] });
-      setIsCreateDialogOpen(false);
-      form.reset();
+      setIsCreateModalOpen(false);
+      antForm.resetFields();
     },
   });
 
@@ -169,8 +168,19 @@ export default function NegotiatedFareManager() {
     document.body.removeChild(link);
   };
 
-  const onSubmit = (data: FareFormData) => {
-    createFareMutation.mutate(data);
+  const onSubmit = (values: any) => {
+    const formattedData = {
+      ...values,
+      bookingStartDate: values.bookingStartDate?.format('YYYY-MM-DD'),
+      bookingEndDate: values.bookingEndDate?.format('YYYY-MM-DD'),
+      travelStartDate: values.travelStartDate?.format('YYYY-MM-DD'),
+      travelEndDate: values.travelEndDate?.format('YYYY-MM-DD'),
+      baseNetFare: values.baseNetFare?.toString(),
+      seatAllotment: values.seatAllotment?.toString(),
+      minStay: values.minStay?.toString(),
+      maxStay: values.maxStay?.toString(),
+    };
+    createFareMutation.mutate(formattedData);
   };
 
   const createSampleFares = () => {
@@ -252,7 +262,7 @@ export default function NegotiatedFareManager() {
         <TabsContent value="upload" className="space-y-4">
           <div className="flex justify-between items-center mb-4">
             <div className="flex gap-2">
-              <Button onClick={createSampleFares} disabled={createFareMutation.isPending}>
+              <Button onClick={() => setIsCreateModalOpen(true)} disabled={createFareMutation.isPending}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Fare
               </Button>
@@ -771,6 +781,238 @@ export default function NegotiatedFareManager() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <Modal
+        title="Create New Negotiated Fare"
+        open={isCreateModalOpen}
+        onCancel={() => setIsCreateModalOpen(false)}
+        footer={null}
+        width={800}
+        destroyOnClose
+      >
+        <AntForm
+          form={antForm}
+          layout="vertical"
+          onFinish={onSubmit}
+          autoComplete="off"
+        >
+          <Row gutter={16}>
+            <Col span={8}>
+              <AntForm.Item
+                label="Airline Code"
+                name="airlineCode"
+                rules={[
+                  { required: true, message: 'Please enter airline code' },
+                  { len: 2, message: 'Airline code must be 2 characters' }
+                ]}
+              >
+                <AntInput placeholder="AA" maxLength={2} />
+              </AntForm.Item>
+            </Col>
+            <Col span={8}>
+              <AntForm.Item
+                label="Fare Code"
+                name="fareCode"
+                rules={[{ required: true, message: 'Please enter fare code' }]}
+              >
+                <AntInput placeholder="NEGO001" />
+              </AntForm.Item>
+            </Col>
+            <Col span={8}>
+              <AntForm.Item
+                label="Currency"
+                name="currency"
+                rules={[{ required: true, message: 'Please select currency' }]}
+              >
+                <AntSelect placeholder="Select currency">
+                  {currencies.map((currency) => (
+                    <AntSelect.Option key={currency} value={currency}>
+                      {currency}
+                    </AntSelect.Option>
+                  ))}
+                </AntSelect>
+              </AntForm.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={8}>
+              <AntForm.Item
+                label="Origin"
+                name="origin"
+                rules={[
+                  { required: true, message: 'Please enter origin' },
+                  { len: 3, message: 'Origin must be 3 characters' }
+                ]}
+              >
+                <AntInput placeholder="NYC" maxLength={3} />
+              </AntForm.Item>
+            </Col>
+            <Col span={8}>
+              <AntForm.Item
+                label="Destination"
+                name="destination"
+                rules={[
+                  { required: true, message: 'Please enter destination' },
+                  { len: 3, message: 'Destination must be 3 characters' }
+                ]}
+              >
+                <AntInput placeholder="LAX" maxLength={3} />
+              </AntForm.Item>
+            </Col>
+            <Col span={8}>
+              <AntForm.Item
+                label="Base Net Fare"
+                name="baseNetFare"
+                rules={[{ required: true, message: 'Please enter base fare' }]}
+              >
+                <InputNumber placeholder="299.00" min={0} step={0.01} style={{ width: '100%' }} />
+              </AntForm.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <AntForm.Item
+                label="Trip Type"
+                name="tripType"
+                rules={[{ required: true, message: 'Please select trip type' }]}
+              >
+                <AntSelect placeholder="Select trip type">
+                  <AntSelect.Option value="ONE_WAY">One Way</AntSelect.Option>
+                  <AntSelect.Option value="ROUND_TRIP">Round Trip</AntSelect.Option>
+                  <AntSelect.Option value="MULTI_CITY">Multi City</AntSelect.Option>
+                </AntSelect>
+              </AntForm.Item>
+            </Col>
+            <Col span={12}>
+              <AntForm.Item
+                label="Cabin Class"
+                name="cabinClass"
+                rules={[{ required: true, message: 'Please select cabin class' }]}
+              >
+                <AntSelect placeholder="Select cabin class">
+                  <AntSelect.Option value="ECONOMY">Economy</AntSelect.Option>
+                  <AntSelect.Option value="PREMIUM_ECONOMY">Premium Economy</AntSelect.Option>
+                  <AntSelect.Option value="BUSINESS">Business</AntSelect.Option>
+                  <AntSelect.Option value="FIRST">First</AntSelect.Option>
+                </AntSelect>
+              </AntForm.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <AntForm.Item
+                label="Booking Start Date"
+                name="bookingStartDate"
+                rules={[{ required: true, message: 'Please select booking start date' }]}
+              >
+                <DatePicker style={{ width: '100%' }} />
+              </AntForm.Item>
+            </Col>
+            <Col span={12}>
+              <AntForm.Item
+                label="Booking End Date"
+                name="bookingEndDate"
+                rules={[{ required: true, message: 'Please select booking end date' }]}
+              >
+                <DatePicker style={{ width: '100%' }} />
+              </AntForm.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <AntForm.Item
+                label="Travel Start Date"
+                name="travelStartDate"
+                rules={[{ required: true, message: 'Please select travel start date' }]}
+              >
+                <DatePicker style={{ width: '100%' }} />
+              </AntForm.Item>
+            </Col>
+            <Col span={12}>
+              <AntForm.Item
+                label="Travel End Date"
+                name="travelEndDate"
+                rules={[{ required: true, message: 'Please select travel end date' }]}
+              >
+                <DatePicker style={{ width: '100%' }} />
+              </AntForm.Item>
+            </Col>
+          </Row>
+
+          <AntForm.Item
+            label="Point of Sale (POS)"
+            name="pos"
+            rules={[{ required: true, message: 'Please select at least one POS' }]}
+          >
+            <AntCheckbox.Group>
+              <Row>
+                {countries.map((country) => (
+                  <Col span={6} key={country}>
+                    <AntCheckbox value={country}>{country}</AntCheckbox>
+                  </Col>
+                ))}
+              </Row>
+            </AntCheckbox.Group>
+          </AntForm.Item>
+
+          <AntForm.Item
+            label="Eligible Agent Tiers"
+            name="eligibleAgentTiers"
+            rules={[{ required: true, message: 'Please select at least one tier' }]}
+          >
+            <AntCheckbox.Group>
+              <Row>
+                {agentTiers.map((tier) => (
+                  <Col span={6} key={tier}>
+                    <AntCheckbox value={tier}>{tier}</AntCheckbox>
+                  </Col>
+                ))}
+              </Row>
+            </AntCheckbox.Group>
+          </AntForm.Item>
+
+          <Row gutter={16}>
+            <Col span={8}>
+              <AntForm.Item label="Seat Allotment" name="seatAllotment">
+                <InputNumber placeholder="50" min={0} style={{ width: '100%' }} />
+              </AntForm.Item>
+            </Col>
+            <Col span={8}>
+              <AntForm.Item label="Min Stay (days)" name="minStay">
+                <InputNumber placeholder="7" min={0} style={{ width: '100%' }} />
+              </AntForm.Item>
+            </Col>
+            <Col span={8}>
+              <AntForm.Item label="Max Stay (days)" name="maxStay">
+                <InputNumber placeholder="30" min={0} style={{ width: '100%' }} />
+              </AntForm.Item>
+            </Col>
+          </Row>
+
+          <AntForm.Item label="Remarks" name="remarks">
+            <AntInput.TextArea placeholder="Additional notes..." rows={3} />
+          </AntForm.Item>
+
+          <AntForm.Item>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+              <AntButton onClick={() => setIsCreateModalOpen(false)}>
+                Cancel
+              </AntButton>
+              <AntButton 
+                type="primary" 
+                htmlType="submit" 
+                loading={createFareMutation.isPending}
+              >
+                {createFareMutation.isPending ? "Creating..." : "Create Fare"}
+              </AntButton>
+            </div>
+          </AntForm.Item>
+        </AntForm>
+      </Modal>
     </div>
   );
 }

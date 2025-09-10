@@ -17,7 +17,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const filters = req.query;
       const fares = await storage.getNegotiatedFares(filters);
       res.json(fares);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch negotiated fares", error: error.message });
     }
   });
@@ -38,7 +38,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const fare = await storage.insertNegotiatedFare(validatedData);
       res.status(201).json(fare);
-    } catch (error) {
+    } catch (error: any) {
       res.status(400).json({ message: "Invalid fare data", error: error.message });
     }
   });
@@ -50,9 +50,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No file uploaded" });
       }
 
-      const results = [];
-      const errors = [];
-      const conflicts = [];
+      const results: any[] = [];
+      const errors: any[] = [];
+      const conflicts: any[] = [];
 
       // Parse CSV
       const stream = Readable.from(req.file.buffer.toString());
@@ -94,14 +94,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             } else {
               results.push(validatedData);
             }
-          } catch (error) {
+          } catch (error: any) {
             errors.push({ data, error: error.message });
           }
         })
         .on("end", async () => {
           try {
             // Insert valid fares
-            const insertedFares = [];
+            const insertedFares: any[] = [];
             for (const fareData of results) {
               const fare = await storage.insertNegotiatedFare(fareData);
               insertedFares.push(fare);
@@ -118,11 +118,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 errors,
               },
             });
-          } catch (error) {
+          } catch (error: any) {
             res.status(500).json({ message: "Failed to insert fares", error: error.message });
           }
         });
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to process upload", error: error.message });
     }
   });
@@ -135,7 +135,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Fare not found" });
       }
       res.json(fare);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch fare", error: error.message });
     }
   });
@@ -146,7 +146,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertNegotiatedFareSchema.parse(req.body);
       const fare = await storage.updateNegotiatedFare(req.params.id, validatedData);
       res.json(fare);
-    } catch (error) {
+    } catch (error: any) {
       res.status(400).json({ message: "Failed to update fare", error: error.message });
     }
   });
@@ -156,7 +156,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       await storage.deleteNegotiatedFare(req.params.id);
       res.status(204).send();
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to delete fare", error: error.message });
     }
   });

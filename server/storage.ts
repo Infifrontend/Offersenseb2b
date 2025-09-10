@@ -32,10 +32,16 @@ export class DatabaseStorage implements IStorage {
       .values(insertUser)
       .returning();
     return user;
-  },
+  }
 
   async insertNegotiatedFare(fare: InsertNegotiatedFare): Promise<NegotiatedFare> {
-    const [newFare] = await db.insert(negotiatedFares).values(fare).returning();
+    // Convert number baseNetFare to string for PostgreSQL decimal type
+    const processedFare = { ...fare };
+    if (typeof processedFare.baseNetFare === 'number') {
+      processedFare.baseNetFare = processedFare.baseNetFare.toString() as any;
+    }
+    
+    const [newFare] = await db.insert(negotiatedFares).values(processedFare).returning();
     return newFare;
   }
 
@@ -77,9 +83,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateNegotiatedFare(id: string, updates: Partial<InsertNegotiatedFare>): Promise<NegotiatedFare> {
+    // Convert number baseNetFare to string for PostgreSQL decimal type
+    const processedUpdates = { ...updates };
+    if (processedUpdates.baseNetFare !== undefined) {
+      processedUpdates.baseNetFare = processedUpdates.baseNetFare.toString() as any;
+    }
+    
     const [updatedFare] = await db
       .update(negotiatedFares)
-      .set({ ...updates, updatedAt: sql`now()` })
+      .set({ ...processedUpdates, updatedAt: sql`now()` })
       .where(eq(negotiatedFares.id, id))
       .returning();
     return updatedFare;

@@ -786,7 +786,7 @@ export default function NegotiatedFareManager() {
               >
                 <DatePicker 
                   style={{ width: "100%" }} 
-                  format="DD MM YYYY"
+                  format="DD/MM/YYYY"
                 />
               </AntForm.Item>
             </Col>
@@ -800,7 +800,7 @@ export default function NegotiatedFareManager() {
               >
                 <DatePicker 
                   style={{ width: "100%" }}
-                  format="DD MM YYYY"
+                  format="DD/MM/YYYY"
                 />
               </AntForm.Item>
             </Col>
@@ -820,7 +820,7 @@ export default function NegotiatedFareManager() {
               >
                 <DatePicker 
                   style={{ width: "100%" }}
-                  format="DD MM YYYY"
+                  format="DD/MM/YYYY"
                 />
               </AntForm.Item>
             </Col>
@@ -834,7 +834,7 @@ export default function NegotiatedFareManager() {
               >
                 <DatePicker 
                   style={{ width: "100%" }}
-                  format="DD MM YYYY"
+                  format="DD/MM/YYYY"
                 />
               </AntForm.Item>
             </Col>
@@ -911,7 +911,7 @@ export default function NegotiatedFareManager() {
               multiple
               style={{ width: "100%" }}
               placeholder={["Select blackout dates", ""]}
-              format="DD MM YYYY"
+              format="DD/MM/YYYY"
             />
           </AntForm.Item>
 
@@ -1375,7 +1375,7 @@ export default function NegotiatedFareManager() {
               >
                 <DatePicker 
                   style={{ width: "100%" }}
-                  format="DD MM YYYY"
+                  format="DD/MM/YYYY"
                 />
               </AntForm.Item>
             </Col>
@@ -1389,7 +1389,7 @@ export default function NegotiatedFareManager() {
               >
                 <DatePicker 
                   style={{ width: "100%" }}
-                  format="DD MM YYYY"
+                  format="DD/MM/YYYY"
                 />
               </AntForm.Item>
             </Col>
@@ -1409,7 +1409,7 @@ export default function NegotiatedFareManager() {
               >
                 <DatePicker 
                   style={{ width: "100%" }}
-                  format="DD MM YYYY"
+                  format="DD/MM/YYYY"
                 />
               </AntForm.Item>
             </Col>
@@ -1423,7 +1423,7 @@ export default function NegotiatedFareManager() {
               >
                 <DatePicker 
                   style={{ width: "100%" }}
-                  format="DD MM YYYY"
+                  format="DD/MM/YYYY"
                 />
               </AntForm.Item>
             </Col>
@@ -1500,7 +1500,7 @@ export default function NegotiatedFareManager() {
               multiple
               style={{ width: "100%" }}
               placeholder={["Select blackout dates", ""]}
-              format="DD MM YYYY"
+              format="DD/MM/YYYY"
             />
           </AntForm.Item>
 

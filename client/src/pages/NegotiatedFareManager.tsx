@@ -255,20 +255,15 @@ export default function NegotiatedFareManager() {
         </p>
       </div>
 
-      <Tabs defaultValue="upload" className="space-y-4">
+      <Tabs defaultValue="list" className="space-y-4">
         <TabsList>
+          <TabsTrigger value="list">Fare List</TabsTrigger>
           <TabsTrigger value="upload">Upload & Manage</TabsTrigger>
-          <TabsTrigger value="create">Create Fare</TabsTrigger>
-          <TabsTrigger value="list">View All Fares</TabsTrigger>
         </TabsList>
 
         <TabsContent value="upload" className="space-y-4">
           <div className="flex justify-between items-center mb-4">
             <div className="flex gap-2">
-              <Button onClick={() => setIsCreateModalOpen(true)} disabled={createFareMutation.isPending}>
-                <Plus className="w-4 h-4 mr-2" />
-                Create Fare
-              </Button>
               <Button onClick={downloadTemplate} variant="outline">
                 <Download className="w-4 h-4 mr-2" />
                 Download Sample CSV
@@ -703,10 +698,18 @@ export default function NegotiatedFareManager() {
         <TabsContent value="list" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>All Negotiated Fares</CardTitle>
-              <CardDescription>
-                View and manage all negotiated fare agreements.
-              </CardDescription>
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle>All Negotiated Fares</CardTitle>
+                  <CardDescription>
+                    View and manage all negotiated fare agreements.
+                  </CardDescription>
+                </div>
+                <Button onClick={() => setIsCreateModalOpen(true)} disabled={createFareMutation.isPending}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Fare
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               {isLoading ? (

@@ -53,7 +53,49 @@ export const insertNegotiatedFareSchema = createInsertSchema(negotiatedFares, {
   updatedAt: true,
 });
 
+export const dynamicDiscountRules = pgTable("dynamic_discount_rules", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ruleCode: varchar("rule_code", { length: 50 }).notNull().unique(),
+  fareSource: varchar("fare_source", { length: 20 }).notNull(), // API_GDS_NDC
+  origin: varchar("origin", { length: 3 }).notNull(),
+  destination: varchar("destination", { length: 3 }).notNull(),
+  cabinClass: varchar("cabin_class", { length: 20 }).notNull(),
+  tripType: varchar("trip_type", { length: 20 }).notNull(),
+  pos: json("pos").notNull(), // array of ISO country codes
+  marketRegion: varchar("market_region", { length: 50 }),
+  agentTier: json("agent_tier").notNull(), // array: PLATINUM/GOLD/SILVER/BRONZE
+  cohortCodes: json("cohort_codes"), // array of cohort codes
+  channel: varchar("channel", { length: 20 }).notNull(), // API | PORTAL | MOBILE
+  bookingWindowMin: integer("booking_window_min"),
+  bookingWindowMax: integer("booking_window_max"),
+  travelWindowMin: integer("travel_window_min"),
+  travelWindowMax: integer("travel_window_max"),
+  seasonCode: varchar("season_code", { length: 50 }),
+  adjustmentType: varchar("adjustment_type", { length: 20 }).notNull(), // PERCENT | AMOUNT
+  adjustmentValue: decimal("adjustment_value", { precision: 10, scale: 2 }).notNull(),
+  stackable: varchar("stackable", { length: 5 }).default("false"), // true/false
+  priority: integer("priority").notNull().default(1),
+  status: varchar("status", { length: 20 }).default("ACTIVE"), // ACTIVE | INACTIVE
+  validFrom: date("valid_from").notNull(),
+  validTo: date("valid_to").notNull(),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
+export const insertDynamicDiscountRuleSchema = createInsertSchema(dynamicDiscountRules, {
+  adjustmentValue: z.string().transform((val) => parseFloat(val)),
+  pos: z.array(z.string()),
+  agentTier: z.array(z.enum(["PLATINUM", "GOLD", "SILVER", "BRONZE"])),
+  cohortCodes: z.array(z.string()).optional(),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type NegotiatedFare = typeof negotiatedFares.$inferSelect;
 export type InsertNegotiatedFare = z.infer<typeof insertNegotiatedFareSchema>;
+export type DynamicDiscountRule = typeof dynamicDiscountRules.$inferSelect;
+export type InsertDynamicDiscountRule = z.infer<typeof insertDynamicDiscountRuleSchema>;

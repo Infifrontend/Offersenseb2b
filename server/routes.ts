@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import multer from "multer";
 import csv from "csv-parser";
 import { Readable } from "stream";
-import { insertNegotiatedFareSchema } from "../shared/schema";
+import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema } from "../shared/schema";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -173,6 +173,125 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error: any) {
       res.status(500).json({ message: "Failed to delete fare", error: error.message });
+    }
+  });
+
+  // Dynamic Discount Rules Routes
+  
+  // Get all dynamic discount rules with optional filters
+  app.get("/api/dynamic-discount-rules", async (req, res) => {
+    try {
+      const filters = req.query;
+      const rules = await storage.getDynamicDiscountRules(filters);
+      res.json(rules);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch discount rules", error: error.message });
+    }
+  });
+
+  // Create single dynamic discount rule
+  app.post("/api/dynamic-discount-rules", async (req, res) => {
+    try {
+      const validatedData = insertDynamicDiscountRuleSchema.parse(req.body);
+      
+      // Check for conflicts
+      const conflicts = await storage.checkDiscountRuleConflicts(validatedData);
+      if (conflicts.length > 0) {
+        return res.status(409).json({ 
+          message: "Rule conflicts detected", 
+          conflicts 
+        });
+      }
+
+      const rule = await storage.insertDynamicDiscountRule(validatedData);
+      res.status(201).json(rule);
+    } catch (error: any) {
+      res.status(400).json({ message: "Invalid rule data", error: error.message });
+    }
+  });
+
+  // Simulate discount rule application
+  app.post("/api/dynamic-discount-rules/simulate", async (req, res) => {
+    try {
+      const { baseFare, currency, ruleId } = req.body;
+      
+      if (!baseFare || !currency || !ruleId) {
+        return res.status(400).json({ message: "baseFare, currency, and ruleId are required" });
+      }
+
+      const rule = await storage.getDynamicDiscountRuleById(ruleId);
+      if (!rule) {
+        return res.status(404).json({ message: "Rule not found" });
+      }
+
+      let adjustedFare = parseFloat(baseFare);
+      if (rule.adjustmentType === "PERCENT") {
+        adjustedFare = baseFare * (1 + parseFloat(rule.adjustmentValue) / 100);
+      } else if (rule.adjustmentType === "AMOUNT") {
+        adjustedFare = baseFare + parseFloat(rule.adjustmentValue);
+      }
+
+      res.json({
+        baseFare: parseFloat(baseFare),
+        adjustedFare: Math.round(adjustedFare * 100) / 100,
+        adjustment: {
+          type: rule.adjustmentType,
+          value: parseFloat(rule.adjustmentValue)
+        },
+        currency,
+        ruleApplied: rule.ruleCode
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to simulate rule", error: error.message });
+    }
+  });
+
+  // Get rule by ID
+  app.get("/api/dynamic-discount-rules/:id", async (req, res) => {
+    try {
+      const rule = await storage.getDynamicDiscountRuleById(req.params.id);
+      if (!rule) {
+        return res.status(404).json({ message: "Rule not found" });
+      }
+      res.json(rule);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch rule", error: error.message });
+    }
+  });
+
+  // Update rule
+  app.put("/api/dynamic-discount-rules/:id", async (req, res) => {
+    try {
+      const validatedData = insertDynamicDiscountRuleSchema.parse(req.body);
+      const rule = await storage.updateDynamicDiscountRule(req.params.id, validatedData);
+      res.json(rule);
+    } catch (error: any) {
+      res.status(400).json({ message: "Failed to update rule", error: error.message });
+    }
+  });
+
+  // Update rule status
+  app.patch("/api/dynamic-discount-rules/:id/status", async (req, res) => {
+    try {
+      const { status } = req.body;
+      if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
+        return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
+      }
+      
+      const rule = await storage.updateDynamicDiscountRuleStatus(req.params.id, status);
+      res.json(rule);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to update rule status", error: error.message });
+    }
+  });
+
+  // Delete rule
+  app.delete("/api/dynamic-discount-rules/:id", async (req, res) => {
+    try {
+      await storage.deleteDynamicDiscountRule(req.params.id);
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to delete rule", error: error.message });
     }
   });
 

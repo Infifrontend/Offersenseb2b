@@ -535,7 +535,12 @@ export default function NegotiatedFareManager() {
 
         <div className="bg-white rounded-lg border">
           {isLoading ? (
-            <div className="p-6">Loading fares...</div>
+            <div className="flex items-center justify-center p-12">
+              <div className="flex items-center gap-3">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                <span className="text-gray-600">Loading fares...</span>
+              </div>
+            </div>
           ) : (
             <Table>
               <TableHeader>

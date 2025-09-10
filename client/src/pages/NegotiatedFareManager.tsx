@@ -309,21 +309,39 @@ export default function NegotiatedFareManager() {
 
   const onSubmit = (values: any) => {
     const formattedData = {
-      ...values,
+      airlineCode: values.airlineCode,
+      fareCode: values.fareCode,
+      origin: values.origin,
+      destination: values.destination,
+      tripType: values.tripType,
+      cabinClass: values.cabinClass,
+      baseNetFare: values.baseNetFare?.toString(),
+      currency: values.currency,
       bookingStartDate: values.bookingStartDate?.format("YYYY-MM-DD"),
       bookingEndDate: values.bookingEndDate?.format("YYYY-MM-DD"),
       travelStartDate: values.travelStartDate?.format("YYYY-MM-DD"),
       travelEndDate: values.travelEndDate?.format("YYYY-MM-DD"),
-      baseNetFare: values.baseNetFare?.toString(),
-      seatAllotment: values.seatAllotment?.toString(),
-      minStay: values.minStay?.toString(),
-      maxStay: values.maxStay?.toString(),
-      blackoutDates: values.blackoutDates?.map((dateRange: any) => 
-        Array.isArray(dateRange) 
-          ? dateRange.map((date: any) => date.format("YYYY-MM-DD"))
-          : [dateRange.format("YYYY-MM-DD")]
-      ).flat() || [],
-      eligibleCohorts: values.eligibleCohorts || [],
+      pos: values.pos || [],
+      seatAllotment: values.seatAllotment || null,
+      minStay: values.minStay || null,
+      maxStay: values.maxStay || null,
+      blackoutDates: values.blackoutDates && values.blackoutDates.length > 0 
+        ? values.blackoutDates.map((dateRange: any) => {
+            if (Array.isArray(dateRange)) {
+              return dateRange.map((date: any) => date.format("YYYY-MM-DD"));
+            } else if (dateRange && dateRange.format) {
+              return dateRange.format("YYYY-MM-DD");
+            }
+            return dateRange;
+          }).flat()
+        : null,
+      eligibleAgentTiers: values.eligibleAgentTiers && values.eligibleAgentTiers.length > 0 
+        ? values.eligibleAgentTiers 
+        : ["BRONZE"],
+      eligibleCohorts: values.eligibleCohorts && values.eligibleCohorts.length > 0 
+        ? values.eligibleCohorts 
+        : null,
+      remarks: values.remarks || null,
     };
     createFareMutation.mutate(formattedData);
   };

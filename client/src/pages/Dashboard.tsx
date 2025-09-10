@@ -3,14 +3,6 @@ import { BarChart3, DollarSign, Users, Percent, Gift } from "lucide-react";
 export default function Dashboard() {
   return (
     <div>
-      {/* Page Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground mb-2">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Monitor key metrics and manage your travel offerings from this central hub.
-        </p>
-      </div>
-
       {/* Dashboard Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div className="bg-card rounded-lg border border-border p-6" data-testid="card-active-offers">

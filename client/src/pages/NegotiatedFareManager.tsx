@@ -8,6 +8,8 @@ import {
   Filter,
   Download,
   AlertCircle,
+  Eye,
+  Edit,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -454,10 +456,10 @@ export default function NegotiatedFareManager() {
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Button variant="ghost" size="sm" className="p-1">
-                          <Search className="w-4 h-4 text-gray-500" />
+                          <Eye className="w-4 h-4 text-gray-500" />
                         </Button>
                         <Button variant="ghost" size="sm" className="p-1">
-                          <Upload className="w-4 h-4 text-gray-500" />
+                          <Edit className="w-4 h-4 text-gray-500" />
                         </Button>
                         <div className="w-8 h-4 bg-blue-600 rounded-full relative cursor-pointer">
                           <div className="w-3 h-3 bg-white rounded-full absolute right-0.5 top-0.5 shadow-sm"></div>

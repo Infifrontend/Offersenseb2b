@@ -185,6 +185,31 @@ export default function Header({ onToggleSidebar, isMobile }: HeaderProps) {
 
       {/* User Actions */}
       <div className="flex items-center space-x-4">
+        {/* Time Period Dropdown */}
+        <select className="px-3 py-2 text-sm border border-gray-300 rounded-md bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option>Last 7 days</option>
+          <option>Last 30 days</option>
+          <option>Last 90 days</option>
+          <option>Custom Range</option>
+        </select>
+
+        {/* Channels Dropdown */}
+        <select className="px-3 py-2 text-sm border border-gray-300 rounded-md bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option>All Channels</option>
+          <option>Direct</option>
+          <option>GDS</option>
+          <option>OTA</option>
+          <option>Corporate</option>
+        </select>
+
+        {/* Refresh Button */}
+        <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center space-x-2">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <span>Refresh</span>
+        </button>
+
         <button
           className="p-2 rounded-lg hover:bg-muted relative"
           data-testid="notifications-button"

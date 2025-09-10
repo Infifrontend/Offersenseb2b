@@ -323,28 +323,39 @@ export default function NegotiatedFareManager() {
   
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-gray-50">
       {/* Header Section */}
-      <div className="bg-white border-b">
-        <div className="px-6 py-4">
-          <div className="flex justify-between items-center mb-4">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">
-                Fare Manager
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Manage airline fares, validate pricing rules, and handle fare
-                uploads
-              </p>
+      <div className="bg-white border-b px-6 py-6">
+        <div className="flex justify-between items-start mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              Fare Manager
+            </h1>
+            <p className="text-gray-600 text-sm">
+              Manage airline fares, validate pricing rules, and handle fare uploads
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">Last 7 days</span>
+              <Button variant="outline" size="sm" className="text-xs">
+                All Channels
+              </Button>
+              <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-white">
+                Refresh
+              </Button>
             </div>
           </div>
+        </div>
 
-          {/* Action Buttons */}
+        {/* Action Buttons Row */}
+        <div className="flex justify-between items-center">
           <div className="flex gap-3">
             <Button
               onClick={() => setIsCreateModalOpen(true)}
               disabled={createFareMutation.isPending}
-              className="bg-blue-600 hover:bg-blue-700 text-white gap-2"
+              className="bg-purple-600 hover:bg-purple-700 text-white gap-2"
             >
               <Plus className="w-4 h-4" />
               Create Fare
@@ -375,64 +386,66 @@ export default function NegotiatedFareManager() {
               onChange={handleFileUpload}
               className="hidden"
             />
+          </div>
 
-            <div className="ml-auto">
-              <Select defaultValue="all-status">
-                <SelectTrigger className="w-32">
-                  <SelectValue placeholder="All Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all-status">All Status</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div>
+            <Select defaultValue="all-status">
+              <SelectTrigger className="w-32">
+                <SelectValue placeholder="All Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all-status">All Status</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="inactive">Inactive</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>
 
       {/* Fare Inventory Section */}
-      <div className="px-6">
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold">Fare Inventory</h2>
+      <div className="px-6 py-6">
+        <div className="mb-4">
+          <h2 className="text-xl font-semibold text-gray-900">Fare Inventory</h2>
         </div>
 
-        <div className="bg-white rounded-lg border">
+        <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
           {isLoading ? (
             <div className="p-6">Loading fares...</div>
           ) : (
             <Table>
-              <TableHeader>
+              <TableHeader className="bg-gray-50">
                 <TableRow>
-                  <TableHead>Fare Code</TableHead>
-                  <TableHead>Route</TableHead>
-                  <TableHead>Class</TableHead>
-                  <TableHead>Trip Type</TableHead>
-                  <TableHead>Base Fare</TableHead>
-                  <TableHead>Brand</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead className="font-medium text-gray-700 py-4 px-6">Fare Code</TableHead>
+                  <TableHead className="font-medium text-gray-700 py-4 px-6">Route</TableHead>
+                  <TableHead className="font-medium text-gray-700 py-4 px-6">Class</TableHead>
+                  <TableHead className="font-medium text-gray-700 py-4 px-6">Trip Type</TableHead>
+                  <TableHead className="font-medium text-gray-700 py-4 px-6">Base Fare</TableHead>
+                  <TableHead className="font-medium text-gray-700 py-4 px-6">Brand</TableHead>
+                  <TableHead className="font-medium text-gray-700 py-4 px-6">Status</TableHead>
+                  <TableHead className="font-medium text-gray-700 py-4 px-6">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {displayFares?.map((fare: NegotiatedFare) => (
-                  <TableRow key={fare.id}>
-                    <TableCell className="font-medium">
+                  <TableRow key={fare.id} className="border-b hover:bg-gray-50">
+                    <TableCell className="font-medium py-4 px-6 text-gray-900">
                       {fare.fareCode}
                     </TableCell>
-                    <TableCell>
-                      <div className="font-medium">
+                    <TableCell className="py-4 px-6">
+                      <div className="text-gray-900">
                         {fare.origin} → {fare.destination}
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="py-4 px-6 text-gray-700">
                       {fare.cabinClass === "PREMIUM_ECONOMY"
                         ? "Premium"
+                        : fare.cabinClass === "ECONOMY"
+                        ? "Economy"
                         : fare.cabinClass}
                     </TableCell>
-                    <TableCell>
-                      <div className="text-sm">
+                    <TableCell className="py-4 px-6">
+                      <div className="text-gray-700">
                         {fare.tripType === "ROUND_TRIP"
                           ? "Round Trip"
                           : fare.tripType === "ONE_WAY"
@@ -440,14 +453,14 @@ export default function NegotiatedFareManager() {
                             : fare.tripType}
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="py-4 px-6">
                       <div>
-                        <div className="font-medium">{fare.currency}</div>
-                        <div className="text-sm">{fare.baseNetFare}</div>
+                        <div className="text-gray-900 font-medium">{fare.currency}</div>
+                        <div className="text-gray-700">{fare.baseNetFare}</div>
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <div className="text-sm text-muted-foreground">
+                    <TableCell className="py-4 px-6">
+                      <div className="text-gray-700">
                         {fare.remarks?.includes("Premium")
                           ? "none"
                           : fare.remarks?.includes("special")
@@ -457,24 +470,23 @@ export default function NegotiatedFareManager() {
                               : "none"}
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="default"
-                        className="bg-green-100 text-green-800"
-                      >
+                    <TableCell className="py-4 px-6">
+                      <Badge className="bg-green-100 text-green-700 border-green-200">
                         Active
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm">
-                          <Search className="w-4 h-4" />
+                    <TableCell className="py-4 px-6">
+                      <div className="flex items-center gap-3">
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <Search className="w-4 h-4 text-gray-500" />
                         </Button>
-                        <Button variant="ghost" size="sm">
-                          <Upload className="w-4 h-4" />
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <Upload className="w-4 h-4 text-gray-500" />
                         </Button>
-                        <div className="w-8 h-4 bg-purple-600 rounded-full relative">
-                          <div className="w-3 h-3 bg-white rounded-full absolute right-0.5 top-0.5"></div>
+                        <div className="relative">
+                          <div className="w-10 h-5 bg-purple-600 rounded-full cursor-pointer">
+                            <div className="w-4 h-4 bg-white rounded-full absolute right-0.5 top-0.5 transition-all"></div>
+                          </div>
                         </div>
                       </div>
                     </TableCell>
@@ -484,7 +496,7 @@ export default function NegotiatedFareManager() {
             </Table>
           )}
         </div>
-      </div>
+      )
 
       <Modal
         title="Create New Negotiated Fare"

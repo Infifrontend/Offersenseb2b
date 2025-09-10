@@ -247,45 +247,108 @@ export default function NegotiatedFareManager() {
 
   return (
     <div className="space-y-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground mb-2">Negotiated Fare Manager</h1>
-        <p className="text-muted-foreground">
-          Manage and configure negotiated fares with airline partners.
-        </p>
-      </div>
-
-      {/* Navigation Buttons */}
-      <div className="flex gap-2 mb-4">
-        <Button variant="outline" className="flex-1">Fare List</Button>
-        <Button variant="outline" onClick={() => setIsCreateModalOpen(true)} className="flex-1">Create Fare</Button>
-        <Button variant="outline" className="flex-1">Upload & Manage</Button>
-      </div>
-
-      {/* Fare List Section */}
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-start">
+      {/* Header Section */}
+      <div className="bg-white border-b">
+        <div className="px-6 py-4">
+          <div className="flex justify-between items-center mb-4">
             <div>
-              <CardTitle>All Negotiated Fares</CardTitle>
-              <CardDescription>
-                View and manage all negotiated fare agreements.
-              </CardDescription>
+              <h1 className="text-2xl font-bold text-foreground">Fare Manager</h1>
+              <p className="text-sm text-muted-foreground">
+                Manage airline fares, validate pricing rules, and handle fare uploads
+              </p>
             </div>
-            <Button onClick={() => setIsCreateModalOpen(true)} disabled={createFareMutation.isPending}>
-              <Plus className="w-4 h-4 mr-2" />
+            <div className="flex items-center gap-4">
+              <Select defaultValue="7days">
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder="Last 7 days" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7days">Last 7 days</SelectItem>
+                  <SelectItem value="30days">Last 30 days</SelectItem>
+                  <SelectItem value="90days">Last 90 days</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select defaultValue="all-channels">
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder="All Channels" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all-channels">All Channels</SelectItem>
+                  <SelectItem value="online">Online</SelectItem>
+                  <SelectItem value="offline">Offline</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Button variant="outline" size="sm" className="gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Refresh
+              </Button>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-3">
+            <Button 
+              onClick={() => setIsCreateModalOpen(true)} 
+              disabled={createFareMutation.isPending}
+              className="bg-blue-600 hover:bg-blue-700 text-white gap-2"
+            >
+              <Plus className="w-4 h-4" />
               Create Fare
             </Button>
+            
+            <Button variant="outline" onClick={downloadTemplate} className="gap-2">
+              <Download className="w-4 h-4" />
+              Download Sample CSV
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              onClick={() => fileInputRef.current?.click()}
+              className="gap-2"
+            >
+              <Upload className="w-4 h-4" />
+              Upload CSV
+            </Button>
+            
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv,.xlsx"
+              onChange={handleFileUpload}
+              className="hidden"
+            />
+
+            <div className="ml-auto">
+              <Select defaultValue="all-status">
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder="All Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all-status">All Status</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-        </CardHeader>
-        <CardContent>
+        </div>
+      </div>
+
+      {/* Fare Inventory Section */}
+      <div className="px-6">
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold">Fare Inventory</h2>
+        </div>
+        
+        <div className="bg-white rounded-lg border">
           {isLoading ? (
-            <div>Loading fares...</div>
+            <div className="p-6">Loading fares...</div>
           ) : (
-            <div className="space-y-4">
-              <div className="mb-4">
-                <h2 className="text-xl font-semibold">Fare Inventory</h2>
-              </div>
-              <Table>
+            <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Fare Code</TableHead>
@@ -346,11 +409,10 @@ export default function NegotiatedFareManager() {
                   </TableRow>
                 ))}
               </TableBody>
-              </Table>
-            </div>
+            </Table>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       <Modal
         title="Create New Negotiated Fare"

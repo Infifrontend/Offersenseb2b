@@ -65,6 +65,7 @@ import {
   Col,
 } from "antd";
 import dayjs from "dayjs";
+import { cn, formatDate } from "@/lib/utils";
 
 // Form schemas
 const fareFormSchema = z.object({
@@ -391,7 +392,7 @@ export default function NegotiatedFareManager() {
 
   const onEditSubmit = (values: any) => {
     if (!selectedFare) return;
-    
+
     const formattedData = {
       airlineCode: values.airlineCode,
       fareCode: values.fareCode,
@@ -958,7 +959,7 @@ export default function NegotiatedFareManager() {
         footer={[
           <div key="footer" className="flex justify-between items-center w-full pt-4 border-t">
             <div className="text-xs text-gray-500">
-              Created: {selectedFare ? new Date(selectedFare.createdAt).toLocaleDateString() : ''}
+              Created: {selectedFare ? formatDate(selectedFare.createdAt) : ''}
             </div>
             <AntButton 
               key="close" 
@@ -1070,11 +1071,11 @@ export default function NegotiatedFareManager() {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">From:</span>
-                    <span className="font-medium">{new Date(selectedFare.bookingStartDate).toLocaleDateString()}</span>
+                    <span className="font-medium">{formatDate(selectedFare.bookingStartDate)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">To:</span>
-                    <span className="font-medium">{new Date(selectedFare.bookingEndDate).toLocaleDateString()}</span>
+                    <span className="font-medium">{formatDate(selectedFare.bookingEndDate)}</span>
                   </div>
                 </div>
               </div>
@@ -1086,11 +1087,11 @@ export default function NegotiatedFareManager() {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">From:</span>
-                    <span className="font-medium">{new Date(selectedFare.travelStartDate).toLocaleDateString()}</span>
+                    <span className="font-medium">{formatDate(selectedFare.travelStartDate)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">To:</span>
-                    <span className="font-medium">{new Date(selectedFare.travelEndDate).toLocaleDateString()}</span>
+                    <span className="font-medium">{formatDate(selectedFare.travelEndDate)}</span>
                   </div>
                 </div>
               </div>
@@ -1190,7 +1191,7 @@ export default function NegotiatedFareManager() {
                       <label className="text-sm font-medium text-gray-700">Blackout Dates</label>
                       <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-md">
                         <div className="text-sm text-red-800">
-                          {selectedFare.blackoutDates.map(date => new Date(date).toLocaleDateString()).join(', ')}
+                          {selectedFare.blackoutDates.map(date => formatDate(date)).join(', ')}
                         </div>
                       </div>
                     </div>

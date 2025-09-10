@@ -144,7 +144,7 @@ export default function Sidebar({
       </div>
 
       {/* Navigation Menu */}
-      <nav className="flex-1 overflow-y-auto p-4">
+      <nav className="flex-1 overflow-y-hidden hover:overflow-y-auto scrollbar-hide p-4">
         <ul className="space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;

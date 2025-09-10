@@ -405,14 +405,14 @@ export default function NegotiatedFareManager() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Fare Code</TableHead>
-                  <TableHead>Route</TableHead>
-                  <TableHead>Class</TableHead>
-                  <TableHead>Trip Type</TableHead>
-                  <TableHead>Base Fare</TableHead>
-                  <TableHead>Brand</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead className="w-[180px]">Fare Code</TableHead>
+                  <TableHead className="w-[120px]">Route</TableHead>
+                  <TableHead className="w-[100px]">Class</TableHead>
+                  <TableHead className="w-[100px]">Trip Type</TableHead>
+                  <TableHead className="w-[100px]">Base Fare</TableHead>
+                  <TableHead className="w-[100px]">Brand</TableHead>
+                  <TableHead className="w-[80px]">Status</TableHead>
+                  <TableHead className="w-[120px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -422,14 +422,17 @@ export default function NegotiatedFareManager() {
                       {fare.fareCode}
                     </TableCell>
                     <TableCell>
-                      <div className="font-medium">
-                        {fare.origin} → {fare.destination}
+                      <div className="text-sm">
+                        {fare.origin} →<br />
+                        {fare.destination}
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-sm">
                       {fare.cabinClass === "PREMIUM_ECONOMY"
                         ? "Premium"
-                        : fare.cabinClass}
+                        : fare.cabinClass === "ECONOMY"
+                          ? "Economy"
+                          : fare.cabinClass}
                     </TableCell>
                     <TableCell>
                       <div className="text-sm">
@@ -441,13 +444,13 @@ export default function NegotiatedFareManager() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div>
+                      <div className="text-sm">
                         <div className="font-medium">{fare.currency}</div>
-                        <div className="text-sm">{fare.baseNetFare}</div>
+                        <div>{fare.baseNetFare}</div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="text-sm font-medium">
                         {fare.remarks?.includes("Premium")
                           ? "none"
                           : fare.remarks?.includes("special")
@@ -458,23 +461,20 @@ export default function NegotiatedFareManager() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge
-                        variant="default"
-                        className="bg-green-100 text-green-800"
-                      >
+                      <span className="text-sm font-medium text-green-600">
                         Active
-                      </Badge>
+                      </span>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm">
-                          <Search className="w-4 h-4" />
+                      <div className="flex items-center gap-3">
+                        <Button variant="ghost" size="sm" className="p-1">
+                          <Search className="w-4 h-4 text-gray-500" />
                         </Button>
-                        <Button variant="ghost" size="sm">
-                          <Upload className="w-4 h-4" />
+                        <Button variant="ghost" size="sm" className="p-1">
+                          <Upload className="w-4 h-4 text-gray-500" />
                         </Button>
-                        <div className="w-8 h-4 bg-purple-600 rounded-full relative">
-                          <div className="w-3 h-3 bg-white rounded-full absolute right-0.5 top-0.5"></div>
+                        <div className="w-8 h-4 bg-blue-600 rounded-full relative cursor-pointer">
+                          <div className="w-3 h-3 bg-white rounded-full absolute right-0.5 top-0.5 shadow-sm"></div>
                         </div>
                       </div>
                     </TableCell>

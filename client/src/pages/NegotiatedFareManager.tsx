@@ -699,11 +699,10 @@ export default function NegotiatedFareManager() {
               {isLoading ? (
                 <div>Loading fares...</div>
               ) : (
-                <div className="space-y-4">
-                  <div className="mb-4">
-                    <h2 className="text-xl font-semibold">Fare Inventory</h2>
-                  </div>
-                  <Table>
+                <div className="mb-4">
+                  <h2 className="text-xl font-semibold">Fare Inventory</h2>
+                </div>
+                <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Fare Code</TableHead>
@@ -764,8 +763,7 @@ export default function NegotiatedFareManager() {
                       </TableRow>
                     ))}
                   </TableBody>
-                  </Table>
-                </div>
+                </Table>
               )}
             </CardContent>
           </Card>

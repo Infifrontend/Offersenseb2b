@@ -42,13 +42,7 @@ export default function Header({ onToggleSidebar, isMobile }: HeaderProps) {
           </button>
         )}
         
-        {/* Breadcrumb Navigation */}
-        <nav className="flex items-center text-sm text-muted-foreground">
-          <span className="breadcrumb-item">Home</span>
-          <span className="breadcrumb-item font-medium text-foreground">
-            {currentPageLabel}
-          </span>
-        </nav>
+        
       </div>
 
       {/* User Actions */}

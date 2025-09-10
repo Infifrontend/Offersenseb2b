@@ -97,6 +97,15 @@ export class DatabaseStorage implements IStorage {
     return updatedFare;
   }
 
+  async updateNegotiatedFareStatus(id: string, status: string): Promise<NegotiatedFare> {
+    const [updatedFare] = await db
+      .update(negotiatedFares)
+      .set({ status, updatedAt: sql`now()` })
+      .where(eq(negotiatedFares.id, id))
+      .returning();
+    return updatedFare;
+  }
+
   async deleteNegotiatedFare(id: string): Promise<void> {
     await db.delete(negotiatedFares).where(eq(negotiatedFares.id, id));
   }

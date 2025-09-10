@@ -286,6 +286,24 @@ export default function NegotiatedFareManager() {
     },
   });
 
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const response = await fetch(`/api/negofares/${id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message);
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/negofares"] });
+    },
+  });
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -445,6 +463,11 @@ export default function NegotiatedFareManager() {
     setIsEditModalOpen(true);
   };
 
+  const handleStatusToggle = (fare: NegotiatedFare) => {
+    const newStatus = fare.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
+    updateStatusMutation.mutate({ id: fare.id, status: newStatus });
+  };
+
   return (
     <div className="space-y-6">
       {/* Header Section */}
@@ -572,8 +595,10 @@ export default function NegotiatedFareManager() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <span className="text-sm font-medium text-green-600">
-                        Active
+                      <span className={`text-sm font-medium ${
+                        fare.status === "ACTIVE" ? "text-green-600" : "text-red-600"
+                      }`}>
+                        {fare.status === "ACTIVE" ? "Active" : "Inactive"}
                       </span>
                     </TableCell>
                     <TableCell>
@@ -594,8 +619,15 @@ export default function NegotiatedFareManager() {
                         >
                           <Edit className="w-4 h-4 text-gray-500" />
                         </Button>
-                        <div className="w-8 h-4 bg-blue-600 rounded-full relative cursor-pointer">
-                          <div className="w-3 h-3 bg-white rounded-full absolute right-0.5 top-0.5 shadow-sm"></div>
+                        <div 
+                          className={`w-8 h-4 rounded-full relative cursor-pointer transition-colors ${
+                            fare.status === "ACTIVE" ? "bg-blue-600" : "bg-gray-300"
+                          }`}
+                          onClick={() => handleStatusToggle(fare)}
+                        >
+                          <div className={`w-3 h-3 bg-white rounded-full absolute top-0.5 shadow-sm transition-transform ${
+                            fare.status === "ACTIVE" ? "right-0.5" : "left-0.5"
+                          }`}></div>
                         </div>
                       </div>
                     </TableCell>

@@ -151,6 +151,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update fare status
+  app.patch("/api/negofares/:id/status", async (req, res) => {
+    try {
+      const { status } = req.body;
+      if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
+        return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
+      }
+      
+      const fare = await storage.updateNegotiatedFareStatus(req.params.id, status);
+      res.json(fare);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to update fare status", error: error.message });
+    }
+  });
+
   // Delete fare
   app.delete("/api/negofares/:id", async (req, res) => {
     try {

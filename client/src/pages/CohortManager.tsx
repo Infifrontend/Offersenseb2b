@@ -455,8 +455,9 @@ export default function CohortManager() {
                         placeholder="Select cohort type"
                         allowClear
                         showSearch
+                        style={{ width: '100%' }}
                         filterOption={(input, option) =>
-                          (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                          (option?.children ?? '').toString().toLowerCase().includes(input.toLowerCase())
                         }
                       >
                         {cohortTypes.map((type) => (

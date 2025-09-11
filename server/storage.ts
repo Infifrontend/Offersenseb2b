@@ -899,12 +899,21 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date()
       };
       
+      console.log("Storage: Rule data to insert:", ruleData);
+      
       const result = await this.db.insert(offerRules).values(ruleData).returning();
       console.log("Storage: Successfully inserted offer rule:", result[0]);
+      
+      if (!result || result.length === 0) {
+        throw new Error("Failed to insert offer rule - no result returned");
+      }
+      
       return result[0];
     } catch (error: any) {
       console.error("Storage: Error inserting offer rule:", error);
-      throw error;
+      console.error("Storage: Error details:", error.message);
+      console.error("Storage: Error stack:", error.stack);
+      throw new Error(`Failed to insert offer rule: ${error.message}`);
     }
   }
 

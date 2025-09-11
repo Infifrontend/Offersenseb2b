@@ -1081,7 +1081,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create single offer rule
   app.post("/api/offer-rules", async (req, res) => {
     try {
+      console.log("Received offer rule data:", req.body);
+
       const validatedData = insertOfferRuleSchema.parse(req.body);
+      console.log("Validated offer rule data:", validatedData);
 
       // Check for conflicts
       const conflicts = await storage.checkOfferRuleConflicts(validatedData);
@@ -1093,8 +1096,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const rule = await storage.insertOfferRule(validatedData);
+      console.log("Created offer rule:", rule);
+
       res.status(201).json(rule);
     } catch (error: any) {
+      console.error("Error creating offer rule:", error);
+
+      if (error.errors && Array.isArray(error.errors)) {
+        // Zod validation errors
+        return res.status(400).json({ 
+          message: "Validation failed", 
+          errors: error.errors,
+          error: error.message 
+        });
+      }
+
       res.status(400).json({ message: "Invalid rule data", error: error.message });
     }
   });

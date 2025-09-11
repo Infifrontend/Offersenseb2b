@@ -421,9 +421,9 @@ export default function OfferRuleBuilder() {
         console.log("All form validation passed:", validatedValues);
         
         try {
-          // Extract basic info from validated values with null checks
-          const ruleCode = validatedValues.ruleCode || '';
-          const ruleName = validatedValues.ruleName || '';
+          // Extract basic info from validated values
+          const ruleCode = validatedValues.ruleCode?.trim();
+          const ruleName = validatedValues.ruleName?.trim();
           const ruleType = validatedValues.ruleType;
           const priority = validatedValues.priority || 1;
           const validFrom = validatedValues.validFrom;
@@ -431,29 +431,18 @@ export default function OfferRuleBuilder() {
           
           console.log("Extracted basic info:", { ruleCode, ruleName, ruleType, priority, validFrom, validTo });
 
-          // Additional validation for required fields
-          if (!ruleCode || ruleCode.trim() === '') {
-            alert("Rule Code is required");
-            setCurrentStep(0);
-            return;
-          }
-          
-          if (!ruleName || ruleName.trim() === '') {
-            alert("Rule Name is required");
-            setCurrentStep(0);
-            return;
-          }
-          
-          if (!ruleType) {
-            alert("Rule Type is required");
-            setCurrentStep(0);
+          // Validate actions exist
+          const actions = validatedValues.actions || [];
+          if (actions.length === 0) {
+            alert("At least one action is required");
+            setCurrentStep(2);
             return;
           }
 
           const formattedData = {
-            ruleCode: ruleCode.trim(),
-            ruleName: ruleName.trim(),
-            ruleType: ruleType,
+            ruleCode,
+            ruleName,
+            ruleType,
             conditions: {
               origin: validatedValues["conditions.origin"] || undefined,
               destination: validatedValues["conditions.destination"] || undefined,
@@ -481,7 +470,7 @@ export default function OfferRuleBuilder() {
                     }
                   : undefined,
             },
-            actions: (validatedValues.actions || []).map((action: any) => {
+            actions: actions.map((action: any) => {
               const formattedAction: any = {
                 type: action.type,
               };
@@ -503,7 +492,7 @@ export default function OfferRuleBuilder() {
               
               return formattedAction;
             }),
-            priority: priority,
+            priority,
             validFrom: validFrom?.format ? validFrom.format("YYYY-MM-DD") : validFrom,
             validTo: validTo?.format ? validTo.format("YYYY-MM-DD") : validTo,
             justification: validatedValues.justification || undefined,
@@ -512,13 +501,6 @@ export default function OfferRuleBuilder() {
           };
           
           console.log("Final formatted data:", formattedData);
-          
-          // Final validation check for actions
-          if (!formattedData.actions || formattedData.actions.length === 0) {
-            alert("At least one action is required");
-            setCurrentStep(2); // Go back to actions step
-            return;
-          }
           
           createRuleMutation.mutate(formattedData);
         } catch (error) {

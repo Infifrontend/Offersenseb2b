@@ -1132,24 +1132,29 @@ export class DatabaseStorage implements IStorage {
   // Audit Log Methods
   async getAuditLogs(filters: any = {}): Promise<InsertAuditLog[]> {
     let query = this.db.select().from(auditLogs);
+    const conditions = [];
 
     if (filters.module) {
-      query = query.where(eq(auditLogs.module, filters.module));
+      conditions.push(eq(auditLogs.module, filters.module));
     }
     if (filters.entityId) {
-      query = query.where(eq(auditLogs.entityId, filters.entityId));
+      conditions.push(eq(auditLogs.entityId, filters.entityId));
     }
     if (filters.user) {
-      query = query.where(eq(auditLogs.user, filters.user));
+      conditions.push(eq(auditLogs.user, filters.user));
     }
     if (filters.action) {
-      query = query.where(eq(auditLogs.action, filters.action));
+      conditions.push(eq(auditLogs.action, filters.action));
     }
     if (filters.startDate) {
-      query = query.where(gte(auditLogs.timestamp, new Date(filters.startDate)));
+      conditions.push(gte(auditLogs.timestamp, new Date(filters.startDate)));
     }
     if (filters.endDate) {
-      query = query.where(lte(auditLogs.timestamp, new Date(filters.endDate)));
+      conditions.push(lte(auditLogs.timestamp, new Date(filters.endDate)));
+    }
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
     }
 
     return await query.orderBy(desc(auditLogs.timestamp));
@@ -1161,11 +1166,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAuditLogsByEntity(entityId: string, module?: string): Promise<InsertAuditLog[]> {
-    let query = this.db.select().from(auditLogs).where(eq(auditLogs.entityId, entityId));
+    const conditions = [eq(auditLogs.entityId, entityId)];
 
     if (module) {
-      query = query.where(eq(auditLogs.module, module));
+      conditions.push(eq(auditLogs.module, module));
     }
+
+    const query = this.db.select().from(auditLogs).where(and(...conditions));
 
     return await query.orderBy(desc(auditLogs.timestamp));
   }

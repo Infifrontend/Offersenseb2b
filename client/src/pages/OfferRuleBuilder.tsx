@@ -125,6 +125,16 @@ export default function OfferRuleBuilder() {
   const [editForm] = AntForm.useForm();
   const [simulateForm] = AntForm.useForm();
 
+  // Fetch cohorts
+  const { data: availableCohorts } = useQuery({
+    queryKey: ["/api/cohorts"],
+    queryFn: async () => {
+      const response = await fetch("/api/cohorts");
+      if (!response.ok) throw new Error("Failed to fetch cohorts");
+      return response.json();
+    },
+  });
+
   // Dummy data for development
   const dummyRules = [
     {
@@ -853,7 +863,18 @@ export default function OfferRuleBuilder() {
                       mode="tags"
                       placeholder="Enter cohort codes (e.g., FESTIVE_2025, VIP_CORP)"
                       style={{ width: "100%" }}
-                    />
+                    >
+                      {availableCohorts?.map((cohort: any) => (
+                        <AntSelect.Option key={cohort.id} value={cohort.cohortName}>
+                          <div style={{ display: "flex", flexDirection: "column" }}>
+                            <div className="cls-cohort-dropdwon">
+                              <p>{cohort.cohortName}</p>{" "}
+                              <span className="text-gray-600">{cohort.cohortCode}</span>
+                            </div>
+                          </div>
+                        </AntSelect.Option>
+                      ))}
+                    </AntSelect>
                   </AntForm.Item>
                 </AntCard>
 

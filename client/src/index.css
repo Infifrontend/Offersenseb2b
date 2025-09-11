@@ -2,6 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Bundle Details Modal Styles */
+.bundle-details-modal .ant-modal-header {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 20px 24px;
+}
+
+.bundle-details-modal .ant-modal-body {
+  padding: 24px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.bundle-details-modal .ant-modal-footer {
+  border-top: 1px solid #f0f0f0;
+  padding: 16px 24px;
+}
+
+.cls-cohort-dropdwon {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.cls-cohort-dropdwon p {
+  margin: 0;
+  font-weight: 500;
+}
+
 :root {
   --background: hsl(0 0% 98%);
   --foreground: hsl(0 0% 15%);

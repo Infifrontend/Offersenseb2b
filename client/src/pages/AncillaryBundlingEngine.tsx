@@ -1487,138 +1487,217 @@ export default function AncillaryBundlingEngine() {
 
       {/* View Bundle Modal */}
       <Modal
-        title="Bundle Details"
+        title={
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-50 rounded-lg">
+              <Package className="h-5 w-5 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold">Bundle Details</h3>
+              <p className="text-sm text-gray-500">
+                {selectedBundle?.bundleCode} - {selectedBundle?.bundleName}
+              </p>
+            </div>
+          </div>
+        }
         open={isViewBundleModalOpen}
         onCancel={() => setIsViewBundleModalOpen(false)}
         footer={[
-          <AntButton
-            key="close"
-            onClick={() => setIsViewBundleModalOpen(false)}
-          >
-            Close
-          </AntButton>,
+          <div key="footer" className="flex justify-between items-center w-full">
+            <div className="text-xs text-gray-500">
+              Created: {selectedBundle && dayjs(selectedBundle.createdAt).format("MMM DD, YYYY HH:mm")}
+            </div>
+            <Space>
+              <AntButton
+                icon={<Edit className="h-4 w-4" />}
+                onClick={() => {
+                  setIsViewBundleModalOpen(false);
+                  openEditBundleModal(selectedBundle!);
+                }}
+              >
+                Edit Bundle
+              </AntButton>
+              <AntButton
+                type="primary"
+                onClick={() => setIsViewBundleModalOpen(false)}
+              >
+                Close
+              </AntButton>
+            </Space>
+          </div>,
         ]}
-        width={600}
+        width={800}
+        className="bundle-details-modal"
       >
         {selectedBundle && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">Bundle Code</label>
-                <p className="text-sm text-muted-foreground">
-                  {selectedBundle.bundleCode}
-                </p>
-              </div>
-              <div>
-                <label className="text-sm font-medium">Bundle Type</label>
-                <p className="text-sm text-muted-foreground">
-                  {getBundleTypeIcon(selectedBundle.bundleType)}{" "}
-                  {getBundleTypeLabel(selectedBundle.bundleType)}
-                </p>
-              </div>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium">Bundle Name</label>
-              <p className="text-sm text-muted-foreground">
-                {selectedBundle.bundleName}
-              </p>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium">Components</label>
-              <div className="flex flex-wrap gap-1 mt-1">
-                {selectedBundle.components.map((component) => (
-                  <Tag key={component} color="blue">
-                    {component}
-                  </Tag>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">Channel</label>
-                <p className="text-sm text-muted-foreground">
-                  {selectedBundle.channel}
-                </p>
-              </div>
-              <div>
-                <label className="text-sm font-medium">Season Code</label>
-                <p className="text-sm text-muted-foreground">
-                  {selectedBundle.seasonCode || "N/A"}
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">Point of Sale</label>
-                <div className="flex flex-wrap gap-1 mt-1">
-                  {selectedBundle.pos.map((pos) => (
-                    <Tag key={pos}>{pos}</Tag>
-                  ))}
+          <div className="space-y-6">
+            {/* Header Section with Status */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-100">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{getBundleTypeIcon(selectedBundle.bundleType)}</span>
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900">{selectedBundle.bundleName}</h4>
+                    <p className="text-sm text-gray-600">{selectedBundle.bundleCode}</p>
+                  </div>
                 </div>
-              </div>
-              <div>
-                <label className="text-sm font-medium">Agent Tiers</label>
-                <div className="flex flex-wrap gap-1 mt-1">
-                  {selectedBundle.agentTier.map((tier) => (
-                    <Tag key={tier} color="green">
-                      {tier}
-                    </Tag>
-                  ))}
+                <div className="flex items-center gap-2">
+                  <Badge
+                    variant={selectedBundle.status === "ACTIVE" ? "default" : "secondary"}
+                    className="text-sm px-3 py-1"
+                  >
+                    {selectedBundle.status}
+                  </Badge>
+                  <Badge variant="outline" className="text-sm px-3 py-1">
+                    {getBundleTypeLabel(selectedBundle.bundleType)}
+                  </Badge>
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">Valid From</label>
-                <p className="text-sm text-muted-foreground">
-                  {dayjs(selectedBundle.validFrom).format("MMMM DD, YYYY")}
-                </p>
+            {/* Main Information Grid */}
+            <div className="grid grid-cols-2 gap-6">
+              {/* Left Column */}
+              <div className="space-y-4">
+                <Card className="p-4">
+                  <h5 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                    <Settings className="h-4 w-4" />
+                    Configuration
+                  </h5>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Channel</label>
+                      <div className="mt-1">
+                        <Badge variant="secondary" className="text-sm">
+                          {selectedBundle.channel}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Season Code</label>
+                      <p className="text-sm font-medium text-gray-900 mt-1">
+                        {selectedBundle.seasonCode || "Not specified"}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Inventory Cap</label>
+                      <p className="text-sm font-medium text-gray-900 mt-1">
+                        {selectedBundle.inventoryCap ? selectedBundle.inventoryCap.toLocaleString() : "Unlimited"}
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="p-4">
+                  <h5 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                    <Package className="h-4 w-4" />
+                    Components
+                  </h5>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedBundle.components.map((component) => (
+                      <Tag key={component} color="blue" className="text-sm">
+                        {component}
+                      </Tag>
+                    ))}
+                  </div>
+                </Card>
               </div>
-              <div>
-                <label className="text-sm font-medium">Valid To</label>
-                <p className="text-sm text-muted-foreground">
-                  {dayjs(selectedBundle.validTo).format("MMMM DD, YYYY")}
-                </p>
+
+              {/* Right Column */}
+              <div className="space-y-4">
+                <Card className="p-4">
+                  <h5 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    Validity Period
+                  </h5>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100">
+                      <div>
+                        <label className="text-xs font-medium text-green-700 uppercase tracking-wide">Valid From</label>
+                        <p className="text-sm font-semibold text-green-900">
+                          {dayjs(selectedBundle.validFrom).format("MMMM DD, YYYY")}
+                        </p>
+                      </div>
+                      <div className="text-green-600">
+                        <Play className="h-4 w-4" />
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-100">
+                      <div>
+                        <label className="text-xs font-medium text-red-700 uppercase tracking-wide">Valid To</label>
+                        <p className="text-sm font-semibold text-red-900">
+                          {dayjs(selectedBundle.validTo).format("MMMM DD, YYYY")}
+                        </p>
+                      </div>
+                      <div className="text-red-600">
+                        <DollarSign className="h-4 w-4" />
+                      </div>
+                    </div>
+                    <div className="text-center text-sm text-gray-500">
+                      Duration: {dayjs(selectedBundle.validTo).diff(dayjs(selectedBundle.validFrom), 'days')} days
+                    </div>
+                  </div>
+                </Card>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">Inventory Cap</label>
-                <p className="text-sm text-muted-foreground">
-                  {selectedBundle.inventoryCap || "Unlimited"}
-                </p>
-              </div>
-              <div>
-                <label className="text-sm font-medium">Status</label>
-                <Badge
-                  variant={
-                    selectedBundle.status === "ACTIVE" ? "default" : "secondary"
-                  }
-                >
-                  {selectedBundle.status}
-                </Badge>
-              </div>
-            </div>
-
-            {selectedBundle.cohortCodes &&
-              selectedBundle.cohortCodes.length > 0 && (
+            {/* Targeting Section */}
+            <Card className="p-4">
+              <h5 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <Filter className="h-4 w-4" />
+                Targeting Criteria
+              </h5>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="text-sm font-medium">Cohort Codes</label>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {selectedBundle.cohortCodes.map((cohort) => (
-                      <Tag key={cohort} color="purple">
-                        {cohort}
+                  <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Point of Sale</label>
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {selectedBundle.pos.map((pos) => (
+                      <Tag key={pos} color="orange" className="text-sm">
+                        {pos}
                       </Tag>
                     ))}
                   </div>
                 </div>
-              )}
+                <div>
+                  <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Agent Tiers</label>
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {selectedBundle.agentTier.map((tier) => (
+                      <Tag key={tier} color="green" className="text-sm">
+                        {tier}
+                      </Tag>
+                    ))}
+                  </div>
+                </div>
+                {selectedBundle.cohortCodes && selectedBundle.cohortCodes.length > 0 && (
+                  <div>
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Cohort Codes</label>
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {selectedBundle.cohortCodes.map((cohort) => (
+                        <Tag key={cohort} color="purple" className="text-sm">
+                          {cohort}
+                        </Tag>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </Card>
+
+            {/* Additional Information */}
+            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
+              <div>
+                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Created</label>
+                <p className="text-sm text-gray-900 font-medium">
+                  {dayjs(selectedBundle.createdAt).format("MMMM DD, YYYY [at] HH:mm")}
+                </p>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Last Updated</label>
+                <p className="text-sm text-gray-900 font-medium">
+                  {dayjs(selectedBundle.updatedAt).format("MMMM DD, YYYY [at] HH:mm")}
+                </p>
+              </div>
+            </div>
           </div>
         )}
       </Modal>

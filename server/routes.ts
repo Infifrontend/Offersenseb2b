@@ -1781,6 +1781,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Fetching cohorts for dropdown list...");
       const cohorts = await storage.getCohorts({ status: "ACTIVE" });
       console.log(`Found ${cohorts?.length || 0} active cohorts`);
+      
+      // Return cohorts in the format expected by the frontend
+      const formattedCohorts = cohorts?.map(cohort => ({
+        code: cohort.cohortCode,
+        name: cohort.cohortName,
+        id: cohort.id,
+        type: cohort.type
+      })) || [];
+      
+      res.json(formattedCohorts);
+    } catch (error: any) {
+      console.error("Error fetching cohorts for dropdown:", error);
+      res.status(500).json({ message: "Failed to fetch cohorts", error: error.message });
+    }
+  });
 
       // Always return an array, even if empty
       if (!cohorts || cohorts.length === 0) {

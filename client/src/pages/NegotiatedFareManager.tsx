@@ -979,27 +979,35 @@ export default function NegotiatedFareManager() {
           <AntForm.Item
             label="Eligible Cohorts (Optional)"
             name="eligibleCohorts"
+            tooltip="Select cohorts that are eligible for this fare. Only users matching these cohorts will see this fare."
           >
             <AntSelect
               mode="multiple"
-              placeholder={isCohortsLoading ? "Loading cohorts..." : "Select cohorts"}
+              placeholder={isCohortsLoading ? "Loading cohorts..." : availableCohorts.length === 0 ? "No cohorts available" : "Select cohorts"}
               style={{ width: "100%" }}
               dropdownStyle={{ zIndex: 9999 }}
               getPopupContainer={(trigger) => trigger.parentElement}
               virtual={false}
               showSearch
               loading={isCohortsLoading}
+              disabled={isCohortsLoading}
               notFoundContent={isCohortsLoading ? "Loading..." : "No cohorts found"}
-              filterOption={(input, option) =>
-                option?.children?.toLowerCase().indexOf(input.toLowerCase()) >= 0 ||
-                option?.value?.toLowerCase().indexOf(input.toLowerCase()) >= 0
-              }
+              filterOption={(input, option) => {
+                const label = option?.children?.props?.children?.[0]?.props?.children || option?.value || '';
+                const code = option?.children?.props?.children?.[1]?.props?.children || option?.value || '';
+                return label.toLowerCase().indexOf(input.toLowerCase()) >= 0 ||
+                       code.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+              }}
             >
               {availableCohorts.map((cohort: any) => (
                 <AntSelect.Option key={cohort.code} value={cohort.code}>
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span style={{ fontWeight: '500', fontSize: '14px' }}>{cohort.name || cohort.code}</span>
-                    <span style={{ fontSize: '12px', color: '#666' }}>{cohort.code}</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', padding: '2px 0' }}>
+                    <span style={{ fontWeight: '500', fontSize: '14px', color: '#333' }}>
+                      {cohort.name || cohort.code}
+                    </span>
+                    <span style={{ fontSize: '12px', color: '#666' }}>
+                      Code: {cohort.code} • Type: {cohort.type}
+                    </span>
                   </div>
                 </AntSelect.Option>
               ))}
@@ -1688,27 +1696,35 @@ export default function NegotiatedFareManager() {
           <AntForm.Item
             label="Eligible Cohorts (Optional)"
             name="eligibleCohorts"
+            tooltip="Select cohorts that are eligible for this fare. Only users matching these cohorts will see this fare."
           >
             <AntSelect
               mode="multiple"
-              placeholder={isCohortsLoading ? "Loading cohorts..." : "Select cohorts"}
+              placeholder={isCohortsLoading ? "Loading cohorts..." : availableCohorts.length === 0 ? "No cohorts available" : "Select cohorts"}
               style={{ width: "100%" }}
               dropdownStyle={{ zIndex: 9999 }}
               getPopupContainer={(trigger) => trigger.parentElement}
               virtual={false}
               showSearch
               loading={isCohortsLoading}
+              disabled={isCohortsLoading}
               notFoundContent={isCohortsLoading ? "Loading..." : "No cohorts found"}
-              filterOption={(input, option) =>
-                option?.children?.toLowerCase().indexOf(input.toLowerCase()) >= 0 ||
-                option?.value?.toLowerCase().indexOf(input.toLowerCase()) >= 0
-              }
+              filterOption={(input, option) => {
+                const label = option?.children?.props?.children?.[0]?.props?.children || option?.value || '';
+                const code = option?.children?.props?.children?.[1]?.props?.children || option?.value || '';
+                return label.toLowerCase().indexOf(input.toLowerCase()) >= 0 ||
+                       code.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+              }}
             >
               {availableCohorts.map((cohort: any) => (
                 <AntSelect.Option key={cohort.code} value={cohort.code}>
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span style={{ fontWeight: '500', fontSize: '14px' }}>{cohort.name || cohort.code}</span>
-                    <span style={{ fontSize: '12px', color: '#666' }}>{cohort.code}</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', padding: '2px 0' }}>
+                    <span style={{ fontWeight: '500', fontSize: '14px', color: '#333' }}>
+                      {cohort.name || cohort.code}
+                    </span>
+                    <span style={{ fontSize: '12px', color: '#666' }}>
+                      Code: {cohort.code} • Type: {cohort.type}
+                    </span>
                   </div>
                 </AntSelect.Option>
               ))}

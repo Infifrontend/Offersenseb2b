@@ -1609,6 +1609,33 @@ export default function DynamicDiscountEngine() {
                         ))}
                       </div>
                     </div>
+                    {selectedRule.cohortCodes && selectedRule.cohortCodes.length > 0 && (
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">
+                          Eligible Cohorts
+                        </label>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {selectedRule.cohortCodes.map((cohortCode, index) => {
+                            // Find the cohort details from availableCohorts
+                            const cohort = availableCohorts.find(
+                              (c: any) => c.cohortName === cohortCode || c.cohortCode === cohortCode
+                            );
+                            return (
+                              <span
+                                key={index}
+                                className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-800"
+                                title={cohort ? `${cohort.cohortName} (${cohort.cohortCode})` : cohortCode}
+                              >
+                                {cohort ? cohort.cohortCode : cohortCode}
+                              </span>
+                            );
+                          })}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          This discount will only apply to users in these cohorts
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </Col>
                 <Col span={12}>

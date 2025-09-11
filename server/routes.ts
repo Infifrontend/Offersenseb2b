@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import multer from "multer";
 import csv from "csv-parser";
 import { Readable } from "stream";
-import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema, insertAirAncillaryRuleSchema, insertNonAirRateSchema, insertNonAirMarkupRuleSchema, insertBundleSchema, insertBundlePricingRuleSchema, insertOfferRuleSchema, insertOfferTraceSchema } from "../shared/schema";
+import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema, insertAirAncillaryRuleSchema, insertNonAirRateSchema, insertNonAirMarkupRuleSchema, insertBundleSchema, insertBundlePricingRuleSchema, insertOfferRuleSchema, insertOfferTraceSchema, insertAgentSchema, insertChannelPricingOverrideSchema } from "../shared/schema";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -1242,6 +1242,213 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error: any) {
       res.status(500).json({ message: "Failed to delete offer trace", error: error.message });
+    }
+  });
+
+  // Agent Routes
+  
+  // Get all agents with optional filters
+  app.get("/api/agents", async (req, res) => {
+    try {
+      const filters = req.query;
+      const agents = await storage.getAgents(filters);
+      res.json(agents);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch agents", error: error.message });
+    }
+  });
+
+  // Create single agent
+  app.post("/api/agents", async (req, res) => {
+    try {
+      const validatedData = insertAgentSchema.parse(req.body);
+      
+      // Check for conflicts
+      const conflicts = await storage.checkAgentConflicts(validatedData);
+      if (conflicts.length > 0) {
+        return res.status(409).json({ 
+          message: "Agent conflicts detected", 
+          conflicts 
+        });
+      }
+
+      const agent = await storage.insertAgent(validatedData);
+      res.status(201).json(agent);
+    } catch (error: any) {
+      res.status(400).json({ message: "Invalid agent data", error: error.message });
+    }
+  });
+
+  // Get agent by ID
+  app.get("/api/agents/:id", async (req, res) => {
+    try {
+      const agent = await storage.getAgentById(req.params.id);
+      if (!agent) {
+        return res.status(404).json({ message: "Agent not found" });
+      }
+      res.json(agent);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch agent", error: error.message });
+    }
+  });
+
+  // Update agent
+  app.put("/api/agents/:id", async (req, res) => {
+    try {
+      const validatedData = insertAgentSchema.parse(req.body);
+      const agent = await storage.updateAgent(req.params.id, validatedData);
+      res.json(agent);
+    } catch (error: any) {
+      res.status(400).json({ message: "Failed to update agent", error: error.message });
+    }
+  });
+
+  // Update agent status
+  app.patch("/api/agents/:id/status", async (req, res) => {
+    try {
+      const { status } = req.body;
+      if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
+        return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
+      }
+      
+      const agent = await storage.updateAgentStatus(req.params.id, status);
+      res.json(agent);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to update agent status", error: error.message });
+    }
+  });
+
+  // Delete agent
+  app.delete("/api/agents/:id", async (req, res) => {
+    try {
+      await storage.deleteAgent(req.params.id);
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to delete agent", error: error.message });
+    }
+  });
+
+  // Channel Pricing Override Routes
+  
+  // Get all channel pricing overrides with optional filters
+  app.get("/api/channel-overrides", async (req, res) => {
+    try {
+      const filters = req.query;
+      const overrides = await storage.getChannelPricingOverrides(filters);
+      res.json(overrides);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch channel overrides", error: error.message });
+    }
+  });
+
+  // Create single channel pricing override
+  app.post("/api/channel-overrides", async (req, res) => {
+    try {
+      const validatedData = insertChannelPricingOverrideSchema.parse(req.body);
+      
+      // Check for conflicts
+      const conflicts = await storage.checkChannelPricingOverrideConflicts(validatedData);
+      if (conflicts.length > 0) {
+        return res.status(409).json({ 
+          message: "Channel override conflicts detected", 
+          conflicts 
+        });
+      }
+
+      const override = await storage.insertChannelPricingOverride(validatedData);
+      res.status(201).json(override);
+    } catch (error: any) {
+      res.status(400).json({ message: "Invalid channel override data", error: error.message });
+    }
+  });
+
+  // Simulate channel override application
+  app.post("/api/channel-overrides/simulate", async (req, res) => {
+    try {
+      const { basePrice, currency, overrideId } = req.body;
+      
+      if (!basePrice || !currency || !overrideId) {
+        return res.status(400).json({ message: "basePrice, currency, and overrideId are required" });
+      }
+
+      const override = await storage.getChannelPricingOverrideById(overrideId);
+      if (!override) {
+        return res.status(404).json({ message: "Channel override not found" });
+      }
+
+      let adjustedPrice = parseFloat(basePrice);
+      let adjustment = 0;
+
+      if (override.adjustmentType === "PERCENT") {
+        adjustment = basePrice * (parseFloat(override.adjustmentValue) / 100);
+        adjustedPrice = basePrice + adjustment;
+      } else if (override.adjustmentType === "AMOUNT") {
+        adjustment = parseFloat(override.adjustmentValue);
+        adjustedPrice = basePrice + adjustment;
+      }
+
+      res.json({
+        basePrice: parseFloat(basePrice),
+        adjustedPrice: Math.round(adjustedPrice * 100) / 100,
+        adjustment: Math.round(adjustment * 100) / 100,
+        adjustmentType: override.adjustmentType,
+        adjustmentValue: parseFloat(override.adjustmentValue),
+        currency,
+        overrideApplied: override.overrideCode,
+        channel: override.channel,
+        productScope: override.productScope
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to simulate channel override", error: error.message });
+    }
+  });
+
+  // Get channel override by ID
+  app.get("/api/channel-overrides/:id", async (req, res) => {
+    try {
+      const override = await storage.getChannelPricingOverrideById(req.params.id);
+      if (!override) {
+        return res.status(404).json({ message: "Channel override not found" });
+      }
+      res.json(override);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch channel override", error: error.message });
+    }
+  });
+
+  // Update channel override
+  app.put("/api/channel-overrides/:id", async (req, res) => {
+    try {
+      const validatedData = insertChannelPricingOverrideSchema.parse(req.body);
+      const override = await storage.updateChannelPricingOverride(req.params.id, validatedData);
+      res.json(override);
+    } catch (error: any) {
+      res.status(400).json({ message: "Failed to update channel override", error: error.message });
+    }
+  });
+
+  // Update channel override status
+  app.patch("/api/channel-overrides/:id/status", async (req, res) => {
+    try {
+      const { status } = req.body;
+      if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
+        return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
+      }
+      
+      const override = await storage.updateChannelPricingOverrideStatus(req.params.id, status);
+      res.json(override);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to update channel override status", error: error.message });
+    }
+  });
+
+  // Delete channel override
+  app.delete("/api/channel-overrides/:id", async (req, res) => {
+    try {
+      await storage.deleteChannelPricingOverride(req.params.id);
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to delete channel override", error: error.message });
     }
   });
 

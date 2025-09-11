@@ -389,3 +389,56 @@ export const insertOfferTraceSchema = createInsertSchema(offerTraces, {
 
 export type OfferTrace = typeof offerTraces.$inferSelect;
 export type InsertOfferTrace = z.infer<typeof insertOfferTraceSchema>;
+
+export const agents = pgTable("agents", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  agentId: varchar("agent_id", { length: 50 }).notNull().unique(),
+  agencyName: varchar("agency_name", { length: 200 }).notNull(),
+  iataCode: varchar("iata_code", { length: 10 }),
+  tier: varchar("tier", { length: 20 }).notNull(), // PLATINUM | GOLD | SILVER | BRONZE
+  allowedChannels: json("allowed_channels").notNull(), // array of API/PORTAL/MOBILE
+  commissionProfileId: varchar("commission_profile_id", { length: 50 }),
+  pos: json("pos").notNull(), // array of ISO country codes
+  status: varchar("status", { length: 20 }).default("ACTIVE"), // ACTIVE | INACTIVE
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
+export const channelPricingOverrides = pgTable("channel_pricing_overrides", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  overrideCode: varchar("override_code", { length: 50 }).notNull().unique(),
+  channel: varchar("channel", { length: 20 }).notNull(), // API | PORTAL | MOBILE
+  pos: json("pos").notNull(), // array of ISO country codes
+  productScope: varchar("product_scope", { length: 20 }).notNull(), // FARE | ANCILLARY | BUNDLE
+  adjustmentType: varchar("adjustment_type", { length: 20 }).notNull(), // PERCENT | AMOUNT
+  adjustmentValue: decimal("adjustment_value", { precision: 10, scale: 2 }).notNull(),
+  priority: integer("priority").notNull().default(1),
+  status: varchar("status", { length: 20 }).default("ACTIVE"), // ACTIVE | INACTIVE
+  validFrom: date("valid_from").notNull(),
+  validTo: date("valid_to").notNull(),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
+export const insertAgentSchema = createInsertSchema(agents, {
+  allowedChannels: z.array(z.enum(["API", "PORTAL", "MOBILE"])),
+  pos: z.array(z.string()),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertChannelPricingOverrideSchema = createInsertSchema(channelPricingOverrides, {
+  adjustmentValue: z.string().transform((val) => parseFloat(val)),
+  pos: z.array(z.string()),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type Agent = typeof agents.$inferSelect;
+export type InsertAgent = z.infer<typeof insertAgentSchema>;
+export type ChannelPricingOverride = typeof channelPricingOverrides.$inferSelect;
+export type InsertChannelPricingOverride = z.infer<typeof insertChannelPricingOverrideSchema>;

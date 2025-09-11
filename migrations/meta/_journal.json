@@ -36,6 +36,13 @@
       "when": 1757564839987,
       "tag": "0004_keen_mole_man",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1757565089815,
+      "tag": "0005_ambitious_stingray",
+      "breakpoints": true
     }
   ]
 }

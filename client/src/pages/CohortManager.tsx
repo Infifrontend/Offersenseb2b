@@ -454,11 +454,17 @@ export default function CohortManager() {
                       <AntSelect 
                         placeholder="Select cohort type"
                         allowClear
-                        options={cohortTypes.map((type) => ({
-                          label: type,
-                          value: type
-                        }))}
-                      />
+                        showSearch
+                        filterOption={(input, option) =>
+                          (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                        }
+                      >
+                        {cohortTypes.map((type) => (
+                          <AntSelect.Option key={type} value={type}>
+                            {type}
+                          </AntSelect.Option>
+                        ))}
+                      </AntSelect>
                     </AntForm.Item>
                   </Col>
                   <Col span={12}>

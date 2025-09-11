@@ -281,48 +281,6 @@ export default function AncillaryBundlingEngine() {
     },
   });
 
-  // Fetch bundle pricing rules
-  const {
-    data: pricingRules = [],
-    isLoading: pricingLoading,
-    error: pricingError,
-    refetch: refetchPricingRules,
-  } = useQuery({
-    queryKey: ["bundle-pricing-rules", pricingFilters],
-    queryFn: async () => {
-      console.log("Fetching bundle pricing rules from /api/bundles/pricing");
-      const params = new URLSearchParams(pricingFilters);
-      const response = await fetch(`/api/bundles/pricing?${params}`);
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(
-          "Failed to fetch bundle pricing rules:",
-          response.status,
-          errorText,
-        );
-        throw new Error(
-          `Failed to fetch bundle pricing rules: ${response.statusText}`,
-        );
-      }
-      const data = await response.json();
-      console.log("Bundle pricing rules response:", data);
-      // Ensure we always return an array, even if the response is not what we expect
-      if (Array.isArray(data)) {
-        return data;
-      } else if (data && data.data && Array.isArray(data.data)) {
-        return data.data;
-      } else {
-        console.warn(
-          "Unexpected response format for bundle pricing rules:",
-          data,
-        );
-        return [];
-      }
-    },
-    retry: 3,
-    retryDelay: 1000,
-  });
-
   // Create bundle mutation
   const createBundleMutation = useMutation({
     mutationFn: async (values: any) => {
@@ -834,127 +792,94 @@ export default function AncillaryBundlingEngine() {
 
           <Card>
             <CardContent className="p-6">
-              {pricingLoading ? (
-                <div className="flex items-center justify-center p-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                </div>
-              ) : pricingError ? (
-                <div className="text-center py-12 text-red-500">
-                  Error loading pricing rules: {pricingError.message}
-                  <Button onClick={refetchPricingRules} className="ml-4">
-                    Retry
-                  </Button>
-                </div>
-              ) : pricingRules.length === 0 ? (
-                <div className="text-center py-12">
-                  <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    No Bundle Pricing Rules Found
-                  </h3>
-                  <p className="text-gray-600 mb-4">
-                    Create your first bundle pricing rule to get started
-                  </p>
-                  <Button onClick={() => setIsCreatePricingModalOpen(true)}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create Bundle Pricing Rule
-                  </Button>
-                </div>
-              ) : (
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Rule Code</TableHead>
-                        <TableHead>Bundle Code</TableHead>
-                        <TableHead>Discount Type</TableHead>
-                        <TableHead>Discount Value</TableHead>
-                        <TableHead>Priority</TableHead>
-                        <TableHead>Valid Period</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {pricingRules.map((rule: BundlePricingRule) => (
-                        <TableRow key={rule.id}>
-                          <TableCell className="font-medium">
-                            {rule.ruleCode || "N/A"}
-                          </TableCell>
-                          <TableCell>{rule.bundleCode || "N/A"}</TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="capitalize">
-                              {rule.discountType
-                                ? rule.discountType.toLowerCase()
-                                : "N/A"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            {rule.discountType === "PERCENT"
-                              ? `${rule.discountValue || 0}%`
-                              : `$${rule.discountValue || 0}`}
-                          </TableCell>
-                          <TableCell>{rule.priority || 1}</TableCell>
-                          <TableCell className="text-sm">
-                            {rule.validFrom && rule.validTo ? (
-                              <>
-                                <div>{formatDate(rule.validFrom)}</div>
-                                <div className="text-gray-500">
-                                  to {formatDate(rule.validTo)}
-                                </div>
-                              </>
-                            ) : (
-                              "N/A"
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <Badge
-                              variant={
-                                rule.status === "ACTIVE"
-                                  ? "default"
-                                  : "secondary"
-                              }
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Rule Code</TableHead>
+                      <TableHead>Bundle Code</TableHead>
+                      <TableHead>Discount Type</TableHead>
+                      <TableHead>Discount Value</TableHead>
+                      <TableHead>Priority</TableHead>
+                      <TableHead>Valid Period</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pricingRules.map((rule: BundlePricingRule) => (
+                      <TableRow key={rule.id}>
+                        <TableCell className="font-medium">
+                          {rule.ruleCode || "N/A"}
+                        </TableCell>
+                        <TableCell>{rule.bundleCode || "N/A"}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="capitalize">
+                            {rule.discountType
+                              ? rule.discountType.toLowerCase()
+                              : "N/A"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {rule.discountType === "PERCENT"
+                            ? `${rule.discountValue || 0}%`
+                            : `$${rule.discountValue || 0}`}
+                        </TableCell>
+                        <TableCell>{rule.priority || 1}</TableCell>
+                        <TableCell className="text-sm">
+                          {rule.validFrom && rule.validTo ? (
+                            <>
+                              <div>{formatDate(rule.validFrom)}</div>
+                              <div className="text-gray-500">
+                                to {formatDate(rule.validTo)}
+                              </div>
+                            </>
+                          ) : (
+                            "N/A"
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              rule.status === "ACTIVE" ? "default" : "secondary"
+                            }
+                          >
+                            {rule.status || "INACTIVE"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleSimulateBundlePricing(rule)}
                             >
-                              {rule.status || "INACTIVE"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() =>
-                                  handleSimulateBundlePricing(rule)
-                                }
-                              >
-                                <Play className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() =>
-                                  handleEditBundlePricingRule(rule)
-                                }
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() =>
-                                  handleDeleteBundlePricingRule(rule.id)
-                                }
-                                disabled={deleteBundlePricingMutation.isPending}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
+                              <Play className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditBundlePricingRule(rule)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() =>
+                                handleDeleteBundlePricingRule(rule.id)
+                              }
+                              disabled={deleteBundlePricingMutation.isPending}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

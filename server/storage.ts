@@ -23,7 +23,7 @@ import type {
   InsightQuery,
 } from "../shared/schema";
 import { db } from "./db";
-import { eq, and, or, gte, lte, ilike, inArray, sql, desc } from "drizzle-orm";
+import { eq, desc, and, gte, lte, sql, like, inArray, or } from "drizzle-orm";
 
 
 export interface IStorage {
@@ -82,8 +82,8 @@ export interface IStorage {
   checkBundleConflicts(bundle: InsertBundle): Promise<InsertBundle[]>;
 
   // Bundle Pricing Rules
-  insertBundlePricingRule(rule: InsertBundlePricingRule): Promise<InsertBundlePricingRule>;
-  getBundlePricingRules(filters?: any): Promise<InsertBundlePricingRule[]>;
+  insertBundlePricingRule(rule: InsertBundlePricingRule): Promise<BundlePricingRule>;
+  getBundlePricingRules(filters?: any): Promise<BundlePricingRule[]>;
   getBundlePricingRuleById(id: string): Promise<InsertBundlePricingRule | undefined>;
   updateBundlePricingRule(id: string, rule: Partial<InsertBundlePricingRule>): Promise<InsertBundlePricingRule>;
   updateBundlePricingRuleStatus(id: string, status: string): Promise<InsertBundlePricingRule>;
@@ -739,36 +739,44 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Bundle Pricing Rule methods
-  async insertBundlePricingRule(rule: InsertBundlePricingRule): Promise<InsertBundlePricingRule> {
-    const [insertedRule] = await this.db.insert(bundlePricingRules).values(rule).returning();
-    return insertedRule;
+  async insertBundlePricingRule(rule: InsertBundlePricingRule): Promise<BundlePricingRule> {
+    const [newRule] = await this.db.insert(bundlePricingRules).values(rule).returning();
+    return newRule;
   }
 
-  async getBundlePricingRules(filters: any = {}): Promise<InsertBundlePricingRule[]> {
-    let query = this.db.select().from(bundlePricingRules);
-    const conditions: any[] = [];
+  async getBundlePricingRules(filters: any = {}): Promise<BundlePricingRule[]> {
+    try {
+      console.log("Storage: getBundlePricingRules called with filters:", filters);
 
-    if (filters.ruleCode) {
-      conditions.push(ilike(bundlePricingRules.ruleCode, `%${filters.ruleCode}%`));
-    }
-    if (filters.bundleCode) {
-      conditions.push(eq(bundlePricingRules.bundleCode, filters.bundleCode));
-    }
-    if (filters.status) {
-      conditions.push(eq(bundlePricingRules.status, filters.status));
-    }
-    if (filters.validFrom) {
-      conditions.push(gte(bundlePricingRules.validFrom, filters.validFrom));
-    }
-    if (filters.validTo) {
-      conditions.push(lte(bundlePricingRules.validTo, filters.validTo));
-    }
+      let query = this.db.select().from(bundlePricingRules);
 
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions));
-    }
+      // Apply filters if provided
+      const conditions = [];
 
-    return await query.orderBy(bundlePricingRules.priority, bundlePricingRules.createdAt);
+      if (filters.bundleCode) {
+        conditions.push(eq(bundlePricingRules.bundleCode, filters.bundleCode));
+      }
+
+      if (filters.status) {
+        conditions.push(eq(bundlePricingRules.status, filters.status));
+      }
+
+      if (filters.ruleCode) {
+        conditions.push(like(bundlePricingRules.ruleCode, `%${filters.ruleCode}%`));
+      }
+
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+
+      const results = await query.orderBy(bundlePricingRules.priority, bundlePricingRules.createdAt);
+      console.log(`Storage: Found ${results?.length || 0} bundle pricing rules`);
+
+      return results || [];
+    } catch (error) {
+      console.error("Storage: Error in getBundlePricingRules:", error);
+      throw error;
+    }
   }
 
   async getBundlePricingRuleById(id: string): Promise<InsertBundlePricingRule | undefined> {

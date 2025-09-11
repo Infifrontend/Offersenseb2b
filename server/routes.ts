@@ -835,9 +835,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/bundles/pricing", async (req, res) => {
     try {
       const filters = req.query;
+      console.log("Fetching bundle pricing rules with filters:", filters);
       const rules = await storage.getBundlePricingRules(filters);
-      res.json(rules);
+      console.log(`Found ${rules?.length || 0} bundle pricing rules`);
+      res.json(rules || []);
     } catch (error: any) {
+      console.error("Error fetching bundle pricing rules:", error);
       res.status(500).json({ message: "Failed to fetch bundle pricing rules", error: error.message });
     }
   });

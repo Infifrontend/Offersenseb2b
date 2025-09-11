@@ -251,7 +251,8 @@ export default function AncillaryBundlingEngine() {
         throw new Error(`Failed to fetch cohorts: ${response.statusText}`);
       }
       const data = await response.json();
-      return data.data || data; // Assuming API returns { data: [...] } or just [...]
+      // Ensure the data is an array, handling potential API responses like { data: [...] }
+      return Array.isArray(data) ? data : data.data || [];
     },
     onError: (error: any) => {
       toast({
@@ -1045,42 +1046,26 @@ export default function AncillaryBundlingEngine() {
 
           <AntForm.Item label="Cohort Codes (Optional)" name="cohortCodes">
               <AntSelect
-                mode="multiple"
-                placeholder={
-                  isCohortsLoading
-                    ? "Loading cohorts..."
-                    : availableCohorts.length === 0
-                    ? "No cohorts available"
-                    : "Select cohorts"
-                }
+                mode="tags"
+                placeholder="Enter cohort codes"
                 style={{ width: "100%" }}
                 dropdownStyle={{ zIndex: 9999 }}
                 getPopupContainer={(trigger) => trigger.parentElement}
                 virtual={false}
                 showSearch
-                loading={isCohortsLoading}
-                disabled={isCohortsLoading}
-                notFoundContent={
-                  isCohortsLoading ? "Loading..." : "No cohorts found"
-                }
                 filterOption={(input, option) =>
-                  option?.children?.props?.children?.[0]?.props?.children
-                    ?.toLowerCase()
-                    .indexOf(input.toLowerCase()) >= 0 ||
-                  option?.children?.props?.children?.[1]?.props?.children
-                    ?.toLowerCase()
-                    .indexOf(input.toLowerCase()) >= 0
+                  option?.children?.toLowerCase().indexOf(input.toLowerCase()) >=
+                    0 ||
+                  option?.value?.toLowerCase().indexOf(input.toLowerCase()) >= 0
                 }
               >
                 {availableCohorts.map((cohort: any) => (
-                  <AntSelect.Option key={cohort.code} value={cohort.code}>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span style={{ fontWeight: '500', fontSize: '14px' }}>
-                        {cohort.name || cohort.code}
-                      </span>
-                      <span style={{ fontSize: '12px', color: '#666' }}>
-                        {cohort.code}
-                      </span>
+                  <AntSelect.Option key={cohort.id} value={cohort.cohortName}>
+                    <div style={{ display: "flex", flexDirection: "column" }}>
+                      <div className="cls-cohort-dropdwon">
+                        <p>{cohort.cohortName}</p>{" "}
+                        <span className="text-gray-600">{cohort.cohortCode}</span>
+                      </div>
                     </div>
                   </AntSelect.Option>
                 ))}
@@ -1342,42 +1327,26 @@ export default function AncillaryBundlingEngine() {
 
           <AntForm.Item label="Cohort Codes (Optional)" name="cohortCodes">
               <AntSelect
-                mode="multiple"
-                placeholder={
-                  isCohortsLoading
-                    ? "Loading cohorts..."
-                    : availableCohorts.length === 0
-                    ? "No cohorts available"
-                    : "Select cohorts"
-                }
+                mode="tags"
+                placeholder="Enter cohort codes"
                 style={{ width: "100%" }}
                 dropdownStyle={{ zIndex: 9999 }}
                 getPopupContainer={(trigger) => trigger.parentElement}
                 virtual={false}
                 showSearch
-                loading={isCohortsLoading}
-                disabled={isCohortsLoading}
-                notFoundContent={
-                  isCohortsLoading ? "Loading..." : "No cohorts found"
-                }
                 filterOption={(input, option) =>
-                  option?.children?.props?.children?.[0]?.props?.children
-                    ?.toLowerCase()
-                    .indexOf(input.toLowerCase()) >= 0 ||
-                  option?.children?.props?.children?.[1]?.props?.children
-                    ?.toLowerCase()
-                    .indexOf(input.toLowerCase()) >= 0
+                  option?.children?.toLowerCase().indexOf(input.toLowerCase()) >=
+                    0 ||
+                  option?.value?.toLowerCase().indexOf(input.toLowerCase()) >= 0
                 }
               >
                 {availableCohorts.map((cohort: any) => (
-                  <AntSelect.Option key={cohort.code} value={cohort.code}>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span style={{ fontWeight: '500', fontSize: '14px' }}>
-                        {cohort.name || cohort.code}
-                      </span>
-                      <span style={{ fontSize: '12px', color: '#666' }}>
-                        {cohort.code}
-                      </span>
+                  <AntSelect.Option key={cohort.id} value={cohort.cohortName}>
+                    <div style={{ display: "flex", flexDirection: "column" }}>
+                      <div className="cls-cohort-dropdwon">
+                        <p>{cohort.cohortName}</p>{" "}
+                        <span className="text-gray-600">{cohort.cohortCode}</span>
+                      </div>
                     </div>
                   </AntSelect.Option>
                 ))}

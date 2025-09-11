@@ -129,7 +129,7 @@ export interface IStorage {
   checkCohortConflicts(cohortData: InsertCohort): Promise<any[]>;
 
   // Audit Log Methods
-  getAuditLogs(filters: any = {}): Promise<InsertAuditLog[]>;
+  getAuditLogs(filters?: any): Promise<InsertAuditLog[]>;
   getAuditLogById(id: string): Promise<InsertAuditLog | null>;
   getAuditLogsByEntity(entityId: string, module?: string): Promise<InsertAuditLog[]>;
   insertAuditLog(data: InsertAuditLog): Promise<InsertAuditLog>;

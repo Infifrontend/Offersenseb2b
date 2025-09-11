@@ -887,8 +887,25 @@ export class DatabaseStorage implements IStorage {
   }
 
   async insertOfferRule(rule: InsertOfferRule): Promise<OfferRule> {
-    const result = await this.db.insert(offerRules).values(rule).returning();
-    return result[0];
+    try {
+      console.log("Storage: Inserting offer rule:", rule);
+      
+      // Ensure required fields have default values
+      const ruleData = {
+        ...rule,
+        status: rule.status || "DRAFT",
+        priority: rule.priority || 1,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      const result = await this.db.insert(offerRules).values(ruleData).returning();
+      console.log("Storage: Successfully inserted offer rule:", result[0]);
+      return result[0];
+    } catch (error: any) {
+      console.error("Storage: Error inserting offer rule:", error);
+      throw error;
+    }
   }
 
   async updateOfferRule(id: string, rule: InsertOfferRule): Promise<OfferRule> {

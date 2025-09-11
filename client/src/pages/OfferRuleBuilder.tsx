@@ -474,27 +474,31 @@ export default function OfferRuleBuilder() {
         validTo: values.validTo?.format("YYYY-MM-DD"),
         justification: values.justification || undefined,
         createdBy: "admin", // This would come from auth context in a real app
+        status: "DRAFT"
       };
       
       console.log("Formatted data:", formattedData);
       
       // Validate that we have required data
       if (!formattedData.ruleCode || !formattedData.ruleName || !formattedData.ruleType) {
-        throw new Error("Missing required basic information");
+        alert("Missing required basic information");
+        return;
       }
       
       if (!formattedData.validFrom || !formattedData.validTo) {
-        throw new Error("Missing validity dates");
+        alert("Missing validity dates");
+        return;
       }
       
       if (!formattedData.actions || formattedData.actions.length === 0) {
-        throw new Error("At least one action is required");
+        alert("At least one action is required");
+        return;
       }
       
       createRuleMutation.mutate(formattedData);
     } catch (error) {
       console.error("Error formatting offer rule data:", error);
-      // Could show a notification here
+      alert(`Error creating rule: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -769,7 +773,6 @@ export default function OfferRuleBuilder() {
           <AntForm
             form={createForm}
             layout="vertical"
-            onFinish={onCreateSubmit}
             autoComplete="off"
           >
             {currentStep === 0 && (
@@ -1181,13 +1184,16 @@ export default function OfferRuleBuilder() {
                   <AntButton
                     type="primary"
                     onClick={() => {
-                      // Validate only the fields for current step
-                      const fieldsToValidate = getFieldsForStep(currentStep);
-                      createForm.validateFields(fieldsToValidate).then(() => {
-                        setCurrentStep(currentStep + 1);
-                      }).catch((errorInfo) => {
-                        console.log("Validation failed for step", currentStep, errorInfo);
-                      });
+                      // For steps other than actions step, allow proceeding without strict validation
+                      if (currentStep === 2) {
+                        // Actions step - ensure at least one action exists
+                        const actions = createForm.getFieldValue('actions') || [];
+                        if (actions.length === 0) {
+                          alert("Please add at least one action before proceeding");
+                          return;
+                        }
+                      }
+                      setCurrentStep(currentStep + 1);
                     }}
                   >
                     Next
@@ -1195,7 +1201,11 @@ export default function OfferRuleBuilder() {
                 ) : (
                   <AntButton
                     type="primary"
-                    htmlType="submit"
+                    onClick={() => {
+                      // Get all form values and submit
+                      const allValues = createForm.getFieldsValue();
+                      onCreateSubmit(allValues);
+                    }}
                     loading={createRuleMutation.isPending}
                   >
                     {createRuleMutation.isPending

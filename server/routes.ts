@@ -239,7 +239,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/dynamic-discount-rules", async (req, res) => {
     try {
       console.log("Received rule data:", req.body);
-      
+
       const validatedData = insertDynamicDiscountRuleSchema.parse(req.body);
       console.log("Validated rule data:", validatedData);
 
@@ -254,11 +254,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const rule = await storage.insertDynamicDiscountRule(validatedData);
       console.log("Created rule:", rule);
-      
+
       res.status(201).json(rule);
     } catch (error: any) {
       console.error("Error creating rule:", error);
-      
+
       if (error.errors && Array.isArray(error.errors)) {
         // Zod validation errors
         return res.status(400).json({ 
@@ -267,7 +267,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           error: error.message 
         });
       }
-      
+
       res.status(400).json({ message: "Invalid rule data", error: error.message });
     }
   });
@@ -1665,15 +1665,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get cohorts for dropdowns
   app.get("/api/cohorts/list", async (req, res) => {
     try {
+      console.log("Fetching cohorts for dropdown list...");
       const cohorts = await storage.getCohorts({ status: "ACTIVE" });
+      console.log(`Found ${cohorts?.length || 0} active cohorts`);
+
+      // Always return an array, even if empty
+      if (!cohorts || cohorts.length === 0) {
+        console.log("No active cohorts found, returning empty array");
+        return res.json([]);
+      }
+
       const cohortList = cohorts.map(cohort => ({
         code: cohort.cohortCode,
         name: cohort.cohortName,
         type: cohort.type
       }));
+
+      console.log("Returning cohorts:", cohortList);
       res.json(cohortList);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch cohorts", error: error.message });
+      console.error("Error fetching cohorts list:", error);
+      // Return empty array on error instead of 500 to prevent UI breaking
+      res.json([]);
     }
   });
 
@@ -2406,12 +2419,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertSimulationSchema.parse(req.body);
       const user = req.header("x-user") || "system";
-      
+
       const simulation = await storage.insertSimulation({
         ...validatedData,
         createdBy: user
       });
-      
+
       res.status(201).json(simulation);
     } catch (error: any) {
       res.status(400).json({ message: "Invalid simulation data", error: error.message });

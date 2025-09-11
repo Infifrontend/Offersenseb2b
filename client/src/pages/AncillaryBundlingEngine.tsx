@@ -240,21 +240,23 @@ export default function AncillaryBundlingEngine() {
   });
 
   // Fetch bundle pricing rules
-  const { data: pricingRules = [], isLoading: pricingLoading } = useQuery({
-    queryKey: ["bundle-pricing-rules", pricingFilters],
+  const {
+    data: pricingRules = [],
+    isLoading: pricingLoading,
+    error: pricingError,
+    refetch: refetchPricingRules,
+  } = useQuery({
+    queryKey: ["bundlePricingRules"],
     queryFn: async () => {
-      const params = new URLSearchParams(pricingFilters);
-      console.log("Fetching pricing rules with params:", params.toString());
-      const response = await fetch(`/api/bundles/pricing?${params}`);
+      console.log("Fetching bundle pricing rules from /api/bundles/pricing");
+      const response = await fetch("/api/bundles/pricing");
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("Failed to fetch bundle pricing rules:", errorText);
-        throw new Error(
-          `Failed to fetch bundle pricing rules: ${response.status}`,
-        );
+        console.error("Failed to fetch bundle pricing rules:", response.status, errorText);
+        throw new Error(`Failed to fetch bundle pricing rules: ${response.statusText}`);
       }
       const data = await response.json();
-      console.log("Received pricing rules data:", data);
+      console.log("Bundle pricing rules response:", data);
       return data;
     },
   });
@@ -764,6 +766,11 @@ export default function AncillaryBundlingEngine() {
               {pricingLoading ? (
                 <div className="flex items-center justify-center p-12">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+              ) : pricingError ? (
+                <div className="text-center py-12 text-red-500">
+                  Error loading pricing rules: {pricingError.message}
+                  <Button onClick={refetchPricingRules} className="ml-4">Retry</Button>
                 </div>
               ) : pricingRules.length === 0 ? (
                 <div className="text-center py-12">

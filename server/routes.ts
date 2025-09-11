@@ -840,12 +840,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Found ${rules?.length || 0} bundle pricing rules`);
 
       // If no rules found and no specific filters, create sample data
-      if (rules.length === 0 && Object.keys(filters).length === 0) {
+      if ((!rules || rules.length === 0) && Object.keys(filters).length === 0) {
         console.log("No bundle pricing rules found, creating sample data...");
         try {
           // First check if bundles exist, if not create sample bundles
           const existingBundles = await storage.getBundles({});
-          if (existingBundles.length === 0) {
+          if (!existingBundles || existingBundles.length === 0) {
             console.log("Creating sample bundles first...");
             const sampleBundles = [
               {
@@ -910,7 +910,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Fetch the newly created rules
           const newRules = await storage.getBundlePricingRules(filters);
           console.log(`Created ${newRules.length} sample bundle pricing rules`);
-          return res.json(newRules);
+          return res.json(newRules || []);
         } catch (createError: any) {
           console.error("Error creating sample data:", createError);
           // Continue and return empty array instead of failing

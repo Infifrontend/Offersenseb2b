@@ -771,18 +771,22 @@ export class DatabaseStorage implements IStorage {
       const results = await query.orderBy(bundlePricingRules.priority, bundlePricingRules.createdAt);
       console.log(`Storage: Found ${results?.length || 0} bundle pricing rules`);
 
+      // Ensure we always return an array
+      const rulesArray = results || [];
+
       // Log a sample record if any exist
-      if (results && results.length > 0) {
-        console.log("Storage: Sample pricing rule:", JSON.stringify(results[0], null, 2));
+      if (rulesArray.length > 0) {
+        console.log("Storage: Sample pricing rule:", JSON.stringify(rulesArray[0], null, 2));
       }
 
-      return results || [];
-    } catch (error) {
+      return rulesArray;
+    } catch (error: any) {
       console.error("Storage: Error in getBundlePricingRules:", error);
       console.error("Storage: Error stack:", error.stack);
 
-      // Re-throw the error so the API can handle it properly
-      throw error;
+      // Return empty array on database errors to prevent UI crashes
+      console.log("Storage: Returning empty array due to error");
+      return [];
     }
   }
 

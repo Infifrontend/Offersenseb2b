@@ -23,15 +23,15 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -421,23 +421,23 @@ export default function DynamicDiscountEngine() {
 
       {/* Sticky Filter Icon */}
       <div className="fixed bottom-6 right-6 z-50">
-        <Drawer open={isFilterDrawerOpen} onOpenChange={setIsFilterDrawerOpen}>
-          <DrawerTrigger asChild>
+        <Sheet open={isFilterDrawerOpen} onOpenChange={setIsFilterDrawerOpen}>
+          <SheetTrigger asChild>
             <Button
               size="lg"
               className="h-14 w-14 rounded-full shadow-lg bg-blue-600 hover:bg-blue-700 text-white"
             >
               <Filter className="w-6 h-6" />
             </Button>
-          </DrawerTrigger>
-          <DrawerContent className="max-h-[80vh]">
-            <DrawerHeader>
-              <DrawerTitle>Filters</DrawerTitle>
-              <DrawerDescription>
+          </SheetTrigger>
+          <SheetContent side="right" className="w-96 overflow-y-auto">
+            <SheetHeader>
+              <SheetTitle>Filters</SheetTitle>
+              <SheetDescription>
                 Filter discount rules by various criteria
-              </DrawerDescription>
-            </DrawerHeader>
-            <div className="px-4 py-2 space-y-4 overflow-y-auto">
+              </SheetDescription>
+            </SheetHeader>
+            <div className="py-4 space-y-4">
               <div className="grid grid-cols-1 gap-4">
                 <div>
                   <Label htmlFor="rule-code">Rule Code</Label>
@@ -548,8 +548,8 @@ export default function DynamicDiscountEngine() {
                 </div>
               </div>
             </div>
-            <DrawerFooter>
-              <div className="flex gap-2">
+            <SheetFooter className="pt-4">
+              <div className="flex gap-2 w-full">
                 <Button
                   variant="outline"
                   onClick={() => setFilters({})}
@@ -557,13 +557,13 @@ export default function DynamicDiscountEngine() {
                 >
                   Reset All
                 </Button>
-                <DrawerClose asChild>
+                <SheetClose asChild>
                   <Button className="flex-1">Apply Filters</Button>
-                </DrawerClose>
+                </SheetClose>
               </div>
-            </DrawerFooter>
-          </DrawerContent>
-        </Drawer>
+            </SheetFooter>
+          </SheetContent>
+        </Sheet>
       </div>
 
       {/* Rules Table */}

@@ -362,7 +362,7 @@ export default function NegotiatedFareManager() {
       "data:text/csv;charset=utf-8," +
       headers.join(",") +
       "\n" +
-      'AA,NEGO001,NYC,LAX,ROUND_TRIP,PREMIUM_ECONOMY,500.00,USD,2024-01-01,2024-12-31,2024-02-01,2024-11-30,"[""US"",""IN""]",50,7,30,"[]","[""GOLD"",""PLATINUM""]","[]","Premium dynamic fare"';
+      'AA,NEGO001,NYC,LAX,ROUND_TRIP,ECONOMY,299.00,USD,2024-01-01,2024-12-31,2024-02-01,2024-11-30,"[""US"",""CA""]",50,7,30,"[]","[""GOLD"",""SILVER""]","[]","Sample negotiated fare"';
 
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
@@ -1023,7 +1023,7 @@ export default function NegotiatedFareManager() {
               }}
             >
               {availableCohorts.map((cohort: any) => (
-                <AntSelect.Option key={cohort.id} value={cohort.cohortCode}>
+                <AntSelect.Option key={cohort.id} value={cohort.code}>
                   <div
                     style={{
                       display: "flex",
@@ -1035,6 +1035,9 @@ export default function NegotiatedFareManager() {
                       <p>{cohort.cohortName}</p>{" "}
                       <span className="text-gray-600">{cohort.cohortCode}</span>
                     </div>
+                    {/* <span style={{ fontSize: "12px", color: "#666" }}>
+                      Code: {cohort.cohortCode} • Name: {cohort.cohortName}
+                    </span> */}
                   </div>
                 </AntSelect.Option>
               ))}
@@ -1770,7 +1773,7 @@ export default function NegotiatedFareManager() {
               }}
             >
               {availableCohorts.map((cohort: any) => (
-                <AntSelect.Option key={cohort.id} value={cohort.cohortCode}>
+                <AntSelect.Option key={cohort.id} value={cohort.cohortName}>
                   <div
                     style={{
                       display: "flex",

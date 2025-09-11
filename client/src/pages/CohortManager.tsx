@@ -101,8 +101,8 @@ export default function CohortManager() {
   const [selectedCohort, setSelectedCohort] = useState<Cohort | null>(null);
   const [filters, setFilters] = useState({
     cohortCode: "",
-    type: "",
-    status: "",
+    type: "all",
+    status: "all",
   });
 
   // Fetch cohorts
@@ -111,7 +111,7 @@ export default function CohortManager() {
     queryFn: async () => {
       const params = new URLSearchParams();
       Object.entries(filters).forEach(([key, value]) => {
-        if (value) params.append(key, value);
+        if (value && value !== "all") params.append(key, value);
       });
       
       const response = await fetch(`/api/cohorts?${params}`);
@@ -659,7 +659,7 @@ export default function CohortManager() {
                   <SelectValue placeholder="All types" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All types</SelectItem>
+                  <SelectItem value="all">All types</SelectItem>
                   {cohortTypes.map((type) => (
                     <SelectItem key={type} value={type}>{type}</SelectItem>
                   ))}
@@ -676,7 +676,7 @@ export default function CohortManager() {
                   <SelectValue placeholder="All statuses" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All statuses</SelectItem>
+                  <SelectItem value="all">All statuses</SelectItem>
                   <SelectItem value="ACTIVE">Active</SelectItem>
                   <SelectItem value="INACTIVE">Inactive</SelectItem>
                 </SelectContent>
@@ -685,7 +685,7 @@ export default function CohortManager() {
             <div className="flex items-end">
               <Button 
                 variant="outline" 
-                onClick={() => setFilters({ cohortCode: "", type: "", status: "" })}
+                onClick={() => setFilters({ cohortCode: "", type: "all", status: "all" })}
                 className="w-full"
               >
                 Reset

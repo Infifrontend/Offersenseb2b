@@ -140,17 +140,6 @@ const countriesData = [
   { code: "IN", name: "India" },
 ];
 
-// Fetch available cohorts from the API
-const { data: availableCohorts = [] } = useQuery({
-  queryKey: ["cohorts"],
-  queryFn: async () => {
-    const response = await fetch("/api/cohorts/list");
-    if (!response.ok) throw new Error("Failed to fetch cohorts");
-    return response.json();
-  },
-});
-
-
 export default function DynamicDiscountEngine() {
   const [filters, setFilters] = useState({});
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -189,6 +178,16 @@ export default function DynamicDiscountEngine() {
       const params = new URLSearchParams(filters);
       const response = await fetch(`/api/dynamic-discount-rules?${params}`);
       if (!response.ok) throw new Error("Failed to fetch rules");
+      return response.json();
+    },
+  });
+
+  // Fetch available cohorts from the API
+  const { data: availableCohorts = [] } = useQuery({
+    queryKey: ["cohorts-list"],
+    queryFn: async () => {
+      const response = await fetch("/api/cohorts/list");
+      if (!response.ok) throw new Error("Failed to fetch cohorts");
       return response.json();
     },
   });

@@ -255,6 +255,8 @@ export default function CohortManager() {
   });
 
   const handleCreateOrUpdate = (values: any) => {
+    console.log("Form values received:", values);
+    
     const formattedData: CohortFormData = {
       cohortCode: values.cohortCode,
       cohortName: values.cohortName,
@@ -263,6 +265,8 @@ export default function CohortManager() {
       description: values.description || null,
       createdBy: "admin", // In real app, get from auth context
     };
+
+    console.log("Formatted data for API:", formattedData);
 
     if (selectedCohort) {
       updateCohortMutation.mutate({

@@ -1038,10 +1038,10 @@ export default function NegotiatedFareManager() {
                         color: "#333",
                       }}
                     >
-                      {cohort.name || cohort.code}
+                      {cohort.name || `Cohort ${cohort.code}`}
                     </span>
                     <span style={{ fontSize: "12px", color: "#666" }}>
-                      Code: {cohort.code} • Type: {cohort.type}
+                      Code: {cohort.code} • Type: {cohort.type || 'N/A'}
                     </span>
                   </div>
                 </AntSelect.Option>
@@ -1793,10 +1793,10 @@ export default function NegotiatedFareManager() {
                         color: "#333",
                       }}
                     >
-                      {cohort.name || cohort.code}
+                      {cohort.name || `Cohort ${cohort.code}`}
                     </span>
                     <span style={{ fontSize: "12px", color: "#666" }}>
-                      Code: {cohort.code} • Type: {cohort.type}
+                      Code: {cohort.code} • Type: {cohort.type || 'N/A'}
                     </span>
                   </div>
                 </AntSelect.Option>

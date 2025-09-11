@@ -973,8 +973,8 @@ export default function DynamicDiscountEngine() {
               {availableCohorts.map((cohort: any) => (
                 <AntSelect.Option key={cohort.code} value={cohort.code}>
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span style={{ fontWeight: '500', fontSize: '14px' }}>{cohort.name || cohort.code}</span>
-                    <span style={{ fontSize: '12px', color: '#666' }}>{cohort.code}</span>
+                    <span style={{ fontWeight: '500', fontSize: '14px' }}>{cohort.name || `Cohort ${cohort.code}`}</span>
+                    <span style={{ fontSize: '12px', color: '#666' }}>Code: {cohort.code} • Type: {cohort.type || 'N/A'}</span>
                   </div>
                 </AntSelect.Option>
               ))}
@@ -1273,8 +1273,8 @@ export default function DynamicDiscountEngine() {
               {availableCohorts.map((cohort: any) => (
                 <AntSelect.Option key={cohort.code} value={cohort.code}>
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span style={{ fontWeight: '500', fontSize: '14px' }}>{cohort.name || cohort.code}</span>
-                    <span style={{ fontSize: '12px', color: '#666' }}>{cohort.code}</span>
+                    <span style={{ fontWeight: '500', fontSize: '14px' }}>{cohort.name || `Cohort ${cohort.code}`}</span>
+                    <span style={{ fontSize: '12px', color: '#666' }}>Code: {cohort.code} • Type: {cohort.type || 'N/A'}</span>
                   </div>
                 </AntSelect.Option>
               ))}

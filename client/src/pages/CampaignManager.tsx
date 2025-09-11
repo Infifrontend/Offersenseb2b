@@ -54,6 +54,7 @@ import {
   Clock,
   AlertCircle,
   Square,
+  SendOutlined,
 } from "lucide-react";
 import dayjs from "dayjs";
 import { z } from "zod";
@@ -241,6 +242,15 @@ const formatCurrency = (value: number) => {
   }).format(value);
 };
 
+// Fetch available cohorts
+const fetchCohorts = async () => {
+  const response = await fetch("/api/cohorts/list");
+  if (!response.ok) {
+    throw new Error("Failed to fetch cohorts");
+  }
+  return response.json();
+};
+
 export default function CampaignManager() {
   // State management
   const [activeTab, setActiveTab] = useState("campaigns");
@@ -270,6 +280,12 @@ export default function CampaignManager() {
       if (!response.ok) throw new Error("Failed to fetch campaigns");
       return response.json();
     },
+  });
+
+  // Fetch available cohorts
+  const { data: availableCohorts = [] } = useQuery({
+    queryKey: ["/api/cohorts/list"],
+    queryFn: fetchCohorts,
   });
 
   const { data: campaignMetrics, isLoading: metricsLoading } = useQuery({
@@ -478,7 +494,7 @@ export default function CampaignManager() {
       render: (record: Campaign) => {
         const totalProducts = (record.products.ancillaries?.length || 0) + (record.products.bundles?.length || 0);
         if (totalProducts === 0) return <span className="text-gray-400">-</span>;
-        
+
         return (
           <div className="text-sm">
             <Tag color="green" size="small">
@@ -527,9 +543,9 @@ export default function CampaignManager() {
         if (record.comms.emailTemplateId) channels.push("Email");
         if (record.comms.whatsappTemplateId) channels.push("WhatsApp");
         if (record.comms.apiPush) channels.push("API");
-        
+
         if (channels.length === 0) return <span className="text-gray-400">-</span>;
-        
+
         return (
           <div className="text-xs">
             <Tag size="small">{channels.length} channel{channels.length > 1 ? 's' : ''}</Tag>

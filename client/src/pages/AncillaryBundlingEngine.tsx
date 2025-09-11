@@ -62,7 +62,7 @@ import {
   Button as AntButton,
   Space,
   Modal,
-  Table,
+  Table as AntTable,
   Tag,
 } from "antd";
 const { RangePicker } = DatePicker;
@@ -746,7 +746,7 @@ export default function AncillaryBundlingEngine() {
 
           <Card>
             <CardContent className="p-6">
-              <Table
+              <AntTable
                 columns={bundleColumns}
                 dataSource={bundles}
                 loading={bundlesLoading}

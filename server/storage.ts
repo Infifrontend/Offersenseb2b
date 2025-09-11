@@ -1239,6 +1239,112 @@ export class DatabaseStorage implements IStorage {
     await this.db.delete(auditLogs).where(eq(auditLogs.id, id));
   }
 
+  // Helper method to create audit logs
+  async createAuditLog(params: {
+    user: string;
+    module: string;
+    entityId: string;
+    action: string;
+    beforeData?: any;
+    afterData?: any;
+    justification?: string;
+    ipAddress?: string;
+    userAgent?: string;
+    sessionId?: string;
+  }): Promise<InsertAuditLog> {
+    const auditData: InsertAuditLog = {
+      timestamp: new Date(),
+      user: params.user,
+      module: params.module,
+      entityId: params.entityId,
+      action: params.action,
+      beforeData: params.beforeData || null,
+      afterData: params.afterData || null,
+      justification: params.justification || null,
+      ipAddress: params.ipAddress || null,
+      userAgent: params.userAgent || null,
+      sessionId: params.sessionId || null,
+    };
+
+    // Calculate diff if both before and after data exist
+    if (params.beforeData && params.afterData) {
+      auditData.diff = this.calculateDiff(params.beforeData, params.afterData);
+    }
+
+    return await this.insertAuditLog(auditData);
+  }
+
+  // Helper method to calculate differences between two objects
+  private calculateDiff(before: any, after: any): Record<string, { from: any; to: any }> {
+    const diff: Record<string, { from: any; to: any }> = {};
+
+    // Get all keys from both objects
+    const allKeys = new Set([...Object.keys(before || {}), ...Object.keys(after || {})]);
+
+    for (const key of allKeys) {
+      const beforeValue = before?.[key];
+      const afterValue = after?.[key];
+
+      // Skip timestamps and IDs that are expected to change
+      if (['createdAt', 'updatedAt', 'id'].includes(key)) {
+        continue;
+      }
+
+      // Compare values (deep comparison for objects/arrays)
+      if (JSON.stringify(beforeValue) !== JSON.stringify(afterValue)) {
+        diff[key] = {
+          from: beforeValue,
+          to: afterValue
+        };
+      }
+    }
+
+    return diff;
+  }
+
+  // Wrapper method for operations that need audit logging
+  async withAuditLog<T>(
+    operation: () => Promise<T>,
+    auditParams: {
+      user: string;
+      module: string;
+      entityId: string;
+      action: string;
+      justification?: string;
+      ipAddress?: string;
+      userAgent?: string;
+      sessionId?: string;
+    },
+    getBeforeData?: () => Promise<any>
+  ): Promise<T> {
+    // Get before data if getter is provided
+    const beforeData = getBeforeData ? await getBeforeData() : null;
+
+    try {
+      // Execute the operation
+      const result = await operation();
+
+      // Create audit log with after data
+      await this.createAuditLog({
+        ...auditParams,
+        beforeData,
+        afterData: result,
+      });
+
+      return result;
+    } catch (error) {
+      // Log failed operations too
+      await this.createAuditLog({
+        ...auditParams,
+        action: `${auditParams.action}_FAILED`,
+        beforeData,
+        afterData: { error: error.message },
+      });
+
+      throw error;
+    }
+  }
+
   // Agent Tier Management operations
   async getAgentTiers(filters: any = {}): Promise<AgentTier[]> {
     let query = this.db.select().from(agentTiers);
@@ -1617,7 +1723,7 @@ export class DatabaseStorage implements IStorage {
 
   async updateDeliveryStatus(id: string, status: string, timestamp?: Date): Promise<CampaignDelivery> {
     const updateData: any = { deliveryStatus: status };
-    
+
     switch (status) {
       case 'SENT':
         updateData.sentAt = timestamp || new Date();

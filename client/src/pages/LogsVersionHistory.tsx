@@ -88,6 +88,8 @@ export default function LogsVersionHistory() {
   const [viewDetailsOpen, setViewDetailsOpen] = useState(false);
   const [entityHistoryOpen, setEntityHistoryOpen] = useState(false);
   const [selectedEntityId, setSelectedEntityId] = useState<string>("");
+  const [rollbackDialogOpen, setRollbackDialogOpen] = useState(false);
+  const [rollbackJustification, setRollbackJustification] = useState("");
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -160,6 +162,42 @@ export default function LogsVersionHistory() {
     onError: (error) => {
       toast({
         title: "Export Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Rollback entity
+  const rollbackMutation = useMutation({
+    mutationFn: async ({ logId, justification }: { logId: string; justification: string }) => {
+      const response = await fetch(`/api/audit-logs/${logId}/rollback`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-user": "admin", // In real app, this would come from auth context
+        },
+        body: JSON.stringify({ justification }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to rollback");
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Rollback Successful",
+        description: "Entity has been rolled back to the previous version.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["audit-logs"] });
+      setViewDetailsOpen(false);
+    },
+    onError: (error) => {
+      toast({
+        title: "Rollback Failed",
         description: error.message,
         variant: "destructive",
       });
@@ -429,16 +467,31 @@ export default function LogsVersionHistory() {
                       {log.justification || "-"}
                     </TableCell>
                     <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedLog(log);
-                          setViewDetailsOpen(true);
-                        }}
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Button>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedLog(log);
+                            setViewDetailsOpen(true);
+                          }}
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        {log.beforeData && log.action !== "CREATED" && log.action !== "ROLLBACK" && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedLog(log);
+                              setRollbackDialogOpen(true);
+                            }}
+                            title="Rollback to this version"
+                          >
+                            <RefreshCw className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -558,6 +611,63 @@ export default function LogsVersionHistory() {
                 </TableBody>
               </Table>
             )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Rollback Confirmation Dialog */}
+      <Dialog open={rollbackDialogOpen} onOpenChange={setRollbackDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirm Rollback</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to rollback this entity to its previous version? This action will create a new audit log entry.
+            </p>
+            {selectedLog && (
+              <div className="bg-muted p-3 rounded text-sm">
+                <div><strong>Entity:</strong> {selectedLog.entityId}</div>
+                <div><strong>Module:</strong> {selectedLog.module}</div>
+                <div><strong>Action:</strong> {selectedLog.action}</div>
+                <div><strong>Date:</strong> {format(new Date(selectedLog.timestamp), "PPpp")}</div>
+              </div>
+            )}
+            <div>
+              <Label htmlFor="rollback-justification">Justification (required)</Label>
+              <Input
+                id="rollback-justification"
+                placeholder="Explain why you are rolling back this change..."
+                value={rollbackJustification}
+                onChange={(e) => setRollbackJustification(e.target.value)}
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setRollbackDialogOpen(false);
+                  setRollbackJustification("");
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  if (selectedLog && rollbackJustification.trim()) {
+                    rollbackMutation.mutate({
+                      logId: selectedLog.id,
+                      justification: rollbackJustification
+                    });
+                    setRollbackJustification("");
+                  }
+                }}
+                disabled={!rollbackJustification.trim() || rollbackMutation.isPending}
+              >
+                {rollbackMutation.isPending ? "Rolling back..." : "Rollback"}
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

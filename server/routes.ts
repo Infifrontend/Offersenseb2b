@@ -26,6 +26,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/negofares", async (req, res) => {
     try {
       const validatedData = insertNegotiatedFareSchema.parse(req.body);
+      const user = req.header("x-user") || "system";
 
       // Check for conflicts
       const conflicts = await storage.checkFareConflicts(validatedData);
@@ -36,7 +37,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const fare = await storage.insertNegotiatedFare(validatedData);
+      const fare = await storage.withAuditLog(
+        () => storage.insertNegotiatedFare(validatedData),
+        {
+          user,
+          module: "NegotiatedFare",
+          entityId: validatedData.fareCode,
+          action: "CREATED",
+          ipAddress: req.ip,
+          userAgent: req.get("User-Agent"),
+          sessionId: req.sessionID || "unknown",
+        }
+      );
+
       res.status(201).json(fare);
     } catch (error: any) {
       res.status(400).json({ message: "Invalid fare data", error: error.message });
@@ -144,7 +157,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/negofares/:id", async (req, res) => {
     try {
       const validatedData = insertNegotiatedFareSchema.parse(req.body);
-      const fare = await storage.updateNegotiatedFare(req.params.id, validatedData);
+      const user = req.header("x-user") || "system";
+      const justification = req.body.justification || "Fare update";
+
+      const fare = await storage.withAuditLog(
+        () => storage.updateNegotiatedFare(req.params.id, validatedData),
+        {
+          user,
+          module: "NegotiatedFare",
+          entityId: req.params.id,
+          action: "UPDATED",
+          justification,
+          ipAddress: req.ip,
+          userAgent: req.get("User-Agent"),
+          sessionId: req.sessionID || "unknown",
+        },
+        () => storage.getNegotiatedFareById(req.params.id)
+      );
+
       res.json(fare);
     } catch (error: any) {
       res.status(400).json({ message: "Failed to update fare", error: error.message });
@@ -154,12 +184,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update fare status
   app.patch("/api/negofares/:id/status", async (req, res) => {
     try {
-      const { status } = req.body;
+      const { status, justification } = req.body;
+      const user = req.header("x-user") || "system";
+
       if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
         return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
       }
 
-      const fare = await storage.updateNegotiatedFareStatus(req.params.id, status);
+      const fare = await storage.withAuditLog(
+        () => storage.updateNegotiatedFareStatus(req.params.id, status),
+        {
+          user,
+          module: "NegotiatedFare",
+          entityId: req.params.id,
+          action: "STATUS_CHANGED",
+          justification: justification || `Status changed to ${status}`,
+          ipAddress: req.ip,
+          userAgent: req.get("User-Agent"),
+          sessionId: req.sessionID || "unknown",
+        },
+        () => storage.getNegotiatedFareById(req.params.id)
+      );
+
       res.json(fare);
     } catch (error: any) {
       res.status(500).json({ message: "Failed to update fare status", error: error.message });
@@ -1698,6 +1744,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error: any) {
       res.status(500).json({ message: "Failed to delete audit log", error: error.message });
+    }
+  });
+
+  // Rollback entity to previous version
+  app.post("/api/audit-logs/:id/rollback", async (req, res) => {
+    try {
+      const { justification } = req.body;
+      const user = req.header("x-user") || "system";
+
+      if (!justification) {
+        return res.status(400).json({ message: "Justification is required for rollback operations" });
+      }
+
+      // Get the audit log entry
+      const auditLog = await storage.getAuditLogById(req.params.id);
+      if (!auditLog) {
+        return res.status(404).json({ message: "Audit log not found" });
+      }
+
+      if (!auditLog.beforeData) {
+        return res.status(400).json({ message: "No previous version available for rollback" });
+      }
+
+      // Perform rollback based on module type
+      let result;
+      switch (auditLog.module) {
+        case "NegotiatedFare":
+          result = await storage.withAuditLog(
+            () => storage.updateNegotiatedFare(auditLog.entityId, auditLog.beforeData),
+            {
+              user,
+              module: auditLog.module,
+              entityId: auditLog.entityId,
+              action: "ROLLBACK",
+              justification: `Rollback to version from ${auditLog.timestamp}: ${justification}`,
+              ipAddress: req.ip,
+              userAgent: req.get("User-Agent"),
+              sessionId: req.sessionID || "unknown",
+            },
+            () => storage.getNegotiatedFareById(auditLog.entityId)
+          );
+          break;
+        case "DynamicDiscountRule":
+          result = await storage.withAuditLog(
+            () => storage.updateDynamicDiscountRule(auditLog.entityId, auditLog.beforeData),
+            {
+              user,
+              module: auditLog.module,
+              entityId: auditLog.entityId,
+              action: "ROLLBACK",
+              justification: `Rollback to version from ${auditLog.timestamp}: ${justification}`,
+              ipAddress: req.ip,
+              userAgent: req.get("User-Agent"),
+              sessionId: req.sessionID || "unknown",
+            },
+            () => storage.getDynamicDiscountRuleById(auditLog.entityId)
+          );
+          break;
+        default:
+          return res.status(400).json({ message: `Rollback not supported for module: ${auditLog.module}` });
+      }
+
+      res.json({
+        success: true,
+        message: "Entity successfully rolled back",
+        result
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to rollback entity", error: error.message });
     }
   });
 

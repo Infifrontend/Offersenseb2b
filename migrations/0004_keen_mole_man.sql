@@ -1,0 +1,20 @@
+CREATE TABLE "offer_traces" (
+	"id" varchar PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"trace_id" varchar(50) NOT NULL,
+	"agent_id" varchar(50) NOT NULL,
+	"search_params" json NOT NULL,
+	"agent_tier" varchar(20) NOT NULL,
+	"cohorts" json,
+	"fare_source" varchar(20) NOT NULL,
+	"base_price" numeric(10, 2) NOT NULL,
+	"adjustments" json,
+	"ancillaries" json,
+	"bundles" json,
+	"final_offer_price" numeric(10, 2) NOT NULL,
+	"commission" numeric(10, 2) NOT NULL,
+	"audit_trace_id" varchar(50),
+	"status" varchar(20) DEFAULT 'ACTIVE',
+	"created_at" timestamp DEFAULT now(),
+	"updated_at" timestamp DEFAULT now(),
+	CONSTRAINT "offer_traces_trace_id_unique" UNIQUE("trace_id")
+);

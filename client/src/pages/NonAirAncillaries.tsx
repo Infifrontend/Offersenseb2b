@@ -1083,7 +1083,19 @@ export default function NonAirAncillaries() {
 
       {/* View Rate Modal */}
       <Modal
-        title="Rate Details"
+        title={
+          <div className="flex items-center space-x-3">
+            <span className="text-2xl">
+              {selectedRate ? getProductIcon(selectedRate.productCode) : "📦"}
+            </span>
+            <div>
+              <h3 className="text-lg font-semibold">Supplier Rate Details</h3>
+              <p className="text-sm text-gray-500">
+                {selectedRate ? selectedRate.supplierCode : ""}
+              </p>
+            </div>
+          </div>
+        }
         open={isViewRateModalOpen}
         onCancel={() => setIsViewRateModalOpen(false)}
         footer={[
@@ -1091,47 +1103,206 @@ export default function NonAirAncillaries() {
             Close
           </AntButton>,
         ]}
+        width={650}
       >
         {selectedRate && (
-          <div className="space-y-4">
-            <div>
-              <label className="font-semibold">Supplier:</label>
-              <div>{selectedRate.supplierCode}</div>
-            </div>
-            <div>
-              <label className="font-semibold">Product:</label>
-              <div>
-                {getProductLabel(selectedRate.productCode)} (
-                {selectedRate.productCode})
+          <div className="space-y-6">
+            {/* Product Information */}
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h4 className="text-sm font-semibold text-blue-800 mb-3 flex items-center">
+                <span className="mr-2">🏷️</span>
+                Product Information
+              </h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Product Name
+                  </label>
+                  <div className="font-medium text-gray-900">
+                    {selectedRate.productName || getProductLabel(selectedRate.productCode)}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    Code: {selectedRate.productCode}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Supplier
+                  </label>
+                  <div className="font-medium text-gray-900">
+                    {selectedRate.supplierCode}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    Supplier Code
+                  </div>
+                </div>
               </div>
             </div>
-            <div>
-              <label className="font-semibold">Net Rate:</label>
-              <div>
-                {selectedRate.currency}{" "}
-                {parseFloat(selectedRate.netRate).toFixed(2)}
+
+            {/* Pricing Information */}
+            <div className="bg-green-50 p-4 rounded-lg">
+              <h4 className="text-sm font-semibold text-green-800 mb-3 flex items-center">
+                <DollarSign className="mr-2 h-4 w-4" />
+                Pricing Details
+              </h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Net Rate
+                  </label>
+                  <div className="text-2xl font-bold text-green-600">
+                    {selectedRate.currency} {parseFloat(selectedRate.netRate).toFixed(2)}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    Base supplier rate
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Currency
+                  </label>
+                  <div className="font-medium text-gray-900">
+                    {selectedRate.currency}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    Pricing currency
+                  </div>
+                </div>
               </div>
             </div>
-            <div>
-              <label className="font-semibold">Region:</label>
-              <div>
-                {Array.isArray(selectedRate.region)
-                  ? selectedRate.region.join(", ")
-                  : selectedRate.region}
+
+            {/* Availability & Coverage */}
+            <div className="bg-purple-50 p-4 rounded-lg">
+              <h4 className="text-sm font-semibold text-purple-800 mb-3 flex items-center">
+                <span className="mr-2">🌍</span>
+                Availability & Coverage
+              </h4>
+              <div className="space-y-3">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Regions Available
+                  </label>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {(Array.isArray(selectedRate.region) 
+                      ? selectedRate.region 
+                      : [selectedRate.region]
+                    ).map((region, index) => (
+                      <Badge
+                        key={index}
+                        variant="outline"
+                        className="bg-purple-100 text-purple-800 border-purple-300"
+                      >
+                        {region}
+                      </Badge>
+                    ))}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    Countries/regions where this rate applies
+                  </div>
+                </div>
+                {selectedRate.inventory && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">
+                      Inventory Available
+                    </label>
+                    <div className="font-medium text-gray-900">
+                      {selectedRate.inventory} units
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      Available stock for booking
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
-            <div>
-              <label className="font-semibold">Valid Period:</label>
-              <div>
-                {selectedRate.validFrom} to {selectedRate.validTo}
+
+            {/* Validity Period */}
+            <div className="bg-orange-50 p-4 rounded-lg">
+              <h4 className="text-sm font-semibold text-orange-800 mb-3 flex items-center">
+                <span className="mr-2">📅</span>
+                Validity Period
+              </h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Valid From
+                  </label>
+                  <div className="font-medium text-gray-900">
+                    {selectedRate.validFrom}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Valid To
+                  </label>
+                  <div className="font-medium text-gray-900">
+                    {selectedRate.validTo}
+                  </div>
+                </div>
+              </div>
+              <div className="mt-2 text-xs text-gray-500">
+                Rate is active between these dates (inclusive)
               </div>
             </div>
-            {selectedRate.inventory && (
-              <div>
-                <label className="font-semibold">Inventory:</label>
-                <div>{selectedRate.inventory}</div>
+
+            {/* Status Information */}
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h4 className="text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                <span className="mr-2">ℹ️</span>
+                Status & Metadata
+              </h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Status
+                  </label>
+                  <div>
+                    <Badge
+                      variant={
+                        selectedRate.status === "ACTIVE" ? "default" : "secondary"
+                      }
+                      className={
+                        selectedRate.status === "ACTIVE" 
+                          ? "bg-green-100 text-green-800 border-green-300" 
+                          : ""
+                      }
+                    >
+                      {selectedRate.status}
+                    </Badge>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Rate ID
+                  </label>
+                  <div className="font-mono text-sm text-gray-600">
+                    {selectedRate.id}
+                  </div>
+                </div>
               </div>
-            )}
+              {(selectedRate.createdAt || selectedRate.updatedAt) && (
+                <div className="mt-3 pt-3 border-t border-gray-200">
+                  <div className="grid grid-cols-2 gap-4 text-xs">
+                    {selectedRate.createdAt && (
+                      <div>
+                        <span className="text-gray-500">Created:</span>
+                        <div className="text-gray-700">
+                          {new Date(selectedRate.createdAt).toLocaleDateString()}
+                        </div>
+                      </div>
+                    )}
+                    {selectedRate.updatedAt && (
+                      <div>
+                        <span className="text-gray-500">Updated:</span>
+                        <div className="text-gray-700">
+                          {new Date(selectedRate.updatedAt).toLocaleDateString()}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </Modal>

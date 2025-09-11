@@ -43,6 +43,13 @@
       "when": 1757565089815,
       "tag": "0005_ambitious_stingray",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1757566023728,
+      "tag": "0006_flippant_the_watchers",
+      "breakpoints": true
     }
   ]
 }

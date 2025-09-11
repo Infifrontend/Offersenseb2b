@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -137,14 +136,14 @@ export default function OfferRuleBuilder() {
         pos: ["IN"],
         agentTier: ["PLATINUM"],
         cohortCodes: ["FESTIVE_2025"],
-        channel: ["PORTAL"]
+        channel: ["PORTAL"],
       },
       actions: [
         {
           type: "ADD_ANCILLARY",
           ancillaryCode: "SEAT_STD",
-          pricing: { type: "FREE" }
-        }
+          pricing: { type: "FREE" },
+        },
       ],
       priority: 50,
       status: "ACTIVE",
@@ -163,15 +162,15 @@ export default function OfferRuleBuilder() {
         pos: ["US", "CA"],
         agentTier: ["GOLD"],
         channel: ["API", "PORTAL"],
-        seasonCode: "WEEKEND"
+        seasonCode: "WEEKEND",
       },
       actions: [
         {
           type: "DISCOUNT",
           scope: "NEGOTIATED",
           valueType: "PERCENT",
-          value: 10
-        }
+          value: 10,
+        },
       ],
       priority: 30,
       status: "PENDING_APPROVAL",
@@ -191,14 +190,14 @@ export default function OfferRuleBuilder() {
         pos: ["IN", "AE"],
         agentTier: ["PLATINUM", "GOLD"],
         cabinClass: ["PREMIUM_ECONOMY", "BUSINESS"],
-        channel: ["PORTAL"]
+        channel: ["PORTAL"],
       },
       actions: [
         {
           type: "ACTIVATE_BUNDLE",
           bundleCode: "COMFORT_PACK",
-          pricing: { type: "PERCENT", value: 15 }
-        }
+          pricing: { type: "PERCENT", value: 15 },
+        },
       ],
       priority: 40,
       status: "DRAFT",
@@ -207,7 +206,7 @@ export default function OfferRuleBuilder() {
       createdBy: "product_manager",
       createdAt: "2024-01-03T00:00:00Z",
       updatedAt: "2024-01-03T00:00:00Z",
-    }
+    },
   ];
 
   // API calls
@@ -266,7 +265,15 @@ export default function OfferRuleBuilder() {
   });
 
   const updateStatusMutation = useMutation({
-    mutationFn: async ({ id, status, approver }: { id: string; status: string; approver?: string }) => {
+    mutationFn: async ({
+      id,
+      status,
+      approver,
+    }: {
+      id: string;
+      status: string;
+      approver?: string;
+    }) => {
       const response = await fetch(`/api/offer-rules/${id}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -326,7 +333,7 @@ export default function OfferRuleBuilder() {
   };
 
   const getRuleTypeIcon = (ruleType: string) => {
-    const type = ruleTypes.find(t => t.value === ruleType);
+    const type = ruleTypes.find((t) => t.value === ruleType);
     return type ? type.icon : "⚙️";
   };
 
@@ -385,14 +392,22 @@ export default function OfferRuleBuilder() {
         cabinClass: values["conditions.cabinClass"] || [],
         tripType: values["conditions.tripType"] || [],
         seasonCode: values["conditions.seasonCode"],
-        bookingWindow: values["conditions.bookingWindowMin"] && values["conditions.bookingWindowMax"] ? {
-          min: values["conditions.bookingWindowMin"],
-          max: values["conditions.bookingWindowMax"]
-        } : undefined,
-        travelWindow: values["conditions.travelWindowMin"] && values["conditions.travelWindowMax"] ? {
-          min: values["conditions.travelWindowMin"],
-          max: values["conditions.travelWindowMax"]
-        } : undefined,
+        bookingWindow:
+          values["conditions.bookingWindowMin"] &&
+          values["conditions.bookingWindowMax"]
+            ? {
+                min: values["conditions.bookingWindowMin"],
+                max: values["conditions.bookingWindowMax"],
+              }
+            : undefined,
+        travelWindow:
+          values["conditions.travelWindowMin"] &&
+          values["conditions.travelWindowMax"]
+            ? {
+                min: values["conditions.travelWindowMin"],
+                max: values["conditions.travelWindowMax"],
+              }
+            : undefined,
       },
       actions: values.actions || [],
       priority: values.priority || 1,
@@ -436,26 +451,26 @@ export default function OfferRuleBuilder() {
     if (!selectedRule) return;
     simulateRuleMutation.mutate({
       ruleId: selectedRule.id,
-      context: values
+      context: values,
     });
   };
 
   const steps = [
     {
-      title: 'Basic Info',
-      description: 'Rule identification and type',
+      title: "Basic Info",
+      description: "Rule identification and type",
     },
     {
-      title: 'Conditions',
-      description: 'When should this rule apply',
+      title: "Conditions",
+      description: "When should this rule apply",
     },
     {
-      title: 'Actions',
-      description: 'What should happen',
+      title: "Actions",
+      description: "What should happen",
     },
     {
-      title: 'Review',
-      description: 'Validate and submit',
+      title: "Review",
+      description: "Validate and submit",
     },
   ];
 
@@ -464,16 +479,10 @@ export default function OfferRuleBuilder() {
       {/* Header Section */}
       <div className="bg-white border-b">
         <div className="py-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <GitBranch className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Offer Rule Builder</h1>
-                <p className="text-gray-600">Create and manage no-code discount, markup, and ancillary rules</p>
-              </div>
-            </div>
+          <div className="flex items-center justify-between mb-4"></div>
+
+          {/* Filter Section */}
+          <div className="flex gap-3">
             <Button
               onClick={() => setIsCreateModalOpen(true)}
               disabled={createRuleMutation.isPending}
@@ -482,10 +491,6 @@ export default function OfferRuleBuilder() {
               <Plus className="w-4 h-4" />
               Create Rule
             </Button>
-          </div>
-
-          {/* Filter Section */}
-          <div className="flex gap-3">
             <div className="flex-1">
               <Input placeholder="Search rules..." className="w-full" />
             </div>
@@ -546,15 +551,19 @@ export default function OfferRuleBuilder() {
                   <TableCell>
                     <div>
                       <div className="font-medium flex items-center gap-2">
-                        <span className="text-lg">{getRuleTypeIcon(rule.ruleType)}</span>
+                        <span className="text-lg">
+                          {getRuleTypeIcon(rule.ruleType)}
+                        </span>
                         {rule.ruleCode}
                       </div>
-                      <div className="text-sm text-gray-500">{rule.ruleName}</div>
+                      <div className="text-sm text-gray-500">
+                        {rule.ruleName}
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className="text-xs">
-                      {rule.ruleType.replace('_', ' ')}
+                      {rule.ruleType.replace("_", " ")}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -564,15 +573,19 @@ export default function OfferRuleBuilder() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium gap-1 ${getStatusColor(rule.status)}`}>
+                    <span
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium gap-1 ${getStatusColor(rule.status)}`}
+                    >
                       {getStatusIcon(rule.status)}
-                      {rule.status.replace('_', ' ')}
+                      {rule.status.replace("_", " ")}
                     </span>
                   </TableCell>
                   <TableCell>
                     <div className="text-xs">
                       <div>{formatDate(rule.validFrom)}</div>
-                      <div className="text-gray-500">to {formatDate(rule.validTo)}</div>
+                      <div className="text-gray-500">
+                        to {formatDate(rule.validTo)}
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -627,7 +640,9 @@ export default function OfferRuleBuilder() {
                           className={`w-8 h-4 rounded-full relative cursor-pointer transition-colors bg-blue-600`}
                           onClick={() => handleStatusChange(rule, "INACTIVE")}
                         >
-                          <div className={`w-3 h-3 bg-white rounded-full absolute top-0.5 right-0.5 shadow-sm transition-transform`}></div>
+                          <div
+                            className={`w-3 h-3 bg-white rounded-full absolute top-0.5 right-0.5 shadow-sm transition-transform`}
+                          ></div>
                         </div>
                       )}
                     </div>
@@ -659,7 +674,7 @@ export default function OfferRuleBuilder() {
       >
         <div className="mt-6">
           <Steps current={currentStep} items={steps} className="mb-8" />
-          
+
           <AntForm
             form={createForm}
             layout="vertical"
@@ -673,7 +688,9 @@ export default function OfferRuleBuilder() {
                     <AntForm.Item
                       label="Rule Code"
                       name="ruleCode"
-                      rules={[{ required: true, message: "Please enter rule code" }]}
+                      rules={[
+                        { required: true, message: "Please enter rule code" },
+                      ]}
                     >
                       <AntInput placeholder="RULE_WEEKEND_DISCOUNT" />
                     </AntForm.Item>
@@ -682,19 +699,23 @@ export default function OfferRuleBuilder() {
                     <AntForm.Item
                       label="Rule Name"
                       name="ruleName"
-                      rules={[{ required: true, message: "Please enter rule name" }]}
+                      rules={[
+                        { required: true, message: "Please enter rule name" },
+                      ]}
                     >
                       <AntInput placeholder="Weekend Discount for Gold Agents" />
                     </AntForm.Item>
                   </Col>
                 </Row>
-                
+
                 <Row gutter={16}>
                   <Col span={12}>
                     <AntForm.Item
                       label="Rule Type"
                       name="ruleType"
-                      rules={[{ required: true, message: "Please select rule type" }]}
+                      rules={[
+                        { required: true, message: "Please select rule type" },
+                      ]}
                     >
                       <AntSelect placeholder="Select rule type">
                         {ruleTypes.map((type) => (
@@ -709,9 +730,16 @@ export default function OfferRuleBuilder() {
                     <AntForm.Item
                       label="Priority"
                       name="priority"
-                      rules={[{ required: true, message: "Please enter priority" }]}
+                      rules={[
+                        { required: true, message: "Please enter priority" },
+                      ]}
                     >
-                      <InputNumber min={1} max={100} placeholder="1-100" style={{ width: "100%" }} />
+                      <InputNumber
+                        min={1}
+                        max={100}
+                        placeholder="1-100"
+                        style={{ width: "100%" }}
+                      />
                     </AntForm.Item>
                   </Col>
                 </Row>
@@ -721,18 +749,28 @@ export default function OfferRuleBuilder() {
                     <AntForm.Item
                       label="Valid From"
                       name="validFrom"
-                      rules={[{ required: true, message: "Please select start date" }]}
+                      rules={[
+                        { required: true, message: "Please select start date" },
+                      ]}
                     >
-                      <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
+                      <DatePicker
+                        style={{ width: "100%" }}
+                        format="DD/MM/YYYY"
+                      />
                     </AntForm.Item>
                   </Col>
                   <Col span={12}>
                     <AntForm.Item
                       label="Valid To"
                       name="validTo"
-                      rules={[{ required: true, message: "Please select end date" }]}
+                      rules={[
+                        { required: true, message: "Please select end date" },
+                      ]}
                     >
-                      <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
+                      <DatePicker
+                        style={{ width: "100%" }}
+                        format="DD/MM/YYYY"
+                      />
                     </AntForm.Item>
                   </Col>
                 </Row>
@@ -749,13 +787,19 @@ export default function OfferRuleBuilder() {
                       </AntForm.Item>
                     </Col>
                     <Col span={8}>
-                      <AntForm.Item label="Destination" name="conditions.destination">
+                      <AntForm.Item
+                        label="Destination"
+                        name="conditions.destination"
+                      >
                         <AntInput placeholder="LAX" maxLength={3} />
                       </AntForm.Item>
                     </Col>
                     <Col span={8}>
                       <AntForm.Item label="Point of Sale" name="conditions.pos">
-                        <AntSelect mode="multiple" placeholder="Select countries">
+                        <AntSelect
+                          mode="multiple"
+                          placeholder="Select countries"
+                        >
                           {countries.map((country) => (
                             <AntSelect.Option key={country} value={country}>
                               {country}
@@ -770,8 +814,14 @@ export default function OfferRuleBuilder() {
                 <AntCard title="👥 Agent & Channel Conditions" size="small">
                   <Row gutter={16}>
                     <Col span={12}>
-                      <AntForm.Item label="Agent Tiers" name="conditions.agentTier">
-                        <AntSelect mode="multiple" placeholder="Select agent tiers">
+                      <AntForm.Item
+                        label="Agent Tiers"
+                        name="conditions.agentTier"
+                      >
+                        <AntSelect
+                          mode="multiple"
+                          placeholder="Select agent tiers"
+                        >
                           {agentTiers.map((tier) => (
                             <AntSelect.Option key={tier} value={tier}>
                               {tier}
@@ -782,7 +832,10 @@ export default function OfferRuleBuilder() {
                     </Col>
                     <Col span={12}>
                       <AntForm.Item label="Channels" name="conditions.channel">
-                        <AntSelect mode="multiple" placeholder="Select channels">
+                        <AntSelect
+                          mode="multiple"
+                          placeholder="Select channels"
+                        >
                           {channels.map((channel) => (
                             <AntSelect.Option key={channel} value={channel}>
                               {channel}
@@ -792,7 +845,10 @@ export default function OfferRuleBuilder() {
                       </AntForm.Item>
                     </Col>
                   </Row>
-                  <AntForm.Item label="Cohort Codes (Optional)" name="conditions.cohortCodes">
+                  <AntForm.Item
+                    label="Cohort Codes (Optional)"
+                    name="conditions.cohortCodes"
+                  >
                     <AntSelect
                       mode="tags"
                       placeholder="Enter cohort codes (e.g., FESTIVE_2025, VIP_CORP)"
@@ -804,29 +860,44 @@ export default function OfferRuleBuilder() {
                 <AntCard title="✈️ Travel Conditions" size="small">
                   <Row gutter={16}>
                     <Col span={12}>
-                      <AntForm.Item label="Cabin Classes" name="conditions.cabinClass">
-                        <AntSelect mode="multiple" placeholder="Select cabin classes">
+                      <AntForm.Item
+                        label="Cabin Classes"
+                        name="conditions.cabinClass"
+                      >
+                        <AntSelect
+                          mode="multiple"
+                          placeholder="Select cabin classes"
+                        >
                           {cabinClasses.map((cabin) => (
                             <AntSelect.Option key={cabin} value={cabin}>
-                              {cabin.replace('_', ' ')}
+                              {cabin.replace("_", " ")}
                             </AntSelect.Option>
                           ))}
                         </AntSelect>
                       </AntForm.Item>
                     </Col>
                     <Col span={12}>
-                      <AntForm.Item label="Trip Types" name="conditions.tripType">
-                        <AntSelect mode="multiple" placeholder="Select trip types">
+                      <AntForm.Item
+                        label="Trip Types"
+                        name="conditions.tripType"
+                      >
+                        <AntSelect
+                          mode="multiple"
+                          placeholder="Select trip types"
+                        >
                           {tripTypes.map((type) => (
                             <AntSelect.Option key={type} value={type}>
-                              {type.replace('_', ' ')}
+                              {type.replace("_", " ")}
                             </AntSelect.Option>
                           ))}
                         </AntSelect>
                       </AntForm.Item>
                     </Col>
                   </Row>
-                  <AntForm.Item label="Season Code (Optional)" name="conditions.seasonCode">
+                  <AntForm.Item
+                    label="Season Code (Optional)"
+                    name="conditions.seasonCode"
+                  >
                     <AntInput placeholder="PEAK_SUMMER, WEEKEND, HOLIDAY" />
                   </AntForm.Item>
                 </AntCard>
@@ -838,13 +909,19 @@ export default function OfferRuleBuilder() {
                 <Alert>
                   <Zap className="h-4 w-4" />
                   <AlertDescription>
-                    Actions define what happens when conditions are met. You can configure multiple actions per rule.
+                    Actions define what happens when conditions are met. You can
+                    configure multiple actions per rule.
                   </AlertDescription>
                 </Alert>
                 <div className="text-center py-8">
                   <Layers className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Action Builder</h3>
-                  <p className="text-gray-500 mb-4">Complex action configuration will be available in the next iteration</p>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    Action Builder
+                  </h3>
+                  <p className="text-gray-500 mb-4">
+                    Complex action configuration will be available in the next
+                    iteration
+                  </p>
                   <Button variant="outline">Configure Actions</Button>
                 </div>
               </div>
@@ -852,17 +929,21 @@ export default function OfferRuleBuilder() {
 
             {currentStep === 3 && (
               <div className="space-y-4">
-                <AntForm.Item label="Justification (Required for approval)" name="justification">
-                  <AntInput.TextArea 
-                    placeholder="Explain the business rationale for this rule..." 
-                    rows={4} 
+                <AntForm.Item
+                  label="Justification (Required for approval)"
+                  name="justification"
+                >
+                  <AntInput.TextArea
+                    placeholder="Explain the business rationale for this rule..."
+                    rows={4}
                   />
                 </AntForm.Item>
-                
+
                 <Alert>
                   <AlertTriangle className="h-4 w-4" />
                   <AlertDescription>
-                    This rule will be created in DRAFT status and require approval before activation.
+                    This rule will be created in DRAFT status and require
+                    approval before activation.
                   </AlertDescription>
                 </Alert>
               </div>
@@ -875,14 +956,17 @@ export default function OfferRuleBuilder() {
               >
                 Previous
               </AntButton>
-              
+
               <div className="flex gap-2">
                 <AntButton onClick={() => setIsCreateModalOpen(false)}>
                   Cancel
                 </AntButton>
-                
+
                 {currentStep < steps.length - 1 ? (
-                  <AntButton type="primary" onClick={() => setCurrentStep(currentStep + 1)}>
+                  <AntButton
+                    type="primary"
+                    onClick={() => setCurrentStep(currentStep + 1)}
+                  >
                     Next
                   </AntButton>
                 ) : (
@@ -891,7 +975,9 @@ export default function OfferRuleBuilder() {
                     htmlType="submit"
                     loading={createRuleMutation.isPending}
                   >
-                    {createRuleMutation.isPending ? "Creating..." : "Create Rule"}
+                    {createRuleMutation.isPending
+                      ? "Creating..."
+                      : "Create Rule"}
                   </AntButton>
                 )}
               </div>
@@ -908,8 +994,12 @@ export default function OfferRuleBuilder() {
               <Eye className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Rule Details</h3>
-              <p className="text-sm text-gray-500">Complete rule configuration and status</p>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Rule Details
+              </h3>
+              <p className="text-sm text-gray-500">
+                Complete rule configuration and status
+              </p>
             </div>
           </div>
         }
@@ -938,19 +1028,29 @@ export default function OfferRuleBuilder() {
             <div className="flex justify-between items-start">
               <div>
                 <div className="flex items-center gap-3 mb-2">
-                  <span className="text-2xl">{getRuleTypeIcon(selectedRule.ruleType)}</span>
+                  <span className="text-2xl">
+                    {getRuleTypeIcon(selectedRule.ruleType)}
+                  </span>
                   <div>
-                    <h4 className="text-xl font-bold text-gray-900">{selectedRule.ruleCode}</h4>
+                    <h4 className="text-xl font-bold text-gray-900">
+                      {selectedRule.ruleCode}
+                    </h4>
                     <p className="text-gray-600">{selectedRule.ruleName}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium gap-2 ${getStatusColor(selectedRule.status)}`}>
+                  <span
+                    className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium gap-2 ${getStatusColor(selectedRule.status)}`}
+                  >
                     {getStatusIcon(selectedRule.status)}
-                    {selectedRule.status.replace('_', ' ')}
+                    {selectedRule.status.replace("_", " ")}
                   </span>
-                  <span className="text-sm text-gray-500">Priority: {selectedRule.priority}</span>
-                  <span className="text-sm text-gray-500">Type: {selectedRule.ruleType.replace('_', ' ')}</span>
+                  <span className="text-sm text-gray-500">
+                    Priority: {selectedRule.priority}
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    Type: {selectedRule.ruleType.replace("_", " ")}
+                  </span>
                 </div>
               </div>
             </div>
@@ -960,11 +1060,15 @@ export default function OfferRuleBuilder() {
               <div className="flex justify-between">
                 <div>
                   <Label className="text-xs text-gray-500">From</Label>
-                  <div className="font-medium">{formatDate(selectedRule.validFrom)}</div>
+                  <div className="font-medium">
+                    {formatDate(selectedRule.validFrom)}
+                  </div>
                 </div>
                 <div>
                   <Label className="text-xs text-gray-500">To</Label>
-                  <div className="font-medium">{formatDate(selectedRule.validTo)}</div>
+                  <div className="font-medium">
+                    {formatDate(selectedRule.validTo)}
+                  </div>
                 </div>
               </div>
             </AntCard>
@@ -974,11 +1078,17 @@ export default function OfferRuleBuilder() {
               <div className="grid grid-cols-2 gap-4">
                 {selectedRule.conditions?.pos && (
                   <div>
-                    <Label className="text-xs text-gray-500">Point of Sale</Label>
+                    <Label className="text-xs text-gray-500">
+                      Point of Sale
+                    </Label>
                     <div className="flex flex-wrap gap-1 mt-1">
-                      {selectedRule.conditions.pos.map((pos: string, index: number) => (
-                        <Tag key={index} color="blue">{pos}</Tag>
-                      ))}
+                      {selectedRule.conditions.pos.map(
+                        (pos: string, index: number) => (
+                          <Tag key={index} color="blue">
+                            {pos}
+                          </Tag>
+                        ),
+                      )}
                     </div>
                   </div>
                 )}
@@ -986,9 +1096,13 @@ export default function OfferRuleBuilder() {
                   <div>
                     <Label className="text-xs text-gray-500">Agent Tiers</Label>
                     <div className="flex flex-wrap gap-1 mt-1">
-                      {selectedRule.conditions.agentTier.map((tier: string, index: number) => (
-                        <Tag key={index} color="gold">{tier}</Tag>
-                      ))}
+                      {selectedRule.conditions.agentTier.map(
+                        (tier: string, index: number) => (
+                          <Tag key={index} color="gold">
+                            {tier}
+                          </Tag>
+                        ),
+                      )}
                     </div>
                   </div>
                 )}
@@ -996,9 +1110,13 @@ export default function OfferRuleBuilder() {
                   <div>
                     <Label className="text-xs text-gray-500">Channels</Label>
                     <div className="flex flex-wrap gap-1 mt-1">
-                      {selectedRule.conditions.channel.map((channel: string, index: number) => (
-                        <Tag key={index} color="green">{channel}</Tag>
-                      ))}
+                      {selectedRule.conditions.channel.map(
+                        (channel: string, index: number) => (
+                          <Tag key={index} color="green">
+                            {channel}
+                          </Tag>
+                        ),
+                      )}
                     </div>
                   </div>
                 )}
@@ -1006,9 +1124,13 @@ export default function OfferRuleBuilder() {
                   <div>
                     <Label className="text-xs text-gray-500">Cohorts</Label>
                     <div className="flex flex-wrap gap-1 mt-1">
-                      {selectedRule.conditions.cohortCodes.map((cohort: string, index: number) => (
-                        <Tag key={index} color="purple">{cohort}</Tag>
-                      ))}
+                      {selectedRule.conditions.cohortCodes.map(
+                        (cohort: string, index: number) => (
+                          <Tag key={index} color="purple">
+                            {cohort}
+                          </Tag>
+                        ),
+                      )}
                     </div>
                   </div>
                 )}
@@ -1021,11 +1143,25 @@ export default function OfferRuleBuilder() {
                 {selectedRule.actions?.map((action: any, index: number) => (
                   <div key={index} className="p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">{action.type.replace('_', ' ')}</span>
-                      {action.ancillaryCode && <Tag color="cyan">{action.ancillaryCode}</Tag>}
-                      {action.bundleCode && <Tag color="orange">{action.bundleCode}</Tag>}
-                      {action.pricing?.type === "FREE" && <Tag color="green">FREE</Tag>}
-                      {action.value && <Tag color="blue">{action.valueType === "PERCENT" ? `${action.value}%` : `$${action.value}`}</Tag>}
+                      <span className="font-medium">
+                        {action.type.replace("_", " ")}
+                      </span>
+                      {action.ancillaryCode && (
+                        <Tag color="cyan">{action.ancillaryCode}</Tag>
+                      )}
+                      {action.bundleCode && (
+                        <Tag color="orange">{action.bundleCode}</Tag>
+                      )}
+                      {action.pricing?.type === "FREE" && (
+                        <Tag color="green">FREE</Tag>
+                      )}
+                      {action.value && (
+                        <Tag color="blue">
+                          {action.valueType === "PERCENT"
+                            ? `${action.value}%`
+                            : `$${action.value}`}
+                        </Tag>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -1049,7 +1185,11 @@ export default function OfferRuleBuilder() {
                   </div>
                   <div>
                     <Label className="text-xs text-gray-500">Approved At</Label>
-                    <div className="font-medium">{selectedRule.approvedAt ? formatDate(selectedRule.approvedAt) : "-"}</div>
+                    <div className="font-medium">
+                      {selectedRule.approvedAt
+                        ? formatDate(selectedRule.approvedAt)
+                        : "-"}
+                    </div>
                   </div>
                 </div>
               </AntCard>
@@ -1064,7 +1204,9 @@ export default function OfferRuleBuilder() {
                 </div>
                 <div>
                   <Label className="text-xs text-gray-500">Created At</Label>
-                  <div className="font-medium">{formatDate(selectedRule.createdAt)}</div>
+                  <div className="font-medium">
+                    {formatDate(selectedRule.createdAt)}
+                  </div>
                 </div>
               </div>
             </AntCard>
@@ -1144,7 +1286,9 @@ export default function OfferRuleBuilder() {
               <AntForm.Item
                 label="Valid From"
                 name="validFrom"
-                rules={[{ required: true, message: "Please select start date" }]}
+                rules={[
+                  { required: true, message: "Please select start date" },
+                ]}
               >
                 <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
               </AntForm.Item>
@@ -1165,7 +1309,13 @@ export default function OfferRuleBuilder() {
           </AntForm.Item>
 
           <AntForm.Item>
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "8px",
+              }}
+            >
               <AntButton onClick={() => setIsEditModalOpen(false)}>
                 Cancel
               </AntButton>
@@ -1194,7 +1344,8 @@ export default function OfferRuleBuilder() {
           <Alert>
             <Play className="h-4 w-4" />
             <AlertDescription>
-              Test how this rule would behave with specific conditions and context.
+              Test how this rule would behave with specific conditions and
+              context.
             </AlertDescription>
           </Alert>
         </div>
@@ -1205,7 +1356,7 @@ export default function OfferRuleBuilder() {
           onFinish={onSimulateSubmit}
         >
           <AntForm.Item label="Test Context" name="testContext">
-            <AntInput.TextArea 
+            <AntInput.TextArea
               placeholder='{"pos": "IN", "agentTier": "GOLD", "baseFare": 500}'
               rows={4}
             />
@@ -1213,7 +1364,9 @@ export default function OfferRuleBuilder() {
 
           {simulateRuleMutation.data && (
             <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-              <h4 className="font-medium text-green-800 mb-2">Simulation Result</h4>
+              <h4 className="font-medium text-green-800 mb-2">
+                Simulation Result
+              </h4>
               <pre className="text-sm text-green-700">
                 {JSON.stringify(simulateRuleMutation.data, null, 2)}
               </pre>
@@ -1221,7 +1374,13 @@ export default function OfferRuleBuilder() {
           )}
 
           <AntForm.Item>
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "8px",
+              }}
+            >
               <AntButton onClick={() => setIsSimulateModalOpen(false)}>
                 Close
               </AntButton>

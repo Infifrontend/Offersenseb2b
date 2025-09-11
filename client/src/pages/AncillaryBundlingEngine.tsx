@@ -236,6 +236,33 @@ export default function AncillaryBundlingEngine() {
     },
   });
 
+  // Fetch cohorts
+  const {
+    data: availableCohorts = [],
+    isLoading: isCohortsLoading,
+    error: cohortsError,
+  } = useQuery({
+    queryKey: ["cohorts"],
+    queryFn: async () => {
+      const response = await fetch("/api/cohorts");
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Failed to fetch cohorts:", response.status, errorText);
+        throw new Error(`Failed to fetch cohorts: ${response.statusText}`);
+      }
+      const data = await response.json();
+      return data.data || data; // Assuming API returns { data: [...] } or just [...]
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: `Failed to load cohorts: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
+
+
   // Fetch bundles
   const { data: bundles = [], isLoading: bundlesLoading } = useQuery({
     queryKey: ["bundles", filters],
@@ -1016,21 +1043,56 @@ export default function AncillaryBundlingEngine() {
             </AntForm.Item>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <AntForm.Item label="Cohort Codes" name="cohortCodes">
+          <AntForm.Item label="Cohort Codes (Optional)" name="cohortCodes">
               <AntSelect
-                mode="tags"
-                placeholder="Enter cohort codes"
-              ></AntSelect>
+                mode="multiple"
+                placeholder={
+                  isCohortsLoading
+                    ? "Loading cohorts..."
+                    : availableCohorts.length === 0
+                    ? "No cohorts available"
+                    : "Select cohorts"
+                }
+                style={{ width: "100%" }}
+                dropdownStyle={{ zIndex: 9999 }}
+                getPopupContainer={(trigger) => trigger.parentElement}
+                virtual={false}
+                showSearch
+                loading={isCohortsLoading}
+                disabled={isCohortsLoading}
+                notFoundContent={
+                  isCohortsLoading ? "Loading..." : "No cohorts found"
+                }
+                filterOption={(input, option) =>
+                  option?.children?.props?.children?.[0]?.props?.children
+                    ?.toLowerCase()
+                    .indexOf(input.toLowerCase()) >= 0 ||
+                  option?.children?.props?.children?.[1]?.props?.children
+                    ?.toLowerCase()
+                    .indexOf(input.toLowerCase()) >= 0
+                }
+              >
+                {availableCohorts.map((cohort: any) => (
+                  <AntSelect.Option key={cohort.code} value={cohort.code}>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ fontWeight: '500', fontSize: '14px' }}>
+                        {cohort.name || cohort.code}
+                      </span>
+                      <span style={{ fontSize: '12px', color: '#666' }}>
+                        {cohort.code}
+                      </span>
+                    </div>
+                  </AntSelect.Option>
+                ))}
+              </AntSelect>
             </AntForm.Item>
 
-            <AntForm.Item label="Inventory Cap" name="inventoryCap">
+          <AntForm.Item label="Inventory Cap" name="inventoryCap">
               <AntInputNumber
                 placeholder="Optional inventory limit"
                 style={{ width: "100%" }}
               />
             </AntForm.Item>
-          </div>
 
           <AntForm.Item
             label="Valid Period"
@@ -1278,21 +1340,56 @@ export default function AncillaryBundlingEngine() {
             </AntForm.Item>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <AntForm.Item label="Cohort Codes" name="cohortCodes">
+          <AntForm.Item label="Cohort Codes (Optional)" name="cohortCodes">
               <AntSelect
-                mode="tags"
-                placeholder="Enter cohort codes"
-              ></AntSelect>
+                mode="multiple"
+                placeholder={
+                  isCohortsLoading
+                    ? "Loading cohorts..."
+                    : availableCohorts.length === 0
+                    ? "No cohorts available"
+                    : "Select cohorts"
+                }
+                style={{ width: "100%" }}
+                dropdownStyle={{ zIndex: 9999 }}
+                getPopupContainer={(trigger) => trigger.parentElement}
+                virtual={false}
+                showSearch
+                loading={isCohortsLoading}
+                disabled={isCohortsLoading}
+                notFoundContent={
+                  isCohortsLoading ? "Loading..." : "No cohorts found"
+                }
+                filterOption={(input, option) =>
+                  option?.children?.props?.children?.[0]?.props?.children
+                    ?.toLowerCase()
+                    .indexOf(input.toLowerCase()) >= 0 ||
+                  option?.children?.props?.children?.[1]?.props?.children
+                    ?.toLowerCase()
+                    .indexOf(input.toLowerCase()) >= 0
+                }
+              >
+                {availableCohorts.map((cohort: any) => (
+                  <AntSelect.Option key={cohort.code} value={cohort.code}>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ fontWeight: '500', fontSize: '14px' }}>
+                        {cohort.name || cohort.code}
+                      </span>
+                      <span style={{ fontSize: '12px', color: '#666' }}>
+                        {cohort.code}
+                      </span>
+                    </div>
+                  </AntSelect.Option>
+                ))}
+              </AntSelect>
             </AntForm.Item>
 
-            <AntForm.Item label="Inventory Cap" name="inventoryCap">
+          <AntForm.Item label="Inventory Cap" name="inventoryCap">
               <AntInputNumber
                 placeholder="Optional inventory limit"
                 style={{ width: "100%" }}
               />
             </AntForm.Item>
-          </div>
 
           <AntForm.Item
             label="Valid Period"

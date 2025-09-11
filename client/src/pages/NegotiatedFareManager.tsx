@@ -237,13 +237,13 @@ export default function NegotiatedFareManager() {
 
   // Fetch available cohorts
   const { data: availableCohorts = [], isLoading: isCohortsLoading } = useQuery({
-    queryKey: ["/api/cohorts/list"], // Corrected API endpoint
+    queryKey: ["cohorts-list"],
     queryFn: async () => {
-      const response = await fetch("/api/cohorts/list"); // Corrected API endpoint
+      const response = await fetch("/api/cohorts/list");
       if (!response.ok) throw new Error("Failed to fetch cohorts");
       return response.json();
     },
-    initialData: [], // Provide initial data to prevent errors if fetch fails
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
 

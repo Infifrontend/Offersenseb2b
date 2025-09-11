@@ -24,6 +24,7 @@ import type {
 } from "../shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte, sql, like, inArray, or, ilike } from "drizzle-orm";
+import * as crypto from 'crypto';
 
 
 export interface IStorage {
@@ -745,17 +746,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getBundlePricingRules(filters: any = {}): Promise<BundlePricingRule[]> {
-    console.log("Storage: getBundlePricingRules called with filters:", filters);
-
     try {
-      let query = db.select().from(bundlePricingRules);
+      console.log("Storage: Starting getBundlePricingRules with filters:", filters);
+
+      let query = this.db.select().from(bundlePricingRules);
 
       // Apply filters
       const conditions = [];
-
-      if (filters.ruleCode) {
-        conditions.push(eq(bundlePricingRules.ruleCode, filters.ruleCode));
-      }
 
       if (filters.bundleCode) {
         conditions.push(eq(bundlePricingRules.bundleCode, filters.bundleCode));
@@ -763,6 +760,10 @@ export class DatabaseStorage implements IStorage {
 
       if (filters.status) {
         conditions.push(eq(bundlePricingRules.status, filters.status));
+      }
+
+      if (filters.discountType) {
+        conditions.push(eq(bundlePricingRules.discountType, filters.discountType));
       }
 
       if (conditions.length > 0) {
@@ -889,7 +890,7 @@ export class DatabaseStorage implements IStorage {
   async insertOfferRule(rule: InsertOfferRule): Promise<OfferRule> {
     try {
       console.log("Storage: Inserting offer rule:", rule);
-      
+
       // Ensure required fields have default values
       const ruleData = {
         ...rule,
@@ -898,16 +899,16 @@ export class DatabaseStorage implements IStorage {
         createdAt: new Date(),
         updatedAt: new Date()
       };
-      
+
       console.log("Storage: Rule data to insert:", ruleData);
-      
+
       const result = await this.db.insert(offerRules).values(ruleData).returning();
       console.log("Storage: Successfully inserted offer rule:", result[0]);
-      
+
       if (!result || result.length === 0) {
         throw new Error("Failed to insert offer rule - no result returned");
       }
-      
+
       return result[0];
     } catch (error: any) {
       console.error("Storage: Error inserting offer rule:", error);

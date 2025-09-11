@@ -1,4 +1,4 @@
-import { users, negotiatedFares, dynamicDiscountRules, airAncillaryRules, nonAirRates, nonAirMarkupRules, bundles, bundlePricingRules, offerRules, type User, type NegotiatedFare, type InsertNegotiatedFare, type DynamicDiscountRule, type InsertDynamicDiscountRule, type AirAncillaryRule, type InsertAirAncillaryRule, type NonAirRate, type InsertNonAirRate, type NonAirMarkupRule, type InsertNonAirMarkupRule, type Bundle, type InsertBundle, type BundlePricingRule, type InsertBundlePricingRule, type OfferRule, type InsertOfferRule } from "../shared/schema";
+import { users, negotiatedFares, dynamicDiscountRules, airAncillaryRules, nonAirRates, nonAirMarkupRules, bundles, bundlePricingRules, offerRules, offerTraces, type User, type NegotiatedFare, type InsertNegotiatedFare, type DynamicDiscountRule, type InsertDynamicDiscountRule, type AirAncillaryRule, type InsertAirAncillaryRule, type NonAirRate, type InsertNonAirRate, type NonAirMarkupRule, type InsertNonAirMarkupRule, type Bundle, type InsertBundle, type BundlePricingRule, type InsertBundlePricingRule, type OfferRule, type InsertOfferRule, type OfferTrace, type InsertOfferTrace } from "../shared/schema";
 import { db } from "./db";
 import { eq, and, or, gte, lte, ilike, inArray, sql } from "drizzle-orm";
 
@@ -74,6 +74,14 @@ export interface IStorage {
   updateOfferRuleStatus(id: string, status: string, approver?: string): Promise<OfferRule>;
   deleteOfferRule(id: string): Promise<void>;
   checkOfferRuleConflicts(rule: InsertOfferRule): Promise<OfferRule[]>;
+  
+  // Offer Composition Methods
+  insertOfferTrace(trace: InsertOfferTrace): Promise<OfferTrace>;
+  getOfferTraces(filters?: any): Promise<OfferTrace[]>;
+  getOfferTraceById(id: string): Promise<OfferTrace | undefined>;
+  getOfferTraceByTraceId(traceId: string): Promise<OfferTrace | undefined>;
+  updateOfferTrace(id: string, updates: Partial<InsertOfferTrace>): Promise<OfferTrace>;
+  deleteOfferTrace(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -735,6 +743,71 @@ export class DatabaseStorage implements IStorage {
     });
 
     return conflicts;
+  }
+
+  // Offer Composition Methods
+  async insertOfferTrace(trace: InsertOfferTrace): Promise<OfferTrace> {
+    const [result] = await db.insert(offerTraces).values(trace).returning();
+    return result;
+  }
+
+  async getOfferTraces(filters: any = {}): Promise<OfferTrace[]> {
+    let query = db.select().from(offerTraces);
+    
+    const conditions = [];
+    
+    if (filters.agentId) {
+      conditions.push(eq(offerTraces.agentId, filters.agentId));
+    }
+    
+    if (filters.fareSource) {
+      conditions.push(eq(offerTraces.fareSource, filters.fareSource));
+    }
+    
+    if (filters.status) {
+      conditions.push(eq(offerTraces.status, filters.status));
+    }
+    
+    if (filters.agentTier) {
+      conditions.push(eq(offerTraces.agentTier, filters.agentTier));
+    }
+    
+    if (filters.dateFrom) {
+      conditions.push(gte(offerTraces.createdAt, new Date(filters.dateFrom)));
+    }
+    
+    if (filters.dateTo) {
+      conditions.push(lte(offerTraces.createdAt, new Date(filters.dateTo)));
+    }
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+    
+    return query.orderBy(sql`${offerTraces.createdAt} DESC`);
+  }
+
+  async getOfferTraceById(id: string): Promise<OfferTrace | undefined> {
+    const [result] = await db.select().from(offerTraces).where(eq(offerTraces.id, id));
+    return result;
+  }
+
+  async getOfferTraceByTraceId(traceId: string): Promise<OfferTrace | undefined> {
+    const [result] = await db.select().from(offerTraces).where(eq(offerTraces.traceId, traceId));
+    return result;
+  }
+
+  async updateOfferTrace(id: string, updates: Partial<InsertOfferTrace>): Promise<OfferTrace> {
+    const [result] = await db
+      .update(offerTraces)
+      .set({ ...updates, updatedAt: sql`now()` })
+      .where(eq(offerTraces.id, id))
+      .returning();
+    return result;
+  }
+
+  async deleteOfferTrace(id: string): Promise<void> {
+    await db.delete(offerTraces).where(eq(offerTraces.id, id));
   }
 }
 

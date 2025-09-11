@@ -324,3 +324,68 @@ export const insertOfferRuleSchema = createInsertSchema(offerRules, {
 
 export type OfferRule = typeof offerRules.$inferSelect;
 export type InsertOfferRule = z.infer<typeof insertOfferRuleSchema>;
+
+export const offerTraces = pgTable("offer_traces", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  traceId: varchar("trace_id", { length: 50 }).notNull().unique(),
+  agentId: varchar("agent_id", { length: 50 }).notNull(),
+  searchParams: json("search_params").notNull(), // origin, destination, dates, pax, etc.
+  agentTier: varchar("agent_tier", { length: 20 }).notNull(),
+  cohorts: json("cohorts"), // array of cohort codes
+  fareSource: varchar("fare_source", { length: 20 }).notNull(), // NEGOTIATED | API
+  basePrice: decimal("base_price", { precision: 10, scale: 2 }).notNull(),
+  adjustments: json("adjustments"), // array of rule adjustments applied
+  ancillaries: json("ancillaries"), // array of ancillary offers
+  bundles: json("bundles"), // array of bundle offers
+  finalOfferPrice: decimal("final_offer_price", { precision: 10, scale: 2 }).notNull(),
+  commission: decimal("commission", { precision: 10, scale: 2 }).notNull(),
+  auditTraceId: varchar("audit_trace_id", { length: 50 }),
+  status: varchar("status", { length: 20 }).default("ACTIVE"), // ACTIVE | EXPIRED
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
+export const insertOfferTraceSchema = createInsertSchema(offerTraces, {
+  basePrice: z.string().transform((val) => parseFloat(val)),
+  finalOfferPrice: z.string().transform((val) => parseFloat(val)),
+  commission: z.string().transform((val) => parseFloat(val)),
+  searchParams: z.object({
+    origin: z.string(),
+    destination: z.string(),
+    tripType: z.enum(["ONE_WAY", "ROUND_TRIP", "MULTI_CITY"]),
+    pax: z.array(z.object({
+      type: z.string(),
+      count: z.number()
+    })),
+    cabinClass: z.enum(["ECONOMY", "PREMIUM_ECONOMY", "BUSINESS", "FIRST"]),
+    dates: z.object({
+      depart: z.string(),
+      return: z.string().optional()
+    }),
+    channel: z.enum(["API", "PORTAL", "MOBILE"]),
+  }),
+  cohorts: z.array(z.string()).optional(),
+  adjustments: z.array(z.object({
+    rule: z.string(),
+    type: z.string(),
+    value: z.number()
+  })).optional(),
+  ancillaries: z.array(z.object({
+    code: z.string(),
+    base: z.number(),
+    discount: z.number().optional(),
+    sell: z.number()
+  })).optional(),
+  bundles: z.array(z.object({
+    code: z.string(),
+    sell: z.number(),
+    saveVsIndiv: z.number().optional()
+  })).optional(),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type OfferTrace = typeof offerTraces.$inferSelect;
+export type InsertOfferTrace = z.infer<typeof insertOfferTraceSchema>;

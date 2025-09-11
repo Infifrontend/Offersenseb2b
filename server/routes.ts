@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import multer from "multer";
 import csv from "csv-parser";
 import { Readable } from "stream";
-import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema, insertAirAncillaryRuleSchema, insertNonAirRateSchema, insertNonAirMarkupRuleSchema, insertBundleSchema, insertBundlePricingRuleSchema, insertOfferRuleSchema } from "../shared/schema";
+import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema, insertAirAncillaryRuleSchema, insertNonAirRateSchema, insertNonAirMarkupRuleSchema, insertBundleSchema, insertBundlePricingRuleSchema, insertOfferRuleSchema, insertOfferTraceSchema } from "../shared/schema";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -1001,6 +1001,247 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error: any) {
       res.status(500).json({ message: "Failed to delete rule", error: error.message });
+    }
+  });
+
+  // Offer Composition Routes
+  
+  // Compose offer for agent
+  app.post("/api/offer/compose", async (req, res) => {
+    try {
+      const { origin, destination, tripType, pax, cabinClass, dates, channel, agentId } = req.body;
+      
+      if (!origin || !destination || !agentId) {
+        return res.status(400).json({ message: "origin, destination, and agentId are required" });
+      }
+
+      // Generate trace ID
+      const traceId = `TRC-${Math.random().toString(36).substr(2, 5)}`;
+      const auditTraceId = `AUD-${Math.random().toString(36).substr(2, 5)}`;
+
+      // Mock agent tier resolution (in real implementation, this would query agent database)
+      const agentTier = "PLATINUM";
+      const cohorts = ["FESTIVE_2025", "PORTAL_USERS"];
+
+      // Step 1: Check for negotiated fares
+      const negotiatedFareFilters = {
+        origin,
+        destination,
+        cabinClass,
+        tripType,
+        status: "ACTIVE"
+      };
+      
+      const negotiatedFares = await storage.getNegotiatedFares(negotiatedFareFilters);
+      let fareSource = "API";
+      let basePrice = 8500; // Mock API fare price
+      let adjustments = [];
+
+      if (negotiatedFares.length > 0) {
+        fareSource = "NEGOTIATED";
+        basePrice = parseFloat(negotiatedFares[0].baseNetFare);
+      }
+
+      // Step 2: Apply dynamic discount rules
+      const discountFilters = {
+        origin,
+        destination,
+        cabinClass,
+        tripType,
+        channel,
+        status: "ACTIVE"
+      };
+      
+      const discountRules = await storage.getDynamicDiscountRules(discountFilters);
+      
+      for (const rule of discountRules) {
+        // Check if rule applies to agent tier
+        const agentTierArray = Array.isArray(rule.agentTier) ? rule.agentTier : [];
+        const posArray = Array.isArray(rule.pos) ? rule.pos : [];
+        
+        if (agentTierArray.includes(agentTier)) {
+          if (rule.adjustmentType === "PERCENT") {
+            const adjustmentValue = parseFloat(rule.adjustmentValue);
+            basePrice = basePrice * (1 + adjustmentValue / 100);
+            adjustments.push({
+              rule: rule.ruleCode,
+              type: "PERCENT",
+              value: adjustmentValue
+            });
+          } else if (rule.adjustmentType === "AMOUNT") {
+            const adjustmentValue = parseFloat(rule.adjustmentValue);
+            basePrice = basePrice + adjustmentValue;
+            adjustments.push({
+              rule: rule.ruleCode,
+              type: "AMOUNT",
+              value: adjustmentValue
+            });
+          }
+        }
+      }
+
+      // Step 3: Add ancillary offers
+      const ancillaryFilters = {
+        status: "ACTIVE"
+      };
+      
+      const ancillaryRules = await storage.getAirAncillaryRules(ancillaryFilters);
+      const ancillaries = [];
+      
+      for (const rule of ancillaryRules) {
+        const agentTierArray = Array.isArray(rule.agentTier) ? rule.agentTier : [];
+        
+        if (agentTierArray.includes(agentTier)) {
+          let baseAncillaryPrice = 2000; // Mock base price
+          let sellPrice = baseAncillaryPrice;
+          let discount = 0;
+          
+          if (rule.adjustmentType === "FREE") {
+            sellPrice = 0;
+            discount = baseAncillaryPrice;
+          } else if (rule.adjustmentType === "PERCENT" && rule.adjustmentValue) {
+            discount = baseAncillaryPrice * (parseFloat(rule.adjustmentValue) / 100);
+            sellPrice = baseAncillaryPrice - discount;
+          } else if (rule.adjustmentType === "AMOUNT" && rule.adjustmentValue) {
+            discount = parseFloat(rule.adjustmentValue);
+            sellPrice = Math.max(0, baseAncillaryPrice - discount);
+          }
+          
+          ancillaries.push({
+            code: rule.ancillaryCode,
+            base: baseAncillaryPrice,
+            discount: Math.round(discount),
+            sell: Math.round(sellPrice)
+          });
+        }
+      }
+
+      // Step 4: Add bundle offers
+      const bundleFilters = {
+        status: "ACTIVE"
+      };
+      
+      const availableBundles = await storage.getBundles(bundleFilters);
+      const bundles = [];
+      
+      for (const bundle of availableBundles) {
+        const agentTierArray = Array.isArray(bundle.agentTier) ? bundle.agentTier : [];
+        const posArray = Array.isArray(bundle.pos) ? bundle.pos : [];
+        
+        if (agentTierArray.includes(agentTier)) {
+          const bundlePricingFilters = {
+            bundleCode: bundle.bundleCode,
+            status: "ACTIVE"
+          };
+          
+          const pricingRules = await storage.getBundlePricingRules(bundlePricingFilters);
+          let bundlePrice = 3000; // Mock base bundle price
+          let saveVsIndiv = 600;
+          
+          if (pricingRules.length > 0) {
+            const rule = pricingRules[0];
+            if (rule.discountType === "PERCENT") {
+              const discount = bundlePrice * (parseFloat(rule.discountValue) / 100);
+              bundlePrice = bundlePrice - discount;
+              saveVsIndiv = Math.round(discount);
+            } else if (rule.discountType === "AMOUNT") {
+              const discount = parseFloat(rule.discountValue);
+              bundlePrice = Math.max(0, bundlePrice - discount);
+              saveVsIndiv = Math.round(discount);
+            }
+          }
+          
+          bundles.push({
+            code: bundle.bundleCode,
+            sell: Math.round(bundlePrice),
+            saveVsIndiv: saveVsIndiv
+          });
+        }
+      }
+
+      // Step 5: Calculate final offer price and commission
+      const ancillaryTotal = ancillaries.reduce((total, anc) => total + anc.sell, 0);
+      const bundleTotal = bundles.reduce((total, bundle) => total + bundle.sell, 0);
+      const finalOfferPrice = Math.round(basePrice + ancillaryTotal + bundleTotal);
+      const commission = Math.round(finalOfferPrice * 0.03); // 3% commission
+
+      // Create offer trace
+      const offerTrace = {
+        traceId,
+        agentId,
+        searchParams: {
+          origin,
+          destination,
+          tripType: tripType || "ROUND_TRIP",
+          pax: pax || [{ type: "ADT", count: 1 }],
+          cabinClass: cabinClass || "ECONOMY",
+          dates: dates || { depart: "2025-11-10", return: "2025-11-20" },
+          channel: channel || "PORTAL"
+        },
+        agentTier,
+        cohorts,
+        fareSource,
+        basePrice: basePrice.toString(),
+        adjustments,
+        ancillaries,
+        bundles,
+        finalOfferPrice: finalOfferPrice.toString(),
+        commission: commission.toString(),
+        auditTraceId
+      };
+
+      const savedTrace = await storage.insertOfferTrace(offerTrace);
+
+      // Return offer response
+      res.json({
+        traceId,
+        agentTier,
+        cohorts,
+        fareSource,
+        basePrice: Math.round(basePrice),
+        adjustments,
+        ancillaries,
+        bundles,
+        finalOfferPrice,
+        commission,
+        auditTraceId
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to compose offer", error: error.message });
+    }
+  });
+
+  // Get offer trace by traceId
+  app.get("/api/offer/trace/:traceId", async (req, res) => {
+    try {
+      const trace = await storage.getOfferTraceByTraceId(req.params.traceId);
+      if (!trace) {
+        return res.status(404).json({ message: "Offer trace not found" });
+      }
+      res.json(trace);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch offer trace", error: error.message });
+    }
+  });
+
+  // Get all offer traces with optional filters
+  app.get("/api/offer/traces", async (req, res) => {
+    try {
+      const filters = req.query;
+      const traces = await storage.getOfferTraces(filters);
+      res.json(traces);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch offer traces", error: error.message });
+    }
+  });
+
+  // Delete offer trace
+  app.delete("/api/offer/traces/:id", async (req, res) => {
+    try {
+      await storage.deleteOfferTrace(req.params.id);
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to delete offer trace", error: error.message });
     }
   });
 

@@ -93,9 +93,44 @@ export const insertDynamicDiscountRuleSchema = createInsertSchema(dynamicDiscoun
   updatedAt: true,
 });
 
+export const airAncillaryRules = pgTable("air_ancillary_rules", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ruleCode: varchar("rule_code", { length: 50 }).notNull().unique(),
+  ancillaryCode: varchar("ancillary_code", { length: 50 }).notNull(), // BAG20, SEAT_STD, MEAL_STD, WIFI_STD, LOUNGE_PASS
+  airlineCode: varchar("airline_code", { length: 2 }), // Optional for carrier-specific
+  origin: varchar("origin", { length: 3 }), // Optional
+  destination: varchar("destination", { length: 3 }), // Optional
+  pos: json("pos").notNull(), // array of ISO country codes
+  channel: varchar("channel", { length: 20 }).notNull(), // API | PORTAL | MOBILE
+  agentTier: json("agent_tier").notNull(), // array: PLATINUM/GOLD/SILVER/BRONZE
+  cohortCodes: json("cohort_codes"), // array of cohort codes
+  conditionBehavior: varchar("condition_behavior", { length: 30 }), // SKIPPED_ANCILLARY | POST_BOOKING
+  adjustmentType: varchar("adjustment_type", { length: 20 }).notNull(), // PERCENT | AMOUNT | FREE
+  adjustmentValue: decimal("adjustment_value", { precision: 10, scale: 2 }), // ignored if FREE
+  priority: integer("priority").notNull().default(1),
+  status: varchar("status", { length: 20 }).default("ACTIVE"), // ACTIVE | INACTIVE
+  validFrom: date("valid_from").notNull(),
+  validTo: date("valid_to").notNull(),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
+export const insertAirAncillaryRuleSchema = createInsertSchema(airAncillaryRules, {
+  adjustmentValue: z.string().transform((val) => parseFloat(val)).optional(),
+  pos: z.array(z.string()),
+  agentTier: z.array(z.enum(["PLATINUM", "GOLD", "SILVER", "BRONZE"])),
+  cohortCodes: z.array(z.string()).optional(),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type NegotiatedFare = typeof negotiatedFares.$inferSelect;
 export type InsertNegotiatedFare = z.infer<typeof insertNegotiatedFareSchema>;
 export type DynamicDiscountRule = typeof dynamicDiscountRules.$inferSelect;
 export type InsertDynamicDiscountRule = z.infer<typeof insertDynamicDiscountRuleSchema>;
+export type AirAncillaryRule = typeof airAncillaryRules.$inferSelect;
+export type InsertAirAncillaryRule = z.infer<typeof insertAirAncillaryRuleSchema>;

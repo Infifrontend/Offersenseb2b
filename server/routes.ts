@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import multer from "multer";
 import csv from "csv-parser";
 import { Readable } from "stream";
-import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema } from "../shared/schema";
+import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema, insertAirAncillaryRuleSchema } from "../shared/schema";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -289,6 +289,134 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/dynamic-discount-rules/:id", async (req, res) => {
     try {
       await storage.deleteDynamicDiscountRule(req.params.id);
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to delete rule", error: error.message });
+    }
+  });
+
+  // Air Ancillary Rules Routes
+  
+  // Get all air ancillary rules with optional filters
+  app.get("/api/air-ancillary-rules", async (req, res) => {
+    try {
+      const filters = req.query;
+      const rules = await storage.getAirAncillaryRules(filters);
+      res.json(rules);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch air ancillary rules", error: error.message });
+    }
+  });
+
+  // Create single air ancillary rule
+  app.post("/api/air-ancillary-rules", async (req, res) => {
+    try {
+      const validatedData = insertAirAncillaryRuleSchema.parse(req.body);
+      
+      // Check for conflicts
+      const conflicts = await storage.checkAirAncillaryRuleConflicts(validatedData);
+      if (conflicts.length > 0) {
+        return res.status(409).json({ 
+          message: "Rule conflicts detected", 
+          conflicts 
+        });
+      }
+
+      const rule = await storage.insertAirAncillaryRule(validatedData);
+      res.status(201).json(rule);
+    } catch (error: any) {
+      res.status(400).json({ message: "Invalid rule data", error: error.message });
+    }
+  });
+
+  // Simulate air ancillary rule application
+  app.post("/api/air-ancillary-rules/simulate", async (req, res) => {
+    try {
+      const { basePrice, currency, ruleId } = req.body;
+      
+      if (!basePrice || !currency || !ruleId) {
+        return res.status(400).json({ message: "basePrice, currency, and ruleId are required" });
+      }
+
+      const rule = await storage.getAirAncillaryRuleById(ruleId);
+      if (!rule) {
+        return res.status(404).json({ message: "Rule not found" });
+      }
+
+      let adjustedPrice = parseFloat(basePrice);
+      let discount = 0;
+
+      if (rule.adjustmentType === "FREE") {
+        adjustedPrice = 0;
+        discount = parseFloat(basePrice);
+      } else if (rule.adjustmentType === "PERCENT" && rule.adjustmentValue) {
+        discount = basePrice * (parseFloat(rule.adjustmentValue) / 100);
+        adjustedPrice = basePrice - discount;
+      } else if (rule.adjustmentType === "AMOUNT" && rule.adjustmentValue) {
+        discount = parseFloat(rule.adjustmentValue);
+        adjustedPrice = Math.max(0, basePrice - discount);
+      }
+
+      res.json({
+        basePrice: parseFloat(basePrice),
+        adjustedPrice: Math.round(adjustedPrice * 100) / 100,
+        discount: Math.round(discount * 100) / 100,
+        adjustment: {
+          type: rule.adjustmentType,
+          value: rule.adjustmentValue ? parseFloat(rule.adjustmentValue) : 0
+        },
+        currency,
+        ruleApplied: rule.ruleCode,
+        ancillaryCode: rule.ancillaryCode
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to simulate rule", error: error.message });
+    }
+  });
+
+  // Get rule by ID
+  app.get("/api/air-ancillary-rules/:id", async (req, res) => {
+    try {
+      const rule = await storage.getAirAncillaryRuleById(req.params.id);
+      if (!rule) {
+        return res.status(404).json({ message: "Rule not found" });
+      }
+      res.json(rule);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch rule", error: error.message });
+    }
+  });
+
+  // Update rule
+  app.put("/api/air-ancillary-rules/:id", async (req, res) => {
+    try {
+      const validatedData = insertAirAncillaryRuleSchema.parse(req.body);
+      const rule = await storage.updateAirAncillaryRule(req.params.id, validatedData);
+      res.json(rule);
+    } catch (error: any) {
+      res.status(400).json({ message: "Failed to update rule", error: error.message });
+    }
+  });
+
+  // Update rule status
+  app.patch("/api/air-ancillary-rules/:id/status", async (req, res) => {
+    try {
+      const { status } = req.body;
+      if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
+        return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
+      }
+      
+      const rule = await storage.updateAirAncillaryRuleStatus(req.params.id, status);
+      res.json(rule);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to update rule status", error: error.message });
+    }
+  });
+
+  // Delete rule
+  app.delete("/api/air-ancillary-rules/:id", async (req, res) => {
+    try {
+      await storage.deleteAirAncillaryRule(req.params.id);
       res.status(204).send();
     } catch (error: any) {
       res.status(500).json({ message: "Failed to delete rule", error: error.message });

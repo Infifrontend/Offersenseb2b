@@ -1,4 +1,4 @@
-import { users, negotiatedFares, dynamicDiscountRules, type User, type NegotiatedFare, type InsertUser, type InsertNegotiatedFare, type InsertDynamicDiscountRule } from "../shared/schema";
+import { users, negotiatedFares, dynamicDiscountRules, airAncillaryRules, type User, type NegotiatedFare, type InsertUser, type InsertNegotiatedFare, type InsertDynamicDiscountRule, type InsertAirAncillaryRule } from "../shared/schema";
 import { db } from "./db";
 import { eq, and, or, gte, lte, ilike, inArray, sql } from "drizzle-orm";
 
@@ -22,6 +22,15 @@ export interface IStorage {
   updateDynamicDiscountRuleStatus(id: string, status: string): Promise<InsertDynamicDiscountRule>;
   deleteDynamicDiscountRule(id: string): Promise<void>;
   checkDiscountRuleConflicts(rule: InsertDynamicDiscountRule): Promise<InsertDynamicDiscountRule[]>;
+
+  // Air Ancillary Rules
+  getAirAncillaryRules(filters?: any): Promise<InsertAirAncillaryRule[]>;
+  getAirAncillaryRuleById(id: string): Promise<InsertAirAncillaryRule | undefined>;
+  insertAirAncillaryRule(rule: InsertAirAncillaryRule): Promise<InsertAirAncillaryRule>;
+  updateAirAncillaryRule(id: string, rule: Partial<InsertAirAncillaryRule>): Promise<InsertAirAncillaryRule>;
+  updateAirAncillaryRuleStatus(id: string, status: string): Promise<InsertAirAncillaryRule>;
+  deleteAirAncillaryRule(id: string): Promise<void>;
+  checkAirAncillaryRuleConflicts(rule: InsertAirAncillaryRule): Promise<InsertAirAncillaryRule[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -217,6 +226,84 @@ export class DatabaseStorage implements IStorage {
         and(
           eq(dynamicDiscountRules.ruleCode, rule.ruleCode),
           eq(dynamicDiscountRules.status, "ACTIVE")
+        )
+      );
+
+    return conflicts;
+  }
+
+  // Air Ancillary Rules methods
+  async getAirAncillaryRules(filters: any = {}): Promise<InsertAirAncillaryRule[]> {
+    let query = db.select().from(airAncillaryRules);
+
+    const conditions: any[] = [];
+
+    if (filters.ruleCode) {
+      conditions.push(ilike(airAncillaryRules.ruleCode, `%${filters.ruleCode}%`));
+    }
+    if (filters.ancillaryCode) {
+      conditions.push(eq(airAncillaryRules.ancillaryCode, filters.ancillaryCode));
+    }
+    if (filters.airlineCode) {
+      conditions.push(eq(airAncillaryRules.airlineCode, filters.airlineCode));
+    }
+    if (filters.origin) {
+      conditions.push(eq(airAncillaryRules.origin, filters.origin));
+    }
+    if (filters.destination) {
+      conditions.push(eq(airAncillaryRules.destination, filters.destination));
+    }
+    if (filters.status) {
+      conditions.push(eq(airAncillaryRules.status, filters.status));
+    }
+    if (filters.channel) {
+      conditions.push(eq(airAncillaryRules.channel, filters.channel));
+    }
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+
+    return await query.orderBy(airAncillaryRules.priority, airAncillaryRules.createdAt);
+  }
+
+  async getAirAncillaryRuleById(id: string): Promise<InsertAirAncillaryRule | undefined> {
+    const result = await db.select().from(airAncillaryRules).where(eq(airAncillaryRules.id, id));
+    return result[0] || undefined;
+  }
+
+  async insertAirAncillaryRule(rule: InsertAirAncillaryRule): Promise<InsertAirAncillaryRule> {
+    const result = await db.insert(airAncillaryRules).values(rule).returning();
+    return result[0];
+  }
+
+  async updateAirAncillaryRule(id: string, rule: Partial<InsertAirAncillaryRule>): Promise<InsertAirAncillaryRule> {
+    const result = await db.update(airAncillaryRules)
+      .set({ ...rule, updatedAt: new Date() })
+      .where(eq(airAncillaryRules.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async updateAirAncillaryRuleStatus(id: string, status: string): Promise<InsertAirAncillaryRule> {
+    const result = await db.update(airAncillaryRules)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(airAncillaryRules.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteAirAncillaryRule(id: string): Promise<void> {
+    return await db.delete(airAncillaryRules).where(eq(airAncillaryRules.id, id));
+  }
+
+  async checkAirAncillaryRuleConflicts(rule: InsertAirAncillaryRule): Promise<InsertAirAncillaryRule[]> {
+    const conflicts = await db.select()
+      .from(airAncillaryRules)
+      .where(
+        and(
+          eq(airAncillaryRules.ruleCode, rule.ruleCode),
+          eq(airAncillaryRules.status, "ACTIVE")
         )
       );
 

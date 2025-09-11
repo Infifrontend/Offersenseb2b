@@ -186,7 +186,7 @@ export default function DynamicDiscountEngine() {
   const { data: availableCohorts = [] } = useQuery({
     queryKey: ["cohorts-list"],
     queryFn: async () => {
-      const response = await fetch("/api/cohorts/list");
+      const response = await fetch("/api/cohorts");
       if (!response.ok) throw new Error("Failed to fetch cohorts");
       return response.json();
     },
@@ -930,26 +930,29 @@ export default function DynamicDiscountEngine() {
             label="Agent Tiers"
             name="agentTier"
             rules={[
-              { required: true, message: "Please select at least one agent tier" },
+              {
+                required: true,
+                message: "Please select at least one agent tier",
+              },
             ]}
           >
-            <AntCheckbox.Group style={{ width: '100%' }}>
+            <AntCheckbox.Group style={{ width: "100%" }}>
               <Row gutter={[16, 8]}>
                 {agentTiers.map((tier) => (
                   <Col span={6} key={tier}>
                     <AntCheckbox
                       value={tier}
                       style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        padding: '4px 8px',
-                        borderRadius: '4px',
-                        border: '1px solid #d9d9d9',
-                        marginBottom: '8px',
-                        fontSize: '14px'
+                        display: "flex",
+                        alignItems: "center",
+                        padding: "4px 8px",
+                        borderRadius: "4px",
+                        border: "1px solid #d9d9d9",
+                        marginBottom: "8px",
+                        fontSize: "14px",
                       }}
                     >
-                      <span style={{ fontWeight: '500' }}>{tier}</span>
+                      <span style={{ fontWeight: "500" }}>{tier}</span>
                     </AntCheckbox>
                   </Col>
                 ))}
@@ -966,15 +969,18 @@ export default function DynamicDiscountEngine() {
               virtual={false}
               showSearch
               filterOption={(input, option) =>
-                option?.children?.toLowerCase().indexOf(input.toLowerCase()) >= 0 ||
+                option?.children?.toLowerCase().indexOf(input.toLowerCase()) >=
+                  0 ||
                 option?.value?.toLowerCase().indexOf(input.toLowerCase()) >= 0
               }
             >
               {availableCohorts.map((cohort: any) => (
-                <AntSelect.Option key={cohort.code} value={cohort.code}>
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span style={{ fontWeight: '500', fontSize: '14px' }}>{cohort.name || cohort.code}</span>
-                    <span style={{ fontSize: '12px', color: '#666' }}>{cohort.code}</span>
+                <AntSelect.Option key={cohort.id} value={cohort.cohortName}>
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    <div className="cls-cohort-dropdwon">
+                      <p>{cohort.cohortName}</p>{" "}
+                      <span className="text-gray-600">{cohort.cohortCode}</span>
+                    </div>
                   </div>
                 </AntSelect.Option>
               ))}
@@ -1227,26 +1233,29 @@ export default function DynamicDiscountEngine() {
                 label="Agent Tiers"
                 name="agentTier"
                 rules={[
-                  { required: true, message: "Please select at least one agent tier" },
+                  {
+                    required: true,
+                    message: "Please select at least one agent tier",
+                  },
                 ]}
               >
-                <AntCheckbox.Group style={{ width: '100%' }}>
+                <AntCheckbox.Group style={{ width: "100%" }}>
                   <Row gutter={[16, 8]}>
                     {agentTiers.map((tier) => (
                       <Col span={6} key={tier}>
                         <AntCheckbox
                           value={tier}
                           style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            padding: '4px 8px',
-                            borderRadius: '4px',
-                            border: '1px solid #d9d9d9',
-                            marginBottom: '8px',
-                            fontSize: '14px'
+                            display: "flex",
+                            alignItems: "center",
+                            padding: "4px 8px",
+                            borderRadius: "4px",
+                            border: "1px solid #d9d9d9",
+                            marginBottom: "8px",
+                            fontSize: "14px",
                           }}
                         >
-                          <span style={{ fontWeight: '500' }}>{tier}</span>
+                          <span style={{ fontWeight: "500" }}>{tier}</span>
                         </AntCheckbox>
                       </Col>
                     ))}
@@ -1266,15 +1275,18 @@ export default function DynamicDiscountEngine() {
               virtual={false}
               showSearch
               filterOption={(input, option) =>
-                option?.children?.toLowerCase().indexOf(input.toLowerCase()) >= 0 ||
+                option?.children?.toLowerCase().indexOf(input.toLowerCase()) >=
+                  0 ||
                 option?.value?.toLowerCase().indexOf(input.toLowerCase()) >= 0
               }
             >
               {availableCohorts.map((cohort: any) => (
-                <AntSelect.Option key={cohort.code} value={cohort.code}>
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span style={{ fontWeight: '500', fontSize: '14px' }}>{cohort.name || cohort.code}</span>
-                    <span style={{ fontSize: '12px', color: '#666' }}>{cohort.code}</span>
+                <AntSelect.Option key={cohort.id} value={cohort.cohortName}>
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    <div className="cls-cohort-dropdwon">
+                      <p>{cohort.cohortName}</p>{" "}
+                      <span className="text-gray-600">{cohort.cohortCode}</span>
+                    </div>
                   </div>
                 </AntSelect.Option>
               ))}

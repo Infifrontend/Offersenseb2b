@@ -313,7 +313,9 @@ export default function DynamicDiscountEngine() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center space-y-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <div className="text-lg font-medium text-gray-600">Loading discount rules...</div>
+          <div className="text-lg font-medium text-gray-600">
+            Loading discount rules...
+          </div>
         </div>
       </div>
     );
@@ -379,6 +381,13 @@ export default function DynamicDiscountEngine() {
           </CardContent>
         </Card>
       </div>
+      <Button
+        onClick={() => setIsCreateModalOpen(true)}
+        className="bg-primary text-white"
+      >
+        <Plus className="w-4 h-4 mr-2" />
+        Create Rule
+      </Button>
       {/* Action Bar */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
@@ -388,45 +397,45 @@ export default function DynamicDiscountEngine() {
               Manage real-time fare adjustments for API/GDS/NDC sources
             </CardDescription>
           </div>
-          <Button 
-            onClick={() => setIsCreateModalOpen(true)}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Create Rule
-          </Button>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-            <Input 
-              placeholder="Rule Code" 
-              value={filters.ruleCode || ''}
-              onChange={(e) => setFilters(prev => ({ ...prev, ruleCode: e.target.value }))}
+            <Input
+              placeholder="Rule Code"
+              value={filters.ruleCode || ""}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, ruleCode: e.target.value }))
+              }
             />
-            <Input 
-              placeholder="Origin" 
-              value={filters.origin || ''}
-              onChange={(e) => setFilters(prev => ({ ...prev, origin: e.target.value }))}
+            <Input
+              placeholder="Origin"
+              value={filters.origin || ""}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, origin: e.target.value }))
+              }
             />
-            <Input 
-              placeholder="Destination" 
-              value={filters.destination || ''}
-              onChange={(e) => setFilters(prev => ({ ...prev, destination: e.target.value }))}
+            <Input
+              placeholder="Destination"
+              value={filters.destination || ""}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, destination: e.target.value }))
+              }
             />
-            <Input 
-              placeholder="Channel" 
-              value={filters.channel || ''}
-              onChange={(e) => setFilters(prev => ({ ...prev, channel: e.target.value }))}
+            <Input
+              placeholder="Channel"
+              value={filters.channel || ""}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, channel: e.target.value }))
+              }
             />
-            <Input 
-              placeholder="Status" 
-              value={filters.status || ''}
-              onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
+            <Input
+              placeholder="Status"
+              value={filters.status || ""}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, status: e.target.value }))
+              }
             />
-            <Button 
-              variant="outline"
-              onClick={() => setFilters({})}
-            >
+            <Button variant="outline" onClick={() => setFilters({})}>
               <Filter className="w-4 h-4 mr-2" />
               Clear Filters
             </Button>
@@ -557,15 +566,19 @@ export default function DynamicDiscountEngine() {
               ))}
             </TableBody>
           </Table>
-          
+
           {rules.length === 0 && (
             <div className="text-center py-12">
               <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
                 <TrendingUp className="w-8 h-8 text-gray-400" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No discount rules found</h3>
-              <p className="text-gray-500 mb-4">Get started by creating your first dynamic discount rule.</p>
-              <Button 
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No discount rules found
+              </h3>
+              <p className="text-gray-500 mb-4">
+                Get started by creating your first dynamic discount rule.
+              </p>
+              <Button
                 onClick={() => setIsCreateModalOpen(true)}
                 className="bg-blue-600 hover:bg-blue-700"
               >
@@ -1409,10 +1422,7 @@ export default function DynamicDiscountEngine() {
         open={isTraceViewerOpen}
         onCancel={() => setIsTraceViewerOpen(false)}
         footer={[
-          <AntButton
-            key="close"
-            onClick={() => setIsTraceViewerOpen(false)}
-          >
+          <AntButton key="close" onClick={() => setIsTraceViewerOpen(false)}>
             Close
           </AntButton>,
         ]}
@@ -1422,7 +1432,7 @@ export default function DynamicDiscountEngine() {
           <div className="text-sm text-gray-600 mb-4">
             View execution traces for rule applications and fare adjustments
           </div>
-          
+
           <Table>
             <TableHeader>
               <TableRow>
@@ -1449,7 +1459,8 @@ export default function DynamicDiscountEngine() {
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">
-                      {trace.searchParams?.origin} → {trace.searchParams?.destination}
+                      {trace.searchParams?.origin} →{" "}
+                      {trace.searchParams?.destination}
                     </div>
                   </TableCell>
                   <TableCell>
@@ -1469,7 +1480,10 @@ export default function DynamicDiscountEngine() {
                           key={idx}
                           className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800"
                         >
-                          {adj.rule}: {adj.type === "PERCENT" ? `${adj.value}%` : `$${adj.value}`}
+                          {adj.rule}:{" "}
+                          {adj.type === "PERCENT"
+                            ? `${adj.value}%`
+                            : `$${adj.value}`}
                         </span>
                       ))}
                     </div>
@@ -1483,7 +1497,7 @@ export default function DynamicDiscountEngine() {
               ))}
             </TableBody>
           </Table>
-          
+
           {traces.length === 0 && (
             <div className="text-center py-8 text-gray-500">
               No execution traces found

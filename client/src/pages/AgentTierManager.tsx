@@ -820,6 +820,7 @@ export default function AgentTierManager() {
                 </p>
               </div>
               <AntButton
+                className="bg-primary text-white"
                 type="primary"
                 icon={<PlusOutlined />}
                 onClick={() => {

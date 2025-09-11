@@ -707,6 +707,7 @@ export default function CampaignManager() {
                 </p>
               </div>
               <AntButton
+                className="bg-primary text-white"
                 type="primary"
                 icon={<Plus className="w-4 h-4" />}
                 onClick={() => {

@@ -600,6 +600,7 @@ export default function AgentChannelManager() {
                 title="Agent Directory & Channel Access"
                 extra={
                   <AntButton
+                    className="bg-primary text-white"
                     type="primary"
                     icon={<PlusOutlined />}
                     onClick={handleCreateAgent}

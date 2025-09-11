@@ -686,7 +686,6 @@ export default function CohortManager() {
                     </Row>
                     <Row gutter={16}>
                       <Col span={8}>
-                      <Col span={8}>
                         <AntForm.Item name="channel" label="Channel">
                           <AntSelect placeholder="Select channel">
                             {channels.map((channel) => (

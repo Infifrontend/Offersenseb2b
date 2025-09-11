@@ -157,6 +157,16 @@ export default function NonAirAncillaries() {
     },
   });
 
+  // Fetch cohorts
+  const { data: availableCohorts = [], isLoading: isCohortsLoading } = useQuery({
+    queryKey: ["cohorts"],
+    queryFn: async () => {
+      const response = await fetch("/api/cohorts");
+      if (!response.ok) throw new Error("Failed to fetch cohorts");
+      return response.json();
+    },
+  });
+
   // Create rate mutation
   const createRateMutation = useMutation({
     mutationFn: async (data: RateFormData) => {
@@ -342,6 +352,7 @@ export default function NonAirAncillaries() {
       ...rule,
       validDates: [dayjs(rule.validFrom), dayjs(rule.validTo)],
       adjustmentValue: parseFloat(rule.adjustmentValue),
+      cohortCodes: rule.cohortCodes || [],
     });
     setIsEditRuleModalOpen(true);
   };
@@ -834,12 +845,62 @@ export default function NonAirAncillaries() {
               </AntForm.Item>
             </Col>
           </Row>
-          <AntForm.Item name="cohortCodes" label="Cohort Codes (Optional)">
+          <AntForm.Item
+            name="cohortCodes"
+            label="Cohort Codes (Optional)"
+            tooltip="Select cohorts that are eligible for this markup rule. Only users matching these cohorts will see this adjusted pricing."
+          >
             <AntSelect
-              mode="tags"
-              placeholder="Enter cohort codes"
+              mode="multiple"
+              placeholder={
+                isCohortsLoading
+                  ? "Loading cohorts..."
+                  : availableCohorts.length === 0
+                    ? "No cohorts available"
+                    : "Select cohorts"
+              }
               style={{ width: "100%" }}
-            />
+              dropdownStyle={{ zIndex: 9999 }}
+              getPopupContainer={(trigger) => trigger.parentElement}
+              virtual={false}
+              showSearch
+              loading={isCohortsLoading}
+              disabled={isCohortsLoading}
+              notFoundContent={
+                isCohortsLoading ? "Loading..." : "No cohorts found"
+              }
+              filterOption={(input, option) => {
+                const label =
+                  option?.children?.props?.children?.[0]?.props?.children ||
+                  option?.value ||
+                  "";
+                const code =
+                  option?.children?.props?.children?.[1]?.props?.children ||
+                  option?.value ||
+                  "";
+                return (
+                  label.toLowerCase().indexOf(input.toLowerCase()) >= 0 ||
+                  code.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                );
+              }}
+            >
+              {availableCohorts.map((cohort: any) => (
+                <AntSelect.Option key={cohort.id} value={cohort.cohortCode}>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      padding: "2px 0",
+                    }}
+                  >
+                    <div className="cls-cohort-dropdwon">
+                      <p>{cohort.cohortName}</p>{" "}
+                      <span className="text-gray-600">{cohort.cohortCode}</span>
+                    </div>
+                  </div>
+                </AntSelect.Option>
+              ))}
+            </AntSelect>
           </AntForm.Item>
           <Row gutter={16}>
             <Col span={8}>
@@ -1132,6 +1193,14 @@ export default function NonAirAncillaries() {
                 {selectedRule.validFrom} to {selectedRule.validTo}
               </div>
             </div>
+            <div>
+              <label className="font-semibold">Cohort Codes:</label>
+              <div>
+                {Array.isArray(selectedRule.cohortCodes)
+                  ? selectedRule.cohortCodes.join(", ")
+                  : "N/A"}
+              </div>
+            </div>
           </div>
         )}
       </Modal>
@@ -1351,12 +1420,62 @@ export default function NonAirAncillaries() {
               </AntForm.Item>
             </Col>
           </Row>
-          <AntForm.Item name="cohortCodes" label="Cohort Codes (Optional)">
+          <AntForm.Item
+            name="cohortCodes"
+            label="Cohort Codes (Optional)"
+            tooltip="Select cohorts that are eligible for this markup rule. Only users matching these cohorts will see this adjusted pricing."
+          >
             <AntSelect
-              mode="tags"
-              placeholder="Enter cohort codes"
+              mode="multiple"
+              placeholder={
+                isCohortsLoading
+                  ? "Loading cohorts..."
+                  : availableCohorts.length === 0
+                    ? "No cohorts available"
+                    : "Select cohorts"
+              }
               style={{ width: "100%" }}
-            />
+              dropdownStyle={{ zIndex: 9999 }}
+              getPopupContainer={(trigger) => trigger.parentElement}
+              virtual={false}
+              showSearch
+              loading={isCohortsLoading}
+              disabled={isCohortsLoading}
+              notFoundContent={
+                isCohortsLoading ? "Loading..." : "No cohorts found"
+              }
+              filterOption={(input, option) => {
+                const label =
+                  option?.children?.props?.children?.[0]?.props?.children ||
+                  option?.value ||
+                  "";
+                const code =
+                  option?.children?.props?.children?.[1]?.props?.children ||
+                  option?.value ||
+                  "";
+                return (
+                  label.toLowerCase().indexOf(input.toLowerCase()) >= 0 ||
+                  code.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                );
+              }}
+            >
+              {availableCohorts.map((cohort: any) => (
+                <AntSelect.Option key={cohort.id} value={cohort.cohortCode}>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      padding: "2px 0",
+                    }}
+                  >
+                    <div className="cls-cohort-dropdwon">
+                      <p>{cohort.cohortName}</p>{" "}
+                      <span className="text-gray-600">{cohort.cohortCode}</span>
+                    </div>
+                  </div>
+                </AntSelect.Option>
+              ))}
+            </AntSelect>
           </AntForm.Item>
           <Row gutter={16}>
             <Col span={8}>

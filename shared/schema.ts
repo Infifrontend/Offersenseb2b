@@ -484,3 +484,35 @@ export const insertCohortSchema = createInsertSchema(cohorts, {
 
 export type Cohort = typeof cohorts.$inferSelect;
 export type InsertCohort = z.infer<typeof insertCohortSchema>;
+
+export const auditLogs = pgTable("audit_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  timestamp: timestamp("timestamp").default(sql`now()`).notNull(),
+  user: varchar("user", { length: 100 }).notNull(),
+  module: varchar("module", { length: 50 }).notNull(), // NegotiatedFare, DynamicDiscountRule, etc.
+  entityId: varchar("entity_id", { length: 100 }).notNull(),
+  action: varchar("action", { length: 20 }).notNull(), // CREATED, UPDATED, DELETED, STATUS_CHANGED
+  beforeData: json("before_data"), // snapshot before change
+  afterData: json("after_data"), // snapshot after change
+  diff: json("diff"), // specific field changes
+  justification: text("justification"),
+  ipAddress: varchar("ip_address", { length: 45 }),
+  userAgent: text("user_agent"),
+  sessionId: varchar("session_id", { length: 100 }),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const insertAuditLogSchema = createInsertSchema(auditLogs, {
+  beforeData: z.any().optional(),
+  afterData: z.any().optional(),
+  diff: z.record(z.object({
+    from: z.any(),
+    to: z.any()
+  })).optional(),
+}).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type AuditLog = typeof auditLogs.$inferSelect;
+export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;

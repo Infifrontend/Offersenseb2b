@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import multer from "multer";
 import csv from "csv-parser";
 import { Readable } from "stream";
-import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema, insertAirAncillaryRuleSchema, insertNonAirRateSchema, insertNonAirMarkupRuleSchema, insertBundleSchema, insertBundlePricingRuleSchema, insertOfferRuleSchema, insertOfferTraceSchema, insertAgentSchema, insertChannelPricingOverrideSchema, insertCohortSchema } from "../shared/schema";
+import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema, insertAirAncillaryRuleSchema, insertNonAirRateSchema, insertNonAirMarkupRuleSchema, insertBundleSchema, insertBundlePricingRuleSchema, insertOfferRuleSchema, insertOfferTraceSchema, insertAgentSchema, insertChannelPricingOverrideSchema, insertCohortSchema, insertAuditLogSchema } from "../shared/schema";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -1588,6 +1588,116 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error: any) {
       res.status(500).json({ message: "Failed to simulate cohort assignment", error: error.message });
+    }
+  });
+
+  // Audit Logs Routes
+  
+  // Get all audit logs with optional filters
+  app.get("/api/audit-logs", async (req, res) => {
+    try {
+      const filters = req.query;
+      const logs = await storage.getAuditLogs(filters);
+      res.json(logs);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch audit logs", error: error.message });
+    }
+  });
+
+  // Get audit log by ID
+  app.get("/api/audit-logs/:id", async (req, res) => {
+    try {
+      const log = await storage.getAuditLogById(req.params.id);
+      if (!log) {
+        return res.status(404).json({ message: "Audit log not found" });
+      }
+      res.json(log);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch audit log", error: error.message });
+    }
+  });
+
+  // Get audit logs by entity ID
+  app.get("/api/audit-logs/entity/:entityId", async (req, res) => {
+    try {
+      const { module } = req.query;
+      const logs = await storage.getAuditLogsByEntity(req.params.entityId, module as string);
+      res.json(logs);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch entity audit logs", error: error.message });
+    }
+  });
+
+  // Create audit log entry
+  app.post("/api/audit-logs", async (req, res) => {
+    try {
+      const auditData = {
+        user: req.body.user || "system",
+        module: req.body.module,
+        entityId: req.body.entityId,
+        action: req.body.action,
+        beforeData: req.body.beforeData,
+        afterData: req.body.afterData,
+        justification: req.body.justification,
+        ipAddress: req.ip,
+        userAgent: req.get("User-Agent"),
+        sessionId: req.sessionID,
+      };
+
+      const log = await storage.createAuditLog(auditData);
+      res.status(201).json(log);
+    } catch (error: any) {
+      res.status(400).json({ message: "Failed to create audit log", error: error.message });
+    }
+  });
+
+  // Export audit logs (CSV format)
+  app.get("/api/audit-logs/export", async (req, res) => {
+    try {
+      const filters = req.query;
+      const logs = await storage.getAuditLogs(filters);
+      
+      // Generate CSV content
+      const headers = [
+        "timestamp",
+        "user",
+        "module",
+        "entityId",
+        "action",
+        "justification",
+        "changes"
+      ];
+      
+      const csvRows = [
+        headers.join(","),
+        ...logs.map(log => [
+          log.timestamp?.toISOString() || "",
+          log.user,
+          log.module,
+          log.entityId,
+          log.action,
+          `"${log.justification || ""}"`,
+          `"${JSON.stringify(log.diff || {}).replace(/"/g, '""')}"`
+        ].join(","))
+      ];
+      
+      const csvContent = csvRows.join("\n");
+      
+      res.setHeader("Content-Type", "text/csv");
+      res.setHeader("Content-Disposition", "attachment; filename=audit_logs.csv");
+      res.send(csvContent);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to export audit logs", error: error.message });
+    }
+  });
+
+  // Delete audit log
+  app.delete("/api/audit-logs/:id", async (req, res) => {
+    try {
+      await storage.deleteAuditLog(req.params.id);
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to delete audit log", error: error.message });
     }
   });
 

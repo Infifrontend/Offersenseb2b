@@ -1,31 +1,18 @@
-import { users, negotiatedFares, dynamicDiscountRules, airAncillaryRules, nonAirRates, nonAirMarkupRules, bundles, bundlePricingRules, offerRules, offerTraces, agents, channelPricingOverrides, cohorts } from "../shared/schema";
-import type { 
-  InsertUser, 
-  User, 
-  NegotiatedFare, 
-  InsertNegotiatedFare, 
-  DynamicDiscountRule, 
-  InsertDynamicDiscountRule,
+import { users, negotiatedFares, dynamicDiscountRules, airAncillaryRules, nonAirRates, nonAirMarkupRules, bundles, bundlePricingRules, offerRules, offerTraces, agents, channelPricingOverrides, cohorts, auditLogs, type InsertUser, type InsertNegotiatedFare, type InsertDynamicDiscountRule, type InsertAirAncillaryRule, type InsertNonAirRate, type InsertNonAirMarkupRule, type InsertBundle, type InsertBundlePricingRule, type InsertOfferRule, type InsertOfferTrace, type InsertAgent, type InsertChannelPricingOverride, type InsertCohort, type InsertAuditLog } from "../shared/schema";
+import type {
+  User,
+  NegotiatedFare,
+  DynamicDiscountRule,
   AirAncillaryRule,
-  InsertAirAncillaryRule,
   NonAirRate,
-  InsertNonAirRate,
   NonAirMarkupRule,
-  InsertNonAirMarkupRule,
   Bundle,
-  InsertBundle,
   BundlePricingRule,
-  InsertBundlePricingRule,
   OfferRule,
-  InsertOfferRule,
   OfferTrace,
-  InsertOfferTrace,
   Agent,
-  InsertAgent,
   ChannelPricingOverride,
-  InsertChannelPricingOverride,
   Cohort,
-  InsertCohort
 } from "../shared/schema";
 import { db } from "./db";
 import { eq, and, or, gte, lte, ilike, inArray, sql, desc } from "drizzle-orm";
@@ -139,6 +126,39 @@ export interface IStorage {
   updateCohortStatus(id: string, status: string): Promise<Cohort>;
   deleteCohort(id: string): Promise<void>;
   checkCohortConflicts(cohortData: InsertCohort): Promise<any[]>;
+
+  // Audit Log Methods
+  getAuditLogs(filters: any = {}): Promise<InsertAuditLog[]>;
+  getAuditLogById(id: string): Promise<InsertAuditLog | null>;
+  getAuditLogsByEntity(entityId: string, module?: string): Promise<InsertAuditLog[]>;
+  insertAuditLog(data: InsertAuditLog): Promise<InsertAuditLog>;
+  deleteAuditLog(id: string): Promise<void>;
+  createAuditLog(params: {
+    user: string;
+    module: string;
+    entityId: string;
+    action: string;
+    beforeData?: any;
+    afterData?: any;
+    justification?: string;
+    ipAddress?: string;
+    userAgent?: string;
+    sessionId?: string;
+  }): Promise<InsertAuditLog>;
+  withAuditLog<T>(
+    operation: () => Promise<T>,
+    auditParams: {
+      user: string;
+      module: string;
+      entityId: string;
+      action: string;
+      justification?: string;
+      ipAddress?: string;
+      userAgent?: string;
+      sessionId?: string;
+    },
+    getBeforeData?: () => Promise<any>
+  ): Promise<T>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -791,10 +811,10 @@ export class DatabaseStorage implements IStorage {
       // Check for overlapping conditions
       const hasOverlap = (
         (!existingConditions.pos && !newConditions.pos) ||
-        (existingConditions.pos && newConditions.pos && 
+        (existingConditions.pos && newConditions.pos &&
          existingConditions.pos.some((p: string) => newConditions.pos.includes(p))) ||
         (!existingConditions.agentTier && !newConditions.agentTier) ||
-        (existingConditions.agentTier && newConditions.agentTier && 
+        (existingConditions.agentTier && newConditions.agentTier &&
          existingConditions.agentTier.some((t: string) => newConditions.agentTier.includes(t)))
       );
 
@@ -1107,6 +1127,149 @@ export class DatabaseStorage implements IStorage {
     }
 
     return conflicts;
+  }
+
+  // Audit Log Methods
+  async getAuditLogs(filters: any = {}): Promise<InsertAuditLog[]> {
+    let query = this.db.select().from(auditLogs);
+
+    if (filters.module) {
+      query = query.where(eq(auditLogs.module, filters.module));
+    }
+    if (filters.entityId) {
+      query = query.where(eq(auditLogs.entityId, filters.entityId));
+    }
+    if (filters.user) {
+      query = query.where(eq(auditLogs.user, filters.user));
+    }
+    if (filters.action) {
+      query = query.where(eq(auditLogs.action, filters.action));
+    }
+    if (filters.startDate) {
+      query = query.where(gte(auditLogs.timestamp, new Date(filters.startDate)));
+    }
+    if (filters.endDate) {
+      query = query.where(lte(auditLogs.timestamp, new Date(filters.endDate)));
+    }
+
+    return await query.orderBy(desc(auditLogs.timestamp));
+  }
+
+  async getAuditLogById(id: string): Promise<InsertAuditLog | null> {
+    const result = await this.db.select().from(auditLogs).where(eq(auditLogs.id, id));
+    return result[0] || null;
+  }
+
+  async getAuditLogsByEntity(entityId: string, module?: string): Promise<InsertAuditLog[]> {
+    let query = this.db.select().from(auditLogs).where(eq(auditLogs.entityId, entityId));
+
+    if (module) {
+      query = query.where(eq(auditLogs.module, module));
+    }
+
+    return await query.orderBy(desc(auditLogs.timestamp));
+  }
+
+  async insertAuditLog(data: InsertAuditLog): Promise<InsertAuditLog> {
+    const result = await this.db.insert(auditLogs).values(data).returning();
+    return result[0];
+  }
+
+  async deleteAuditLog(id: string): Promise<void> {
+    await this.db.delete(auditLogs).where(eq(auditLogs.id, id));
+  }
+
+  // Utility method to create audit log entries
+  async createAuditLog(params: {
+    user: string;
+    module: string;
+    entityId: string;
+    action: string;
+    beforeData?: any;
+    afterData?: any;
+    justification?: string;
+    ipAddress?: string;
+    userAgent?: string;
+    sessionId?: string;
+  }): Promise<InsertAuditLog> {
+    const diff: Record<string, { from: any; to: any }> = {};
+
+    // Generate diff if both before and after data are provided
+    if (params.beforeData && params.afterData) {
+      const beforeKeys = Object.keys(params.beforeData);
+      const afterKeys = Object.keys(params.afterData);
+      const allKeys = new Set([...beforeKeys, ...afterKeys]);
+
+      for (const key of allKeys) {
+        const beforeValue = params.beforeData[key];
+        const afterValue = params.afterData[key];
+
+        if (JSON.stringify(beforeValue) !== JSON.stringify(afterValue)) {
+          diff[key] = {
+            from: beforeValue,
+            to: afterValue
+          };
+        }
+      }
+    }
+
+    const auditData: InsertAuditLog = {
+      user: params.user,
+      module: params.module,
+      entityId: params.entityId,
+      action: params.action,
+      beforeData: params.beforeData,
+      afterData: params.afterData,
+      diff: Object.keys(diff).length > 0 ? diff : null,
+      justification: params.justification,
+      ipAddress: params.ipAddress,
+      userAgent: params.userAgent,
+      sessionId: params.sessionId,
+      timestamp: new Date(),
+    };
+
+    return await this.insertAuditLog(auditData);
+  }
+
+  // Helper method to wrap entity operations with audit logging
+  async withAuditLog<T>(
+    operation: () => Promise<T>,
+    auditParams: {
+      user: string;
+      module: string;
+      entityId: string;
+      action: string;
+      justification?: string;
+      ipAddress?: string;
+      userAgent?: string;
+      sessionId?: string;
+    },
+    getBeforeData?: () => Promise<any>
+  ): Promise<T> {
+    const beforeData = getBeforeData ? await getBeforeData() : null;
+
+    try {
+      const result = await operation();
+
+      // Create audit log after successful operation
+      await this.createAuditLog({
+        ...auditParams,
+        beforeData,
+        afterData: result,
+      });
+
+      return result;
+    } catch (error) {
+      // Optionally log failed operations too
+      await this.createAuditLog({
+        ...auditParams,
+        action: `${auditParams.action}_FAILED`,
+        beforeData,
+        afterData: { error: error.message },
+      });
+
+      throw error;
+    }
   }
 };
 

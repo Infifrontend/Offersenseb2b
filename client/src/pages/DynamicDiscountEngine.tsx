@@ -904,23 +904,36 @@ export default function DynamicDiscountEngine() {
               </AntForm.Item>
             </Col>
           </Row>
-          <Row>
-            <Col span={12}>
-              <AntForm.Item
-                label="Agent Tiers"
-                name="agentTier"
-                rules={[{ required: true }]}
-              >
-                <AntSelect mode="multiple" placeholder="Select agent tiers">
-                  {agentTiers.map((tier) => (
-                    <AntSelect.Option key={tier} value={tier}>
-                      {tier}
-                    </AntSelect.Option>
-                  ))}
-                </AntSelect>
-              </AntForm.Item>
-            </Col>
-          </Row>
+          <AntForm.Item
+            label="Agent Tiers"
+            name="agentTier"
+            rules={[
+              { required: true, message: "Please select at least one agent tier" },
+            ]}
+          >
+            <AntCheckbox.Group style={{ width: '100%' }}>
+              <Row gutter={[16, 8]}>
+                {agentTiers.map((tier) => (
+                  <Col span={6} key={tier}>
+                    <AntCheckbox 
+                      value={tier}
+                      style={{ 
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        border: '1px solid #d9d9d9',
+                        marginBottom: '8px',
+                        fontSize: '14px'
+                      }}
+                    >
+                      <span style={{ fontWeight: '500' }}>{tier}</span>
+                    </AntCheckbox>
+                  </Col>
+                ))}
+              </Row>
+            </AntCheckbox.Group>
+          </AntForm.Item>
           <AntForm.Item label="Eligible Cohorts (Optional)" name="cohortCodes">
             <AntSelect mode="tags" placeholder="Enter cohort codes"></AntSelect>
           </AntForm.Item>
@@ -1166,19 +1179,36 @@ export default function DynamicDiscountEngine() {
                 </AntCheckbox.Group>
               </AntForm.Item>
             </Col>
-            <Col span={12}>
+            <Col span={24}>
               <AntForm.Item
                 label="Agent Tiers"
                 name="agentTier"
-                rules={[{ required: true }]}
+                rules={[
+                  { required: true, message: "Please select at least one agent tier" },
+                ]}
               >
-                <AntSelect mode="multiple" placeholder="Select agent tiers">
-                  {agentTiers.map((tier) => (
-                    <AntSelect.Option key={tier} value={tier}>
-                      {tier}
-                    </AntSelect.Option>
-                  ))}
-                </AntSelect>
+                <AntCheckbox.Group style={{ width: '100%' }}>
+                  <Row gutter={[16, 8]}>
+                    {agentTiers.map((tier) => (
+                      <Col span={6} key={tier}>
+                        <AntCheckbox 
+                          value={tier}
+                          style={{ 
+                            display: 'flex',
+                            alignItems: 'center',
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            border: '1px solid #d9d9d9',
+                            marginBottom: '8px',
+                            fontSize: '14px'
+                          }}
+                        >
+                          <span style={{ fontWeight: '500' }}>{tier}</span>
+                        </AntCheckbox>
+                      </Col>
+                    ))}
+                  </Row>
+                </AntCheckbox.Group>
               </AntForm.Item>
             </Col>
           </Row>

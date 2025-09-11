@@ -901,11 +901,24 @@ export default function NegotiatedFareManager() {
               { required: true, message: "Please select at least one tier" },
             ]}
           >
-            <AntCheckbox.Group>
-              <Row>
+            <AntCheckbox.Group style={{ width: '100%' }}>
+              <Row gutter={[16, 8]}>
                 {agentTiers.map((tier) => (
                   <Col span={6} key={tier}>
-                    <AntCheckbox value={tier}>{tier}</AntCheckbox>
+                    <AntCheckbox 
+                      value={tier}
+                      style={{ 
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        border: '1px solid #d9d9d9',
+                        marginBottom: '8px',
+                        fontSize: '14px'
+                      }}
+                    >
+                      <span style={{ fontWeight: '500' }}>{tier}</span>
+                    </AntCheckbox>
                   </Col>
                 ))}
               </Row>
@@ -1579,11 +1592,24 @@ export default function NegotiatedFareManager() {
               { required: true, message: "Please select at least one tier" },
             ]}
           >
-            <AntCheckbox.Group>
-              <Row>
+            <AntCheckbox.Group style={{ width: '100%' }}>
+              <Row gutter={[16, 8]}>
                 {agentTiers.map((tier) => (
                   <Col span={6} key={tier}>
-                    <AntCheckbox value={tier}>{tier}</AntCheckbox>
+                    <AntCheckbox 
+                      value={tier}
+                      style={{ 
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        border: '1px solid #d9d9d9',
+                        marginBottom: '8px',
+                        fontSize: '14px'
+                      }}
+                    >
+                      <span style={{ fontWeight: '500' }}>{tier}</span>
+                    </AntCheckbox>
                   </Col>
                 ))}
               </Row>

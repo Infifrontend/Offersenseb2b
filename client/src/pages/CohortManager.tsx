@@ -453,12 +453,8 @@ export default function CohortManager() {
                     >
                       <AntSelect 
                         placeholder="Select cohort type"
-                        allowClear
-                        showSearch
                         style={{ width: '100%' }}
-                        filterOption={(input, option) =>
-                          (option?.children ?? '').toString().toLowerCase().includes(input.toLowerCase())
-                        }
+                        dropdownStyle={{ zIndex: 9999 }}
                       >
                         {cohortTypes.map((type) => (
                           <AntSelect.Option key={type} value={type}>

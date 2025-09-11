@@ -111,7 +111,11 @@ export default function CohortManager() {
   });
 
   // Fetch cohorts
-  const { data: cohorts = [], isLoading, error } = useQuery({
+  const {
+    data: cohorts = [],
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["cohorts", filters],
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -277,7 +281,7 @@ export default function CohortManager() {
 
   const handleCreateOrUpdate = (values: any) => {
     console.log("Form values received:", values);
-    
+
     const formattedData: CohortFormData = {
       cohortCode: values.cohortCode,
       cohortName: values.cohortName,
@@ -475,11 +479,16 @@ export default function CohortManager() {
                     <AntForm.Item
                       name="type"
                       label="Cohort Type"
-                      rules={[{ required: true, message: "Please select a cohort type" }]}
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please select a cohort type",
+                        },
+                      ]}
                     >
-                      <AntSelect 
+                      <AntSelect
                         placeholder="Select cohort type"
-                        style={{ width: '100%' }}
+                        style={{ width: "100%" }}
                         dropdownStyle={{ zIndex: 9999 }}
                         getPopupContainer={(trigger) => trigger.parentElement}
                         virtual={false}
@@ -495,35 +504,6 @@ export default function CohortManager() {
                   <Col span={12}>
                     <AntForm.Item name="description" label="Description">
                       <AntInput placeholder="Optional description" />
-                    </AntForm.Item>
-                  </Col>
-                </Row>
-
-                <Row gutter={16}>
-                  <Col span={24}>
-                    <AntForm.Item name="eligibleCohorts" label="Eligible Cohorts (Optional)">
-                      <AntSelect
-                        mode="multiple"
-                        placeholder="Select related cohorts"
-                        style={{ width: "100%" }}
-                        dropdownStyle={{ zIndex: 9999 }}
-                        getPopupContainer={(trigger) => trigger.parentElement}
-                        virtual={false}
-                        showSearch
-                        filterOption={(input, option) =>
-                          option?.children?.toLowerCase().indexOf(input.toLowerCase()) >= 0 ||
-                          option?.value?.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                        }
-                      >
-                        {availableCohorts.map((cohort: any) => (
-                          <AntSelect.Option key={cohort.code} value={cohort.code}>
-                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                              <span style={{ fontWeight: '500', fontSize: '14px' }}>{cohort.name || cohort.code}</span>
-                              <span style={{ fontSize: '12px', color: '#666' }}>{cohort.code}</span>
-                            </div>
-                          </AntSelect.Option>
-                        ))}
-                      </AntSelect>
                     </AntForm.Item>
                   </Col>
                 </Row>
@@ -745,11 +725,13 @@ export default function CohortManager() {
                     <Row gutter={16}>
                       <Col span={8}>
                         <AntForm.Item name="channel" label="Channel">
-                          <AntSelect 
+                          <AntSelect
                             placeholder="Select channel"
-                            style={{ width: '100%' }}
+                            style={{ width: "100%" }}
                             dropdownStyle={{ zIndex: 9999 }}
-                            getPopupContainer={(trigger) => trigger.parentElement}
+                            getPopupContainer={(trigger) =>
+                              trigger.parentElement
+                            }
                             virtual={false}
                           >
                             {channels.map((channel) => (
@@ -762,11 +744,13 @@ export default function CohortManager() {
                       </Col>
                       <Col span={8}>
                         <AntForm.Item name="device" label="Device Type">
-                          <AntSelect 
+                          <AntSelect
                             placeholder="Select device"
-                            style={{ width: '100%' }}
+                            style={{ width: "100%" }}
                             dropdownStyle={{ zIndex: 9999 }}
-                            getPopupContainer={(trigger) => trigger.parentElement}
+                            getPopupContainer={(trigger) =>
+                              trigger.parentElement
+                            }
                             virtual={false}
                           >
                             {devices.map((device) => (
@@ -819,11 +803,13 @@ export default function CohortManager() {
                           name="bookingFrequency"
                           label="Booking Frequency"
                         >
-                          <AntSelect 
+                          <AntSelect
                             placeholder="Select frequency"
-                            style={{ width: '100%' }}
+                            style={{ width: "100%" }}
                             dropdownStyle={{ zIndex: 9999 }}
-                            getPopupContainer={(trigger) => trigger.parentElement}
+                            getPopupContainer={(trigger) =>
+                              trigger.parentElement
+                            }
                             virtual={false}
                           >
                             {bookingFrequencies.map((freq) => (
@@ -842,9 +828,11 @@ export default function CohortManager() {
                           <AntSelect
                             mode="multiple"
                             placeholder="Select cabin classes"
-                            style={{ width: '100%' }}
+                            style={{ width: "100%" }}
                             dropdownStyle={{ zIndex: 9999 }}
-                            getPopupContainer={(trigger) => trigger.parentElement}
+                            getPopupContainer={(trigger) =>
+                              trigger.parentElement
+                            }
                             virtual={false}
                           >
                             {cabinClasses.map((cabin) => (

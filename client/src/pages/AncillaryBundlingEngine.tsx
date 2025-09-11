@@ -843,14 +843,7 @@ export default function AncillaryBundlingEngine() {
                               : `$${rule.discountValue || 0}`}
                           </TableCell>
                           <TableCell>{rule.priority || 1}</TableCell>
-                          <TableCell className="text-sm text-gray-600">
-                            {rule.validFrom ? new Date(rule.validFrom).toLocaleDateString() : 'N/A'} - {rule.validTo ? new Date(rule.validTo).toLocaleDateString() : 'N/A'}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={rule.status === 'ACTIVE' ? 'default' : 'secondary'}>
-                              {rule.status || 'UNKNOWN'}
-                            </Badge>
-                          </TableCell>me="text-sm">
+                          <TableCell className="text-sm">
                             {rule.validFrom && rule.validTo ? (
                               <>
                                 <div>{formatDate(rule.validFrom)}</div>

@@ -254,7 +254,7 @@ export default function AncillaryBundlingEngine() {
     error: pricingError,
     refetch: refetchPricingRules,
   } = useQuery({
-    queryKey: ["bundlePricingRules"],
+    queryKey: ["bundle-pricing-rules"],
     queryFn: async () => {
       console.log("Fetching bundle pricing rules from /api/bundles/pricing");
       const response = await fetch("/api/bundles/pricing");
@@ -265,7 +265,7 @@ export default function AncillaryBundlingEngine() {
       }
       const data = await response.json();
       console.log("Bundle pricing rules response:", data);
-      return data;
+      return Array.isArray(data) ? data : [];
     },
   });
 

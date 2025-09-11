@@ -1,4 +1,4 @@
-import { users, negotiatedFares, dynamicDiscountRules, airAncillaryRules, nonAirRates, nonAirMarkupRules, bundles, bundlePricingRules, offerRules, offerTraces, agents, channelPricingOverrides } from "../shared/schema";
+import { users, negotiatedFares, dynamicDiscountRules, airAncillaryRules, nonAirRates, nonAirMarkupRules, bundles, bundlePricingRules, offerRules, offerTraces, agents, channelPricingOverrides, cohorts } from "../shared/schema";
 import type { 
   InsertUser, 
   User, 
@@ -23,7 +23,9 @@ import type {
   Agent,
   InsertAgent,
   ChannelPricingOverride,
-  InsertChannelPricingOverride
+  InsertChannelPricingOverride,
+  Cohort,
+  InsertCohort
 } from "../shared/schema";
 import { db } from "./db";
 import { eq, and, or, gte, lte, ilike, inArray, sql, desc } from "drizzle-orm";
@@ -127,6 +129,16 @@ export interface IStorage {
   updateChannelPricingOverrideStatus(id: string, status: string): Promise<ChannelPricingOverride>;
   deleteChannelPricingOverride(id: string): Promise<void>;
   checkChannelPricingOverrideConflicts(overrideData: InsertChannelPricingOverride): Promise<any[]>;
+
+  // Cohort operations
+  getCohorts(filters?: any): Promise<Cohort[]>;
+  insertCohort(cohortData: InsertCohort): Promise<Cohort>;
+  getCohortById(id: string): Promise<Cohort | null>;
+  getCohortByCode(cohortCode: string): Promise<Cohort | null>;
+  updateCohort(id: string, cohortData: InsertCohort): Promise<Cohort>;
+  updateCohortStatus(id: string, status: string): Promise<Cohort>;
+  deleteCohort(id: string): Promise<void>;
+  checkCohortConflicts(cohortData: InsertCohort): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1014,6 +1026,84 @@ export class DatabaseStorage implements IStorage {
           conflictingOverride: existing
         });
       }
+    }
+
+    return conflicts;
+  }
+
+  // Cohort operations
+  async getCohorts(filters: any = {}): Promise<Cohort[]> {
+    let query = this.db.select().from(cohorts);
+    const conditions = [];
+
+    if (filters.cohortCode) {
+      conditions.push(eq(cohorts.cohortCode, filters.cohortCode));
+    }
+    if (filters.type) {
+      conditions.push(eq(cohorts.type, filters.type));
+    }
+    if (filters.status) {
+      conditions.push(eq(cohorts.status, filters.status));
+    }
+    if (filters.createdBy) {
+      conditions.push(eq(cohorts.createdBy, filters.createdBy));
+    }
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+
+    return await query.orderBy(cohorts.createdAt);
+  }
+
+  async insertCohort(cohortData: InsertCohort): Promise<Cohort> {
+    const [cohort] = await this.db.insert(cohorts).values(cohortData).returning();
+    return cohort;
+  }
+
+  async getCohortById(id: string): Promise<Cohort | null> {
+    const [cohort] = await this.db.select().from(cohorts).where(eq(cohorts.id, id));
+    return cohort || null;
+  }
+
+  async getCohortByCode(cohortCode: string): Promise<Cohort | null> {
+    const [cohort] = await this.db.select().from(cohorts).where(eq(cohorts.cohortCode, cohortCode));
+    return cohort || null;
+  }
+
+  async updateCohort(id: string, cohortData: InsertCohort): Promise<Cohort> {
+    const [cohort] = await this.db
+      .update(cohorts)
+      .set({ ...cohortData, updatedAt: new Date() })
+      .where(eq(cohorts.id, id))
+      .returning();
+    return cohort;
+  }
+
+  async updateCohortStatus(id: string, status: string): Promise<Cohort> {
+    const [cohort] = await this.db
+      .update(cohorts)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(cohorts.id, id))
+      .returning();
+    return cohort;
+  }
+
+  async deleteCohort(id: string): Promise<void> {
+    await this.db.delete(cohorts).where(eq(cohorts.id, id));
+  }
+
+  async checkCohortConflicts(cohortData: InsertCohort): Promise<any[]> {
+    // Check for existing cohort with same cohortCode
+    const existingCohort = await this.getCohortByCode(cohortData.cohortCode);
+    const conflicts = [];
+
+    if (existingCohort) {
+      conflicts.push({
+        type: 'DUPLICATE_COHORT_CODE',
+        message: `Cohort with code ${cohortData.cohortCode} already exists`,
+        conflictingCohort: existingCohort
+      });
     }
 
     return conflicts;

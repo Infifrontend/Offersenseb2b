@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import multer from "multer";
 import csv from "csv-parser";
 import { Readable } from "stream";
-import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema, insertAirAncillaryRuleSchema, insertNonAirRateSchema, insertNonAirMarkupRuleSchema, insertBundleSchema, insertBundlePricingRuleSchema, insertOfferRuleSchema, insertOfferTraceSchema, insertAgentSchema, insertChannelPricingOverrideSchema } from "../shared/schema";
+import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema, insertAirAncillaryRuleSchema, insertNonAirRateSchema, insertNonAirMarkupRuleSchema, insertBundleSchema, insertBundlePricingRuleSchema, insertOfferRuleSchema, insertOfferTraceSchema, insertAgentSchema, insertChannelPricingOverrideSchema, insertCohortSchema } from "../shared/schema";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -1449,6 +1449,145 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error: any) {
       res.status(500).json({ message: "Failed to delete channel override", error: error.message });
+    }
+  });
+
+  // Cohort Routes
+  
+  // Get all cohorts with optional filters
+  app.get("/api/cohorts", async (req, res) => {
+    try {
+      const filters = req.query;
+      const cohorts = await storage.getCohorts(filters);
+      res.json(cohorts);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch cohorts", error: error.message });
+    }
+  });
+
+  // Create single cohort
+  app.post("/api/cohorts", async (req, res) => {
+    try {
+      const validatedData = insertCohortSchema.parse(req.body);
+      
+      // Check for conflicts
+      const conflicts = await storage.checkCohortConflicts(validatedData);
+      if (conflicts.length > 0) {
+        return res.status(409).json({ 
+          message: "Cohort conflicts detected", 
+          conflicts 
+        });
+      }
+
+      const cohort = await storage.insertCohort(validatedData);
+      res.status(201).json(cohort);
+    } catch (error: any) {
+      res.status(400).json({ message: "Invalid cohort data", error: error.message });
+    }
+  });
+
+  // Get cohort by ID
+  app.get("/api/cohorts/:id", async (req, res) => {
+    try {
+      const cohort = await storage.getCohortById(req.params.id);
+      if (!cohort) {
+        return res.status(404).json({ message: "Cohort not found" });
+      }
+      res.json(cohort);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch cohort", error: error.message });
+    }
+  });
+
+  // Update cohort
+  app.put("/api/cohorts/:id", async (req, res) => {
+    try {
+      const validatedData = insertCohortSchema.parse(req.body);
+      const cohort = await storage.updateCohort(req.params.id, validatedData);
+      res.json(cohort);
+    } catch (error: any) {
+      res.status(400).json({ message: "Failed to update cohort", error: error.message });
+    }
+  });
+
+  // Update cohort status
+  app.patch("/api/cohorts/:id/status", async (req, res) => {
+    try {
+      const { status } = req.body;
+      if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
+        return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
+      }
+      
+      const cohort = await storage.updateCohortStatus(req.params.id, status);
+      res.json(cohort);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to update cohort status", error: error.message });
+    }
+  });
+
+  // Delete cohort
+  app.delete("/api/cohorts/:id", async (req, res) => {
+    try {
+      await storage.deleteCohort(req.params.id);
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to delete cohort", error: error.message });
+    }
+  });
+
+  // Simulate cohort assignment
+  app.post("/api/cohorts/simulate", async (req, res) => {
+    try {
+      const { searchContext } = req.body;
+      
+      if (!searchContext) {
+        return res.status(400).json({ message: "searchContext is required" });
+      }
+
+      // Get all active cohorts
+      const activeCohorts = await storage.getCohorts({ status: "ACTIVE" });
+      const matchedCohorts = [];
+
+      // Simple cohort matching logic
+      for (const cohort of activeCohorts) {
+        const criteria = cohort.criteria as any;
+        let matches = true;
+
+        // Check POS criteria
+        if (criteria.pos && searchContext.pos) {
+          matches = matches && criteria.pos.includes(searchContext.pos);
+        }
+
+        // Check channel criteria
+        if (criteria.channel && searchContext.channel) {
+          matches = matches && criteria.channel === searchContext.channel;
+        }
+
+        // Check device criteria
+        if (criteria.device && searchContext.device) {
+          matches = matches && criteria.device === searchContext.device;
+        }
+
+        // Check booking window criteria
+        if (criteria.bookingWindow && searchContext.bookingDaysAhead) {
+          const bookingDays = searchContext.bookingDaysAhead;
+          matches = matches && 
+            bookingDays >= criteria.bookingWindow.min && 
+            bookingDays <= criteria.bookingWindow.max;
+        }
+
+        if (matches) {
+          matchedCohorts.push(cohort.cohortCode);
+        }
+      }
+
+      res.json({
+        searchContext,
+        matchedCohorts,
+        matchedCount: matchedCohorts.length
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to simulate cohort assignment", error: error.message });
     }
   });
 

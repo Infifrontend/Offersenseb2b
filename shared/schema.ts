@@ -438,7 +438,49 @@ export const insertChannelPricingOverrideSchema = createInsertSchema(channelPric
   updatedAt: true,
 });
 
+export type InsertChannelPricingOverride = z.infer<typeof insertChannelPricingOverrideSchema>;
 export type Agent = typeof agents.$inferSelect;
 export type InsertAgent = z.infer<typeof insertAgentSchema>;
 export type ChannelPricingOverride = typeof channelPricingOverrides.$inferSelect;
 export type InsertChannelPricingOverride = z.infer<typeof insertChannelPricingOverrideSchema>;
+
+export const cohorts = pgTable("cohorts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  cohortCode: varchar("cohort_code", { length: 50 }).notNull().unique(),
+  cohortName: varchar("cohort_name", { length: 200 }).notNull(),
+  type: varchar("type", { length: 20 }).notNull(), // MARKET | CHANNEL | SEASON | BEHAVIOR
+  criteria: json("criteria").notNull(), // JSON rules object
+  description: text("description"),
+  status: varchar("status", { length: 20 }).default("ACTIVE"), // ACTIVE | INACTIVE
+  createdBy: varchar("created_by", { length: 50 }).notNull(),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
+export const insertCohortSchema = createInsertSchema(cohorts, {
+  criteria: z.object({
+    pos: z.array(z.string()).optional(),
+    channel: z.enum(["API", "PORTAL", "MOBILE"]).optional(),
+    device: z.enum(["DESKTOP", "MOBILE", "TABLET"]).optional(),
+    bookingWindow: z.object({
+      min: z.number(),
+      max: z.number()
+    }).optional(),
+    season: z.string().optional(),
+    behavior: z.object({
+      bookingFrequency: z.enum(["HIGH", "MEDIUM", "LOW"]).optional(),
+      averageBookingValue: z.object({
+        min: z.number(),
+        max: z.number()
+      }).optional(),
+      preferredCabinClass: z.array(z.enum(["ECONOMY", "PREMIUM_ECONOMY", "BUSINESS", "FIRST"])).optional(),
+    }).optional(),
+  }),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type Cohort = typeof cohorts.$inferSelect;
+export type InsertCohort = z.infer<typeof insertCohortSchema>;

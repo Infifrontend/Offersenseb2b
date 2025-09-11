@@ -745,29 +745,31 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getBundlePricingRules(filters: any = {}): Promise<BundlePricingRule[]> {
+    console.log("Storage: getBundlePricingRules called with filters:", filters);
+
     try {
-      console.log("Storage: Getting bundle pricing rules with filters:", filters);
+      let query = db.select().from(bundlePricingRules);
 
-      let query = this.db.select().from(bundlePricingRules);
-
+      // Apply filters
       const conditions = [];
 
-      if (filters.status) {
-        conditions.push(eq(bundlePricingRules.status, filters.status));
+      if (filters.ruleCode) {
+        conditions.push(eq(bundlePricingRules.ruleCode, filters.ruleCode));
       }
 
       if (filters.bundleCode) {
         conditions.push(eq(bundlePricingRules.bundleCode, filters.bundleCode));
       }
 
-      if (filters.ruleCode) {
-        conditions.push(eq(bundlePricingRules.ruleCode, filters.ruleCode));
+      if (filters.status) {
+        conditions.push(eq(bundlePricingRules.status, filters.status));
       }
 
       if (conditions.length > 0) {
         query = query.where(and(...conditions));
       }
 
+      console.log("Storage: Executing query for bundle pricing rules");
       const results = await query.orderBy(bundlePricingRules.priority, bundlePricingRules.createdAt);
       console.log(`Storage: Found ${results?.length || 0} bundle pricing rules`);
 

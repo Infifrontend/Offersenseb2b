@@ -836,7 +836,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const filters = req.query;
       console.log("Fetching bundle pricing rules with filters:", filters);
-      
+
       let rules = await storage.getBundlePricingRules(filters);
       console.log(`Found ${rules?.length || 0} bundle pricing rules`);
 
@@ -848,7 +848,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // If no rules found and no specific filters, create sample data
       if (rules.length === 0 && Object.keys(filters).length === 0) {
         console.log("No bundle pricing rules found, creating sample data...");
-        
+
         // First check if bundles exist, if not create sample bundles
         let existingBundles = await storage.getBundles({});
         if (!Array.isArray(existingBundles)) {
@@ -935,6 +935,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.error("Error refetching after sample creation:", refetchError);
           rules = [];
         }
+      } catch (createError: any) {
+        console.error("Error creating sample data:", createError);
+        console.error("Sample creation error stack:", createError.stack);
       }
 
       // Always return an array

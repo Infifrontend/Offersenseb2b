@@ -266,7 +266,19 @@ export default function AncillaryBundlingEngine() {
       }
       const data = await response.json();
       console.log("Bundle pricing rules response:", data);
-      return Array.isArray(data) ? data : [];
+      // Ensure we always return an array, even if the response is not what we expect
+      if (Array.isArray(data)) {
+        return data;
+      } else if (data && data.data && Array.isArray(data.data)) {
+        return data.data;
+      } else {
+        console.warn("Unexpected response format for bundle pricing rules:", data);
+        return [];
+      }
+    },
+    retry: 3,
+    retryDelay: 1000,
+  });
     },
   });
 
@@ -833,7 +845,14 @@ export default function AncillaryBundlingEngine() {
                               : `$${rule.discountValue || 0}`}
                           </TableCell>
                           <TableCell>{rule.priority || 1}</TableCell>
-                          <TableCell className="text-sm">
+                          <TableCell className="text-sm text-gray-600">
+                            {rule.validFrom ? new Date(rule.validFrom).toLocaleDateString() : 'N/A'} - {rule.validTo ? new Date(rule.validTo).toLocaleDateString() : 'N/A'}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={rule.status === 'ACTIVE' ? 'default' : 'secondary'}>
+                              {rule.status || 'UNKNOWN'}
+                            </Badge>
+                          </TableCell>me="text-sm">
                             {rule.validFrom && rule.validTo ? (
                               <>
                                 <div>{formatDate(rule.validFrom)}</div>

@@ -1,4 +1,4 @@
-import { users, negotiatedFares, dynamicDiscountRules, airAncillaryRules, nonAirRates, nonAirMarkupRules, type User, type NegotiatedFare, type InsertUser, type InsertNegotiatedFare, type InsertDynamicDiscountRule, type InsertAirAncillaryRule, type InsertNonAirRate, type InsertNonAirMarkupRule } from "../shared/schema";
+import { users, negotiatedFares, dynamicDiscountRules, airAncillaryRules, nonAirRates, nonAirMarkupRules, bundles, bundlePricingRules, type User, type NegotiatedFare, type InsertUser, type InsertNegotiatedFare, type InsertDynamicDiscountRule, type InsertAirAncillaryRule, type InsertNonAirRate, type InsertNonAirMarkupRule, type InsertBundle, type InsertBundlePricingRule } from "../shared/schema";
 import { db } from "./db";
 import { eq, and, or, gte, lte, ilike, inArray, sql } from "drizzle-orm";
 
@@ -47,6 +47,24 @@ export interface IStorage {
   updateNonAirMarkupRuleStatus(id: string, status: string): Promise<InsertNonAirMarkupRule>;
   deleteNonAirMarkupRule(id: string): Promise<void>;
   checkNonAirMarkupRuleConflicts(rule: InsertNonAirMarkupRule): Promise<InsertNonAirMarkupRule[]>;
+
+  // Bundles
+  insertBundle(bundle: InsertBundle): Promise<InsertBundle>;
+  getBundles(filters?: any): Promise<InsertBundle[]>;
+  getBundleById(id: string): Promise<InsertBundle | undefined>;
+  updateBundle(id: string, bundle: Partial<InsertBundle>): Promise<InsertBundle>;
+  updateBundleStatus(id: string, status: string): Promise<InsertBundle>;
+  deleteBundle(id: string): Promise<void>;
+  checkBundleConflicts(bundle: InsertBundle): Promise<InsertBundle[]>;
+
+  // Bundle Pricing Rules
+  insertBundlePricingRule(rule: InsertBundlePricingRule): Promise<InsertBundlePricingRule>;
+  getBundlePricingRules(filters?: any): Promise<InsertBundlePricingRule[]>;
+  getBundlePricingRuleById(id: string): Promise<InsertBundlePricingRule | undefined>;
+  updateBundlePricingRule(id: string, rule: Partial<InsertBundlePricingRule>): Promise<InsertBundlePricingRule>;
+  updateBundlePricingRuleStatus(id: string, status: string): Promise<InsertBundlePricingRule>;
+  deleteBundlePricingRule(id: string): Promise<void>;
+  checkBundlePricingRuleConflicts(rule: InsertBundlePricingRule): Promise<InsertBundlePricingRule[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -456,6 +474,153 @@ export class DatabaseStorage implements IStorage {
         and(
           eq(nonAirMarkupRules.ruleCode, rule.ruleCode),
           eq(nonAirMarkupRules.status, "ACTIVE")
+        )
+      );
+    return conflicts;
+  }
+
+  // Bundle methods
+  async insertBundle(bundle: InsertBundle): Promise<InsertBundle> {
+    const [insertedBundle] = await db.insert(bundles).values(bundle).returning();
+    return insertedBundle;
+  }
+
+  async getBundles(filters: any = {}): Promise<InsertBundle[]> {
+    let query = db.select().from(bundles);
+    const conditions: any[] = [];
+
+    if (filters.bundleCode) {
+      conditions.push(ilike(bundles.bundleCode, `%${filters.bundleCode}%`));
+    }
+    if (filters.bundleType) {
+      conditions.push(eq(bundles.bundleType, filters.bundleType));
+    }
+    if (filters.status) {
+      conditions.push(eq(bundles.status, filters.status));
+    }
+    if (filters.channel) {
+      conditions.push(eq(bundles.channel, filters.channel));
+    }
+    if (filters.validFrom) {
+      conditions.push(gte(bundles.validFrom, filters.validFrom));
+    }
+    if (filters.validTo) {
+      conditions.push(lte(bundles.validTo, filters.validTo));
+    }
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+
+    return await query.orderBy(bundles.createdAt);
+  }
+
+  async getBundleById(id: string): Promise<InsertBundle | undefined> {
+    const [bundle] = await db.select().from(bundles).where(eq(bundles.id, id));
+    return bundle;
+  }
+
+  async updateBundle(id: string, bundle: Partial<InsertBundle>): Promise<InsertBundle> {
+    const [updatedBundle] = await db
+      .update(bundles)
+      .set({ ...bundle, updatedAt: sql`now()` })
+      .where(eq(bundles.id, id))
+      .returning();
+    return updatedBundle;
+  }
+
+  async updateBundleStatus(id: string, status: string): Promise<InsertBundle> {
+    const [updatedBundle] = await db
+      .update(bundles)
+      .set({ status, updatedAt: sql`now()` })
+      .where(eq(bundles.id, id))
+      .returning();
+    return updatedBundle;
+  }
+
+  async deleteBundle(id: string): Promise<void> {
+    await db.delete(bundles).where(eq(bundles.id, id));
+  }
+
+  async checkBundleConflicts(bundle: InsertBundle): Promise<InsertBundle[]> {
+    const conflicts = await db.select()
+      .from(bundles)
+      .where(
+        and(
+          eq(bundles.bundleCode, bundle.bundleCode),
+          eq(bundles.status, "ACTIVE")
+        )
+      );
+    return conflicts;
+  }
+
+  // Bundle Pricing Rule methods
+  async insertBundlePricingRule(rule: InsertBundlePricingRule): Promise<InsertBundlePricingRule> {
+    const [insertedRule] = await db.insert(bundlePricingRules).values(rule).returning();
+    return insertedRule;
+  }
+
+  async getBundlePricingRules(filters: any = {}): Promise<InsertBundlePricingRule[]> {
+    let query = db.select().from(bundlePricingRules);
+    const conditions: any[] = [];
+
+    if (filters.ruleCode) {
+      conditions.push(ilike(bundlePricingRules.ruleCode, `%${filters.ruleCode}%`));
+    }
+    if (filters.bundleCode) {
+      conditions.push(eq(bundlePricingRules.bundleCode, filters.bundleCode));
+    }
+    if (filters.status) {
+      conditions.push(eq(bundlePricingRules.status, filters.status));
+    }
+    if (filters.validFrom) {
+      conditions.push(gte(bundlePricingRules.validFrom, filters.validFrom));
+    }
+    if (filters.validTo) {
+      conditions.push(lte(bundlePricingRules.validTo, filters.validTo));
+    }
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+
+    return await query.orderBy(bundlePricingRules.priority, bundlePricingRules.createdAt);
+  }
+
+  async getBundlePricingRuleById(id: string): Promise<InsertBundlePricingRule | undefined> {
+    const [rule] = await db.select().from(bundlePricingRules).where(eq(bundlePricingRules.id, id));
+    return rule;
+  }
+
+  async updateBundlePricingRule(id: string, rule: Partial<InsertBundlePricingRule>): Promise<InsertBundlePricingRule> {
+    const [updatedRule] = await db
+      .update(bundlePricingRules)
+      .set({ ...rule, updatedAt: sql`now()` })
+      .where(eq(bundlePricingRules.id, id))
+      .returning();
+    return updatedRule;
+  }
+
+  async updateBundlePricingRuleStatus(id: string, status: string): Promise<InsertBundlePricingRule> {
+    const [updatedRule] = await db
+      .update(bundlePricingRules)
+      .set({ status, updatedAt: sql`now()` })
+      .where(eq(bundlePricingRules.id, id))
+      .returning();
+    return updatedRule;
+  }
+
+  async deleteBundlePricingRule(id: string): Promise<void> {
+    await db.delete(bundlePricingRules).where(eq(bundlePricingRules.id, id));
+  }
+
+  async checkBundlePricingRuleConflicts(rule: InsertBundlePricingRule): Promise<InsertBundlePricingRule[]> {
+    const conflicts = await db.select()
+      .from(bundlePricingRules)
+      .where(
+        and(
+          eq(bundlePricingRules.ruleCode, rule.ruleCode),
+          eq(bundlePricingRules.status, "ACTIVE")
         )
       );
     return conflicts;

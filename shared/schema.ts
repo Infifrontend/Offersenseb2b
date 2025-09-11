@@ -199,3 +199,65 @@ export type NonAirRate = typeof nonAirRates.$inferSelect;
 export type InsertNonAirRate = z.infer<typeof insertNonAirRateSchema>;
 export type NonAirMarkupRule = typeof nonAirMarkupRules.$inferSelect;
 export type InsertNonAirMarkupRule = z.infer<typeof insertNonAirMarkupRuleSchema>;
+
+export const bundles = pgTable("bundles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  bundleCode: varchar("bundle_code", { length: 50 }).notNull().unique(),
+  bundleName: varchar("bundle_name", { length: 200 }).notNull(),
+  components: json("components").notNull(), // array of SKUs: air/non-air product codes
+  bundleType: varchar("bundle_type", { length: 20 }).notNull(), // AIR_AIR | AIR_NONAIR | NONAIR_NONAIR
+  pos: json("pos").notNull(), // array of ISO country codes
+  agentTier: json("agent_tier").notNull(), // array: PLATINUM/GOLD/SILVER/BRONZE
+  cohortCodes: json("cohort_codes"), // array of cohort codes
+  channel: varchar("channel", { length: 20 }).notNull(), // API | PORTAL | MOBILE
+  seasonCode: varchar("season_code", { length: 50 }),
+  validFrom: date("valid_from").notNull(),
+  validTo: date("valid_to").notNull(),
+  inventoryCap: integer("inventory_cap"), // optional inventory limits
+  status: varchar("status", { length: 20 }).default("ACTIVE"), // ACTIVE | INACTIVE
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
+export const bundlePricingRules = pgTable("bundle_pricing_rules", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ruleCode: varchar("rule_code", { length: 50 }).notNull().unique(),
+  bundleCode: varchar("bundle_code", { length: 50 }).notNull(),
+  discountType: varchar("discount_type", { length: 20 }).notNull(), // PERCENT | AMOUNT
+  discountValue: decimal("discount_value", { precision: 10, scale: 2 }).notNull(),
+  tieredPromo: json("tiered_promo"), // optional table: [{qty: number, discount: number}]
+  priority: integer("priority").notNull().default(1),
+  status: varchar("status", { length: 20 }).default("ACTIVE"), // ACTIVE | INACTIVE
+  validFrom: date("valid_from").notNull(),
+  validTo: date("valid_to").notNull(),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
+export const insertBundleSchema = createInsertSchema(bundles, {
+  components: z.array(z.string()),
+  pos: z.array(z.string()),
+  agentTier: z.array(z.enum(["PLATINUM", "GOLD", "SILVER", "BRONZE"])),
+  cohortCodes: z.array(z.string()).optional(),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertBundlePricingRuleSchema = createInsertSchema(bundlePricingRules, {
+  discountValue: z.string().transform((val) => parseFloat(val)),
+  tieredPromo: z.array(z.object({
+    qty: z.number(),
+    discount: z.number(),
+  })).optional(),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type Bundle = typeof bundles.$inferSelect;
+export type InsertBundle = z.infer<typeof insertBundleSchema>;
+export type BundlePricingRule = typeof bundlePricingRules.$inferSelect;
+export type InsertBundlePricingRule = z.infer<typeof insertBundlePricingRuleSchema>;

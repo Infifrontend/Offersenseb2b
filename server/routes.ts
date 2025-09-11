@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import multer from "multer";
 import csv from "csv-parser";
 import { Readable } from "stream";
-import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema, insertAirAncillaryRuleSchema, insertNonAirRateSchema, insertNonAirMarkupRuleSchema } from "../shared/schema";
+import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema, insertAirAncillaryRuleSchema, insertNonAirRateSchema, insertNonAirMarkupRuleSchema, insertBundleSchema, insertBundlePricingRuleSchema } from "../shared/schema";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -681,6 +681,212 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error: any) {
       res.status(500).json({ message: "Failed to delete rule", error: error.message });
+    }
+  });
+
+  // Bundle Routes
+  
+  // Get all bundles with optional filters
+  app.get("/api/bundles", async (req, res) => {
+    try {
+      const filters = req.query;
+      const bundles = await storage.getBundles(filters);
+      res.json(bundles);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch bundles", error: error.message });
+    }
+  });
+
+  // Create single bundle
+  app.post("/api/bundles", async (req, res) => {
+    try {
+      const validatedData = insertBundleSchema.parse(req.body);
+      
+      // Check for conflicts
+      const conflicts = await storage.checkBundleConflicts(validatedData);
+      if (conflicts.length > 0) {
+        return res.status(409).json({ 
+          message: "Bundle conflicts detected", 
+          conflicts 
+        });
+      }
+
+      const bundle = await storage.insertBundle(validatedData);
+      res.status(201).json(bundle);
+    } catch (error: any) {
+      res.status(400).json({ message: "Invalid bundle data", error: error.message });
+    }
+  });
+
+  // Get bundle by ID
+  app.get("/api/bundles/:id", async (req, res) => {
+    try {
+      const bundle = await storage.getBundleById(req.params.id);
+      if (!bundle) {
+        return res.status(404).json({ message: "Bundle not found" });
+      }
+      res.json(bundle);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch bundle", error: error.message });
+    }
+  });
+
+  // Update bundle
+  app.put("/api/bundles/:id", async (req, res) => {
+    try {
+      const validatedData = insertBundleSchema.parse(req.body);
+      const bundle = await storage.updateBundle(req.params.id, validatedData);
+      res.json(bundle);
+    } catch (error: any) {
+      res.status(400).json({ message: "Failed to update bundle", error: error.message });
+    }
+  });
+
+  // Update bundle status
+  app.patch("/api/bundles/:id/status", async (req, res) => {
+    try {
+      const { status } = req.body;
+      if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
+        return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
+      }
+      
+      const bundle = await storage.updateBundleStatus(req.params.id, status);
+      res.json(bundle);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to update bundle status", error: error.message });
+    }
+  });
+
+  // Delete bundle
+  app.delete("/api/bundles/:id", async (req, res) => {
+    try {
+      await storage.deleteBundle(req.params.id);
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to delete bundle", error: error.message });
+    }
+  });
+
+  // Bundle Pricing Rules Routes
+  
+  // Get all bundle pricing rules with optional filters
+  app.get("/api/bundles/pricing", async (req, res) => {
+    try {
+      const filters = req.query;
+      const rules = await storage.getBundlePricingRules(filters);
+      res.json(rules);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch bundle pricing rules", error: error.message });
+    }
+  });
+
+  // Create single bundle pricing rule
+  app.post("/api/bundles/pricing", async (req, res) => {
+    try {
+      const validatedData = insertBundlePricingRuleSchema.parse(req.body);
+      
+      // Check for conflicts
+      const conflicts = await storage.checkBundlePricingRuleConflicts(validatedData);
+      if (conflicts.length > 0) {
+        return res.status(409).json({ 
+          message: "Bundle pricing rule conflicts detected", 
+          conflicts 
+        });
+      }
+
+      const rule = await storage.insertBundlePricingRule(validatedData);
+      res.status(201).json(rule);
+    } catch (error: any) {
+      res.status(400).json({ message: "Invalid bundle pricing rule data", error: error.message });
+    }
+  });
+
+  // Simulate bundle pricing application
+  app.post("/api/bundles/pricing/simulate", async (req, res) => {
+    try {
+      const { basePrice, currency, ruleId } = req.body;
+      
+      if (!basePrice || !currency || !ruleId) {
+        return res.status(400).json({ message: "basePrice, currency, and ruleId are required" });
+      }
+
+      const rule = await storage.getBundlePricingRuleById(ruleId);
+      if (!rule) {
+        return res.status(404).json({ message: "Bundle pricing rule not found" });
+      }
+
+      let adjustedPrice = parseFloat(basePrice);
+      let discount = 0;
+
+      if (rule.discountType === "PERCENT") {
+        discount = basePrice * (parseFloat(rule.discountValue) / 100);
+        adjustedPrice = basePrice - discount;
+      } else if (rule.discountType === "AMOUNT") {
+        discount = parseFloat(rule.discountValue);
+        adjustedPrice = Math.max(0, basePrice - discount);
+      }
+
+      res.json({
+        basePrice: parseFloat(basePrice),
+        adjustedPrice: Math.round(adjustedPrice * 100) / 100,
+        discount: Math.round(discount * 100) / 100,
+        discountType: rule.discountType,
+        discountValue: parseFloat(rule.discountValue),
+        currency,
+        ruleApplied: rule.ruleCode,
+        bundleCode: rule.bundleCode
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to simulate bundle pricing rule", error: error.message });
+    }
+  });
+
+  // Get bundle pricing rule by ID
+  app.get("/api/bundles/pricing/:id", async (req, res) => {
+    try {
+      const rule = await storage.getBundlePricingRuleById(req.params.id);
+      if (!rule) {
+        return res.status(404).json({ message: "Bundle pricing rule not found" });
+      }
+      res.json(rule);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch bundle pricing rule", error: error.message });
+    }
+  });
+
+  // Update bundle pricing rule
+  app.put("/api/bundles/pricing/:id", async (req, res) => {
+    try {
+      const validatedData = insertBundlePricingRuleSchema.parse(req.body);
+      const rule = await storage.updateBundlePricingRule(req.params.id, validatedData);
+      res.json(rule);
+    } catch (error: any) {
+      res.status(400).json({ message: "Failed to update bundle pricing rule", error: error.message });
+    }
+  });
+
+  // Update bundle pricing rule status
+  app.patch("/api/bundles/pricing/:id/status", async (req, res) => {
+    try {
+      const { status } = req.body;
+      if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
+        return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
+      }
+      
+      const rule = await storage.updateBundlePricingRuleStatus(req.params.id, status);
+      res.json(rule);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to update bundle pricing rule status", error: error.message });
+    }
+  });
+
+  // Delete bundle pricing rule
+  app.delete("/api/bundles/pricing/:id", async (req, res) => {
+    try {
+      await storage.deleteBundlePricingRule(req.params.id);
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to delete bundle pricing rule", error: error.message });
     }
   });
 

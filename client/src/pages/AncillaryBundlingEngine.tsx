@@ -286,13 +286,29 @@ export default function AncillaryBundlingEngine() {
     data: pricingRules = [],
     isLoading: pricingRulesLoading,
     refetch: refetchPricingRules,
+    error: pricingRulesError,
   } = useQuery({
     queryKey: ["bundle-pricing-rules", pricingFilters],
     queryFn: async () => {
       const params = new URLSearchParams(pricingFilters);
       const response = await fetch(`/api/bundles/pricing?${params}`);
-      if (!response.ok) throw new Error("Failed to fetch bundle pricing rules");
-      return response.json();
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Failed to fetch bundle pricing rules:", response.status, errorText);
+        throw new Error(`Failed to fetch bundle pricing rules: ${response.status} ${response.statusText}`);
+      }
+      const data = await response.json();
+      // Ensure we always return an array
+      return Array.isArray(data) ? data : [];
+    },
+    retry: 1,
+    onError: (error: any) => {
+      console.error("Bundle pricing rules query error:", error);
+      toast({
+        title: "Error",
+        description: `Failed to load bundle pricing rules: ${error.message}`,
+        variant: "destructive",
+      });
     },
   });
 

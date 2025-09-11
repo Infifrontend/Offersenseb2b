@@ -837,8 +837,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const filters = req.query;
       console.log("API: Fetching bundle pricing rules with filters:", filters);
 
-      let rules = await storage.getBundlePricingRules(filters);
-      console.log(`API: Found ${rules?.length || 0} bundle pricing rules`);
+      let rules;
+      try {
+        rules = await storage.getBundlePricingRules(filters);
+        console.log(`API: Found ${rules?.length || 0} bundle pricing rules`);
+      } catch (dbError: any) {
+        console.error("API: Database error fetching pricing rules:", dbError.message);
+        // Return empty array if database error occurs
+        rules = [];
+      }
 
       // Ensure we always return an array
       if (!Array.isArray(rules)) {

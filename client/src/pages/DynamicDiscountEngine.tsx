@@ -475,16 +475,16 @@ export default function DynamicDiscountEngine() {
                 <div>
                   <Label htmlFor="channel">Channel</Label>
                   <Select
-                    value={filters.channel || ""}
+                    value={filters.channel || "ALL"}
                     onValueChange={(value) =>
-                      setFilters((prev) => ({ ...prev, channel: value }))
+                      setFilters((prev) => ({ ...prev, channel: value === "ALL" ? "" : value }))
                     }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select channel" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Channels</SelectItem>
+                      <SelectItem value="ALL">All Channels</SelectItem>
                       <SelectItem value="API">API</SelectItem>
                       <SelectItem value="PORTAL">PORTAL</SelectItem>
                       <SelectItem value="MOBILE">MOBILE</SelectItem>
@@ -494,16 +494,16 @@ export default function DynamicDiscountEngine() {
                 <div>
                   <Label htmlFor="status">Status</Label>
                   <Select
-                    value={filters.status || ""}
+                    value={filters.status || "ALL"}
                     onValueChange={(value) =>
-                      setFilters((prev) => ({ ...prev, status: value }))
+                      setFilters((prev) => ({ ...prev, status: value === "ALL" ? "" : value }))
                     }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Status</SelectItem>
+                      <SelectItem value="ALL">All Status</SelectItem>
                       <SelectItem value="ACTIVE">Active</SelectItem>
                       <SelectItem value="INACTIVE">Inactive</SelectItem>
                     </SelectContent>
@@ -512,16 +512,16 @@ export default function DynamicDiscountEngine() {
                 <div>
                   <Label htmlFor="fare-source">Fare Source</Label>
                   <Select
-                    value={filters.fareSource || ""}
+                    value={filters.fareSource || "ALL"}
                     onValueChange={(value) =>
-                      setFilters((prev) => ({ ...prev, fareSource: value }))
+                      setFilters((prev) => ({ ...prev, fareSource: value === "ALL" ? "" : value }))
                     }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select fare source" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Sources</SelectItem>
+                      <SelectItem value="ALL">All Sources</SelectItem>
                       <SelectItem value="API_GDS_NDC">API/GDS/NDC</SelectItem>
                     </SelectContent>
                   </Select>
@@ -529,16 +529,16 @@ export default function DynamicDiscountEngine() {
                 <div>
                   <Label htmlFor="agent-tier">Agent Tier</Label>
                   <Select
-                    value={filters.agentTier || ""}
+                    value={filters.agentTier || "ALL"}
                     onValueChange={(value) =>
-                      setFilters((prev) => ({ ...prev, agentTier: value }))
+                      setFilters((prev) => ({ ...prev, agentTier: value === "ALL" ? "" : value }))
                     }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select agent tier" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Tiers</SelectItem>
+                      <SelectItem value="ALL">All Tiers</SelectItem>
                       <SelectItem value="PLATINUM">Platinum</SelectItem>
                       <SelectItem value="GOLD">Gold</SelectItem>
                       <SelectItem value="SILVER">Silver</SelectItem>

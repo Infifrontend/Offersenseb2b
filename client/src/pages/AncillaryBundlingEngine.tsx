@@ -254,10 +254,11 @@ export default function AncillaryBundlingEngine() {
     error: pricingError,
     refetch: refetchPricingRules,
   } = useQuery({
-    queryKey: ["bundle-pricing-rules"],
+    queryKey: ["bundle-pricing-rules", pricingFilters],
     queryFn: async () => {
       console.log("Fetching bundle pricing rules from /api/bundles/pricing");
-      const response = await fetch("/api/bundles/pricing");
+      const params = new URLSearchParams(pricingFilters);
+      const response = await fetch(`/api/bundles/pricing?${params}`);
       if (!response.ok) {
         const errorText = await response.text();
         console.error("Failed to fetch bundle pricing rules:", response.status, errorText);
@@ -329,6 +330,7 @@ export default function AncillaryBundlingEngine() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["bundle-pricing-rules"] });
+      refetchPricingRules();
       setIsCreatePricingModalOpen(false);
       pricingForm.resetFields();
       toast({
@@ -408,6 +410,7 @@ export default function AncillaryBundlingEngine() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["bundle-pricing-rules"] });
+      refetchPricingRules();
       setIsEditPricingModalOpen(false);
       setSelectedPricingRule(null);
       toast({
@@ -457,6 +460,11 @@ export default function AncillaryBundlingEngine() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["bundle-pricing-rules"] });
+      refetchPricingRules();
+      toast({
+        title: "Success",
+        description: "Pricing rule deleted successfully",
+      });
     },
   });
 

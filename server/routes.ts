@@ -837,15 +837,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const filters = req.query;
       console.log("Fetching bundle pricing rules with filters:", filters);
       
-      let rules;
-      try {
-        rules = await storage.getBundlePricingRules(filters);
-        console.log(`Found ${rules?.length || 0} bundle pricing rules`);
-      } catch (storageError: any) {
-        console.error("Storage error fetching pricing rules:", storageError);
-        // Return empty array instead of failing
-        rules = [];
-      }
+      let rules = await storage.getBundlePricingRules(filters);
+      console.log(`Found ${rules?.length || 0} bundle pricing rules`);
 
       // Ensure we always return an array
       if (!Array.isArray(rules)) {
@@ -855,15 +848,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // If no rules found and no specific filters, create sample data
       if (rules.length === 0 && Object.keys(filters).length === 0) {
         console.log("No bundle pricing rules found, creating sample data...");
-        try {
-          // First check if bundles exist, if not create sample bundles
-          let existingBundles;
-          try {
-            existingBundles = await storage.getBundles({});
-          } catch (bundleError) {
-            console.error("Error fetching bundles:", bundleError);
-            existingBundles = [];
-          }
+        
+        // First check if bundles exist, if not create sample bundles
+        let existingBundles = await storage.getBundles({});
+        if (!Array.isArray(existingBundles)) {
+          existingBundles = [];
+        }
 
           if (!existingBundles || existingBundles.length === 0) {
             console.log("Creating sample bundles first...");

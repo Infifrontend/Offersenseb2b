@@ -800,8 +800,9 @@ export class DatabaseStorage implements IStorage {
       });
       console.error("Storage: Full error stack:", error.stack);
 
-      // Instead of silently returning empty array, throw the error so the API can handle it properly
-      throw new Error(`Database error: ${error.message}`);
+      // Return empty array instead of throwing to prevent complete failure
+      console.error("Storage: Returning empty array due to database error");
+      return [];
     }
   }
 

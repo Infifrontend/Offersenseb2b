@@ -860,7 +860,7 @@ export default function DynamicDiscountEngine() {
           </Row>
 
           <Row gutter={16}>
-            <Col span={12}>
+            <Col span={24}>
               <AntForm.Item
                 label="Point of Sale"
                 name="pos"
@@ -868,24 +868,32 @@ export default function DynamicDiscountEngine() {
                   { required: true, message: "Please select at least one POS" },
                 ]}
               >
-                <AntCheckbox.Group style={{ width: '100%' }}>
+                <AntCheckbox.Group style={{ width: "100%" }}>
                   <Row gutter={[16, 8]}>
                     {countriesData.map((country) => (
                       <Col span={6} key={country.code}>
-                        <AntCheckbox 
+                        <AntCheckbox
                           value={country.code}
-                          style={{ 
-                            display: 'flex',
-                            alignItems: 'center',
-                            padding: '4px 8px',
-                            borderRadius: '4px',
-                            border: '1px solid #d9d9d9',
-                            marginBottom: '8px',
-                            fontSize: '14px'
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            padding: "4px 8px",
+                            borderRadius: "4px",
+                            border: "1px solid #d9d9d9",
+                            marginBottom: "8px",
+                            fontSize: "14px",
                           }}
                         >
-                          <span style={{ fontWeight: '500' }}>{country.code}</span>
-                          <span style={{ fontSize: '12px', color: '#666', marginLeft: '4px' }}>
+                          <span style={{ fontWeight: "500" }}>
+                            {country.code}
+                          </span>
+                          <span
+                            style={{
+                              fontSize: "12px",
+                              color: "#666",
+                              marginLeft: "4px",
+                            }}
+                          >
                             {country.name}
                           </span>
                         </AntCheckbox>
@@ -895,6 +903,8 @@ export default function DynamicDiscountEngine() {
                 </AntCheckbox.Group>
               </AntForm.Item>
             </Col>
+          </Row>
+          <Row>
             <Col span={12}>
               <AntForm.Item
                 label="Agent Tiers"
@@ -911,7 +921,6 @@ export default function DynamicDiscountEngine() {
               </AntForm.Item>
             </Col>
           </Row>
-
           <AntForm.Item label="Eligible Cohorts (Optional)" name="cohortCodes">
             <AntSelect mode="tags" placeholder="Enter cohort codes"></AntSelect>
           </AntForm.Item>
@@ -1122,24 +1131,32 @@ export default function DynamicDiscountEngine() {
                   { required: true, message: "Please select at least one POS" },
                 ]}
               >
-                <AntCheckbox.Group style={{ width: '100%' }}>
+                <AntCheckbox.Group style={{ width: "100%" }}>
                   <Row gutter={[16, 8]}>
                     {countriesData.map((country) => (
                       <Col span={6} key={country.code}>
-                        <AntCheckbox 
+                        <AntCheckbox
                           value={country.code}
-                          style={{ 
-                            display: 'flex',
-                            alignItems: 'center',
-                            padding: '4px 8px',
-                            borderRadius: '4px',
-                            border: '1px solid #d9d9d9',
-                            marginBottom: '8px',
-                            fontSize: '14px'
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            padding: "4px 8px",
+                            borderRadius: "4px",
+                            border: "1px solid #d9d9d9",
+                            marginBottom: "8px",
+                            fontSize: "14px",
                           }}
                         >
-                          <span style={{ fontWeight: '500' }}>{country.code}</span>
-                          <span style={{ fontSize: '12px', color: '#666', marginLeft: '4px' }}>
+                          <span style={{ fontWeight: "500" }}>
+                            {country.code}
+                          </span>
+                          <span
+                            style={{
+                              fontSize: "12px",
+                              color: "#666",
+                              marginLeft: "4px",
+                            }}
+                          >
                             {country.name}
                           </span>
                         </AntCheckbox>

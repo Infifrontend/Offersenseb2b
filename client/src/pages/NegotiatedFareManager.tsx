@@ -123,7 +123,16 @@ interface NegotiatedFare {
 }
 
 const currencies = ["USD", "EUR", "GBP", "INR", "AUD", "CAD", "SGD"];
-const countries = ["US", "GB", "DE", "FR", "IN", "AU", "CA", "SG"];
+const countriesData = [
+  { code: "US", name: "United States" },
+  { code: "GB", name: "United Kingdom" },
+  { code: "DE", name: "Germany" },
+  { code: "FR", name: "France" },
+  { code: "IN", name: "India" },
+  { code: "AU", name: "Australia" },
+  { code: "CA", name: "Canada" },
+  { code: "SG", name: "Singapore" },
+];
 const agentTiers = ["PLATINUM", "GOLD", "SILVER", "BRONZE"];
 
 export default function NegotiatedFareManager() {
@@ -858,11 +867,27 @@ export default function NegotiatedFareManager() {
               { required: true, message: "Please select at least one POS" },
             ]}
           >
-            <AntCheckbox.Group>
-              <Row>
-                {countries.map((country) => (
-                  <Col span={6} key={country}>
-                    <AntCheckbox value={country}>{country}</AntCheckbox>
+            <AntCheckbox.Group style={{ width: '100%' }}>
+              <Row gutter={[16, 8]}>
+                {countriesData.map((country) => (
+                  <Col span={6} key={country.code}>
+                    <AntCheckbox 
+                      value={country.code}
+                      style={{ 
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        border: '1px solid #d9d9d9',
+                        marginBottom: '8px',
+                        fontSize: '14px'
+                      }}
+                    >
+                      <span style={{ fontWeight: '500' }}>{country.code}</span>
+                      <span style={{ fontSize: '12px', color: '#666', marginLeft: '4px' }}>
+                        {country.name}
+                      </span>
+                    </AntCheckbox>
                   </Col>
                 ))}
               </Row>
@@ -1177,14 +1202,17 @@ export default function NegotiatedFareManager() {
                         Point of Sale
                       </label>
                       <div className="flex flex-wrap gap-1 mt-1">
-                        {selectedFare.pos?.map((country, index) => (
-                          <span
-                            key={index}
-                            className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800"
-                          >
-                            {country}
-                          </span>
-                        ))}
+                        {selectedFare.pos?.map((countryCode, index) => {
+                          const country = countriesData.find(c => c.code === countryCode);
+                          return (
+                            <span
+                              key={index}
+                              className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800"
+                            >
+                              {country ? `${country.code} (${country.name})` : countryCode}
+                            </span>
+                          );
+                        })}
                       </div>
                     </div>
                     <div>
@@ -1517,11 +1545,27 @@ export default function NegotiatedFareManager() {
               { required: true, message: "Please select at least one POS" },
             ]}
           >
-            <AntCheckbox.Group>
-              <Row>
-                {countries.map((country) => (
-                  <Col span={6} key={country}>
-                    <AntCheckbox value={country}>{country}</AntCheckbox>
+            <AntCheckbox.Group style={{ width: '100%' }}>
+              <Row gutter={[16, 8]}>
+                {countriesData.map((country) => (
+                  <Col span={6} key={country.code}>
+                    <AntCheckbox 
+                      value={country.code}
+                      style={{ 
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        border: '1px solid #d9d9d9',
+                        marginBottom: '8px',
+                        fontSize: '14px'
+                      }}
+                    >
+                      <span style={{ fontWeight: '500' }}>{country.code}</span>
+                      <span style={{ fontSize: '12px', color: '#666', marginLeft: '4px' }}>
+                        {country.name}
+                      </span>
+                    </AntCheckbox>
                   </Col>
                 ))}
               </Row>

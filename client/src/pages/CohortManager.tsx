@@ -690,7 +690,13 @@ export default function CohortManager() {
                     <Row gutter={16}>
                       <Col span={8}>
                         <AntForm.Item name="channel" label="Channel">
-                          <AntSelect placeholder="Select channel">
+                          <AntSelect 
+                            placeholder="Select channel"
+                            style={{ width: '100%' }}
+                            dropdownStyle={{ zIndex: 9999 }}
+                            getPopupContainer={(trigger) => trigger.parentElement}
+                            virtual={false}
+                          >
                             {channels.map((channel) => (
                               <AntSelect.Option key={channel} value={channel}>
                                 {channel}
@@ -701,7 +707,13 @@ export default function CohortManager() {
                       </Col>
                       <Col span={8}>
                         <AntForm.Item name="device" label="Device Type">
-                          <AntSelect placeholder="Select device">
+                          <AntSelect 
+                            placeholder="Select device"
+                            style={{ width: '100%' }}
+                            dropdownStyle={{ zIndex: 9999 }}
+                            getPopupContainer={(trigger) => trigger.parentElement}
+                            virtual={false}
+                          >
                             {devices.map((device) => (
                               <AntSelect.Option key={device} value={device}>
                                 {device}
@@ -752,7 +764,13 @@ export default function CohortManager() {
                           name="bookingFrequency"
                           label="Booking Frequency"
                         >
-                          <AntSelect placeholder="Select frequency">
+                          <AntSelect 
+                            placeholder="Select frequency"
+                            style={{ width: '100%' }}
+                            dropdownStyle={{ zIndex: 9999 }}
+                            getPopupContainer={(trigger) => trigger.parentElement}
+                            virtual={false}
+                          >
                             {bookingFrequencies.map((freq) => (
                               <AntSelect.Option key={freq} value={freq}>
                                 {freq}
@@ -769,6 +787,10 @@ export default function CohortManager() {
                           <AntSelect
                             mode="multiple"
                             placeholder="Select cabin classes"
+                            style={{ width: '100%' }}
+                            dropdownStyle={{ zIndex: 9999 }}
+                            getPopupContainer={(trigger) => trigger.parentElement}
+                            virtual={false}
                           >
                             {cabinClasses.map((cabin) => (
                               <AntSelect.Option key={cabin} value={cabin}>

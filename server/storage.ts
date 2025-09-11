@@ -772,21 +772,36 @@ export class DatabaseStorage implements IStorage {
       console.log(`Storage: Found ${results?.length || 0} bundle pricing rules`);
 
       // Ensure we always return an array
-      const rulesArray = results || [];
+      const rulesArray = Array.isArray(results) ? results : [];
 
       // Log a sample record if any exist
       if (rulesArray.length > 0) {
         console.log("Storage: Sample pricing rule:", JSON.stringify(rulesArray[0], null, 2));
+      } else {
+        console.log("Storage: No bundle pricing rules found in database");
       }
 
       return rulesArray;
     } catch (error: any) {
-      console.error("Storage: Error in getBundlePricingRules:", error);
-      console.error("Storage: Error stack:", error.stack);
+      console.error("Storage: Database error in getBundlePricingRules:", error.message);
+      console.error("Storage: Error details:", {
+        code: error.code,
+        constraint: error.constraint,
+        detail: error.detail,
+        hint: error.hint,
+        position: error.position,
+        routine: error.routine,
+        schema: error.schema,
+        table: error.table,
+        column: error.column,
+        dataType: error.dataType,
+        file: error.file,
+        line: error.line
+      });
+      console.error("Storage: Full error stack:", error.stack);
 
-      // Return empty array on database errors to prevent UI crashes
-      console.log("Storage: Returning empty array due to error");
-      return [];
+      // Instead of silently returning empty array, throw the error so the API can handle it properly
+      throw new Error(`Database error: ${error.message}`);
     }
   }
 

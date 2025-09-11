@@ -836,7 +836,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const filters = req.query;
       console.log("Fetching bundle pricing rules with filters:", filters);
-      const rules = await storage.getBundlePricingRules(filters);
+      
+      let rules = await storage.getBundlePricingRules(filters);
       console.log(`Found ${rules?.length || 0} bundle pricing rules`);
 
       // If no rules found and no specific filters, create sample data
@@ -875,7 +876,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             ];
 
             for (const bundleData of sampleBundles) {
-              await storage.insertBundle(bundleData);
+              try {
+                await storage.insertBundle(bundleData);
+                console.log(`Created bundle: ${bundleData.bundleCode}`);
+              } catch (bundleError) {
+                console.error(`Error creating bundle ${bundleData.bundleCode}:`, bundleError);
+              }
             }
           }
 
@@ -904,22 +910,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ];
 
           for (const ruleData of sampleRules) {
-            await storage.insertBundlePricingRule(ruleData);
+            try {
+              await storage.insertBundlePricingRule(ruleData);
+              console.log(`Created pricing rule: ${ruleData.ruleCode}`);
+            } catch (ruleError) {
+              console.error(`Error creating pricing rule ${ruleData.ruleCode}:`, ruleError);
+            }
           }
 
           // Fetch the newly created rules
-          const newRules = await storage.getBundlePricingRules(filters);
-          console.log(`Created ${newRules.length} sample bundle pricing rules`);
-          return res.json(newRules || []);
+          rules = await storage.getBundlePricingRules(filters);
+          console.log(`After sample creation: ${rules?.length || 0} bundle pricing rules`);
         } catch (createError: any) {
           console.error("Error creating sample data:", createError);
-          // Continue and return empty array instead of failing
+          console.error("Sample creation error stack:", createError.stack);
         }
       }
 
       res.json(rules || []);
     } catch (error: any) {
-      console.error("Error fetching bundle pricing rules:", error);
+      console.error("Error in /api/bundles/pricing endpoint:", error);
+      console.error("Endpoint error stack:", error.stack);
       res.status(500).json({ message: "Failed to fetch bundle pricing rules", error: error.message });
     }
   });

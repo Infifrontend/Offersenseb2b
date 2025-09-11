@@ -27,6 +27,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
@@ -787,74 +795,82 @@ export default function AncillaryBundlingEngine() {
                   </Button>
                 </div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Rule Code</TableHead>
-                      <TableHead>Bundle Code</TableHead>
-                      <TableHead>Discount Type</TableHead>
-                      <TableHead>Discount Value</TableHead>
-                      <TableHead>Priority</TableHead>
-                      <TableHead>Valid Period</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {pricingRules.map((rule: BundlePricingRule) => (
-                      <TableRow key={rule.id}>
-                        <TableCell className="font-medium">{rule.ruleCode}</TableCell>
-                        <TableCell>{rule.bundleCode}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="capitalize">
-                            {rule.discountType.toLowerCase()}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {rule.discountType === "PERCENT"
-                            ? `${rule.discountValue}%`
-                            : `$${rule.discountValue}`}
-                        </TableCell>
-                        <TableCell>{rule.priority}</TableCell>
-                        <TableCell className="text-sm">
-                          <div>{formatDate(rule.validFrom)}</div>
-                          <div className="text-gray-500">to {formatDate(rule.validTo)}</div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={rule.status === "ACTIVE" ? "default" : "secondary"}>
-                            {rule.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleSimulateBundlePricing(rule)}
-                            >
-                              <Play className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEditBundlePricingRule(rule)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeleteBundlePricingRule(rule.id)}
-                              disabled={deleteBundlePricingMutation.isPending}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Rule Code</TableHead>
+                        <TableHead>Bundle Code</TableHead>
+                        <TableHead>Discount Type</TableHead>
+                        <TableHead>Discount Value</TableHead>
+                        <TableHead>Priority</TableHead>
+                        <TableHead>Valid Period</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {pricingRules.map((rule: BundlePricingRule) => (
+                        <TableRow key={rule.id}>
+                          <TableCell className="font-medium">{rule.ruleCode || 'N/A'}</TableCell>
+                          <TableCell>{rule.bundleCode || 'N/A'}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="capitalize">
+                              {rule.discountType ? rule.discountType.toLowerCase() : 'N/A'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {rule.discountType === "PERCENT"
+                              ? `${rule.discountValue || 0}%`
+                              : `$${rule.discountValue || 0}`}
+                          </TableCell>
+                          <TableCell>{rule.priority || 1}</TableCell>
+                          <TableCell className="text-sm">
+                            {rule.validFrom && rule.validTo ? (
+                              <>
+                                <div>{formatDate(rule.validFrom)}</div>
+                                <div className="text-gray-500">to {formatDate(rule.validTo)}</div>
+                              </>
+                            ) : (
+                              'N/A'
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={rule.status === "ACTIVE" ? "default" : "secondary"}>
+                              {rule.status || 'INACTIVE'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleSimulateBundlePricing(rule)}
+                              >
+                                <Play className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEditBundlePricingRule(rule)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteBundlePricingRule(rule.id)}
+                                disabled={deleteBundlePricingMutation.isPending}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               )}
             </CardContent>
           </Card>

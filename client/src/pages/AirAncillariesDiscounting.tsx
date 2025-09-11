@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -11,7 +10,13 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -26,7 +31,19 @@ import {
   Col,
   message,
 } from "antd";
-import { TrendingUp, Plus, Filter, Eye, Edit, Calculator, Tags, Gift, Plane, Utensils, Wifi } from "lucide-react";
+import {
+  TrendingUp,
+  Plus,
+  Filter,
+  Eye,
+  Edit,
+  Calculator,
+  Tags,
+  Gift,
+  Plane,
+  Utensils,
+  Wifi,
+} from "lucide-react";
 import type { AirAncillaryRule } from "../../../shared/schema";
 import dayjs from "dayjs";
 
@@ -69,12 +86,12 @@ const adjustmentTypes = ["PERCENT", "AMOUNT", "FREE"];
 const conditionBehaviors = ["SKIPPED_ANCILLARY", "POST_BOOKING"];
 
 const getAncillaryIcon = (code: string) => {
-  const ancillary = ancillaryCodes.find(a => a.value === code);
+  const ancillary = ancillaryCodes.find((a) => a.value === code);
   return ancillary?.icon || "📦";
 };
 
 const getAncillaryLabel = (code: string) => {
-  const ancillary = ancillaryCodes.find(a => a.value === code);
+  const ancillary = ancillaryCodes.find((a) => a.value === code);
   return ancillary?.label || code;
 };
 
@@ -84,7 +101,9 @@ export default function AirAncillariesDiscounting() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSimulateModalOpen, setIsSimulateModalOpen] = useState(false);
-  const [selectedRule, setSelectedRule] = useState<AirAncillaryRule | null>(null);
+  const [selectedRule, setSelectedRule] = useState<AirAncillaryRule | null>(
+    null,
+  );
   const [simulationResult, setSimulationResult] = useState<any>(null);
   const queryClient = useQueryClient();
   const [antForm] = AntForm.useForm();
@@ -124,7 +143,11 @@ export default function AirAncillariesDiscounting() {
       toast({ title: "Rule created successfully" });
     },
     onError: (error: Error) => {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
@@ -167,7 +190,11 @@ export default function AirAncillariesDiscounting() {
 
   // Simulate rule mutation
   const simulateRuleMutation = useMutation({
-    mutationFn: async (data: { basePrice: number; currency: string; ruleId: string }) => {
+    mutationFn: async (data: {
+      basePrice: number;
+      currency: string;
+      ruleId: string;
+    }) => {
       const response = await fetch("/api/air-ancillary-rules/simulate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -188,7 +215,8 @@ export default function AirAncillariesDiscounting() {
       validFrom: values.validDates[0].format("YYYY-MM-DD"),
       validTo: values.validDates[1].format("YYYY-MM-DD"),
       cohortCodes: values.cohortCodes || [],
-      adjustmentValue: values.adjustmentType === "FREE" ? null : values.adjustmentValue,
+      adjustmentValue:
+        values.adjustmentType === "FREE" ? null : values.adjustmentValue,
     };
     delete formattedData.validDates;
     createRuleMutation.mutate(formattedData);
@@ -200,7 +228,8 @@ export default function AirAncillariesDiscounting() {
       validFrom: values.validDates[0].format("YYYY-MM-DD"),
       validTo: values.validDates[1].format("YYYY-MM-DD"),
       cohortCodes: values.cohortCodes || [],
-      adjustmentValue: values.adjustmentType === "FREE" ? null : values.adjustmentValue,
+      adjustmentValue:
+        values.adjustmentType === "FREE" ? null : values.adjustmentValue,
     };
     delete formattedData.validDates;
     updateRuleMutation.mutate({ id: selectedRule!.id, data: formattedData });
@@ -248,12 +277,6 @@ export default function AirAncillariesDiscounting() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Air Ancillaries Discounting</h1>
-          <p className="text-muted-foreground">
-            Configure dynamic discount strategies for airline ancillary services
-          </p>
-        </div>
         <div className="flex gap-2">
           <Button onClick={() => setIsCreateModalOpen(true)}>
             <Plus className="w-4 h-4 mr-2" />
@@ -280,18 +303,28 @@ export default function AirAncillariesDiscounting() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {rules.filter((rule: AirAncillaryRule) => rule.status === "ACTIVE").length}
+              {
+                rules.filter(
+                  (rule: AirAncillaryRule) => rule.status === "ACTIVE",
+                ).length
+              }
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Free Ancillaries</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Free Ancillaries
+            </CardTitle>
             <Gift className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {rules.filter((rule: AirAncillaryRule) => rule.adjustmentType === "FREE").length}
+              {
+                rules.filter(
+                  (rule: AirAncillaryRule) => rule.adjustmentType === "FREE",
+                ).length
+              }
             </div>
           </CardContent>
         </Card>
@@ -302,7 +335,10 @@ export default function AirAncillariesDiscounting() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {rules.filter((rule: AirAncillaryRule) => rule.priority >= 5).length}
+              {
+                rules.filter((rule: AirAncillaryRule) => rule.priority >= 5)
+                  .length
+              }
             </div>
           </CardContent>
         </Card>
@@ -332,7 +368,8 @@ export default function AirAncillariesDiscounting() {
         <CardHeader>
           <CardTitle>Ancillary Discount Rules</CardTitle>
           <CardDescription>
-            Manage discount rules for baggage, seats, meals, and other airline services
+            Manage discount rules for baggage, seats, meals, and other airline
+            services
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -356,63 +393,81 @@ export default function AirAncillariesDiscounting() {
                     <div className="font-medium">{rule.ruleCode}</div>
                     <div className="text-sm text-gray-500">
                       {rule.conditionBehavior && (
-                        <Badge variant="outline" className="text-xs">{rule.conditionBehavior}</Badge>
+                        <Badge variant="outline" className="text-xs">
+                          {rule.conditionBehavior}
+                        </Badge>
                       )}
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <span className="text-lg">{getAncillaryIcon(rule.ancillaryCode)}</span>
+                      <span className="text-lg">
+                        {getAncillaryIcon(rule.ancillaryCode)}
+                      </span>
                       <div>
                         <div className="font-medium">{rule.ancillaryCode}</div>
-                        <div className="text-sm text-gray-500">{getAncillaryLabel(rule.ancillaryCode)}</div>
+                        <div className="text-sm text-gray-500">
+                          {getAncillaryLabel(rule.ancillaryCode)}
+                        </div>
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="text-sm">{rule.airlineCode || "All"}</TableCell>
+                  <TableCell className="text-sm">
+                    {rule.airlineCode || "All"}
+                  </TableCell>
                   <TableCell className="text-sm">{rule.channel}</TableCell>
                   <TableCell>
                     <div className="text-sm">
-                      <div className={`font-medium ${
-                        rule.adjustmentType === "FREE" ? 'text-green-600' :
-                        rule.adjustmentType === "PERCENT" ? 'text-blue-600' : 'text-orange-600'
-                      }`}>
-                        {rule.adjustmentType === "FREE" ? "FREE" :
-                         rule.adjustmentType === "PERCENT" ? `${rule.adjustmentValue}% OFF` :
-                         `$${rule.adjustmentValue} OFF`
-                        }
+                      <div
+                        className={`font-medium ${
+                          rule.adjustmentType === "FREE"
+                            ? "text-green-600"
+                            : rule.adjustmentType === "PERCENT"
+                              ? "text-blue-600"
+                              : "text-orange-600"
+                        }`}
+                      >
+                        {rule.adjustmentType === "FREE"
+                          ? "FREE"
+                          : rule.adjustmentType === "PERCENT"
+                            ? `${rule.adjustmentValue}% OFF`
+                            : `$${rule.adjustmentValue} OFF`}
                       </div>
                     </div>
                   </TableCell>
                   <TableCell className="text-sm">{rule.priority}</TableCell>
                   <TableCell>
-                    <span className={`text-sm font-medium ${
-                      rule.status === "ACTIVE" ? "text-green-600" : "text-red-600"
-                    }`}>
+                    <span
+                      className={`text-sm font-medium ${
+                        rule.status === "ACTIVE"
+                          ? "text-green-600"
+                          : "text-red-600"
+                      }`}
+                    >
                       {rule.status === "ACTIVE" ? "Active" : "Inactive"}
                     </span>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         className="p-1"
                         onClick={() => handleViewRule(rule)}
                       >
                         <Eye className="w-4 h-4 text-gray-500" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         className="p-1"
                         onClick={() => handleEditRuleClick(rule)}
                       >
                         <Edit className="w-4 h-4 text-gray-500" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         className="p-1"
                         onClick={() => {
                           setSelectedRule(rule);
@@ -421,15 +476,19 @@ export default function AirAncillariesDiscounting() {
                       >
                         <Calculator className="w-4 h-4 text-gray-500" />
                       </Button>
-                      <div 
+                      <div
                         className={`w-8 h-4 rounded-full relative cursor-pointer transition-colors ${
-                          rule.status === "ACTIVE" ? "bg-blue-600" : "bg-gray-300"
+                          rule.status === "ACTIVE"
+                            ? "bg-blue-600"
+                            : "bg-gray-300"
                         }`}
                         onClick={() => handleStatusToggle(rule)}
                       >
-                        <div 
+                        <div
                           className={`w-3 h-3 bg-white rounded-full absolute top-0.5 transition-transform ${
-                            rule.status === "ACTIVE" ? "translate-x-4" : "translate-x-0.5"
+                            rule.status === "ACTIVE"
+                              ? "translate-x-4"
+                              : "translate-x-0.5"
                           }`}
                         />
                       </div>
@@ -461,15 +520,26 @@ export default function AirAncillariesDiscounting() {
         >
           <Row gutter={16}>
             <Col span={12}>
-              <AntForm.Item label="Rule Code" name="ruleCode" rules={[{ required: true }]}>
+              <AntForm.Item
+                label="Rule Code"
+                name="ruleCode"
+                rules={[{ required: true }]}
+              >
                 <AntInput placeholder="e.g., BAG10_PLATINUM_GCC" />
               </AntForm.Item>
             </Col>
             <Col span={12}>
-              <AntForm.Item label="Ancillary Code" name="ancillaryCode" rules={[{ required: true }]}>
+              <AntForm.Item
+                label="Ancillary Code"
+                name="ancillaryCode"
+                rules={[{ required: true }]}
+              >
                 <AntSelect placeholder="Select ancillary service">
-                  {ancillaryCodes.map(ancillary => (
-                    <AntSelect.Option key={ancillary.value} value={ancillary.value}>
+                  {ancillaryCodes.map((ancillary) => (
+                    <AntSelect.Option
+                      key={ancillary.value}
+                      value={ancillary.value}
+                    >
                       <span className="mr-2">{ancillary.icon}</span>
                       {ancillary.label}
                     </AntSelect.Option>
@@ -499,16 +569,28 @@ export default function AirAncillariesDiscounting() {
 
           <Row gutter={16}>
             <Col span={12}>
-              <AntForm.Item label="Point of Sale" name="pos" rules={[{ required: true }]}>
-                <AntSelect mode="tags" placeholder="Enter country codes (e.g., AE, SA, KW)">
-                </AntSelect>
+              <AntForm.Item
+                label="Point of Sale"
+                name="pos"
+                rules={[{ required: true }]}
+              >
+                <AntSelect
+                  mode="tags"
+                  placeholder="Enter country codes (e.g., AE, SA, KW)"
+                ></AntSelect>
               </AntForm.Item>
             </Col>
             <Col span={12}>
-              <AntForm.Item label="Channel" name="channel" rules={[{ required: true }]}>
+              <AntForm.Item
+                label="Channel"
+                name="channel"
+                rules={[{ required: true }]}
+              >
                 <AntSelect placeholder="Select channel">
-                  {channels.map(channel => (
-                    <AntSelect.Option key={channel} value={channel}>{channel}</AntSelect.Option>
+                  {channels.map((channel) => (
+                    <AntSelect.Option key={channel} value={channel}>
+                      {channel}
+                    </AntSelect.Option>
                   ))}
                 </AntSelect>
               </AntForm.Item>
@@ -517,52 +599,73 @@ export default function AirAncillariesDiscounting() {
 
           <Row gutter={16}>
             <Col span={12}>
-              <AntForm.Item label="Agent Tiers" name="agentTier" rules={[{ required: true }]}>
+              <AntForm.Item
+                label="Agent Tiers"
+                name="agentTier"
+                rules={[{ required: true }]}
+              >
                 <AntSelect mode="multiple" placeholder="Select agent tiers">
-                  {agentTiers.map(tier => (
-                    <AntSelect.Option key={tier} value={tier}>{tier}</AntSelect.Option>
+                  {agentTiers.map((tier) => (
+                    <AntSelect.Option key={tier} value={tier}>
+                      {tier}
+                    </AntSelect.Option>
                   ))}
                 </AntSelect>
               </AntForm.Item>
             </Col>
             <Col span={12}>
               <AntForm.Item label="Cohort Codes (Optional)" name="cohortCodes">
-                <AntSelect mode="tags" placeholder="Enter cohort codes">
-                </AntSelect>
+                <AntSelect
+                  mode="tags"
+                  placeholder="Enter cohort codes"
+                ></AntSelect>
               </AntForm.Item>
             </Col>
           </Row>
 
-          <AntForm.Item label="Condition Behavior (Optional)" name="conditionBehavior">
+          <AntForm.Item
+            label="Condition Behavior (Optional)"
+            name="conditionBehavior"
+          >
             <AntSelect placeholder="Select behavior condition">
-              {conditionBehaviors.map(behavior => (
-                <AntSelect.Option key={behavior} value={behavior}>{behavior}</AntSelect.Option>
+              {conditionBehaviors.map((behavior) => (
+                <AntSelect.Option key={behavior} value={behavior}>
+                  {behavior}
+                </AntSelect.Option>
               ))}
             </AntSelect>
           </AntForm.Item>
 
           <Row gutter={16}>
             <Col span={8}>
-              <AntForm.Item label="Adjustment Type" name="adjustmentType" rules={[{ required: true }]}>
+              <AntForm.Item
+                label="Adjustment Type"
+                name="adjustmentType"
+                rules={[{ required: true }]}
+              >
                 <AntSelect placeholder="Select type">
-                  {adjustmentTypes.map(type => (
-                    <AntSelect.Option key={type} value={type}>{type}</AntSelect.Option>
+                  {adjustmentTypes.map((type) => (
+                    <AntSelect.Option key={type} value={type}>
+                      {type}
+                    </AntSelect.Option>
                   ))}
                 </AntSelect>
               </AntForm.Item>
             </Col>
             <Col span={8}>
-              <AntForm.Item 
-                label="Adjustment Value" 
+              <AntForm.Item
+                label="Adjustment Value"
                 name="adjustmentValue"
                 rules={[
                   ({ getFieldValue }) => ({
                     validator(_, value) {
-                      if (getFieldValue('adjustmentType') === 'FREE') {
+                      if (getFieldValue("adjustmentType") === "FREE") {
                         return Promise.resolve();
                       }
                       if (!value) {
-                        return Promise.reject(new Error('Adjustment value is required'));
+                        return Promise.reject(
+                          new Error("Adjustment value is required"),
+                        );
                       }
                       return Promise.resolve();
                     },
@@ -573,22 +676,36 @@ export default function AirAncillariesDiscounting() {
               </AntForm.Item>
             </Col>
             <Col span={8}>
-              <AntForm.Item label="Priority" name="priority" rules={[{ required: true }]}>
-                <AntInputNumber min={1} placeholder="1" style={{ width: "100%" }} />
+              <AntForm.Item
+                label="Priority"
+                name="priority"
+                rules={[{ required: true }]}
+              >
+                <AntInputNumber
+                  min={1}
+                  placeholder="1"
+                  style={{ width: "100%" }}
+                />
               </AntForm.Item>
             </Col>
           </Row>
 
-          <AntForm.Item label="Valid Dates" name="validDates" rules={[{ required: true }]}>
+          <AntForm.Item
+            label="Valid Dates"
+            name="validDates"
+            rules={[{ required: true }]}
+          >
             <RangePicker style={{ width: "100%" }} />
           </AntForm.Item>
 
           <AntForm.Item>
             <div className="flex justify-end gap-2">
-              <AntButton onClick={() => {
-                setIsCreateModalOpen(false);
-                antForm.resetFields();
-              }}>
+              <AntButton
+                onClick={() => {
+                  setIsCreateModalOpen(false);
+                  antForm.resetFields();
+                }}
+              >
                 Cancel
               </AntButton>
               <AntButton
@@ -623,15 +740,26 @@ export default function AirAncillariesDiscounting() {
         >
           <Row gutter={16}>
             <Col span={12}>
-              <AntForm.Item label="Rule Code" name="ruleCode" rules={[{ required: true }]}>
+              <AntForm.Item
+                label="Rule Code"
+                name="ruleCode"
+                rules={[{ required: true }]}
+              >
                 <AntInput placeholder="e.g., BAG10_PLATINUM_GCC" />
               </AntForm.Item>
             </Col>
             <Col span={12}>
-              <AntForm.Item label="Ancillary Code" name="ancillaryCode" rules={[{ required: true }]}>
+              <AntForm.Item
+                label="Ancillary Code"
+                name="ancillaryCode"
+                rules={[{ required: true }]}
+              >
                 <AntSelect placeholder="Select ancillary service">
-                  {ancillaryCodes.map(ancillary => (
-                    <AntSelect.Option key={ancillary.value} value={ancillary.value}>
+                  {ancillaryCodes.map((ancillary) => (
+                    <AntSelect.Option
+                      key={ancillary.value}
+                      value={ancillary.value}
+                    >
                       <span className="mr-2">{ancillary.icon}</span>
                       {ancillary.label}
                     </AntSelect.Option>
@@ -661,16 +789,28 @@ export default function AirAncillariesDiscounting() {
 
           <Row gutter={16}>
             <Col span={12}>
-              <AntForm.Item label="Point of Sale" name="pos" rules={[{ required: true }]}>
-                <AntSelect mode="tags" placeholder="Enter country codes (e.g., AE, SA, KW)">
-                </AntSelect>
+              <AntForm.Item
+                label="Point of Sale"
+                name="pos"
+                rules={[{ required: true }]}
+              >
+                <AntSelect
+                  mode="tags"
+                  placeholder="Enter country codes (e.g., AE, SA, KW)"
+                ></AntSelect>
               </AntForm.Item>
             </Col>
             <Col span={12}>
-              <AntForm.Item label="Channel" name="channel" rules={[{ required: true }]}>
+              <AntForm.Item
+                label="Channel"
+                name="channel"
+                rules={[{ required: true }]}
+              >
                 <AntSelect placeholder="Select channel">
-                  {channels.map(channel => (
-                    <AntSelect.Option key={channel} value={channel}>{channel}</AntSelect.Option>
+                  {channels.map((channel) => (
+                    <AntSelect.Option key={channel} value={channel}>
+                      {channel}
+                    </AntSelect.Option>
                   ))}
                 </AntSelect>
               </AntForm.Item>
@@ -679,52 +819,73 @@ export default function AirAncillariesDiscounting() {
 
           <Row gutter={16}>
             <Col span={12}>
-              <AntForm.Item label="Agent Tiers" name="agentTier" rules={[{ required: true }]}>
+              <AntForm.Item
+                label="Agent Tiers"
+                name="agentTier"
+                rules={[{ required: true }]}
+              >
                 <AntSelect mode="multiple" placeholder="Select agent tiers">
-                  {agentTiers.map(tier => (
-                    <AntSelect.Option key={tier} value={tier}>{tier}</AntSelect.Option>
+                  {agentTiers.map((tier) => (
+                    <AntSelect.Option key={tier} value={tier}>
+                      {tier}
+                    </AntSelect.Option>
                   ))}
                 </AntSelect>
               </AntForm.Item>
             </Col>
             <Col span={12}>
               <AntForm.Item label="Cohort Codes (Optional)" name="cohortCodes">
-                <AntSelect mode="tags" placeholder="Enter cohort codes">
-                </AntSelect>
+                <AntSelect
+                  mode="tags"
+                  placeholder="Enter cohort codes"
+                ></AntSelect>
               </AntForm.Item>
             </Col>
           </Row>
 
-          <AntForm.Item label="Condition Behavior (Optional)" name="conditionBehavior">
+          <AntForm.Item
+            label="Condition Behavior (Optional)"
+            name="conditionBehavior"
+          >
             <AntSelect placeholder="Select behavior condition">
-              {conditionBehaviors.map(behavior => (
-                <AntSelect.Option key={behavior} value={behavior}>{behavior}</AntSelect.Option>
+              {conditionBehaviors.map((behavior) => (
+                <AntSelect.Option key={behavior} value={behavior}>
+                  {behavior}
+                </AntSelect.Option>
               ))}
             </AntSelect>
           </AntForm.Item>
 
           <Row gutter={16}>
             <Col span={8}>
-              <AntForm.Item label="Adjustment Type" name="adjustmentType" rules={[{ required: true }]}>
+              <AntForm.Item
+                label="Adjustment Type"
+                name="adjustmentType"
+                rules={[{ required: true }]}
+              >
                 <AntSelect placeholder="Select type">
-                  {adjustmentTypes.map(type => (
-                    <AntSelect.Option key={type} value={type}>{type}</AntSelect.Option>
+                  {adjustmentTypes.map((type) => (
+                    <AntSelect.Option key={type} value={type}>
+                      {type}
+                    </AntSelect.Option>
                   ))}
                 </AntSelect>
               </AntForm.Item>
             </Col>
             <Col span={8}>
-              <AntForm.Item 
-                label="Adjustment Value" 
+              <AntForm.Item
+                label="Adjustment Value"
                 name="adjustmentValue"
                 rules={[
                   ({ getFieldValue }) => ({
                     validator(_, value) {
-                      if (getFieldValue('adjustmentType') === 'FREE') {
+                      if (getFieldValue("adjustmentType") === "FREE") {
                         return Promise.resolve();
                       }
                       if (!value) {
-                        return Promise.reject(new Error('Adjustment value is required'));
+                        return Promise.reject(
+                          new Error("Adjustment value is required"),
+                        );
                       }
                       return Promise.resolve();
                     },
@@ -735,23 +896,37 @@ export default function AirAncillariesDiscounting() {
               </AntForm.Item>
             </Col>
             <Col span={8}>
-              <AntForm.Item label="Priority" name="priority" rules={[{ required: true }]}>
-                <AntInputNumber min={1} placeholder="1" style={{ width: "100%" }} />
+              <AntForm.Item
+                label="Priority"
+                name="priority"
+                rules={[{ required: true }]}
+              >
+                <AntInputNumber
+                  min={1}
+                  placeholder="1"
+                  style={{ width: "100%" }}
+                />
               </AntForm.Item>
             </Col>
           </Row>
 
-          <AntForm.Item label="Valid Dates" name="validDates" rules={[{ required: true }]}>
+          <AntForm.Item
+            label="Valid Dates"
+            name="validDates"
+            rules={[{ required: true }]}
+          >
             <RangePicker style={{ width: "100%" }} />
           </AntForm.Item>
 
           <AntForm.Item>
             <div className="flex justify-end gap-2">
-              <AntButton onClick={() => {
-                setIsEditModalOpen(false);
-                setSelectedRule(null);
-                editForm.resetFields();
-              }}>
+              <AntButton
+                onClick={() => {
+                  setIsEditModalOpen(false);
+                  setSelectedRule(null);
+                  editForm.resetFields();
+                }}
+              >
                 Cancel
               </AntButton>
               <AntButton
@@ -774,8 +949,12 @@ export default function AirAncillariesDiscounting() {
               <Eye className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Rule Details</h3>
-              <p className="text-sm text-gray-500">Complete ancillary discount rule information</p>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Rule Details
+              </h3>
+              <p className="text-sm text-gray-500">
+                Complete ancillary discount rule information
+              </p>
             </div>
           </div>
         }
@@ -785,8 +964,8 @@ export default function AirAncillariesDiscounting() {
           setSelectedRule(null);
         }}
         footer={[
-          <AntButton 
-            key="close" 
+          <AntButton
+            key="close"
             type="primary"
             onClick={() => {
               setIsViewModalOpen(false);
@@ -794,7 +973,7 @@ export default function AirAncillariesDiscounting() {
             }}
           >
             Close
-          </AntButton>
+          </AntButton>,
         ]}
         width={900}
       >
@@ -803,48 +982,70 @@ export default function AirAncillariesDiscounting() {
             {/* Status Badge */}
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                  selectedRule.status === "ACTIVE" 
-                    ? "bg-green-100 text-green-800" 
-                    : "bg-red-100 text-red-800"
-                }`}>
-                  <div className={`w-2 h-2 rounded-full mr-2 ${
-                    selectedRule.status === "ACTIVE" ? "bg-green-400" : "bg-red-400"
-                  }`}></div>
+                <span
+                  className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                    selectedRule.status === "ACTIVE"
+                      ? "bg-green-100 text-green-800"
+                      : "bg-red-100 text-red-800"
+                  }`}
+                >
+                  <div
+                    className={`w-2 h-2 rounded-full mr-2 ${
+                      selectedRule.status === "ACTIVE"
+                        ? "bg-green-400"
+                        : "bg-red-400"
+                    }`}
+                  ></div>
                   {selectedRule.status}
                 </span>
                 {selectedRule.conditionBehavior && (
-                  <Badge variant="outline">{selectedRule.conditionBehavior}</Badge>
+                  <Badge variant="outline">
+                    {selectedRule.conditionBehavior}
+                  </Badge>
                 )}
               </div>
-              <div className="text-sm text-gray-500">
-                ID: {selectedRule.id}
-              </div>
+              <div className="text-sm text-gray-500">ID: {selectedRule.id}</div>
             </div>
 
             {/* Main Rule Information */}
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-100">
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">Rule Information</h4>
+              <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                Rule Information
+              </h4>
               <Row gutter={[24, 16]}>
                 <Col span={8}>
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Rule Code</label>
-                    <div className="text-lg font-bold text-gray-900">{selectedRule.ruleCode}</div>
-                  </div>
-                </Col>
-                <Col span={8}>
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Ancillary Service</label>
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">{getAncillaryIcon(selectedRule.ancillaryCode)}</span>
-                      <div className="text-lg font-bold text-blue-600">{selectedRule.ancillaryCode}</div>
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      Rule Code
+                    </label>
+                    <div className="text-lg font-bold text-gray-900">
+                      {selectedRule.ruleCode}
                     </div>
                   </div>
                 </Col>
                 <Col span={8}>
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Priority</label>
-                    <div className="text-lg font-bold text-green-600">{selectedRule.priority}</div>
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      Ancillary Service
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">
+                        {getAncillaryIcon(selectedRule.ancillaryCode)}
+                      </span>
+                      <div className="text-lg font-bold text-blue-600">
+                        {selectedRule.ancillaryCode}
+                      </div>
+                    </div>
+                  </div>
+                </Col>
+                <Col span={8}>
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      Priority
+                    </label>
+                    <div className="text-lg font-bold text-green-600">
+                      {selectedRule.priority}
+                    </div>
                   </div>
                 </Col>
               </Row>
@@ -852,24 +1053,37 @@ export default function AirAncillariesDiscounting() {
 
             {/* Discount Information */}
             <div className="bg-yellow-50 rounded-lg p-6 border border-yellow-100">
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">Discount Details</h4>
+              <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                Discount Details
+              </h4>
               <Row gutter={[24, 16]}>
                 <Col span={12}>
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Type</label>
-                    <div className="text-lg font-bold text-gray-900">{selectedRule.adjustmentType}</div>
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      Type
+                    </label>
+                    <div className="text-lg font-bold text-gray-900">
+                      {selectedRule.adjustmentType}
+                    </div>
                   </div>
                 </Col>
                 <Col span={12}>
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Value</label>
-                    <div className={`text-lg font-bold ${
-                      selectedRule.adjustmentType === "FREE" ? 'text-green-600' : 'text-blue-600'
-                    }`}>
-                      {selectedRule.adjustmentType === "FREE" ? "FREE" :
-                       selectedRule.adjustmentType === "PERCENT" ? `${selectedRule.adjustmentValue}%` :
-                       `$${selectedRule.adjustmentValue}`
-                      }
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      Value
+                    </label>
+                    <div
+                      className={`text-lg font-bold ${
+                        selectedRule.adjustmentType === "FREE"
+                          ? "text-green-600"
+                          : "text-blue-600"
+                      }`}
+                    >
+                      {selectedRule.adjustmentType === "FREE"
+                        ? "FREE"
+                        : selectedRule.adjustmentType === "PERCENT"
+                          ? `${selectedRule.adjustmentValue}%`
+                          : `$${selectedRule.adjustmentValue}`}
                     </div>
                   </div>
                 </Col>
@@ -878,27 +1092,34 @@ export default function AirAncillariesDiscounting() {
 
             {/* Eligibility & Restrictions */}
             <div className="bg-white rounded-lg p-6 border">
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">Eligibility & Restrictions</h4>
+              <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                Eligibility & Restrictions
+              </h4>
               <Row gutter={[24, 16]}>
                 <Col span={12}>
                   <div className="space-y-3">
                     <div>
-                      <label className="text-sm font-medium text-gray-700">Airline</label>
+                      <label className="text-sm font-medium text-gray-700">
+                        Airline
+                      </label>
                       <div className="mt-1 text-sm font-mono bg-gray-100 px-2 py-1 rounded">
                         {selectedRule.airlineCode || "All Airlines"}
                       </div>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-700">Route</label>
+                      <label className="text-sm font-medium text-gray-700">
+                        Route
+                      </label>
                       <div className="mt-1 text-sm font-mono bg-gray-100 px-2 py-1 rounded">
-                        {selectedRule.origin && selectedRule.destination 
+                        {selectedRule.origin && selectedRule.destination
                           ? `${selectedRule.origin} → ${selectedRule.destination}`
-                          : "All Routes"
-                        }
+                          : "All Routes"}
                       </div>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-700">Channel</label>
+                      <label className="text-sm font-medium text-gray-700">
+                        Channel
+                      </label>
                       <div className="mt-1">
                         <Badge variant="outline">{selectedRule.channel}</Badge>
                       </div>
@@ -908,40 +1129,59 @@ export default function AirAncillariesDiscounting() {
                 <Col span={12}>
                   <div className="space-y-3">
                     <div>
-                      <label className="text-sm font-medium text-gray-700">Point of Sale</label>
+                      <label className="text-sm font-medium text-gray-700">
+                        Point of Sale
+                      </label>
                       <div className="flex flex-wrap gap-1 mt-1">
                         {selectedRule.pos?.map((country, index) => (
-                          <span key={index} className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
+                          <span
+                            key={index}
+                            className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800"
+                          >
                             {country}
                           </span>
                         ))}
                       </div>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-700">Agent Tiers</label>
+                      <label className="text-sm font-medium text-gray-700">
+                        Agent Tiers
+                      </label>
                       <div className="flex flex-wrap gap-1 mt-1">
                         {selectedRule.agentTier?.map((tier, index) => (
-                          <span key={index} className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${
-                            tier === 'PLATINUM' ? 'bg-gray-100 text-gray-800' :
-                            tier === 'GOLD' ? 'bg-yellow-100 text-yellow-800' :
-                            tier === 'SILVER' ? 'bg-gray-100 text-gray-700' :
-                            'bg-orange-100 text-orange-800'
-                          }`}>
+                          <span
+                            key={index}
+                            className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${
+                              tier === "PLATINUM"
+                                ? "bg-gray-100 text-gray-800"
+                                : tier === "GOLD"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : tier === "SILVER"
+                                    ? "bg-gray-100 text-gray-700"
+                                    : "bg-orange-100 text-orange-800"
+                            }`}
+                          >
                             {tier}
                           </span>
                         ))}
                       </div>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-700">Valid Period</label>
+                      <label className="text-sm font-medium text-gray-700">
+                        Valid Period
+                      </label>
                       <div className="text-sm space-y-1">
                         <div className="flex justify-between">
                           <span className="text-gray-600">From:</span>
-                          <span className="font-medium">{formatDate(selectedRule.validFrom)}</span>
+                          <span className="font-medium">
+                            {formatDate(selectedRule.validFrom)}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">To:</span>
-                          <span className="font-medium">{formatDate(selectedRule.validTo)}</span>
+                          <span className="font-medium">
+                            {formatDate(selectedRule.validTo)}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -971,8 +1211,12 @@ export default function AirAncillariesDiscounting() {
           layout="vertical"
           onFinish={handleSimulate}
         >
-          <AntForm.Item label="Base Price" name="basePrice" rules={[{ required: true }]}>
-            <AntInputNumber 
+          <AntForm.Item
+            label="Base Price"
+            name="basePrice"
+            rules={[{ required: true }]}
+          >
+            <AntInputNumber
               placeholder="Enter base ancillary price"
               style={{ width: "100%" }}
               min={0}
@@ -980,7 +1224,11 @@ export default function AirAncillariesDiscounting() {
             />
           </AntForm.Item>
 
-          <AntForm.Item label="Currency" name="currency" rules={[{ required: true }]}>
+          <AntForm.Item
+            label="Currency"
+            name="currency"
+            rules={[{ required: true }]}
+          >
             <AntSelect placeholder="Select currency">
               <AntSelect.Option value="USD">USD</AntSelect.Option>
               <AntSelect.Option value="EUR">EUR</AntSelect.Option>
@@ -993,12 +1241,18 @@ export default function AirAncillariesDiscounting() {
               <h4 className="font-semibold mb-2">Simulation Result</h4>
               <div className="space-y-2">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-lg">{getAncillaryIcon(simulationResult.ancillaryCode)}</span>
-                  <span className="font-medium">{simulationResult.ancillaryCode}</span>
+                  <span className="text-lg">
+                    {getAncillaryIcon(simulationResult.ancillaryCode)}
+                  </span>
+                  <span className="font-medium">
+                    {simulationResult.ancillaryCode}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span>Base Price:</span>
-                  <span>{simulationResult.currency} {simulationResult.basePrice}</span>
+                  <span>
+                    {simulationResult.currency} {simulationResult.basePrice}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span>Discount:</span>
@@ -1008,10 +1262,16 @@ export default function AirAncillariesDiscounting() {
                 </div>
                 <div className="flex justify-between font-bold text-lg border-t pt-2">
                   <span>Final Price:</span>
-                  <span className={simulationResult.adjustedPrice === 0 ? 'text-green-600' : 'text-blue-600'}>
-                    {simulationResult.adjustedPrice === 0 ? 'FREE' : 
-                     `${simulationResult.currency} ${simulationResult.adjustedPrice}`
+                  <span
+                    className={
+                      simulationResult.adjustedPrice === 0
+                        ? "text-green-600"
+                        : "text-blue-600"
                     }
+                  >
+                    {simulationResult.adjustedPrice === 0
+                      ? "FREE"
+                      : `${simulationResult.currency} ${simulationResult.adjustedPrice}`}
                   </span>
                 </div>
               </div>
@@ -1020,12 +1280,14 @@ export default function AirAncillariesDiscounting() {
 
           <AntForm.Item>
             <div className="flex justify-end gap-2">
-              <AntButton onClick={() => {
-                setIsSimulateModalOpen(false);
-                setSelectedRule(null);
-                setSimulationResult(null);
-                simulateForm.resetFields();
-              }}>
+              <AntButton
+                onClick={() => {
+                  setIsSimulateModalOpen(false);
+                  setSelectedRule(null);
+                  setSimulationResult(null);
+                  simulateForm.resetFields();
+                }}
+              >
                 Cancel
               </AntButton>
               <AntButton

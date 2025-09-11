@@ -13,7 +13,13 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -30,7 +36,15 @@ import {
   Upload,
   message,
 } from "antd";
-import { TrendingUp, Plus, Upload as UploadIcon, Filter, Eye, Edit, Calculator } from "lucide-react";
+import {
+  TrendingUp,
+  Plus,
+  Upload as UploadIcon,
+  Filter,
+  Eye,
+  Edit,
+  Calculator,
+} from "lucide-react";
 import type { DynamicDiscountRule } from "../../../shared/schema";
 import dayjs from "dayjs";
 
@@ -70,7 +84,9 @@ const ruleFormSchema = z.object({
   tripType: z.enum(["ONE_WAY", "ROUND_TRIP", "MULTI_CITY"]),
   pos: z.array(z.string()).min(1, "At least one POS required"),
   marketRegion: z.string().optional(),
-  agentTier: z.array(z.enum(["PLATINUM", "GOLD", "SILVER", "BRONZE"])).min(1, "At least one agent tier required"),
+  agentTier: z
+    .array(z.enum(["PLATINUM", "GOLD", "SILVER", "BRONZE"]))
+    .min(1, "At least one agent tier required"),
   cohortCodes: z.array(z.string()).optional(),
   channel: z.enum(["API", "PORTAL", "MOBILE"]),
   bookingWindowMin: z.number().optional(),
@@ -99,7 +115,9 @@ export default function DynamicDiscountEngine() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSimulateModalOpen, setIsSimulateModalOpen] = useState(false);
-  const [selectedRule, setSelectedRule] = useState<DynamicDiscountRule | null>(null);
+  const [selectedRule, setSelectedRule] = useState<DynamicDiscountRule | null>(
+    null,
+  );
   const [simulationResult, setSimulationResult] = useState<any>(null);
   const queryClient = useQueryClient();
   const [antForm] = AntForm.useForm();
@@ -151,7 +169,11 @@ export default function DynamicDiscountEngine() {
       toast({ title: "Rule created successfully" });
     },
     onError: (error: Error) => {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
@@ -194,7 +216,11 @@ export default function DynamicDiscountEngine() {
 
   // Simulate rule mutation
   const simulateRuleMutation = useMutation({
-    mutationFn: async (data: { baseFare: number; currency: string; ruleId: string }) => {
+    mutationFn: async (data: {
+      baseFare: number;
+      currency: string;
+      ruleId: string;
+    }) => {
       const response = await fetch("/api/dynamic-discount-rules/simulate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -274,22 +300,6 @@ export default function DynamicDiscountEngine() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Dynamic Discount Engine</h1>
-          <p className="text-muted-foreground">
-            Manage intelligent pricing rules for API, GDS, and NDC fare sources
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={() => setIsCreateModalOpen(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Create Rule
-          </Button>
-        </div>
-      </div>
-
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
@@ -308,18 +318,28 @@ export default function DynamicDiscountEngine() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {rules.filter((rule: DynamicDiscountRule) => rule.status === "ACTIVE").length}
+              {
+                rules.filter(
+                  (rule: DynamicDiscountRule) => rule.status === "ACTIVE",
+                ).length
+              }
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Stackable Rules</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Stackable Rules
+            </CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {rules.filter((rule: DynamicDiscountRule) => rule.stackable === "true").length}
+              {
+                rules.filter(
+                  (rule: DynamicDiscountRule) => rule.stackable === "true",
+                ).length
+              }
             </div>
           </CardContent>
         </Card>
@@ -330,7 +350,10 @@ export default function DynamicDiscountEngine() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {rules.filter((rule: DynamicDiscountRule) => rule.priority >= 5).length}
+              {
+                rules.filter((rule: DynamicDiscountRule) => rule.priority >= 5)
+                  .length
+              }
             </div>
           </CardContent>
         </Card>
@@ -360,7 +383,8 @@ export default function DynamicDiscountEngine() {
         <CardHeader>
           <CardTitle>Discount Rules</CardTitle>
           <CardDescription>
-            Manage dynamic discount and markup rules for real-time fare adjustments
+            Manage dynamic discount and markup rules for real-time fare
+            adjustments
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -384,57 +408,68 @@ export default function DynamicDiscountEngine() {
                     <div className="font-medium">{rule.ruleCode}</div>
                     <div className="text-sm text-gray-500">
                       {rule.stackable === "true" && (
-                        <Badge variant="outline" className="text-xs">Stackable</Badge>
+                        <Badge variant="outline" className="text-xs">
+                          Stackable
+                        </Badge>
                       )}
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">
-                      <div className="font-medium">{rule.origin} → {rule.destination}</div>
-                      <div className="text-gray-500">{rule.cabinClass} • {rule.tripType.replace('_', ' ')}</div>
+                      <div className="font-medium">
+                        {rule.origin} → {rule.destination}
+                      </div>
+                      <div className="text-gray-500">
+                        {rule.cabinClass} • {rule.tripType.replace("_", " ")}
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell className="text-sm">{rule.fareSource}</TableCell>
                   <TableCell className="text-sm">{rule.channel}</TableCell>
                   <TableCell>
                     <div className="text-sm">
-                      <div className={`font-medium ${parseFloat(rule.adjustmentValue) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {rule.adjustmentType === "PERCENT" ? 
-                          `${parseFloat(rule.adjustmentValue) >= 0 ? '+' : ''}${rule.adjustmentValue}%` :
-                          `${parseFloat(rule.adjustmentValue) >= 0 ? '+' : ''}${rule.adjustmentValue}`
-                        }
+                      <div
+                        className={`font-medium ${parseFloat(rule.adjustmentValue) >= 0 ? "text-green-600" : "text-red-600"}`}
+                      >
+                        {rule.adjustmentType === "PERCENT"
+                          ? `${parseFloat(rule.adjustmentValue) >= 0 ? "+" : ""}${rule.adjustmentValue}%`
+                          : `${parseFloat(rule.adjustmentValue) >= 0 ? "+" : ""}${rule.adjustmentValue}`}
                       </div>
                     </div>
                   </TableCell>
                   <TableCell className="text-sm">{rule.priority}</TableCell>
                   <TableCell>
-                    <span className={`text-sm font-medium ${
-                      rule.status === "ACTIVE" ? "text-green-600" : "text-red-600"
-                    }`}>
+                    <span
+                      className={`text-sm font-medium ${
+                        rule.status === "ACTIVE"
+                          ? "text-green-600"
+                          : "text-red-600"
+                      }`}
+                    >
                       {rule.status === "ACTIVE" ? "Active" : "Inactive"}
                     </span>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         className="p-1"
                         onClick={() => handleViewRule(rule)}
                       >
                         <Eye className="w-4 h-4 text-gray-500" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         className="p-1"
                         onClick={() => handleEditRuleClick(rule)}
                       >
                         <Edit className="w-4 h-4 text-gray-500" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         className="p-1"
                         onClick={() => {
                           setSelectedRule(rule);
@@ -443,15 +478,19 @@ export default function DynamicDiscountEngine() {
                       >
                         <Calculator className="w-4 h-4 text-gray-500" />
                       </Button>
-                      <div 
+                      <div
                         className={`w-8 h-4 rounded-full relative cursor-pointer transition-colors ${
-                          rule.status === "ACTIVE" ? "bg-blue-600" : "bg-gray-300"
+                          rule.status === "ACTIVE"
+                            ? "bg-blue-600"
+                            : "bg-gray-300"
                         }`}
                         onClick={() => handleStatusToggle(rule)}
                       >
-                        <div 
+                        <div
                           className={`w-3 h-3 bg-white rounded-full absolute top-0.5 transition-transform ${
-                            rule.status === "ACTIVE" ? "translate-x-4" : "translate-x-0.5"
+                            rule.status === "ACTIVE"
+                              ? "translate-x-4"
+                              : "translate-x-0.5"
                           }`}
                         />
                       </div>
@@ -483,15 +522,25 @@ export default function DynamicDiscountEngine() {
         >
           <Row gutter={16}>
             <Col span={12}>
-              <AntForm.Item label="Rule Code" name="ruleCode" rules={[{ required: true }]}>
+              <AntForm.Item
+                label="Rule Code"
+                name="ruleCode"
+                rules={[{ required: true }]}
+              >
                 <AntInput placeholder="e.g., DISCOUNT_001" />
               </AntForm.Item>
             </Col>
             <Col span={12}>
-              <AntForm.Item label="Fare Source" name="fareSource" rules={[{ required: true }]}>
+              <AntForm.Item
+                label="Fare Source"
+                name="fareSource"
+                rules={[{ required: true }]}
+              >
                 <AntSelect placeholder="Select fare source">
-                  {fareSources.map(source => (
-                    <AntSelect.Option key={source} value={source}>{source}</AntSelect.Option>
+                  {fareSources.map((source) => (
+                    <AntSelect.Option key={source} value={source}>
+                      {source}
+                    </AntSelect.Option>
                   ))}
                 </AntSelect>
               </AntForm.Item>
@@ -500,20 +549,34 @@ export default function DynamicDiscountEngine() {
 
           <Row gutter={16}>
             <Col span={8}>
-              <AntForm.Item label="Origin" name="origin" rules={[{ required: true }]}>
+              <AntForm.Item
+                label="Origin"
+                name="origin"
+                rules={[{ required: true }]}
+              >
                 <AntInput placeholder="LHR" maxLength={3} />
               </AntForm.Item>
             </Col>
             <Col span={8}>
-              <AntForm.Item label="Destination" name="destination" rules={[{ required: true }]}>
+              <AntForm.Item
+                label="Destination"
+                name="destination"
+                rules={[{ required: true }]}
+              >
                 <AntInput placeholder="JFK" maxLength={3} />
               </AntForm.Item>
             </Col>
             <Col span={8}>
-              <AntForm.Item label="Channel" name="channel" rules={[{ required: true }]}>
+              <AntForm.Item
+                label="Channel"
+                name="channel"
+                rules={[{ required: true }]}
+              >
                 <AntSelect placeholder="Select channel">
-                  {channels.map(channel => (
-                    <AntSelect.Option key={channel} value={channel}>{channel}</AntSelect.Option>
+                  {channels.map((channel) => (
+                    <AntSelect.Option key={channel} value={channel}>
+                      {channel}
+                    </AntSelect.Option>
                   ))}
                 </AntSelect>
               </AntForm.Item>
@@ -522,19 +585,31 @@ export default function DynamicDiscountEngine() {
 
           <Row gutter={16}>
             <Col span={12}>
-              <AntForm.Item label="Cabin Class" name="cabinClass" rules={[{ required: true }]}>
+              <AntForm.Item
+                label="Cabin Class"
+                name="cabinClass"
+                rules={[{ required: true }]}
+              >
                 <AntSelect placeholder="Select cabin class">
-                  {cabinClasses.map(cabin => (
-                    <AntSelect.Option key={cabin} value={cabin}>{cabin}</AntSelect.Option>
+                  {cabinClasses.map((cabin) => (
+                    <AntSelect.Option key={cabin} value={cabin}>
+                      {cabin}
+                    </AntSelect.Option>
                   ))}
                 </AntSelect>
               </AntForm.Item>
             </Col>
             <Col span={12}>
-              <AntForm.Item label="Trip Type" name="tripType" rules={[{ required: true }]}>
+              <AntForm.Item
+                label="Trip Type"
+                name="tripType"
+                rules={[{ required: true }]}
+              >
                 <AntSelect placeholder="Select trip type">
-                  {tripTypes.map(type => (
-                    <AntSelect.Option key={type} value={type}>{type.replace('_', ' ')}</AntSelect.Option>
+                  {tripTypes.map((type) => (
+                    <AntSelect.Option key={type} value={type}>
+                      {type.replace("_", " ")}
+                    </AntSelect.Option>
                   ))}
                 </AntSelect>
               </AntForm.Item>
@@ -543,16 +618,28 @@ export default function DynamicDiscountEngine() {
 
           <Row gutter={16}>
             <Col span={12}>
-              <AntForm.Item label="Point of Sale" name="pos" rules={[{ required: true }]}>
-                <AntSelect mode="tags" placeholder="Enter country codes (e.g., US, GB)">
-                </AntSelect>
+              <AntForm.Item
+                label="Point of Sale"
+                name="pos"
+                rules={[{ required: true }]}
+              >
+                <AntSelect
+                  mode="tags"
+                  placeholder="Enter country codes (e.g., US, GB)"
+                ></AntSelect>
               </AntForm.Item>
             </Col>
             <Col span={12}>
-              <AntForm.Item label="Agent Tiers" name="agentTier" rules={[{ required: true }]}>
+              <AntForm.Item
+                label="Agent Tiers"
+                name="agentTier"
+                rules={[{ required: true }]}
+              >
                 <AntSelect mode="multiple" placeholder="Select agent tiers">
-                  {agentTiers.map(tier => (
-                    <AntSelect.Option key={tier} value={tier}>{tier}</AntSelect.Option>
+                  {agentTiers.map((tier) => (
+                    <AntSelect.Option key={tier} value={tier}>
+                      {tier}
+                    </AntSelect.Option>
                   ))}
                 </AntSelect>
               </AntForm.Item>
@@ -560,40 +647,65 @@ export default function DynamicDiscountEngine() {
           </Row>
 
           <AntForm.Item label="Eligible Cohorts (Optional)" name="cohortCodes">
-            <AntSelect mode="tags" placeholder="Enter cohort codes">
-            </AntSelect>
+            <AntSelect mode="tags" placeholder="Enter cohort codes"></AntSelect>
           </AntForm.Item>
 
           <Row gutter={16}>
             <Col span={8}>
-              <AntForm.Item label="Adjustment Type" name="adjustmentType" rules={[{ required: true }]}>
+              <AntForm.Item
+                label="Adjustment Type"
+                name="adjustmentType"
+                rules={[{ required: true }]}
+              >
                 <AntSelect placeholder="Select type">
-                  {adjustmentTypes.map(type => (
-                    <AntSelect.Option key={type} value={type}>{type}</AntSelect.Option>
+                  {adjustmentTypes.map((type) => (
+                    <AntSelect.Option key={type} value={type}>
+                      {type}
+                    </AntSelect.Option>
                   ))}
                 </AntSelect>
               </AntForm.Item>
             </Col>
             <Col span={8}>
-              <AntForm.Item label="Adjustment Value" name="adjustmentValue" rules={[{ required: true }]}>
+              <AntForm.Item
+                label="Adjustment Value"
+                name="adjustmentValue"
+                rules={[{ required: true }]}
+              >
                 <AntInputNumber placeholder="10" style={{ width: "100%" }} />
               </AntForm.Item>
             </Col>
             <Col span={8}>
-              <AntForm.Item label="Priority" name="priority" rules={[{ required: true }]}>
-                <AntInputNumber min={1} placeholder="1" style={{ width: "100%" }} />
+              <AntForm.Item
+                label="Priority"
+                name="priority"
+                rules={[{ required: true }]}
+              >
+                <AntInputNumber
+                  min={1}
+                  placeholder="1"
+                  style={{ width: "100%" }}
+                />
               </AntForm.Item>
             </Col>
           </Row>
 
           <Row gutter={16}>
             <Col span={12}>
-              <AntForm.Item label="Valid Dates" name="validDates" rules={[{ required: true }]}>
+              <AntForm.Item
+                label="Valid Dates"
+                name="validDates"
+                rules={[{ required: true }]}
+              >
                 <RangePicker style={{ width: "100%" }} />
               </AntForm.Item>
             </Col>
             <Col span={12}>
-              <AntForm.Item label="Stackable" name="stackable" valuePropName="checked">
+              <AntForm.Item
+                label="Stackable"
+                name="stackable"
+                valuePropName="checked"
+              >
                 <AntSwitch />
               </AntForm.Item>
             </Col>
@@ -601,10 +713,12 @@ export default function DynamicDiscountEngine() {
 
           <AntForm.Item>
             <div className="flex justify-end gap-2">
-              <AntButton onClick={() => {
-                setIsCreateModalOpen(false);
-                antForm.resetFields();
-              }}>
+              <AntButton
+                onClick={() => {
+                  setIsCreateModalOpen(false);
+                  antForm.resetFields();
+                }}
+              >
                 Cancel
               </AntButton>
               <AntButton
@@ -639,15 +753,25 @@ export default function DynamicDiscountEngine() {
         >
           <Row gutter={16}>
             <Col span={12}>
-              <AntForm.Item label="Rule Code" name="ruleCode" rules={[{ required: true }]}>
+              <AntForm.Item
+                label="Rule Code"
+                name="ruleCode"
+                rules={[{ required: true }]}
+              >
                 <AntInput placeholder="e.g., DISCOUNT_001" />
               </AntForm.Item>
             </Col>
             <Col span={12}>
-              <AntForm.Item label="Fare Source" name="fareSource" rules={[{ required: true }]}>
+              <AntForm.Item
+                label="Fare Source"
+                name="fareSource"
+                rules={[{ required: true }]}
+              >
                 <AntSelect placeholder="Select fare source">
-                  {fareSources.map(source => (
-                    <AntSelect.Option key={source} value={source}>{source}</AntSelect.Option>
+                  {fareSources.map((source) => (
+                    <AntSelect.Option key={source} value={source}>
+                      {source}
+                    </AntSelect.Option>
                   ))}
                 </AntSelect>
               </AntForm.Item>
@@ -656,20 +780,34 @@ export default function DynamicDiscountEngine() {
 
           <Row gutter={16}>
             <Col span={8}>
-              <AntForm.Item label="Origin" name="origin" rules={[{ required: true }]}>
+              <AntForm.Item
+                label="Origin"
+                name="origin"
+                rules={[{ required: true }]}
+              >
                 <AntInput placeholder="LHR" maxLength={3} />
               </AntForm.Item>
             </Col>
             <Col span={8}>
-              <AntForm.Item label="Destination" name="destination" rules={[{ required: true }]}>
+              <AntForm.Item
+                label="Destination"
+                name="destination"
+                rules={[{ required: true }]}
+              >
                 <AntInput placeholder="JFK" maxLength={3} />
               </AntForm.Item>
             </Col>
             <Col span={8}>
-              <AntForm.Item label="Channel" name="channel" rules={[{ required: true }]}>
+              <AntForm.Item
+                label="Channel"
+                name="channel"
+                rules={[{ required: true }]}
+              >
                 <AntSelect placeholder="Select channel">
-                  {channels.map(channel => (
-                    <AntSelect.Option key={channel} value={channel}>{channel}</AntSelect.Option>
+                  {channels.map((channel) => (
+                    <AntSelect.Option key={channel} value={channel}>
+                      {channel}
+                    </AntSelect.Option>
                   ))}
                 </AntSelect>
               </AntForm.Item>
@@ -678,19 +816,31 @@ export default function DynamicDiscountEngine() {
 
           <Row gutter={16}>
             <Col span={12}>
-              <AntForm.Item label="Cabin Class" name="cabinClass" rules={[{ required: true }]}>
+              <AntForm.Item
+                label="Cabin Class"
+                name="cabinClass"
+                rules={[{ required: true }]}
+              >
                 <AntSelect placeholder="Select cabin class">
-                  {cabinClasses.map(cabin => (
-                    <AntSelect.Option key={cabin} value={cabin}>{cabin}</AntSelect.Option>
+                  {cabinClasses.map((cabin) => (
+                    <AntSelect.Option key={cabin} value={cabin}>
+                      {cabin}
+                    </AntSelect.Option>
                   ))}
                 </AntSelect>
               </AntForm.Item>
             </Col>
             <Col span={12}>
-              <AntForm.Item label="Trip Type" name="tripType" rules={[{ required: true }]}>
+              <AntForm.Item
+                label="Trip Type"
+                name="tripType"
+                rules={[{ required: true }]}
+              >
                 <AntSelect placeholder="Select trip type">
-                  {tripTypes.map(type => (
-                    <AntSelect.Option key={type} value={type}>{type.replace('_', ' ')}</AntSelect.Option>
+                  {tripTypes.map((type) => (
+                    <AntSelect.Option key={type} value={type}>
+                      {type.replace("_", " ")}
+                    </AntSelect.Option>
                   ))}
                 </AntSelect>
               </AntForm.Item>
@@ -699,16 +849,28 @@ export default function DynamicDiscountEngine() {
 
           <Row gutter={16}>
             <Col span={12}>
-              <AntForm.Item label="Point of Sale" name="pos" rules={[{ required: true }]}>
-                <AntSelect mode="tags" placeholder="Enter country codes (e.g., US, GB)">
-                </AntSelect>
+              <AntForm.Item
+                label="Point of Sale"
+                name="pos"
+                rules={[{ required: true }]}
+              >
+                <AntSelect
+                  mode="tags"
+                  placeholder="Enter country codes (e.g., US, GB)"
+                ></AntSelect>
               </AntForm.Item>
             </Col>
             <Col span={12}>
-              <AntForm.Item label="Agent Tiers" name="agentTier" rules={[{ required: true }]}>
+              <AntForm.Item
+                label="Agent Tiers"
+                name="agentTier"
+                rules={[{ required: true }]}
+              >
                 <AntSelect mode="multiple" placeholder="Select agent tiers">
-                  {agentTiers.map(tier => (
-                    <AntSelect.Option key={tier} value={tier}>{tier}</AntSelect.Option>
+                  {agentTiers.map((tier) => (
+                    <AntSelect.Option key={tier} value={tier}>
+                      {tier}
+                    </AntSelect.Option>
                   ))}
                 </AntSelect>
               </AntForm.Item>
@@ -716,40 +878,65 @@ export default function DynamicDiscountEngine() {
           </Row>
 
           <AntForm.Item label="Eligible Cohorts (Optional)" name="cohortCodes">
-            <AntSelect mode="tags" placeholder="Enter cohort codes">
-            </AntSelect>
+            <AntSelect mode="tags" placeholder="Enter cohort codes"></AntSelect>
           </AntForm.Item>
 
           <Row gutter={16}>
             <Col span={8}>
-              <AntForm.Item label="Adjustment Type" name="adjustmentType" rules={[{ required: true }]}>
+              <AntForm.Item
+                label="Adjustment Type"
+                name="adjustmentType"
+                rules={[{ required: true }]}
+              >
                 <AntSelect placeholder="Select type">
-                  {adjustmentTypes.map(type => (
-                    <AntSelect.Option key={type} value={type}>{type}</AntSelect.Option>
+                  {adjustmentTypes.map((type) => (
+                    <AntSelect.Option key={type} value={type}>
+                      {type}
+                    </AntSelect.Option>
                   ))}
                 </AntSelect>
               </AntForm.Item>
             </Col>
             <Col span={8}>
-              <AntForm.Item label="Adjustment Value" name="adjustmentValue" rules={[{ required: true }]}>
+              <AntForm.Item
+                label="Adjustment Value"
+                name="adjustmentValue"
+                rules={[{ required: true }]}
+              >
                 <AntInputNumber placeholder="10" style={{ width: "100%" }} />
               </AntForm.Item>
             </Col>
             <Col span={8}>
-              <AntForm.Item label="Priority" name="priority" rules={[{ required: true }]}>
-                <AntInputNumber min={1} placeholder="1" style={{ width: "100%" }} />
+              <AntForm.Item
+                label="Priority"
+                name="priority"
+                rules={[{ required: true }]}
+              >
+                <AntInputNumber
+                  min={1}
+                  placeholder="1"
+                  style={{ width: "100%" }}
+                />
               </AntForm.Item>
             </Col>
           </Row>
 
           <Row gutter={16}>
             <Col span={12}>
-              <AntForm.Item label="Valid Dates" name="validDates" rules={[{ required: true }]}>
+              <AntForm.Item
+                label="Valid Dates"
+                name="validDates"
+                rules={[{ required: true }]}
+              >
                 <RangePicker style={{ width: "100%" }} />
               </AntForm.Item>
             </Col>
             <Col span={12}>
-              <AntForm.Item label="Stackable" name="stackable" valuePropName="checked">
+              <AntForm.Item
+                label="Stackable"
+                name="stackable"
+                valuePropName="checked"
+              >
                 <AntSwitch />
               </AntForm.Item>
             </Col>
@@ -757,11 +944,13 @@ export default function DynamicDiscountEngine() {
 
           <AntForm.Item>
             <div className="flex justify-end gap-2">
-              <AntButton onClick={() => {
-                setIsEditModalOpen(false);
-                setSelectedRule(null);
-                editForm.resetFields();
-              }}>
+              <AntButton
+                onClick={() => {
+                  setIsEditModalOpen(false);
+                  setSelectedRule(null);
+                  editForm.resetFields();
+                }}
+              >
                 Cancel
               </AntButton>
               <AntButton
@@ -784,8 +973,12 @@ export default function DynamicDiscountEngine() {
               <Eye className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Rule Details</h3>
-              <p className="text-sm text-gray-500">Complete discount rule information</p>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Rule Details
+              </h3>
+              <p className="text-sm text-gray-500">
+                Complete discount rule information
+              </p>
             </div>
           </div>
         }
@@ -795,8 +988,8 @@ export default function DynamicDiscountEngine() {
           setSelectedRule(null);
         }}
         footer={[
-          <AntButton 
-            key="close" 
+          <AntButton
+            key="close"
             type="primary"
             onClick={() => {
               setIsViewModalOpen(false);
@@ -804,7 +997,7 @@ export default function DynamicDiscountEngine() {
             }}
           >
             Close
-          </AntButton>
+          </AntButton>,
         ]}
         width={900}
       >
@@ -813,45 +1006,63 @@ export default function DynamicDiscountEngine() {
             {/* Status Badge */}
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                  selectedRule.status === "ACTIVE" 
-                    ? "bg-green-100 text-green-800" 
-                    : "bg-red-100 text-red-800"
-                }`}>
-                  <div className={`w-2 h-2 rounded-full mr-2 ${
-                    selectedRule.status === "ACTIVE" ? "bg-green-400" : "bg-red-400"
-                  }`}></div>
+                <span
+                  className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                    selectedRule.status === "ACTIVE"
+                      ? "bg-green-100 text-green-800"
+                      : "bg-red-100 text-red-800"
+                  }`}
+                >
+                  <div
+                    className={`w-2 h-2 rounded-full mr-2 ${
+                      selectedRule.status === "ACTIVE"
+                        ? "bg-green-400"
+                        : "bg-red-400"
+                    }`}
+                  ></div>
                   {selectedRule.status}
                 </span>
                 {selectedRule.stackable === "true" && (
                   <Badge variant="outline">Stackable</Badge>
                 )}
               </div>
-              <div className="text-sm text-gray-500">
-                ID: {selectedRule.id}
-              </div>
+              <div className="text-sm text-gray-500">ID: {selectedRule.id}</div>
             </div>
 
             {/* Main Rule Information */}
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-100">
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">Rule Information</h4>
+              <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                Rule Information
+              </h4>
               <Row gutter={[24, 16]}>
                 <Col span={8}>
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Rule Code</label>
-                    <div className="text-lg font-bold text-gray-900">{selectedRule.ruleCode}</div>
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      Rule Code
+                    </label>
+                    <div className="text-lg font-bold text-gray-900">
+                      {selectedRule.ruleCode}
+                    </div>
                   </div>
                 </Col>
                 <Col span={8}>
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Fare Source</label>
-                    <div className="text-lg font-bold text-blue-600">{selectedRule.fareSource}</div>
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      Fare Source
+                    </label>
+                    <div className="text-lg font-bold text-blue-600">
+                      {selectedRule.fareSource}
+                    </div>
                   </div>
                 </Col>
                 <Col span={8}>
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Priority</label>
-                    <div className="text-lg font-bold text-green-600">{selectedRule.priority}</div>
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      Priority
+                    </label>
+                    <div className="text-lg font-bold text-green-600">
+                      {selectedRule.priority}
+                    </div>
                   </div>
                 </Col>
               </Row>
@@ -859,25 +1070,31 @@ export default function DynamicDiscountEngine() {
 
             {/* Route Information */}
             <div className="bg-gray-50 rounded-lg p-6 border">
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">Route & Travel Details</h4>
+              <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                Route & Travel Details
+              </h4>
               <Row gutter={[24, 16]}>
                 <Col span={12}>
                   <div className="flex items-center gap-4">
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-gray-900">{selectedRule.origin}</div>
+                      <div className="text-2xl font-bold text-gray-900">
+                        {selectedRule.origin}
+                      </div>
                       <div className="text-xs text-gray-500">Origin</div>
                     </div>
                     <div className="flex-1 flex items-center">
                       <div className="w-full h-px bg-gray-300 relative">
                         <div className="absolute inset-0 flex items-center justify-center">
                           <div className="bg-white px-2 py-1 rounded-full border text-xs text-gray-600">
-                            {selectedRule.tripType.replace('_', ' ')}
+                            {selectedRule.tripType.replace("_", " ")}
                           </div>
                         </div>
                       </div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-gray-900">{selectedRule.destination}</div>
+                      <div className="text-2xl font-bold text-gray-900">
+                        {selectedRule.destination}
+                      </div>
                       <div className="text-xs text-gray-500">Destination</div>
                     </div>
                   </div>
@@ -886,11 +1103,15 @@ export default function DynamicDiscountEngine() {
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-600">Cabin:</span>
-                      <span className="font-medium">{selectedRule.cabinClass}</span>
+                      <span className="font-medium">
+                        {selectedRule.cabinClass}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-600">Channel:</span>
-                      <span className="font-medium">{selectedRule.channel}</span>
+                      <span className="font-medium">
+                        {selectedRule.channel}
+                      </span>
                     </div>
                   </div>
                 </Col>
@@ -899,20 +1120,31 @@ export default function DynamicDiscountEngine() {
 
             {/* Adjustment Information */}
             <div className="bg-yellow-50 rounded-lg p-6 border border-yellow-100">
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">Adjustment Details</h4>
+              <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                Adjustment Details
+              </h4>
               <Row gutter={[24, 16]}>
                 <Col span={12}>
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Type</label>
-                    <div className="text-lg font-bold text-gray-900">{selectedRule.adjustmentType}</div>
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      Type
+                    </label>
+                    <div className="text-lg font-bold text-gray-900">
+                      {selectedRule.adjustmentType}
+                    </div>
                   </div>
                 </Col>
                 <Col span={12}>
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Value</label>
-                    <div className={`text-lg font-bold ${parseFloat(selectedRule.adjustmentValue) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {parseFloat(selectedRule.adjustmentValue) >= 0 ? '+' : ''}{selectedRule.adjustmentValue}
-                      {selectedRule.adjustmentType === "PERCENT" ? '%' : ''}
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      Value
+                    </label>
+                    <div
+                      className={`text-lg font-bold ${parseFloat(selectedRule.adjustmentValue) >= 0 ? "text-green-600" : "text-red-600"}`}
+                    >
+                      {parseFloat(selectedRule.adjustmentValue) >= 0 ? "+" : ""}
+                      {selectedRule.adjustmentValue}
+                      {selectedRule.adjustmentType === "PERCENT" ? "%" : ""}
                     </div>
                   </div>
                 </Col>
@@ -921,30 +1153,45 @@ export default function DynamicDiscountEngine() {
 
             {/* Eligibility & Restrictions */}
             <div className="bg-white rounded-lg p-6 border">
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">Eligibility & Restrictions</h4>
+              <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                Eligibility & Restrictions
+              </h4>
               <Row gutter={[24, 16]}>
                 <Col span={12}>
                   <div className="space-y-3">
                     <div>
-                      <label className="text-sm font-medium text-gray-700">Point of Sale</label>
+                      <label className="text-sm font-medium text-gray-700">
+                        Point of Sale
+                      </label>
                       <div className="flex flex-wrap gap-1 mt-1">
                         {selectedRule.pos?.map((country, index) => (
-                          <span key={index} className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
+                          <span
+                            key={index}
+                            className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800"
+                          >
                             {country}
                           </span>
                         ))}
                       </div>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-700">Agent Tiers</label>
+                      <label className="text-sm font-medium text-gray-700">
+                        Agent Tiers
+                      </label>
                       <div className="flex flex-wrap gap-1 mt-1">
                         {selectedRule.agentTier?.map((tier, index) => (
-                          <span key={index} className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${
-                            tier === 'PLATINUM' ? 'bg-gray-100 text-gray-800' :
-                            tier === 'GOLD' ? 'bg-yellow-100 text-yellow-800' :
-                            tier === 'SILVER' ? 'bg-gray-100 text-gray-700' :
-                            'bg-orange-100 text-orange-800'
-                          }`}>
+                          <span
+                            key={index}
+                            className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${
+                              tier === "PLATINUM"
+                                ? "bg-gray-100 text-gray-800"
+                                : tier === "GOLD"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : tier === "SILVER"
+                                    ? "bg-gray-100 text-gray-700"
+                                    : "bg-orange-100 text-orange-800"
+                            }`}
+                          >
                             {tier}
                           </span>
                         ))}
@@ -955,15 +1202,21 @@ export default function DynamicDiscountEngine() {
                 <Col span={12}>
                   <div className="space-y-3">
                     <div>
-                      <label className="text-sm font-medium text-gray-700">Valid Period</label>
+                      <label className="text-sm font-medium text-gray-700">
+                        Valid Period
+                      </label>
                       <div className="text-sm space-y-1">
                         <div className="flex justify-between">
                           <span className="text-gray-600">From:</span>
-                          <span className="font-medium">{formatDate(selectedRule.validFrom)}</span>
+                          <span className="font-medium">
+                            {formatDate(selectedRule.validFrom)}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">To:</span>
-                          <span className="font-medium">{formatDate(selectedRule.validTo)}</span>
+                          <span className="font-medium">
+                            {formatDate(selectedRule.validTo)}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -993,8 +1246,12 @@ export default function DynamicDiscountEngine() {
           layout="vertical"
           onFinish={handleSimulate}
         >
-          <AntForm.Item label="Base Fare" name="baseFare" rules={[{ required: true }]}>
-            <AntInputNumber 
+          <AntForm.Item
+            label="Base Fare"
+            name="baseFare"
+            rules={[{ required: true }]}
+          >
+            <AntInputNumber
               placeholder="Enter base fare amount"
               style={{ width: "100%" }}
               min={0}
@@ -1002,7 +1259,11 @@ export default function DynamicDiscountEngine() {
             />
           </AntForm.Item>
 
-          <AntForm.Item label="Currency" name="currency" rules={[{ required: true }]}>
+          <AntForm.Item
+            label="Currency"
+            name="currency"
+            rules={[{ required: true }]}
+          >
             <AntSelect placeholder="Select currency">
               <AntSelect.Option value="USD">USD</AntSelect.Option>
               <AntSelect.Option value="EUR">EUR</AntSelect.Option>
@@ -1016,20 +1277,27 @@ export default function DynamicDiscountEngine() {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span>Base Fare:</span>
-                  <span>{simulationResult.currency} {simulationResult.baseFare}</span>
+                  <span>
+                    {simulationResult.currency} {simulationResult.baseFare}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span>Adjustment:</span>
                   <span>
-                    {simulationResult.adjustment.type === "PERCENT" 
+                    {simulationResult.adjustment.type === "PERCENT"
                       ? `${simulationResult.adjustment.value}%`
-                      : `${simulationResult.currency} ${simulationResult.adjustment.value}`
-                    }
+                      : `${simulationResult.currency} ${simulationResult.adjustment.value}`}
                   </span>
                 </div>
                 <div className="flex justify-between font-bold text-lg border-t pt-2">
                   <span>Final Fare:</span>
-                  <span className={simulationResult.adjustedFare > simulationResult.baseFare ? 'text-red-600' : 'text-green-600'}>
+                  <span
+                    className={
+                      simulationResult.adjustedFare > simulationResult.baseFare
+                        ? "text-red-600"
+                        : "text-green-600"
+                    }
+                  >
                     {simulationResult.currency} {simulationResult.adjustedFare}
                   </span>
                 </div>
@@ -1039,12 +1307,14 @@ export default function DynamicDiscountEngine() {
 
           <AntForm.Item>
             <div className="flex justify-end gap-2">
-              <AntButton onClick={() => {
-                setIsSimulateModalOpen(false);
-                setSelectedRule(null);
-                setSimulationResult(null);
-                simulateForm.resetFields();
-              }}>
+              <AntButton
+                onClick={() => {
+                  setIsSimulateModalOpen(false);
+                  setSelectedRule(null);
+                  setSimulationResult(null);
+                  simulateForm.resetFields();
+                }}
+              >
                 Cancel
               </AntButton>
               <AntButton

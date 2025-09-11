@@ -32,30 +32,29 @@ import {
 } from "antd";
 import { 
   Megaphone,
-  PlusOutlined, 
-  EditOutlined, 
-  DeleteOutlined, 
-  EyeOutlined,
-  PlayCircleOutlined,
-  PauseCircleOutlined,
-  BarChartOutlined,
-  SendOutlined,
-  TargetIcon,
-  CalendarOutlined,
-  MessageSquareOutlined,
-  TrendingUpOutlined,
+  Plus, 
+  Edit, 
+  Trash2, 
+  Eye,
+  Play,
+  Pause,
+  BarChart3,
+  Send,
+  Target,
+  Calendar,
+  MessageSquare,
+  TrendingUp,
   Users,
   DollarSign,
   MousePointer,
-  Eye,
   ShoppingCart,
   Mail,
   Smartphone,
   Globe,
-  CheckCircleOutlined,
-  ClockCircleOutlined,
-  ExclamationCircleOutlined,
-  StopOutlined
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  Square
 } from "lucide-react";
 import dayjs from "dayjs";
 import { z } from "zod";
@@ -482,8 +481,8 @@ export default function CampaignManager() {
         <div className="flex gap-1">
           {record.comms.portalBanner && <Tag icon={<Globe className="w-3 h-3" />} size="small">Portal</Tag>}
           {record.comms.emailTemplateId && <Tag icon={<Mail className="w-3 h-3" />} size="small">Email</Tag>}
-          {record.comms.whatsappTemplateId && <Tag icon={<MessageSquareOutlined className="w-3 h-3" />} size="small">WhatsApp</Tag>}
-          {record.comms.apiPush && <Tag icon={<SendOutlined className="w-3 h-3" />} size="small">API</Tag>}
+          {record.comms.whatsappTemplateId && <Tag icon={<MessageSquare className="w-3 h-3" />} size="small">WhatsApp</Tag>}
+          {record.comms.apiPush && <Tag icon={<Send className="w-3 h-3" />} size="small">API</Tag>}
         </div>
       ),
     },
@@ -505,14 +504,14 @@ export default function CampaignManager() {
         <Space>
           <Tooltip title="View Performance">
             <AntButton 
-              icon={<BarChartOutlined />} 
+              icon={<BarChart3 className="w-4 h-4" />} 
               size="small" 
               onClick={() => handleViewPerformance(record)}
             />
           </Tooltip>
           <Tooltip title="Edit Campaign">
             <AntButton 
-              icon={<EditOutlined />} 
+              icon={<Edit className="w-4 h-4" />} 
               size="small" 
               onClick={() => handleEditCampaign(record)}
             />
@@ -520,7 +519,7 @@ export default function CampaignManager() {
           {record.status === "DRAFT" || record.status === "PAUSED" ? (
             <Tooltip title="Activate Campaign">
               <AntButton 
-                icon={<PlayCircleOutlined />} 
+                icon={<Play className="w-4 h-4" />} 
                 size="small"
                 type="primary"
                 onClick={() => handleStatusChange(record, "ACTIVE")}
@@ -529,7 +528,7 @@ export default function CampaignManager() {
           ) : record.status === "ACTIVE" ? (
             <Tooltip title="Pause Campaign">
               <AntButton 
-                icon={<PauseCircleOutlined />} 
+                icon={<Pause className="w-4 h-4" />} 
                 size="small"
                 onClick={() => handleStatusChange(record, "PAUSED")}
               />
@@ -541,7 +540,7 @@ export default function CampaignManager() {
           >
             <Tooltip title="Delete Campaign">
               <AntButton 
-                icon={<DeleteOutlined />} 
+                icon={<Trash2 className="w-4 h-4" />} 
                 size="small" 
                 danger
               />
@@ -592,7 +591,7 @@ export default function CampaignManager() {
             <Statistic
               title="Active Campaigns"
               value={activeCampaigns.length}
-              prefix={<PlayCircleOutlined />}
+              prefix={<Play className="w-4 h-4" />}
               valueStyle={{ color: '#1890ff' }}
             />
           </AntCard>
@@ -602,7 +601,7 @@ export default function CampaignManager() {
             <Statistic
               title="Draft Campaigns"
               value={campaignStats.DRAFT || 0}
-              prefix={<EditOutlined />}
+              prefix={<Edit className="w-4 h-4" />}
               valueStyle={{ color: '#722ed1' }}
             />
           </AntCard>
@@ -612,7 +611,7 @@ export default function CampaignManager() {
             <Statistic
               title="Completed Campaigns"
               value={campaignStats.COMPLETED || 0}
-              prefix={<CheckCircleOutlined />}
+              prefix={<CheckCircle className="w-4 h-4" />}
               valueStyle={{ color: '#52c41a' }}
             />
           </AntCard>
@@ -632,7 +631,7 @@ export default function CampaignManager() {
               </div>
               <AntButton 
                 type="primary" 
-                icon={<PlusOutlined />}
+                icon={<Plus className="w-4 h-4" />}
                 onClick={() => {
                   setEditingCampaign(null);
                   campaignForm.resetFields();
@@ -1057,7 +1056,7 @@ export default function CampaignManager() {
                       <Statistic
                         title="Sent"
                         value={campaignMetrics.aggregated.sent}
-                        prefix={<SendOutlined />}
+                        prefix={<Send className="w-4 h-4" />}
                         valueStyle={{ fontSize: '18px' }}
                       />
                     </AntCard>
@@ -1067,7 +1066,7 @@ export default function CampaignManager() {
                       <Statistic
                         title="Delivered"
                         value={campaignMetrics.aggregated.delivered}
-                        prefix={<CheckCircleOutlined />}
+                        prefix={<CheckCircle className="w-4 h-4" />}
                         valueStyle={{ fontSize: '18px', color: '#52c41a' }}
                       />
                     </AntCard>

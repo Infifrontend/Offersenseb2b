@@ -53,6 +53,7 @@ import {
   Col,
   Upload,
   message,
+  Checkbox as AntCheckbox,
 } from "antd";
 import {
   TrendingUp,
@@ -127,6 +128,17 @@ const cabinClasses = ["ECONOMY", "PREMIUM_ECONOMY", "BUSINESS", "FIRST"];
 const tripTypes = ["ONE_WAY", "ROUND_TRIP", "MULTI_CITY"];
 const channels = ["API", "PORTAL", "MOBILE"];
 const adjustmentTypes = ["PERCENT", "AMOUNT"];
+
+const countriesData = [
+  { code: "US", name: "United States" },
+  { code: "GB", name: "United Kingdom" },
+  { code: "CA", name: "Canada" },
+  { code: "DE", name: "Germany" },
+  { code: "FR", name: "France" },
+  { code: "AU", name: "Australia" },
+  { code: "JP", name: "Japan" },
+  { code: "IN", name: "India" },
+];
 
 export default function DynamicDiscountEngine() {
   const [filters, setFilters] = useState({});
@@ -852,12 +864,35 @@ export default function DynamicDiscountEngine() {
               <AntForm.Item
                 label="Point of Sale"
                 name="pos"
-                rules={[{ required: true }]}
+                rules={[
+                  { required: true, message: "Please select at least one POS" },
+                ]}
               >
-                <AntSelect
-                  mode="tags"
-                  placeholder="Enter country codes (e.g., US, GB)"
-                ></AntSelect>
+                <AntCheckbox.Group style={{ width: '100%' }}>
+                  <Row gutter={[16, 8]}>
+                    {countriesData.map((country) => (
+                      <Col span={6} key={country.code}>
+                        <AntCheckbox 
+                          value={country.code}
+                          style={{ 
+                            display: 'flex',
+                            alignItems: 'center',
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            border: '1px solid #d9d9d9',
+                            marginBottom: '8px',
+                            fontSize: '14px'
+                          }}
+                        >
+                          <span style={{ fontWeight: '500' }}>{country.code}</span>
+                          <span style={{ fontSize: '12px', color: '#666', marginLeft: '4px' }}>
+                            {country.name}
+                          </span>
+                        </AntCheckbox>
+                      </Col>
+                    ))}
+                  </Row>
+                </AntCheckbox.Group>
               </AntForm.Item>
             </Col>
             <Col span={12}>
@@ -1083,12 +1118,35 @@ export default function DynamicDiscountEngine() {
               <AntForm.Item
                 label="Point of Sale"
                 name="pos"
-                rules={[{ required: true }]}
+                rules={[
+                  { required: true, message: "Please select at least one POS" },
+                ]}
               >
-                <AntSelect
-                  mode="tags"
-                  placeholder="Enter country codes (e.g., US, GB)"
-                ></AntSelect>
+                <AntCheckbox.Group style={{ width: '100%' }}>
+                  <Row gutter={[16, 8]}>
+                    {countriesData.map((country) => (
+                      <Col span={6} key={country.code}>
+                        <AntCheckbox 
+                          value={country.code}
+                          style={{ 
+                            display: 'flex',
+                            alignItems: 'center',
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            border: '1px solid #d9d9d9',
+                            marginBottom: '8px',
+                            fontSize: '14px'
+                          }}
+                        >
+                          <span style={{ fontWeight: '500' }}>{country.code}</span>
+                          <span style={{ fontSize: '12px', color: '#666', marginLeft: '4px' }}>
+                            {country.name}
+                          </span>
+                        </AntCheckbox>
+                      </Col>
+                    ))}
+                  </Row>
+                </AntCheckbox.Group>
               </AntForm.Item>
             </Col>
             <Col span={12}>

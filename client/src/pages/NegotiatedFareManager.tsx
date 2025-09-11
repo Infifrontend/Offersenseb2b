@@ -236,7 +236,7 @@ export default function NegotiatedFareManager() {
   });
 
   // Fetch available cohorts
-  const { data: availableCohorts } = useQuery({
+  const { data: availableCohorts = [], isLoading: isCohortsLoading } = useQuery({
     queryKey: ["/api/cohorts/list"], // Corrected API endpoint
     queryFn: async () => {
       const response = await fetch("/api/cohorts/list"); // Corrected API endpoint
@@ -982,12 +982,14 @@ export default function NegotiatedFareManager() {
           >
             <AntSelect
               mode="multiple"
-              placeholder="Select cohorts"
+              placeholder={isCohortsLoading ? "Loading cohorts..." : "Select cohorts"}
               style={{ width: "100%" }}
               dropdownStyle={{ zIndex: 9999 }}
               getPopupContainer={(trigger) => trigger.parentElement}
               virtual={false}
               showSearch
+              loading={isCohortsLoading}
+              notFoundContent={isCohortsLoading ? "Loading..." : "No cohorts found"}
               filterOption={(input, option) =>
                 option?.children?.toLowerCase().indexOf(input.toLowerCase()) >= 0 ||
                 option?.value?.toLowerCase().indexOf(input.toLowerCase()) >= 0
@@ -1689,12 +1691,14 @@ export default function NegotiatedFareManager() {
           >
             <AntSelect
               mode="multiple"
-              placeholder="Select cohorts"
+              placeholder={isCohortsLoading ? "Loading cohorts..." : "Select cohorts"}
               style={{ width: "100%" }}
               dropdownStyle={{ zIndex: 9999 }}
               getPopupContainer={(trigger) => trigger.parentElement}
               virtual={false}
               showSearch
+              loading={isCohortsLoading}
+              notFoundContent={isCohortsLoading ? "Loading..." : "No cohorts found"}
               filterOption={(input, option) =>
                 option?.children?.toLowerCase().indexOf(input.toLowerCase()) >= 0 ||
                 option?.value?.toLowerCase().indexOf(input.toLowerCase()) >= 0

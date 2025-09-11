@@ -281,6 +281,17 @@ export default function AncillaryBundlingEngine() {
     },
   });
 
+  // Fetch bundle pricing rules
+  const { data: pricingRules = [], isLoading: pricingRulesLoading, refetch: refetchPricingRules } = useQuery({
+    queryKey: ["bundle-pricing-rules", pricingFilters],
+    queryFn: async () => {
+      const params = new URLSearchParams(pricingFilters);
+      const response = await fetch(`/api/bundles/pricing?${params}`);
+      if (!response.ok) throw new Error("Failed to fetch bundle pricing rules");
+      return response.json();
+    },
+  });
+
   // Create bundle mutation
   const createBundleMutation = useMutation({
     mutationFn: async (values: any) => {

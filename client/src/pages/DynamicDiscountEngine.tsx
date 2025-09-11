@@ -23,6 +23,24 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Form as AntForm,
   Input as AntInput,
   Select as AntSelect,
@@ -122,6 +140,7 @@ export default function DynamicDiscountEngine() {
   );
   const [simulationResult, setSimulationResult] = useState<any>(null);
   const [executionTraces, setExecutionTraces] = useState<any[]>([]);
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const queryClient = useQueryClient();
   const [antForm] = AntForm.useForm();
   const [editForm] = AntForm.useForm();
@@ -388,7 +407,7 @@ export default function DynamicDiscountEngine() {
         <Plus className="w-4 h-4 mr-2" />
         Create Rule
       </Button>
-      {/* Action Bar */}
+      {/* Header Card */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
@@ -398,50 +417,154 @@ export default function DynamicDiscountEngine() {
             </CardDescription>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-            <Input
-              placeholder="Rule Code"
-              value={filters.ruleCode || ""}
-              onChange={(e) =>
-                setFilters((prev) => ({ ...prev, ruleCode: e.target.value }))
-              }
-            />
-            <Input
-              placeholder="Origin"
-              value={filters.origin || ""}
-              onChange={(e) =>
-                setFilters((prev) => ({ ...prev, origin: e.target.value }))
-              }
-            />
-            <Input
-              placeholder="Destination"
-              value={filters.destination || ""}
-              onChange={(e) =>
-                setFilters((prev) => ({ ...prev, destination: e.target.value }))
-              }
-            />
-            <Input
-              placeholder="Channel"
-              value={filters.channel || ""}
-              onChange={(e) =>
-                setFilters((prev) => ({ ...prev, channel: e.target.value }))
-              }
-            />
-            <Input
-              placeholder="Status"
-              value={filters.status || ""}
-              onChange={(e) =>
-                setFilters((prev) => ({ ...prev, status: e.target.value }))
-              }
-            />
-            <Button variant="outline" onClick={() => setFilters({})}>
-              <Filter className="w-4 h-4 mr-2" />
-              Clear Filters
-            </Button>
-          </div>
-        </CardContent>
       </Card>
+
+      {/* Sticky Filter Icon */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <Drawer open={isFilterDrawerOpen} onOpenChange={setIsFilterDrawerOpen}>
+          <DrawerTrigger asChild>
+            <Button
+              size="lg"
+              className="h-14 w-14 rounded-full shadow-lg bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <Filter className="w-6 h-6" />
+            </Button>
+          </DrawerTrigger>
+          <DrawerContent className="max-h-[80vh]">
+            <DrawerHeader>
+              <DrawerTitle>Filters</DrawerTitle>
+              <DrawerDescription>
+                Filter discount rules by various criteria
+              </DrawerDescription>
+            </DrawerHeader>
+            <div className="px-4 py-2 space-y-4 overflow-y-auto">
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <Label htmlFor="rule-code">Rule Code</Label>
+                  <Input
+                    id="rule-code"
+                    placeholder="Enter rule code..."
+                    value={filters.ruleCode || ""}
+                    onChange={(e) =>
+                      setFilters((prev) => ({ ...prev, ruleCode: e.target.value }))
+                    }
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="origin">Origin</Label>
+                  <Input
+                    id="origin"
+                    placeholder="Enter origin..."
+                    value={filters.origin || ""}
+                    onChange={(e) =>
+                      setFilters((prev) => ({ ...prev, origin: e.target.value }))
+                    }
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="destination">Destination</Label>
+                  <Input
+                    id="destination"
+                    placeholder="Enter destination..."
+                    value={filters.destination || ""}
+                    onChange={(e) =>
+                      setFilters((prev) => ({ ...prev, destination: e.target.value }))
+                    }
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="channel">Channel</Label>
+                  <Select
+                    value={filters.channel || ""}
+                    onValueChange={(value) =>
+                      setFilters((prev) => ({ ...prev, channel: value }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select channel" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All Channels</SelectItem>
+                      <SelectItem value="API">API</SelectItem>
+                      <SelectItem value="PORTAL">PORTAL</SelectItem>
+                      <SelectItem value="MOBILE">MOBILE</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="status">Status</Label>
+                  <Select
+                    value={filters.status || ""}
+                    onValueChange={(value) =>
+                      setFilters((prev) => ({ ...prev, status: value }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All Status</SelectItem>
+                      <SelectItem value="ACTIVE">Active</SelectItem>
+                      <SelectItem value="INACTIVE">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="fare-source">Fare Source</Label>
+                  <Select
+                    value={filters.fareSource || ""}
+                    onValueChange={(value) =>
+                      setFilters((prev) => ({ ...prev, fareSource: value }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select fare source" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All Sources</SelectItem>
+                      <SelectItem value="API_GDS_NDC">API/GDS/NDC</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="agent-tier">Agent Tier</Label>
+                  <Select
+                    value={filters.agentTier || ""}
+                    onValueChange={(value) =>
+                      setFilters((prev) => ({ ...prev, agentTier: value }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select agent tier" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All Tiers</SelectItem>
+                      <SelectItem value="PLATINUM">Platinum</SelectItem>
+                      <SelectItem value="GOLD">Gold</SelectItem>
+                      <SelectItem value="SILVER">Silver</SelectItem>
+                      <SelectItem value="BRONZE">Bronze</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+            <DrawerFooter>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setFilters({})}
+                  className="flex-1"
+                >
+                  Reset All
+                </Button>
+                <DrawerClose asChild>
+                  <Button className="flex-1">Apply Filters</Button>
+                </DrawerClose>
+              </div>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
+      </div>
 
       {/* Rules Table */}
       <Card>

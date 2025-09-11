@@ -445,70 +445,70 @@ export default function LogsVersionHistory() {
               <Empty description="No audit logs found" />
             </div>
           ) : (
-            <div className="overflow-auto">
+            <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[180px] min-w-[180px]">Timestamp</TableHead>
-                    <TableHead className="w-[120px] min-w-[120px]">User</TableHead>
-                    <TableHead className="w-[130px] min-w-[130px]">Module</TableHead>
-                    <TableHead className="w-[140px] min-w-[140px]">Entity ID</TableHead>
-                    <TableHead className="w-[100px] min-w-[100px]">Action</TableHead>
-                    <TableHead className="w-[200px] min-w-[200px]">Justification</TableHead>
-                    <TableHead className="w-[100px] min-w-[100px]">Actions</TableHead>
+                    <TableHead className="min-w-[160px]">Timestamp</TableHead>
+                    <TableHead className="min-w-[100px]">User</TableHead>
+                    <TableHead className="min-w-[110px]">Module</TableHead>
+                    <TableHead className="min-w-[120px]">Entity ID</TableHead>
+                    <TableHead className="min-w-[90px]">Action</TableHead>
+                    <TableHead className="min-w-[150px]">Justification</TableHead>
+                    <TableHead className="min-w-[80px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredLogs.map((log: AuditLog) => (
                     <TableRow key={log.id}>
-                      <TableCell className="w-[180px]">
+                      <TableCell>
                         <div className="flex items-center gap-1">
                           <Clock className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                          <span className="text-xs leading-tight">
+                          <span className="text-xs leading-tight whitespace-nowrap">
                             {format(
                               new Date(log.timestamp),
-                              "MMM dd, yyyy\nHH:mm:ss",
+                              "MMM dd, yyyy HH:mm",
                             )}
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell className="w-[120px]">
+                      <TableCell>
                         <div className="flex items-center gap-1">
                           <User className="w-3 h-3 text-muted-foreground flex-shrink-0" />
                           <span className="text-sm truncate">{log.user}</span>
                         </div>
                       </TableCell>
-                      <TableCell className="w-[130px]">
-                        <Badge variant="outline" className="text-xs">
+                      <TableCell>
+                        <Badge variant="outline" className="text-xs whitespace-nowrap">
                           {log.module}
                         </Badge>
                       </TableCell>
-                      <TableCell className="w-[140px]">
+                      <TableCell>
                         <Button
                           variant="link"
-                          className="p-0 h-auto font-mono text-xs truncate max-w-full"
+                          className="p-0 h-auto font-mono text-xs truncate"
                           onClick={() => {
                             setSelectedEntityId(log.entityId);
                             setEntityHistoryOpen(true);
                           }}
                           title={log.entityId}
                         >
-                          {log.entityId.length > 12 
-                            ? `${log.entityId.substring(0, 12)}...` 
+                          {log.entityId.length > 10 
+                            ? `${log.entityId.substring(0, 10)}...` 
                             : log.entityId}
                         </Button>
                       </TableCell>
-                      <TableCell className="w-[100px]">
-                        <Badge variant={getActionVariant(log.action)} className="text-xs">
+                      <TableCell>
+                        <Badge variant={getActionVariant(log.action)} className="text-xs whitespace-nowrap">
                           {log.action}
                         </Badge>
                       </TableCell>
-                      <TableCell className="w-[200px]">
-                        <div className="text-sm truncate" title={log.justification || "-"}>
+                      <TableCell>
+                        <div className="text-sm truncate max-w-[150px]" title={log.justification || "-"}>
                           {log.justification || "-"}
                         </div>
                       </TableCell>
-                      <TableCell className="w-[100px]">
+                      <TableCell>
                         <div className="flex gap-1">
                           <Button
                             variant="ghost"

@@ -1132,7 +1132,7 @@ export class DatabaseStorage implements IStorage {
   // Audit Log Methods
   async getAuditLogs(filters: any = {}): Promise<InsertAuditLog[]> {
     let query = this.db.select().from(auditLogs);
-    const conditions = [];
+    const conditions: any[] = [];
 
     if (filters.module) {
       conditions.push(eq(auditLogs.module, filters.module));
@@ -1166,7 +1166,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAuditLogsByEntity(entityId: string, module?: string): Promise<InsertAuditLog[]> {
-    const conditions = [eq(auditLogs.entityId, entityId)];
+    const conditions: any[] = [eq(auditLogs.entityId, entityId)];
 
     if (module) {
       conditions.push(eq(auditLogs.module, module));

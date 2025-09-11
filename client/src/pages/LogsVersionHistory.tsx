@@ -96,8 +96,8 @@ export default function LogsVersionHistory() {
 
   // Build filters object
   const filters = {
-    ...(moduleFilter && { module: moduleFilter }),
-    ...(actionFilter && { action: actionFilter }),
+    ...(moduleFilter && moduleFilter !== "all" && { module: moduleFilter }),
+    ...(actionFilter && actionFilter !== "all" && { action: actionFilter }),
     ...(userFilter && { user: userFilter }),
     ...(dateRange && { 
       startDate: dateRange[0], 
@@ -342,7 +342,7 @@ export default function LogsVersionHistory() {
                   <SelectValue placeholder="All modules" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All modules</SelectItem>
+                  <SelectItem value="all">All modules</SelectItem>
                   <SelectItem value="NegotiatedFare">Negotiated Fares</SelectItem>
                   <SelectItem value="DynamicDiscountRule">Dynamic Discounts</SelectItem>
                   <SelectItem value="AirAncillaryRule">Air Ancillaries</SelectItem>
@@ -361,7 +361,7 @@ export default function LogsVersionHistory() {
                   <SelectValue placeholder="All actions" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All actions</SelectItem>
+                  <SelectItem value="all">All actions</SelectItem>
                   <SelectItem value="CREATED">Created</SelectItem>
                   <SelectItem value="UPDATED">Updated</SelectItem>
                   <SelectItem value="DELETED">Deleted</SelectItem>

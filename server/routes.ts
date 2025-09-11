@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import multer from "multer";
 import csv from "csv-parser";
 import { Readable } from "stream";
-import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema, insertAirAncillaryRuleSchema } from "../shared/schema";
+import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema, insertAirAncillaryRuleSchema, insertNonAirRateSchema, insertNonAirMarkupRuleSchema } from "../shared/schema";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -417,6 +417,267 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/air-ancillary-rules/:id", async (req, res) => {
     try {
       await storage.deleteAirAncillaryRule(req.params.id);
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to delete rule", error: error.message });
+    }
+  });
+
+  // Non-Air Rates Routes
+  
+  // Get all non-air rates with optional filters
+  app.get("/api/nonair/rates", async (req, res) => {
+    try {
+      const filters = req.query;
+      const rates = await storage.getNonAirRates(filters);
+      res.json(rates);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch non-air rates", error: error.message });
+    }
+  });
+
+  // Create single non-air rate
+  app.post("/api/nonair/rates", async (req, res) => {
+    try {
+      const validatedData = insertNonAirRateSchema.parse(req.body);
+      const rate = await storage.insertNonAirRate(validatedData);
+      res.status(201).json(rate);
+    } catch (error: any) {
+      res.status(400).json({ message: "Invalid rate data", error: error.message });
+    }
+  });
+
+  // Upload CSV/Excel file for non-air rates
+  app.post("/api/nonair/rates/upload", upload.single("file"), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const results: any[] = [];
+      const errors: any[] = [];
+
+      // Parse CSV
+      const stream = Readable.from(req.file.buffer.toString());
+      
+      stream
+        .pipe(csv())
+        .on("data", async (data) => {
+          try {
+            // Transform CSV data to match schema
+            const transformedData = {
+              supplierCode: data.supplierCode,
+              productCode: data.productCode,
+              productName: data.productName,
+              netRate: data.netRate,
+              currency: data.currency,
+              region: JSON.parse(data.region || "[]"),
+              validFrom: data.validFrom,
+              validTo: data.validTo,
+              inventory: data.inventory ? parseInt(data.inventory) : null,
+            };
+
+            const validatedData = insertNonAirRateSchema.parse(transformedData);
+            results.push(validatedData);
+          } catch (error: any) {
+            errors.push({ data, error: error.message });
+          }
+        })
+        .on("end", async () => {
+          try {
+            // Insert valid rates
+            const insertedRates: any[] = [];
+            for (const rateData of results) {
+              const rate = await storage.insertNonAirRate(rateData);
+              insertedRates.push(rate);
+            }
+
+            res.json({
+              success: true,
+              inserted: insertedRates.length,
+              errors: errors.length,
+              data: {
+                insertedRates,
+                errors,
+              },
+            });
+          } catch (error: any) {
+            res.status(500).json({ message: "Failed to insert rates", error: error.message });
+          }
+        });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to process upload", error: error.message });
+    }
+  });
+
+  // Get rate by ID
+  app.get("/api/nonair/rates/:id", async (req, res) => {
+    try {
+      const rate = await storage.getNonAirRateById(req.params.id);
+      if (!rate) {
+        return res.status(404).json({ message: "Rate not found" });
+      }
+      res.json(rate);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch rate", error: error.message });
+    }
+  });
+
+  // Update rate
+  app.put("/api/nonair/rates/:id", async (req, res) => {
+    try {
+      const validatedData = insertNonAirRateSchema.parse(req.body);
+      const rate = await storage.updateNonAirRate(req.params.id, validatedData);
+      res.json(rate);
+    } catch (error: any) {
+      res.status(400).json({ message: "Failed to update rate", error: error.message });
+    }
+  });
+
+  // Update rate status
+  app.patch("/api/nonair/rates/:id/status", async (req, res) => {
+    try {
+      const { status } = req.body;
+      if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
+        return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
+      }
+      
+      const rate = await storage.updateNonAirRateStatus(req.params.id, status);
+      res.json(rate);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to update rate status", error: error.message });
+    }
+  });
+
+  // Delete rate
+  app.delete("/api/nonair/rates/:id", async (req, res) => {
+    try {
+      await storage.deleteNonAirRate(req.params.id);
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to delete rate", error: error.message });
+    }
+  });
+
+  // Non-Air Markup Rules Routes
+  
+  // Get all non-air markup rules with optional filters
+  app.get("/api/nonair/rules", async (req, res) => {
+    try {
+      const filters = req.query;
+      const rules = await storage.getNonAirMarkupRules(filters);
+      res.json(rules);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch markup rules", error: error.message });
+    }
+  });
+
+  // Create single non-air markup rule
+  app.post("/api/nonair/rules", async (req, res) => {
+    try {
+      const validatedData = insertNonAirMarkupRuleSchema.parse(req.body);
+      
+      // Check for conflicts
+      const conflicts = await storage.checkNonAirMarkupRuleConflicts(validatedData);
+      if (conflicts.length > 0) {
+        return res.status(409).json({ 
+          message: "Rule conflicts detected", 
+          conflicts 
+        });
+      }
+
+      const rule = await storage.insertNonAirMarkupRule(validatedData);
+      res.status(201).json(rule);
+    } catch (error: any) {
+      res.status(400).json({ message: "Invalid rule data", error: error.message });
+    }
+  });
+
+  // Simulate non-air markup rule application
+  app.post("/api/nonair/rules/simulate", async (req, res) => {
+    try {
+      const { baseRate, currency, ruleId } = req.body;
+      
+      if (!baseRate || !currency || !ruleId) {
+        return res.status(400).json({ message: "baseRate, currency, and ruleId are required" });
+      }
+
+      const rule = await storage.getNonAirMarkupRuleById(ruleId);
+      if (!rule) {
+        return res.status(404).json({ message: "Rule not found" });
+      }
+
+      let adjustedRate = parseFloat(baseRate);
+      let markup = 0;
+
+      if (rule.adjustmentType === "PERCENT") {
+        markup = baseRate * (parseFloat(rule.adjustmentValue) / 100);
+        adjustedRate = baseRate + markup;
+      } else if (rule.adjustmentType === "AMOUNT") {
+        markup = parseFloat(rule.adjustmentValue);
+        adjustedRate = baseRate + markup;
+      }
+
+      res.json({
+        baseRate: parseFloat(baseRate),
+        adjustedRate: Math.round(adjustedRate * 100) / 100,
+        markup: Math.round(markup * 100) / 100,
+        adjustment: {
+          type: rule.adjustmentType,
+          value: parseFloat(rule.adjustmentValue)
+        },
+        currency,
+        ruleApplied: rule.ruleCode,
+        productCode: rule.productCode
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to simulate rule", error: error.message });
+    }
+  });
+
+  // Get rule by ID
+  app.get("/api/nonair/rules/:id", async (req, res) => {
+    try {
+      const rule = await storage.getNonAirMarkupRuleById(req.params.id);
+      if (!rule) {
+        return res.status(404).json({ message: "Rule not found" });
+      }
+      res.json(rule);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch rule", error: error.message });
+    }
+  });
+
+  // Update rule
+  app.put("/api/nonair/rules/:id", async (req, res) => {
+    try {
+      const validatedData = insertNonAirMarkupRuleSchema.parse(req.body);
+      const rule = await storage.updateNonAirMarkupRule(req.params.id, validatedData);
+      res.json(rule);
+    } catch (error: any) {
+      res.status(400).json({ message: "Failed to update rule", error: error.message });
+    }
+  });
+
+  // Update rule status
+  app.patch("/api/nonair/rules/:id/status", async (req, res) => {
+    try {
+      const { status } = req.body;
+      if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
+        return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
+      }
+      
+      const rule = await storage.updateNonAirMarkupRuleStatus(req.params.id, status);
+      res.json(rule);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to update rule status", error: error.message });
+    }
+  });
+
+  // Delete rule
+  app.delete("/api/nonair/rules/:id", async (req, res) => {
+    try {
+      await storage.deleteNonAirMarkupRule(req.params.id);
       res.status(204).send();
     } catch (error: any) {
       res.status(500).json({ message: "Failed to delete rule", error: error.message });

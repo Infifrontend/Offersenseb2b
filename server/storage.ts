@@ -1,4 +1,4 @@
-import { users, negotiatedFares, dynamicDiscountRules, airAncillaryRules, type User, type NegotiatedFare, type InsertUser, type InsertNegotiatedFare, type InsertDynamicDiscountRule, type InsertAirAncillaryRule } from "../shared/schema";
+import { users, negotiatedFares, dynamicDiscountRules, airAncillaryRules, nonAirRates, nonAirMarkupRules, type User, type NegotiatedFare, type InsertUser, type InsertNegotiatedFare, type InsertDynamicDiscountRule, type InsertAirAncillaryRule, type InsertNonAirRate, type InsertNonAirMarkupRule } from "../shared/schema";
 import { db } from "./db";
 import { eq, and, or, gte, lte, ilike, inArray, sql } from "drizzle-orm";
 
@@ -31,6 +31,22 @@ export interface IStorage {
   updateAirAncillaryRuleStatus(id: string, status: string): Promise<InsertAirAncillaryRule>;
   deleteAirAncillaryRule(id: string): Promise<void>;
   checkAirAncillaryRuleConflicts(rule: InsertAirAncillaryRule): Promise<InsertAirAncillaryRule[]>;
+
+  // Non-Air Ancillary Rates
+  insertNonAirRate(rate: InsertNonAirRate): Promise<InsertNonAirRate>;
+  getNonAirRates(filters?: any): Promise<InsertNonAirRate[]>;
+  getNonAirRateById(id: string): Promise<InsertNonAirRate | undefined>;
+  updateNonAirRate(id: string, rate: Partial<InsertNonAirRate>): Promise<InsertNonAirRate>;
+  deleteNonAirRate(id: string): Promise<void>;
+
+  // Non-Air Markup Rules
+  insertNonAirMarkupRule(rule: InsertNonAirMarkupRule): Promise<InsertNonAirMarkupRule>;
+  getNonAirMarkupRules(filters?: any): Promise<InsertNonAirMarkupRule[]>;
+  getNonAirMarkupRuleById(id: string): Promise<InsertNonAirMarkupRule | undefined>;
+  updateNonAirMarkupRule(id: string, rule: Partial<InsertNonAirMarkupRule>): Promise<InsertNonAirMarkupRule>;
+  updateNonAirMarkupRuleStatus(id: string, status: string): Promise<InsertNonAirMarkupRule>;
+  deleteNonAirMarkupRule(id: string): Promise<void>;
+  checkNonAirMarkupRuleConflicts(rule: InsertNonAirMarkupRule): Promise<InsertNonAirMarkupRule[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -307,6 +323,141 @@ export class DatabaseStorage implements IStorage {
         )
       );
 
+    return conflicts;
+  }
+
+  // Non-Air Ancillary Rate methods
+  async insertNonAirRate(rate: InsertNonAirRate): Promise<InsertNonAirRate> {
+    const [insertedRate] = await db.insert(nonAirRates).values(rate).returning();
+    return insertedRate;
+  }
+
+  async getNonAirRates(filters: any = {}): Promise<InsertNonAirRate[]> {
+    let query = db.select().from(nonAirRates);
+    const conditions: any[] = [];
+
+    if (filters.supplierCode) {
+      conditions.push(eq(nonAirRates.supplierCode, filters.supplierCode));
+    }
+    if (filters.productCode) {
+      conditions.push(eq(nonAirRates.productCode, filters.productCode));
+    }
+    if (filters.region) {
+      conditions.push(inArray(nonAirRates.region, filters.region));
+    }
+    if (filters.validFrom) {
+      conditions.push(gte(nonAirRates.validFrom, filters.validFrom));
+    }
+    if (filters.validTo) {
+      conditions.push(lte(nonAirRates.validTo, filters.validTo));
+    }
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+
+    return await query;
+  }
+
+  async getNonAirRateById(id: string): Promise<InsertNonAirRate | undefined> {
+    const [rate] = await db.select().from(nonAirRates).where(eq(nonAirRates.id, id));
+    return rate;
+  }
+
+  async updateNonAirRate(id: string, rate: Partial<InsertNonAirRate>): Promise<InsertNonAirRate> {
+    const [updatedRate] = await db
+      .update(nonAirRates)
+      .set({ ...rate, updatedAt: sql`now()` })
+      .where(eq(nonAirRates.id, id))
+      .returning();
+    return updatedRate;
+  }
+
+  async deleteNonAirRate(id: string): Promise<void> {
+    await db.delete(nonAirRates).where(eq(nonAirRates.id, id));
+  }
+
+  // Non-Air Markup Rule methods
+  async insertNonAirMarkupRule(rule: InsertNonAirMarkupRule): Promise<InsertNonAirMarkupRule> {
+    const [insertedRule] = await db.insert(nonAirMarkupRules).values(rule).returning();
+    return insertedRule;
+  }
+
+  async getNonAirMarkupRules(filters: any = {}): Promise<InsertNonAirMarkupRule[]> {
+    let query = db.select().from(nonAirMarkupRules);
+    const conditions: any[] = [];
+
+    if (filters.ruleCode) {
+      conditions.push(eq(nonAirMarkupRules.ruleCode, filters.ruleCode));
+    }
+    if (filters.supplierCode) {
+      conditions.push(eq(nonAirMarkupRules.supplierCode, filters.supplierCode));
+    }
+    if (filters.productCode) {
+      conditions.push(eq(nonAirMarkupRules.productCode, filters.productCode));
+    }
+    if (filters.pos) {
+      conditions.push(inArray(nonAirMarkupRules.pos, filters.pos));
+    }
+    if (filters.agentTier) {
+      conditions.push(inArray(nonAirMarkupRules.agentTier, filters.agentTier));
+    }
+    if (filters.channel) {
+      conditions.push(eq(nonAirMarkupRules.channel, filters.channel));
+    }
+    if (filters.status) {
+      conditions.push(eq(nonAirMarkupRules.status, filters.status));
+    }
+    if (filters.validFrom) {
+      conditions.push(gte(nonAirMarkupRules.validFrom, filters.validFrom));
+    }
+    if (filters.validTo) {
+      conditions.push(lte(nonAirMarkupRules.validTo, filters.validTo));
+    }
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+
+    return await query.orderBy(nonAirMarkupRules.priority, nonAirMarkupRules.createdAt);
+  }
+
+  async getNonAirMarkupRuleById(id: string): Promise<InsertNonAirMarkupRule | undefined> {
+    const [rule] = await db.select().from(nonAirMarkupRules).where(eq(nonAirMarkupRules.id, id));
+    return rule;
+  }
+
+  async updateNonAirMarkupRule(id: string, rule: Partial<InsertNonAirMarkupRule>): Promise<InsertNonAirMarkupRule> {
+    const [updatedRule] = await db
+      .update(nonAirMarkupRules)
+      .set({ ...rule, updatedAt: sql`now()` })
+      .where(eq(nonAirMarkupRules.id, id))
+      .returning();
+    return updatedRule;
+  }
+
+  async updateNonAirMarkupRuleStatus(id: string, status: string): Promise<InsertNonAirMarkupRule> {
+    const [updatedRule] = await db
+      .update(nonAirMarkupRules)
+      .set({ status, updatedAt: sql`now()` })
+      .where(eq(nonAirMarkupRules.id, id))
+      .returning();
+    return updatedRule;
+  }
+
+  async deleteNonAirMarkupRule(id: string): Promise<void> {
+    await db.delete(nonAirMarkupRules).where(eq(nonAirMarkupRules.id, id));
+  }
+
+  async checkNonAirMarkupRuleConflicts(rule: InsertNonAirMarkupRule): Promise<InsertNonAirMarkupRule[]> {
+    const conflicts = await db.select()
+      .from(nonAirMarkupRules)
+      .where(
+        and(
+          eq(nonAirMarkupRules.ruleCode, rule.ruleCode),
+          eq(nonAirMarkupRules.status, "ACTIVE")
+        )
+      );
     return conflicts;
   }
 }

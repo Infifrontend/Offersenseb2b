@@ -134,3 +134,68 @@ export type DynamicDiscountRule = typeof dynamicDiscountRules.$inferSelect;
 export type InsertDynamicDiscountRule = z.infer<typeof insertDynamicDiscountRuleSchema>;
 export type AirAncillaryRule = typeof airAncillaryRules.$inferSelect;
 export type InsertAirAncillaryRule = z.infer<typeof insertAirAncillaryRuleSchema>;
+
+export const nonAirRates = pgTable("non_air_rates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  supplierCode: varchar("supplier_code", { length: 50 }).notNull(),
+  productCode: varchar("product_code", { length: 50 }).notNull(), // INS_STD, HOTEL_STD, TRANSFER_STD, VISA_STD, FOREX_STD
+  productName: varchar("product_name", { length: 200 }).notNull(),
+  netRate: decimal("net_rate", { precision: 10, scale: 2 }).notNull(),
+  currency: varchar("currency", { length: 3 }).notNull(),
+  region: json("region").notNull(), // array of ISO country codes
+  validFrom: date("valid_from").notNull(),
+  validTo: date("valid_to").notNull(),
+  inventory: integer("inventory"), // optional stock
+  status: varchar("status", { length: 20 }).default("ACTIVE"), // ACTIVE | INACTIVE
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
+export const nonAirMarkupRules = pgTable("non_air_markup_rules", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ruleCode: varchar("rule_code", { length: 50 }).notNull().unique(),
+  supplierCode: varchar("supplier_code", { length: 50 }), // optional, wildcards allowed
+  productCode: varchar("product_code", { length: 50 }).notNull(), // wildcards allowed
+  pos: json("pos").notNull(), // array of ISO country codes
+  agentTier: json("agent_tier").notNull(), // array: PLATINUM/GOLD/SILVER/BRONZE
+  cohortCodes: json("cohort_codes"), // array of cohort codes
+  channel: varchar("channel", { length: 20 }).notNull(), // API | PORTAL | MOBILE
+  adjustmentType: varchar("adjustment_type", { length: 20 }).notNull(), // PERCENT | AMOUNT
+  adjustmentValue: decimal("adjustment_value", { precision: 10, scale: 2 }).notNull(),
+  tieredCommission: json("tiered_commission"), // optional table structure
+  priority: integer("priority").notNull().default(1),
+  status: varchar("status", { length: 20 }).default("ACTIVE"), // ACTIVE | INACTIVE
+  validFrom: date("valid_from").notNull(),
+  validTo: date("valid_to").notNull(),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
+export const insertNonAirRateSchema = createInsertSchema(nonAirRates, {
+  netRate: z.string().transform((val) => parseFloat(val)),
+  region: z.array(z.string()),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertNonAirMarkupRuleSchema = createInsertSchema(nonAirMarkupRules, {
+  adjustmentValue: z.string().transform((val) => parseFloat(val)),
+  pos: z.array(z.string()),
+  agentTier: z.array(z.enum(["PLATINUM", "GOLD", "SILVER", "BRONZE"])),
+  cohortCodes: z.array(z.string()).optional(),
+  tieredCommission: z.array(z.object({
+    tier: z.string(),
+    commission: z.number(),
+  })).optional(),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type NonAirRate = typeof nonAirRates.$inferSelect;
+export type InsertNonAirRate = z.infer<typeof insertNonAirRateSchema>;
+export type NonAirMarkupRule = typeof nonAirMarkupRules.$inferSelect;
+export type InsertNonAirMarkupRule = z.infer<typeof insertNonAirMarkupRuleSchema>;

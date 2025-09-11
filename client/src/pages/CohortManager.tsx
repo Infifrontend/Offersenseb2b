@@ -127,6 +127,17 @@ export default function CohortManager() {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
+  // Fetch available cohorts for dropdowns
+  const { data: availableCohorts = [] } = useQuery({
+    queryKey: ["cohorts-list"],
+    queryFn: async () => {
+      const response = await fetch("/api/cohorts/list");
+      if (!response.ok) throw new Error("Failed to fetch cohorts list");
+      return response.json();
+    },
+    staleTime: 1000 * 60 * 10, // 10 minutes
+  });
+
   // Log cohorts data for debugging
   console.log("Cohorts data:", cohorts);
   console.log("Loading state:", isLoading);
@@ -341,6 +352,11 @@ export default function CohortManager() {
       }
     }
 
+    // Add eligible cohorts if specified
+    if (values.eligibleCohorts && values.eligibleCohorts.length > 0) {
+      criteria.eligibleCohorts = values.eligibleCohorts;
+    }
+
     return criteria;
   };
 
@@ -363,6 +379,7 @@ export default function CohortManager() {
       avgBookingValueMin: criteria.behavior?.averageBookingValue?.min,
       avgBookingValueMax: criteria.behavior?.averageBookingValue?.max,
       preferredCabinClass: criteria.behavior?.preferredCabinClass || [],
+      eligibleCohorts: criteria.eligibleCohorts || [],
     });
     setIsDialogOpen(true);
   };
@@ -476,6 +493,35 @@ export default function CohortManager() {
                   <Col span={12}>
                     <AntForm.Item name="description" label="Description">
                       <AntInput placeholder="Optional description" />
+                    </AntForm.Item>
+                  </Col>
+                </Row>
+
+                <Row gutter={16}>
+                  <Col span={24}>
+                    <AntForm.Item name="eligibleCohorts" label="Eligible Cohorts (Optional)">
+                      <AntSelect
+                        mode="multiple"
+                        placeholder="Select related cohorts"
+                        style={{ width: "100%" }}
+                        dropdownStyle={{ zIndex: 9999 }}
+                        getPopupContainer={(trigger) => trigger.parentElement}
+                        virtual={false}
+                        showSearch
+                        filterOption={(input, option) =>
+                          option?.children?.toLowerCase().indexOf(input.toLowerCase()) >= 0 ||
+                          option?.value?.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                        }
+                      >
+                        {availableCohorts.map((cohort: any) => (
+                          <AntSelect.Option key={cohort.code} value={cohort.code}>
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                              <span style={{ fontWeight: '500' }}>{cohort.code}</span>
+                              <span style={{ fontSize: '12px', color: '#666' }}>{cohort.name}</span>
+                            </div>
+                          </AntSelect.Option>
+                        ))}
+                      </AntSelect>
                     </AntForm.Item>
                   </Col>
                 </Row>

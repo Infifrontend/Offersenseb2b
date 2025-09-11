@@ -292,7 +292,7 @@ export default function AncillaryBundlingEngine() {
     queryFn: async () => {
       console.log("Fetching bundle pricing rules from /api/bundles/pricing");
       const params = new URLSearchParams(pricingFilters);
-      const response = await fetch(`/api/bundles/pricing`);
+      const response = await fetch(`/api/bundles/pricing?${params}`);
       if (!response.ok) {
         const errorText = await response.text();
         console.error(

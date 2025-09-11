@@ -216,7 +216,7 @@ export default function AirAncillariesDiscounting() {
       validTo: values.validDates[1].format("YYYY-MM-DD"),
       cohortCodes: values.cohortCodes || [],
       adjustmentValue:
-        values.adjustmentType === "FREE" ? null : values.adjustmentValue,
+        values.adjustmentType === "FREE" ? null : values.adjustmentValue?.toString(),
     };
     delete formattedData.validDates;
     createRuleMutation.mutate(formattedData);
@@ -229,7 +229,7 @@ export default function AirAncillariesDiscounting() {
       validTo: values.validDates[1].format("YYYY-MM-DD"),
       cohortCodes: values.cohortCodes || [],
       adjustmentValue:
-        values.adjustmentType === "FREE" ? null : values.adjustmentValue,
+        values.adjustmentType === "FREE" ? null : values.adjustmentValue?.toString(),
     };
     delete formattedData.validDates;
     updateRuleMutation.mutate({ id: selectedRule!.id, data: formattedData });

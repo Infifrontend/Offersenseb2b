@@ -1662,6 +1662,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get cohorts for dropdowns
+  app.get("/api/cohorts/list", async (req, res) => {
+    try {
+      const cohorts = await storage.getCohorts({ status: "ACTIVE" });
+      const cohortList = cohorts.map(cohort => ({
+        code: cohort.cohortCode,
+        name: cohort.cohortName,
+        type: cohort.type
+      }));
+      res.json(cohortList);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch cohorts", error: error.message });
+    }
+  });
+
   // Audit Logs Routes
 
   // Get all audit logs with optional filters

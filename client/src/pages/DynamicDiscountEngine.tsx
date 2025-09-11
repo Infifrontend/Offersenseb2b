@@ -140,6 +140,14 @@ const countriesData = [
   { code: "IN", name: "India" },
 ];
 
+const availableCohorts = [
+  { code: "YOUTH", name: "Youth Fare Program" },
+  { code: "SENIOR", name: "Senior Discount" },
+  { code: "STUDENT", name: "Student Travel Offer" },
+  { code: "MILITARY", name: "Military Personnel Discount" },
+  { code: "FAMILY", name: "Family Travel Package" },
+];
+
 export default function DynamicDiscountEngine() {
   const [filters, setFilters] = useState({});
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -291,7 +299,7 @@ export default function DynamicDiscountEngine() {
         adjustmentValue: values.adjustmentValue.toString(),
       };
       delete formattedData.validDates;
-      
+
       console.log("Submitting rule data:", formattedData);
       createRuleMutation.mutate(formattedData);
     } catch (error) {
@@ -927,9 +935,9 @@ export default function DynamicDiscountEngine() {
               <Row gutter={[16, 8]}>
                 {agentTiers.map((tier) => (
                   <Col span={6} key={tier}>
-                    <AntCheckbox 
+                    <AntCheckbox
                       value={tier}
-                      style={{ 
+                      style={{
                         display: 'flex',
                         alignItems: 'center',
                         padding: '4px 8px',
@@ -947,7 +955,28 @@ export default function DynamicDiscountEngine() {
             </AntCheckbox.Group>
           </AntForm.Item>
           <AntForm.Item label="Eligible Cohorts (Optional)" name="cohortCodes">
-            <AntSelect mode="tags" placeholder="Enter cohort codes"></AntSelect>
+            <AntSelect
+              mode="multiple"
+              placeholder="Select cohorts"
+              style={{ width: "100%" }}
+              dropdownStyle={{ zIndex: 9999 }}
+              getPopupContainer={(trigger) => trigger.parentElement}
+              virtual={false}
+              showSearch
+              filterOption={(input, option) =>
+                option?.children?.toLowerCase().indexOf(input.toLowerCase()) >= 0 ||
+                option?.value?.toLowerCase().indexOf(input.toLowerCase()) >= 0
+              }
+            >
+              {availableCohorts.map((cohort) => (
+                <AntSelect.Option key={cohort.code} value={cohort.code}>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontWeight: '500' }}>{cohort.code}</span>
+                    <span style={{ fontSize: '12px', color: '#666' }}>{cohort.name}</span>
+                  </div>
+                </AntSelect.Option>
+              ))}
+            </AntSelect>
           </AntForm.Item>
 
           <Row gutter={16}>
@@ -1191,7 +1220,7 @@ export default function DynamicDiscountEngine() {
                 </AntCheckbox.Group>
               </AntForm.Item>
             </Col>
-            <Col span={24}>
+            <Col span={12}>
               <AntForm.Item
                 label="Agent Tiers"
                 name="agentTier"
@@ -1203,9 +1232,9 @@ export default function DynamicDiscountEngine() {
                   <Row gutter={[16, 8]}>
                     {agentTiers.map((tier) => (
                       <Col span={6} key={tier}>
-                        <AntCheckbox 
+                        <AntCheckbox
                           value={tier}
-                          style={{ 
+                          style={{
                             display: 'flex',
                             alignItems: 'center',
                             padding: '4px 8px',
@@ -1226,7 +1255,28 @@ export default function DynamicDiscountEngine() {
           </Row>
 
           <AntForm.Item label="Eligible Cohorts (Optional)" name="cohortCodes">
-            <AntSelect mode="tags" placeholder="Enter cohort codes"></AntSelect>
+            <AntSelect
+              mode="multiple"
+              placeholder="Select cohorts"
+              style={{ width: "100%" }}
+              dropdownStyle={{ zIndex: 9999 }}
+              getPopupContainer={(trigger) => trigger.parentElement}
+              virtual={false}
+              showSearch
+              filterOption={(input, option) =>
+                option?.children?.toLowerCase().indexOf(input.toLowerCase()) >= 0 ||
+                option?.value?.toLowerCase().indexOf(input.toLowerCase()) >= 0
+              }
+            >
+              {availableCohorts.map((cohort) => (
+                <AntSelect.Option key={cohort.code} value={cohort.code}>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontWeight: '500' }}>{cohort.code}</span>
+                    <span style={{ fontSize: '12px', color: '#666' }}>{cohort.name}</span>
+                  </div>
+                </AntSelect.Option>
+              ))}
+            </AntSelect>
           </AntForm.Item>
 
           <Row gutter={16}>

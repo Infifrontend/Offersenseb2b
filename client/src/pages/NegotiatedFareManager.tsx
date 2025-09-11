@@ -235,6 +235,18 @@ export default function NegotiatedFareManager() {
     },
   });
 
+  // Fetch available cohorts
+  const { data: availableCohorts } = useQuery({
+    queryKey: ["/api/cohorts"],
+    queryFn: async () => {
+      const response = await fetch("/api/cohorts");
+      if (!response.ok) throw new Error("Failed to fetch cohorts");
+      return response.json();
+    },
+    initialData: [], // Provide initial data to prevent errors if fetch fails
+  });
+
+
   // Use dummy data if no API data is available
   const displayFares = fares || dummyFares;
 
@@ -969,11 +981,27 @@ export default function NegotiatedFareManager() {
             name="eligibleCohorts"
           >
             <AntSelect
-              mode="tags"
-              placeholder="Enter cohort codes (e.g., CORP001, VIP002)"
+              mode="multiple"
+              placeholder="Select cohorts"
               style={{ width: "100%" }}
-              tokenSeparators={[","]}
-            />
+              dropdownStyle={{ zIndex: 9999 }}
+              getPopupContainer={(trigger) => trigger.parentElement}
+              virtual={false}
+              showSearch
+              filterOption={(input, option) =>
+                option?.children?.toLowerCase().indexOf(input.toLowerCase()) >= 0 ||
+                option?.value?.toLowerCase().indexOf(input.toLowerCase()) >= 0
+              }
+            >
+              {availableCohorts.map((cohort) => (
+                <AntSelect.Option key={cohort.code} value={cohort.code}>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontWeight: '500' }}>{cohort.code}</span>
+                    <span style={{ fontSize: '12px', color: '#666' }}>{cohort.name}</span>
+                  </div>
+                </AntSelect.Option>
+              ))}
+            </AntSelect>
           </AntForm.Item>
 
           <AntForm.Item label="Remarks" name="remarks">
@@ -1660,11 +1688,27 @@ export default function NegotiatedFareManager() {
             name="eligibleCohorts"
           >
             <AntSelect
-              mode="tags"
-              placeholder="Enter cohort codes (e.g., CORP001, VIP002)"
+              mode="multiple"
+              placeholder="Select cohorts"
               style={{ width: "100%" }}
-              tokenSeparators={[","]}
-            />
+              dropdownStyle={{ zIndex: 9999 }}
+              getPopupContainer={(trigger) => trigger.parentElement}
+              virtual={false}
+              showSearch
+              filterOption={(input, option) =>
+                option?.children?.toLowerCase().indexOf(input.toLowerCase()) >= 0 ||
+                option?.value?.toLowerCase().indexOf(input.toLowerCase()) >= 0
+              }
+            >
+              {availableCohorts.map((cohort) => (
+                <AntSelect.Option key={cohort.code} value={cohort.code}>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontWeight: '500' }}>{cohort.code}</span>
+                    <span style={{ fontSize: '12px', color: '#666' }}>{cohort.name}</span>
+                  </div>
+                </AntSelect.Option>
+              ))}
+            </AntSelect>
           </AntForm.Item>
 
           <AntForm.Item label="Remarks" name="remarks">

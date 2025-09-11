@@ -122,6 +122,16 @@ export default function AirAncillariesDiscounting() {
     },
   });
 
+  // Fetch cohort codes
+  const { data: availableCohorts = [] } = useQuery({
+    queryKey: ["cohorts"],
+    queryFn: async () => {
+      const response = await fetch("/api/cohorts");
+      if (!response.ok) throw new Error("Failed to fetch cohorts");
+      return response.json();
+    },
+  });
+
   // Create rule mutation
   const createRuleMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -622,7 +632,28 @@ export default function AirAncillariesDiscounting() {
                 <AntSelect
                   mode="tags"
                   placeholder="Enter cohort codes"
-                ></AntSelect>
+                  style={{ width: "100%" }}
+                  dropdownStyle={{ zIndex: 9999 }}
+                  getPopupContainer={(trigger) => trigger.parentElement}
+                  virtual={false}
+                  showSearch
+                  filterOption={(input, option) =>
+                    option?.children?.toLowerCase().indexOf(input.toLowerCase()) >=
+                      0 ||
+                    option?.value?.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  }
+                >
+                  {availableCohorts.map((cohort: any) => (
+                    <AntSelect.Option key={cohort.id} value={cohort.cohortName}>
+                      <div style={{ display: "flex", flexDirection: "column" }}>
+                        <div className="cls-cohort-dropdwon">
+                          <p>{cohort.cohortName}</p>{" "}
+                          <span className="text-gray-600">{cohort.cohortCode}</span>
+                        </div>
+                      </div>
+                    </AntSelect.Option>
+                  ))}
+                </AntSelect>
               </AntForm.Item>
             </Col>
           </Row>
@@ -842,7 +873,28 @@ export default function AirAncillariesDiscounting() {
                 <AntSelect
                   mode="tags"
                   placeholder="Enter cohort codes"
-                ></AntSelect>
+                  style={{ width: "100%" }}
+                  dropdownStyle={{ zIndex: 9999 }}
+                  getPopupContainer={(trigger) => trigger.parentElement}
+                  virtual={false}
+                  showSearch
+                  filterOption={(input, option) =>
+                    option?.children?.toLowerCase().indexOf(input.toLowerCase()) >=
+                      0 ||
+                    option?.value?.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  }
+                >
+                  {availableCohorts.map((cohort: any) => (
+                    <AntSelect.Option key={cohort.id} value={cohort.cohortName}>
+                      <div style={{ display: "flex", flexDirection: "column" }}>
+                        <div className="cls-cohort-dropdwon">
+                          <p>{cohort.cohortName}</p>{" "}
+                          <span className="text-gray-600">{cohort.cohortCode}</span>
+                        </div>
+                      </div>
+                    </AntSelect.Option>
+                  ))}
+                </AntSelect>
               </AntForm.Item>
             </Col>
           </Row>
@@ -891,7 +943,7 @@ export default function AirAncillariesDiscounting() {
                           new Error("Adjustment value is required"),
                         );
                       }
-                      return Promise.resolve();
+                      return Promise.Resolve();
                     },
                   }),
                 ]}

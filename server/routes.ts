@@ -1779,12 +1779,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/cohorts/list", async (req, res) => {
     try {
       console.log("Fetching cohorts for dropdown list...");
-      const cohorts = await storage.getCohorts({ status: "ACTIVE" });
+      let cohorts = await storage.getCohorts({ status: "ACTIVE" });
       console.log(`Found ${cohorts?.length || 0} active cohorts`);
+      
+      // If no cohorts exist, create some sample ones
+      if (!cohorts || cohorts.length === 0) {
+        console.log("No active cohorts found, creating sample cohorts...");
+        
+        const sampleCohorts = [
+          {
+            cohortCode: "FESTIVE_2025",
+            cohortName: "Festive Season 2025",
+            type: "SEASON",
+            criteria: {
+              season: "FESTIVE",
+              pos: ["IN", "AE", "US"]
+            },
+            description: "Customers active during festive season",
+            status: "ACTIVE",
+            createdBy: "system"
+          },
+          {
+            cohortCode: "PORTAL_USERS",
+            cohortName: "Portal Active Users",
+            type: "CHANNEL",
+            criteria: {
+              channel: "PORTAL",
+              bookingFrequency: "HIGH"
+            },
+            description: "Frequent portal users",
+            status: "ACTIVE",
+            createdBy: "system"
+          },
+          {
+            cohortCode: "HIGH_VALUE",
+            cohortName: "High Value Customers",
+            type: "BEHAVIOR",
+            criteria: {
+              behavior: {
+                averageBookingValue: { min: 50000, max: 999999 },
+                bookingFrequency: "HIGH"
+              }
+            },
+            description: "High value frequent travelers",
+            status: "ACTIVE",
+            createdBy: "system"
+          }
+        ];
+
+        try {
+          for (const cohortData of sampleCohorts) {
+            await storage.insertCohort(cohortData);
+            console.log(`Created sample cohort: ${cohortData.cohortCode}`);
+          }
+          
+          // Refetch after creating samples
+          cohorts = await storage.getCohorts({ status: "ACTIVE" });
+        } catch (createError) {
+          console.error("Error creating sample cohorts:", createError);
+        }
+      }
       
       // Always return an array, even if empty
       if (!cohorts || cohorts.length === 0) {
-        console.log("No active cohorts found, returning empty array");
+        console.log("Still no cohorts found, returning empty array");
         return res.json([]);
       }
 

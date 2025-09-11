@@ -1178,27 +1178,33 @@ export class DatabaseStorage implements IStorage {
 
   // Cohort operations
   async getCohorts(filters: any = {}): Promise<Cohort[]> {
-    let query = this.db.select().from(cohorts);
-    const conditions = [];
+    try {
+      let query = this.db.select().from(cohorts);
+      const conditions = [];
 
-    if (filters.cohortCode) {
-      conditions.push(eq(cohorts.cohortCode, filters.cohortCode));
-    }
-    if (filters.type) {
-      conditions.push(eq(cohorts.type, filters.type));
-    }
-    if (filters.status) {
-      conditions.push(eq(cohorts.status, filters.status));
-    }
-    if (filters.createdBy) {
-      conditions.push(eq(cohorts.createdBy, filters.createdBy));
-    }
+      if (filters.cohortCode) {
+        conditions.push(eq(cohorts.cohortCode, filters.cohortCode));
+      }
+      if (filters.type) {
+        conditions.push(eq(cohorts.type, filters.type));
+      }
+      if (filters.status) {
+        conditions.push(eq(cohorts.status, filters.status));
+      }
+      if (filters.createdBy) {
+        conditions.push(eq(cohorts.createdBy, filters.createdBy));
+      }
 
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions));
-    }
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
 
-    return await query.orderBy(cohorts.createdAt);
+      const results = await query.orderBy(cohorts.createdAt);
+      return Array.isArray(results) ? results : [];
+    } catch (error) {
+      console.error("Error in getCohorts:", error);
+      return [];
+    }
   }
 
   async insertCohort(cohortData: InsertCohort): Promise<Cohort> {

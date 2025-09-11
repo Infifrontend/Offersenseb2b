@@ -437,42 +437,35 @@ export default function CampaignManager() {
     {
       title: "Campaign",
       key: "campaign",
+      width: 220,
       render: (record: Campaign) => (
         <div>
-          <div className="font-medium">{record.campaignName}</div>
-          <div className="text-sm text-gray-500">{record.campaignCode}</div>
+          <div className="font-medium text-sm">{record.campaignName}</div>
+          <div className="text-xs text-gray-500">{record.campaignCode}</div>
         </div>
       ),
     },
     {
       title: "Target",
       key: "target",
+      width: 140,
       render: (record: Campaign) => (
         <div className="space-y-1">
           {record.target.agentTiers && record.target.agentTiers.length > 0 && (
-            <div className="flex gap-1">
-              {record.target.agentTiers.slice(0, 2).map((tier) => (
-                <Tag key={tier} size="small">
-                  {tier}
-                </Tag>
-              ))}
-              {record.target.agentTiers.length > 2 && (
-                <Tag size="small">+{record.target.agentTiers.length - 2}</Tag>
+            <div className="flex flex-wrap gap-1">
+              <Tag key={record.target.agentTiers[0]} size="small">
+                {record.target.agentTiers[0]}
+              </Tag>
+              {record.target.agentTiers.length > 1 && (
+                <Tag size="small">+{record.target.agentTiers.length - 1}</Tag>
               )}
             </div>
           )}
           {record.target.cohorts && record.target.cohorts.length > 0 && (
-            <div className="flex gap-1">
-              {record.target.cohorts.slice(0, 2).map((cohort) => (
-                <Tag key={cohort} color="blue" size="small">
-                  {cohort}
-                </Tag>
-              ))}
-              {record.target.cohorts.length > 2 && (
-                <Tag color="blue" size="small">
-                  +{record.target.cohorts.length - 2}
-                </Tag>
-              )}
+            <div className="flex flex-wrap gap-1">
+              <Tag color="blue" size="small">
+                {record.target.cohorts.length} cohort{record.target.cohorts.length > 1 ? 's' : ''}
+              </Tag>
             </div>
           )}
         </div>
@@ -481,63 +474,45 @@ export default function CampaignManager() {
     {
       title: "Products",
       key: "products",
-      render: (record: Campaign) => (
-        <div className="space-y-1">
-          {record.products.ancillaries &&
-            record.products.ancillaries.length > 0 && (
-              <div className="flex gap-1">
-                {record.products.ancillaries.slice(0, 2).map((product) => (
-                  <Tag key={product} color="green" size="small">
-                    {product}
-                  </Tag>
-                ))}
-                {record.products.ancillaries.length > 2 && (
-                  <Tag color="green" size="small">
-                    +{record.products.ancillaries.length - 2}
-                  </Tag>
-                )}
-              </div>
-            )}
-          {record.products.bundles && record.products.bundles.length > 0 && (
-            <div className="flex gap-1">
-              {record.products.bundles.slice(0, 2).map((bundle) => (
-                <Tag key={bundle} color="purple" size="small">
-                  {bundle}
-                </Tag>
-              ))}
-              {record.products.bundles.length > 2 && (
-                <Tag color="purple" size="small">
-                  +{record.products.bundles.length - 2}
-                </Tag>
-              )}
-            </div>
-          )}
-        </div>
-      ),
+      width: 120,
+      render: (record: Campaign) => {
+        const totalProducts = (record.products.ancillaries?.length || 0) + (record.products.bundles?.length || 0);
+        if (totalProducts === 0) return <span className="text-gray-400">-</span>;
+        
+        return (
+          <div className="text-sm">
+            <Tag color="green" size="small">
+              {totalProducts} product{totalProducts > 1 ? 's' : ''}
+            </Tag>
+          </div>
+        );
+      },
     },
     {
       title: "Offer",
       key: "offer",
+      width: 110,
       render: (record: Campaign) => {
         const { offer } = record;
         if (offer.type === "PERCENT") {
-          return <Tag color="orange">{offer.value}% Off</Tag>;
+          return <Tag color="orange" size="small">{offer.value}% Off</Tag>;
         } else if (offer.type === "AMOUNT") {
-          return <Tag color="orange">${offer.value} Off</Tag>;
+          return <Tag color="orange" size="small">${offer.value} Off</Tag>;
         } else if (offer.type === "SPECIAL_PRICE") {
-          return <Tag color="red">Special: ${offer.specialPrice}</Tag>;
+          return <Tag color="red" size="small">${offer.specialPrice}</Tag>;
         }
-        return "-";
+        return <span className="text-gray-400">-</span>;
       },
     },
     {
       title: "Duration",
       key: "duration",
+      width: 120,
       render: (record: Campaign) => (
-        <div className="text-sm">
-          <div>{dayjs(record.lifecycle.startDate).format("MMM DD, YYYY")}</div>
+        <div className="text-xs">
+          <div>{dayjs(record.lifecycle.startDate).format("MMM DD")}</div>
           <div className="text-gray-500">
-            to {dayjs(record.lifecycle.endDate).format("MMM DD, YYYY")}
+            to {dayjs(record.lifecycle.endDate).format("MMM DD")}
           </div>
         </div>
       ),
@@ -545,35 +520,28 @@ export default function CampaignManager() {
     {
       title: "Channels",
       key: "channels",
-      render: (record: Campaign) => (
-        <div className="flex gap-1">
-          {record.comms.portalBanner && (
-            <Tag icon={<Globe className="w-3 h-3" />} size="small">
-              Portal
-            </Tag>
-          )}
-          {record.comms.emailTemplateId && (
-            <Tag icon={<Mail className="w-3 h-3" />} size="small">
-              Email
-            </Tag>
-          )}
-          {record.comms.whatsappTemplateId && (
-            <Tag icon={<MessageSquare className="w-3 h-3" />} size="small">
-              WhatsApp
-            </Tag>
-          )}
-          {record.comms.apiPush && (
-            <Tag icon={<Send className="w-3 h-3" />} size="small">
-              API
-            </Tag>
-          )}
-        </div>
-      ),
+      width: 100,
+      render: (record: Campaign) => {
+        const channels = [];
+        if (record.comms.portalBanner) channels.push("Portal");
+        if (record.comms.emailTemplateId) channels.push("Email");
+        if (record.comms.whatsappTemplateId) channels.push("WhatsApp");
+        if (record.comms.apiPush) channels.push("API");
+        
+        if (channels.length === 0) return <span className="text-gray-400">-</span>;
+        
+        return (
+          <div className="text-xs">
+            <Tag size="small">{channels.length} channel{channels.length > 1 ? 's' : ''}</Tag>
+          </div>
+        );
+      },
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
+      width: 90,
       render: (status: string) => (
         <Badge status={getStatusColor(status) as any} text={status} />
       ),
@@ -581,52 +549,42 @@ export default function CampaignManager() {
     {
       title: "Actions",
       key: "actions",
+      width: 120,
+      fixed: "right" as const,
       render: (record: Campaign) => (
-        <Space>
+        <Space size="small">
           <Tooltip title="View Performance">
             <AntButton
-              icon={<BarChart3 className="w-4 h-4" />}
+              icon={<BarChart3 className="w-3 h-3" />}
               size="small"
               onClick={() => handleViewPerformance(record)}
             />
           </Tooltip>
-          <Tooltip title="Edit Campaign">
+          <Tooltip title="Edit">
             <AntButton
-              icon={<Edit className="w-4 h-4" />}
+              icon={<Edit className="w-3 h-3" />}
               size="small"
               onClick={() => handleEditCampaign(record)}
             />
           </Tooltip>
           {record.status === "DRAFT" || record.status === "PAUSED" ? (
-            <Tooltip title="Activate Campaign">
+            <Tooltip title="Activate">
               <AntButton
-                icon={<Play className="w-4 h-4" />}
+                icon={<Play className="w-3 h-3" />}
                 size="small"
                 type="primary"
                 onClick={() => handleStatusChange(record, "ACTIVE")}
               />
             </Tooltip>
           ) : record.status === "ACTIVE" ? (
-            <Tooltip title="Pause Campaign">
+            <Tooltip title="Pause">
               <AntButton
-                icon={<Pause className="w-4 h-4" />}
+                icon={<Pause className="w-3 h-3" />}
                 size="small"
                 onClick={() => handleStatusChange(record, "PAUSED")}
               />
             </Tooltip>
           ) : null}
-          <Popconfirm
-            title="Are you sure you want to delete this campaign?"
-            onConfirm={() => deleteCampaignMutation.mutate(record.id)}
-          >
-            <Tooltip title="Delete Campaign">
-              <AntButton
-                icon={<Trash2 className="w-4 h-4" />}
-                size="small"
-                danger
-              />
-            </Tooltip>
-          </Popconfirm>
         </Space>
       ),
     },
@@ -726,6 +684,8 @@ export default function CampaignManager() {
               loading={campaignsLoading}
               rowKey="id"
               pagination={{ pageSize: 10 }}
+              scroll={{ x: 1020 }}
+              size="small"
             />
           </div>
         </TabPane>

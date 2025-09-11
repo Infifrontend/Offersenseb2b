@@ -455,6 +455,8 @@ export default function CohortManager() {
                         placeholder="Select cohort type"
                         style={{ width: '100%' }}
                         dropdownStyle={{ zIndex: 9999 }}
+                        getPopupContainer={(trigger) => trigger.parentElement}
+                        virtual={false}
                       >
                         {cohortTypes.map((type) => (
                           <AntSelect.Option key={type} value={type}>

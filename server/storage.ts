@@ -1,4 +1,4 @@
-import { users, negotiatedFares, dynamicDiscountRules, airAncillaryRules, nonAirRates, nonAirMarkupRules, bundles, bundlePricingRules, offerRules, offerTraces, agents, channelPricingOverrides, cohorts, auditLogs, agentTiers, agentTierAssignments, tierAssignmentEngine, type InsertUser, type InsertNegotiatedFare, type InsertDynamicDiscountRule, type InsertAirAncillaryRule, type InsertNonAirRate, type InsertNonAirMarkupRule, type InsertBundle, type InsertBundlePricingRule, type InsertOfferRule, type InsertOfferTrace, type InsertAgent, type InsertChannelPricingOverride, type InsertCohort, type InsertAuditLog, type InsertAgentTier, type InsertAgentTierAssignment, type InsertTierAssignmentEngine } from "../shared/schema";
+import { users, negotiatedFares, dynamicDiscountRules, airAncillaryRules, nonAirRates, nonAirMarkupRules, bundles, bundlePricingRules, offerRules, offerTraces, agents, channelPricingOverrides, cohorts, auditLogs, agentTiers, agentTierAssignments, tierAssignmentEngine, campaigns, campaignMetrics, campaignDeliveries, type InsertUser, type InsertNegotiatedFare, type InsertDynamicDiscountRule, type InsertAirAncillaryRule, type InsertNonAirRate, type InsertNonAirMarkupRule, type InsertBundle, type InsertBundlePricingRule, type InsertOfferRule, type InsertOfferTrace, type InsertAgent, type InsertChannelPricingOverride, type InsertCohort, type InsertAuditLog, type InsertAgentTier, type InsertAgentTierAssignment, type InsertTierAssignmentEngine, type InsertCampaign, type InsertCampaignMetrics, type InsertCampaignDelivery } from "../shared/schema";
 import type {
   User,
   NegotiatedFare,
@@ -16,6 +16,9 @@ import type {
   AgentTier,
   AgentTierAssignment,
   TierAssignmentEngine,
+  Campaign,
+  CampaignMetrics,
+  CampaignDelivery,
 } from "../shared/schema";
 import { db } from "./db";
 import { eq, and, or, gte, lte, ilike, inArray, sql, desc } from "drizzle-orm";
@@ -188,6 +191,27 @@ export interface IStorage {
   updateTierAssignmentEngine(id: string, engineData: Partial<InsertTierAssignmentEngine>): Promise<TierAssignmentEngine>;
   updateEngineRunTimestamps(id: string, lastRunAt: Date, nextRunAt: Date): Promise<void>;
   deleteTierAssignmentEngine(id: string): Promise<void>;
+
+  // Campaign Management operations
+  getCampaigns(filters?: any): Promise<Campaign[]>;
+  insertCampaign(campaignData: InsertCampaign): Promise<Campaign>;
+  getCampaignById(id: string): Promise<Campaign | null>;
+  getCampaignByCode(campaignCode: string): Promise<Campaign | null>;
+  updateCampaign(id: string, campaignData: Partial<InsertCampaign>): Promise<Campaign>;
+  updateCampaignStatus(id: string, status: string): Promise<Campaign>;
+  deleteCampaign(id: string): Promise<void>;
+  checkCampaignConflicts(campaignData: InsertCampaign): Promise<any[]>;
+
+  // Campaign Metrics operations
+  getCampaignMetrics(campaignCode: string, filters?: any): Promise<CampaignMetrics[]>;
+  insertCampaignMetrics(metricsData: InsertCampaignMetrics): Promise<CampaignMetrics>;
+  updateCampaignMetrics(campaignCode: string, date: string, metricsData: Partial<InsertCampaignMetrics>): Promise<CampaignMetrics>;
+
+  // Campaign Delivery operations
+  getCampaignDeliveries(campaignCode: string, filters?: any): Promise<CampaignDelivery[]>;
+  insertCampaignDelivery(deliveryData: InsertCampaignDelivery): Promise<CampaignDelivery>;
+  updateDeliveryStatus(id: string, status: string, timestamp?: Date): Promise<CampaignDelivery>;
+  recordDeliveryEvent(id: string, event: string, data?: any): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1454,6 +1478,186 @@ export class DatabaseStorage implements IStorage {
     }
 
     return conflicts;
+  }
+
+  // Campaign Management operations
+  async getCampaigns(filters: any = {}): Promise<Campaign[]> {
+    let query = this.db.select().from(campaigns);
+    const conditions = [];
+
+    if (filters.status) {
+      conditions.push(eq(campaigns.status, filters.status));
+    }
+    if (filters.campaignCode) {
+      conditions.push(ilike(campaigns.campaignCode, `%${filters.campaignCode}%`));
+    }
+    if (filters.createdBy) {
+      conditions.push(eq(campaigns.createdBy, filters.createdBy));
+    }
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+
+    return await query.orderBy(desc(campaigns.createdAt));
+  }
+
+  async insertCampaign(campaignData: InsertCampaign): Promise<Campaign> {
+    const [campaign] = await this.db.insert(campaigns).values(campaignData).returning();
+    return campaign;
+  }
+
+  async getCampaignById(id: string): Promise<Campaign | null> {
+    const [campaign] = await this.db.select().from(campaigns).where(eq(campaigns.id, id));
+    return campaign || null;
+  }
+
+  async getCampaignByCode(campaignCode: string): Promise<Campaign | null> {
+    const [campaign] = await this.db.select().from(campaigns).where(eq(campaigns.campaignCode, campaignCode));
+    return campaign || null;
+  }
+
+  async updateCampaign(id: string, campaignData: Partial<InsertCampaign>): Promise<Campaign> {
+    const [campaign] = await this.db
+      .update(campaigns)
+      .set({ ...campaignData, updatedAt: new Date() })
+      .where(eq(campaigns.id, id))
+      .returning();
+    return campaign;
+  }
+
+  async updateCampaignStatus(id: string, status: string): Promise<Campaign> {
+    const [campaign] = await this.db
+      .update(campaigns)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(campaigns.id, id))
+      .returning();
+    return campaign;
+  }
+
+  async deleteCampaign(id: string): Promise<void> {
+    await this.db.delete(campaigns).where(eq(campaigns.id, id));
+  }
+
+  async checkCampaignConflicts(campaignData: InsertCampaign): Promise<any[]> {
+    const conflicts = [];
+
+    // Check for duplicate campaign code
+    const existingCampaign = await this.getCampaignByCode(campaignData.campaignCode);
+    if (existingCampaign) {
+      conflicts.push({
+        type: 'DUPLICATE_CAMPAIGN_CODE',
+        message: `Campaign with code ${campaignData.campaignCode} already exists`,
+        conflictingCampaign: existingCampaign
+      });
+    }
+
+    return conflicts;
+  }
+
+  // Campaign Metrics operations
+  async getCampaignMetrics(campaignCode: string, filters: any = {}): Promise<CampaignMetrics[]> {
+    let query = this.db.select().from(campaignMetrics).where(eq(campaignMetrics.campaignCode, campaignCode));
+
+    const conditions = [];
+    if (filters.startDate) {
+      conditions.push(gte(campaignMetrics.date, filters.startDate));
+    }
+    if (filters.endDate) {
+      conditions.push(lte(campaignMetrics.date, filters.endDate));
+    }
+
+    if (conditions.length > 0) {
+      query = query.where(and(eq(campaignMetrics.campaignCode, campaignCode), ...conditions));
+    }
+
+    return await query.orderBy(desc(campaignMetrics.date));
+  }
+
+  async insertCampaignMetrics(metricsData: InsertCampaignMetrics): Promise<CampaignMetrics> {
+    const [metrics] = await this.db.insert(campaignMetrics).values(metricsData).returning();
+    return metrics;
+  }
+
+  async updateCampaignMetrics(campaignCode: string, date: string, metricsData: Partial<InsertCampaignMetrics>): Promise<CampaignMetrics> {
+    const [metrics] = await this.db
+      .update(campaignMetrics)
+      .set(metricsData)
+      .where(and(eq(campaignMetrics.campaignCode, campaignCode), eq(campaignMetrics.date, date)))
+      .returning();
+    return metrics;
+  }
+
+  // Campaign Delivery operations
+  async getCampaignDeliveries(campaignCode: string, filters: any = {}): Promise<CampaignDelivery[]> {
+    let query = this.db.select().from(campaignDeliveries).where(eq(campaignDeliveries.campaignCode, campaignCode));
+
+    const conditions = [];
+    if (filters.agentId) {
+      conditions.push(eq(campaignDeliveries.agentId, filters.agentId));
+    }
+    if (filters.deliveryStatus) {
+      conditions.push(eq(campaignDeliveries.deliveryStatus, filters.deliveryStatus));
+    }
+    if (filters.deliveryChannel) {
+      conditions.push(eq(campaignDeliveries.deliveryChannel, filters.deliveryChannel));
+    }
+
+    if (conditions.length > 0) {
+      query = query.where(and(eq(campaignDeliveries.campaignCode, campaignCode), ...conditions));
+    }
+
+    return await query.orderBy(desc(campaignDeliveries.createdAt));
+  }
+
+  async insertCampaignDelivery(deliveryData: InsertCampaignDelivery): Promise<CampaignDelivery> {
+    const [delivery] = await this.db.insert(campaignDeliveries).values(deliveryData).returning();
+    return delivery;
+  }
+
+  async updateDeliveryStatus(id: string, status: string, timestamp?: Date): Promise<CampaignDelivery> {
+    const updateData: any = { deliveryStatus: status };
+    
+    switch (status) {
+      case 'SENT':
+        updateData.sentAt = timestamp || new Date();
+        break;
+      case 'DELIVERED':
+        updateData.deliveredAt = timestamp || new Date();
+        break;
+    }
+
+    const [delivery] = await this.db
+      .update(campaignDeliveries)
+      .set(updateData)
+      .where(eq(campaignDeliveries.id, id))
+      .returning();
+    return delivery;
+  }
+
+  async recordDeliveryEvent(id: string, event: string, data?: any): Promise<void> {
+    const updateData: any = {};
+    const timestamp = new Date();
+
+    switch (event) {
+      case 'OPENED':
+        updateData.openedAt = timestamp;
+        break;
+      case 'CLICKED':
+        updateData.clickedAt = timestamp;
+        break;
+      case 'PURCHASED':
+        updateData.purchasedAt = timestamp;
+        if (data?.amount) {
+          updateData.purchaseAmount = data.amount;
+        }
+        break;
+    }
+
+    await this.db
+      .update(campaignDeliveries)
+      .set(updateData)
+      .where(eq(campaignDeliveries.id, id));
   }
 }
 

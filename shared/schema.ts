@@ -607,3 +607,110 @@ export type AgentTierAssignment = typeof agentTierAssignments.$inferSelect;
 export type InsertAgentTierAssignment = z.infer<typeof insertAgentTierAssignmentSchema>;
 export type TierAssignmentEngine = typeof tierAssignmentEngine.$inferSelect;
 export type InsertTierAssignmentEngine = z.infer<typeof insertTierAssignmentEngineSchema>;
+
+// Campaign Management Tables
+export const campaigns = pgTable("campaigns", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  campaignCode: varchar("campaign_code", { length: 50 }).notNull().unique(),
+  campaignName: varchar("campaign_name", { length: 200 }).notNull(),
+  target: json("target").notNull(), // cohorts, agentTiers, pos, channel
+  products: json("products").notNull(), // ancillaries, bundles
+  offer: json("offer").notNull(), // discount type and value or special pricing
+  lifecycle: json("lifecycle").notNull(), // startDate, endDate, frequency, maxSends, capPerPNR
+  comms: json("comms").notNull(), // portalBanner, emailTemplateId, whatsappTemplateId, apiPush
+  status: varchar("status", { length: 20 }).default("DRAFT"), // DRAFT | ACTIVE | PAUSED | COMPLETED | CANCELLED
+  createdBy: varchar("created_by", { length: 50 }).notNull(),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
+export const campaignMetrics = pgTable("campaign_metrics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  campaignCode: varchar("campaign_code", { length: 50 }).notNull(),
+  date: date("date").notNull(),
+  sent: integer("sent").default(0),
+  delivered: integer("delivered").default(0),
+  opened: integer("opened").default(0),
+  clicked: integer("clicked").default(0),
+  purchased: integer("purchased").default(0),
+  revenueUplift: decimal("revenue_uplift", { precision: 10, scale: 2 }).default("0"),
+  attachRate: decimal("attach_rate", { precision: 5, scale: 2 }).default("0"),
+  roi: decimal("roi", { precision: 5, scale: 2 }).default("0"),
+  breakdown: json("breakdown"), // breakdown by cohort/tier/agent/pos/channel
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const campaignDeliveries = pgTable("campaign_deliveries", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  campaignCode: varchar("campaign_code", { length: 50 }).notNull(),
+  bookingReference: varchar("booking_reference", { length: 50 }).notNull(),
+  agentId: varchar("agent_id", { length: 50 }).notNull(),
+  deliveryChannel: varchar("delivery_channel", { length: 20 }).notNull(), // PORTAL | EMAIL | WHATSAPP | API
+  deliveryStatus: varchar("delivery_status", { length: 20 }).default("PENDING"), // PENDING | SENT | DELIVERED | FAILED
+  sentAt: timestamp("sent_at"),
+  deliveredAt: timestamp("delivered_at"),
+  openedAt: timestamp("opened_at"),
+  clickedAt: timestamp("clicked_at"),
+  purchasedAt: timestamp("purchased_at"),
+  purchaseAmount: decimal("purchase_amount", { precision: 10, scale: 2 }),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const insertCampaignSchema = createInsertSchema(campaigns, {
+  target: z.object({
+    cohorts: z.array(z.string()).optional(),
+    agentTiers: z.array(z.enum(["PLATINUM", "GOLD", "SILVER", "BRONZE"])).optional(),
+    pos: z.array(z.string()).optional(),
+    channel: z.array(z.enum(["PORTAL", "API", "MOBILE"])).optional(),
+  }),
+  products: z.object({
+    ancillaries: z.array(z.string()).optional(),
+    bundles: z.array(z.string()).optional(),
+  }),
+  offer: z.object({
+    type: z.enum(["PERCENT", "AMOUNT", "SPECIAL_PRICE"]),
+    value: z.number().optional(),
+    specialPrice: z.number().optional(),
+  }),
+  lifecycle: z.object({
+    startDate: z.string(),
+    endDate: z.string(),
+    frequency: z.string().optional(), // cron expression
+    maxSends: z.number().optional(),
+    capPerPNR: z.number().optional(),
+  }),
+  comms: z.object({
+    portalBanner: z.boolean().optional(),
+    emailTemplateId: z.string().optional(),
+    whatsappTemplateId: z.string().optional(),
+    apiPush: z.boolean().optional(),
+  }),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCampaignMetricsSchema = createInsertSchema(campaignMetrics, {
+  revenueUplift: z.string().transform((val) => parseFloat(val)),
+  attachRate: z.string().transform((val) => parseFloat(val)),
+  roi: z.string().transform((val) => parseFloat(val)),
+  breakdown: z.record(z.any()).optional(),
+}).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertCampaignDeliverySchema = createInsertSchema(campaignDeliveries, {
+  purchaseAmount: z.string().transform((val) => parseFloat(val)).optional(),
+}).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type Campaign = typeof campaigns.$inferSelect;
+export type InsertCampaign = z.infer<typeof insertCampaignSchema>;
+export type CampaignMetrics = typeof campaignMetrics.$inferSelect;
+export type InsertCampaignMetrics = z.infer<typeof insertCampaignMetricsSchema>;
+export type CampaignDelivery = typeof campaignDeliveries.$inferSelect;
+export type InsertCampaignDelivery = z.infer<typeof insertCampaignDeliverySchema>;

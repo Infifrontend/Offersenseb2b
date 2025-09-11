@@ -4,13 +4,13 @@ import { storage } from "./storage";
 import multer from "multer";
 import csv from "csv-parser";
 import { Readable } from "stream";
-import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema, insertAirAncillaryRuleSchema, insertNonAirRateSchema, insertNonAirMarkupRuleSchema, insertBundleSchema, insertBundlePricingRuleSchema, insertOfferRuleSchema, insertOfferTraceSchema, insertAgentSchema, insertChannelPricingOverrideSchema, insertCohortSchema, insertAuditLogSchema, insertAgentTierSchema, insertAgentTierAssignmentSchema, insertTierAssignmentEngineSchema } from "../shared/schema";
+import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema, insertAirAncillaryRuleSchema, insertNonAirRateSchema, insertNonAirMarkupRuleSchema, insertBundleSchema, insertBundlePricingRuleSchema, insertOfferRuleSchema, insertOfferTraceSchema, insertAgentSchema, insertChannelPricingOverrideSchema, insertCohortSchema, insertAuditLogSchema, insertAgentTierSchema, insertAgentTierAssignmentSchema, insertTierAssignmentEngineSchema, insertCampaignSchema, insertCampaignMetricsSchema, insertCampaignDeliverySchema } from "../shared/schema";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Negotiated Fares Routes
-  
+
   // Get all negotiated fares with optional filters
   app.get("/api/negofares", async (req, res) => {
     try {
@@ -26,7 +26,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/negofares", async (req, res) => {
     try {
       const validatedData = insertNegotiatedFareSchema.parse(req.body);
-      
+
       // Check for conflicts
       const conflicts = await storage.checkFareConflicts(validatedData);
       if (conflicts.length > 0) {
@@ -56,7 +56,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Parse CSV
       const stream = Readable.from(req.file.buffer.toString());
-      
+
       stream
         .pipe(csv())
         .on("data", async (data) => {
@@ -86,7 +86,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             };
 
             const validatedData = insertNegotiatedFareSchema.parse(transformedData);
-            
+
             // Check for conflicts
             const fareConflicts = await storage.checkFareConflicts(validatedData);
             if (fareConflicts.length > 0) {
@@ -158,7 +158,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
         return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
       }
-      
+
       const fare = await storage.updateNegotiatedFareStatus(req.params.id, status);
       res.json(fare);
     } catch (error: any) {
@@ -177,7 +177,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Dynamic Discount Rules Routes
-  
+
   // Get all dynamic discount rules with optional filters
   app.get("/api/dynamic-discount-rules", async (req, res) => {
     try {
@@ -193,7 +193,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/dynamic-discount-rules", async (req, res) => {
     try {
       const validatedData = insertDynamicDiscountRuleSchema.parse(req.body);
-      
+
       // Check for conflicts
       const conflicts = await storage.checkDiscountRuleConflicts(validatedData);
       if (conflicts.length > 0) {
@@ -214,7 +214,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/dynamic-discount-rules/simulate", async (req, res) => {
     try {
       const { baseFare, currency, ruleId } = req.body;
-      
+
       if (!baseFare || !currency || !ruleId) {
         return res.status(400).json({ message: "baseFare, currency, and ruleId are required" });
       }
@@ -277,7 +277,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
         return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
       }
-      
+
       const rule = await storage.updateDynamicDiscountRuleStatus(req.params.id, status);
       res.json(rule);
     } catch (error: any) {
@@ -296,7 +296,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Air Ancillary Rules Routes
-  
+
   // Get all air ancillary rules with optional filters
   app.get("/api/air-ancillary-rules", async (req, res) => {
     try {
@@ -312,7 +312,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/air-ancillary-rules", async (req, res) => {
     try {
       const validatedData = insertAirAncillaryRuleSchema.parse(req.body);
-      
+
       // Check for conflicts
       const conflicts = await storage.checkAirAncillaryRuleConflicts(validatedData);
       if (conflicts.length > 0) {
@@ -333,7 +333,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/air-ancillary-rules/simulate", async (req, res) => {
     try {
       const { basePrice, currency, ruleId } = req.body;
-      
+
       if (!basePrice || !currency || !ruleId) {
         return res.status(400).json({ message: "basePrice, currency, and ruleId are required" });
       }
@@ -405,7 +405,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
         return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
       }
-      
+
       const rule = await storage.updateAirAncillaryRuleStatus(req.params.id, status);
       res.json(rule);
     } catch (error: any) {
@@ -424,7 +424,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Non-Air Rates Routes
-  
+
   // Get all non-air rates with optional filters
   app.get("/api/nonair/rates", async (req, res) => {
     try {
@@ -459,7 +459,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Parse CSV
       const stream = Readable.from(req.file.buffer.toString());
-      
+
       stream
         .pipe(csv())
         .on("data", async (data) => {
@@ -541,7 +541,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
         return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
       }
-      
+
       const rate = await storage.updateNonAirRateStatus(req.params.id, status);
       res.json(rate);
     } catch (error: any) {
@@ -560,7 +560,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Non-Air Markup Rules Routes
-  
+
   // Get all non-air markup rules with optional filters
   app.get("/api/nonair/rules", async (req, res) => {
     try {
@@ -576,7 +576,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/nonair/rules", async (req, res) => {
     try {
       const validatedData = insertNonAirMarkupRuleSchema.parse(req.body);
-      
+
       // Check for conflicts
       const conflicts = await storage.checkNonAirMarkupRuleConflicts(validatedData);
       if (conflicts.length > 0) {
@@ -597,7 +597,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/nonair/rules/simulate", async (req, res) => {
     try {
       const { baseRate, currency, ruleId } = req.body;
-      
+
       if (!baseRate || !currency || !ruleId) {
         return res.status(400).json({ message: "baseRate, currency, and ruleId are required" });
       }
@@ -666,7 +666,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
         return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
       }
-      
+
       const rule = await storage.updateNonAirMarkupRuleStatus(req.params.id, status);
       res.json(rule);
     } catch (error: any) {
@@ -685,7 +685,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Bundle Routes
-  
+
   // Get all bundles with optional filters
   app.get("/api/bundles", async (req, res) => {
     try {
@@ -701,7 +701,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/bundles", async (req, res) => {
     try {
       const validatedData = insertBundleSchema.parse(req.body);
-      
+
       // Check for conflicts
       const conflicts = await storage.checkBundleConflicts(validatedData);
       if (conflicts.length > 0) {
@@ -749,7 +749,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
         return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
       }
-      
+
       const bundle = await storage.updateBundleStatus(req.params.id, status);
       res.json(bundle);
     } catch (error: any) {
@@ -768,7 +768,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Bundle Pricing Rules Routes
-  
+
   // Get all bundle pricing rules with optional filters
   app.get("/api/bundles/pricing", async (req, res) => {
     try {
@@ -784,7 +784,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/bundles/pricing", async (req, res) => {
     try {
       const validatedData = insertBundlePricingRuleSchema.parse(req.body);
-      
+
       // Check for conflicts
       const conflicts = await storage.checkBundlePricingRuleConflicts(validatedData);
       if (conflicts.length > 0) {
@@ -805,7 +805,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/bundles/pricing/simulate", async (req, res) => {
     try {
       const { basePrice, currency, ruleId } = req.body;
-      
+
       if (!basePrice || !currency || !ruleId) {
         return res.status(400).json({ message: "basePrice, currency, and ruleId are required" });
       }
@@ -872,7 +872,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
         return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
       }
-      
+
       const rule = await storage.updateBundlePricingRuleStatus(req.params.id, status);
       res.json(rule);
     } catch (error: any) {
@@ -891,7 +891,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Offer Rules Routes
-  
+
   // Get all offer rules with optional filters
   app.get("/api/offer-rules", async (req, res) => {
     try {
@@ -907,7 +907,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/offer-rules", async (req, res) => {
     try {
       const validatedData = insertOfferRuleSchema.parse(req.body);
-      
+
       // Check for conflicts
       const conflicts = await storage.checkOfferRuleConflicts(validatedData);
       if (conflicts.length > 0) {
@@ -928,7 +928,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/offer-rules/simulate", async (req, res) => {
     try {
       const { ruleId, context } = req.body;
-      
+
       if (!ruleId || !context) {
         return res.status(400).json({ message: "ruleId and context are required" });
       }
@@ -986,7 +986,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!status || !["DRAFT", "PENDING_APPROVAL", "ACTIVE", "INACTIVE"].includes(status)) {
         return res.status(400).json({ message: "Invalid status" });
       }
-      
+
       const rule = await storage.updateOfferRuleStatus(req.params.id, status, approver);
       res.json(rule);
     } catch (error: any) {
@@ -1005,12 +1005,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Offer Composition Routes
-  
+
   // Compose offer for agent
   app.post("/api/offer/compose", async (req, res) => {
     try {
       const { origin, destination, tripType, pax, cabinClass, dates, channel, agentId } = req.body;
-      
+
       if (!origin || !destination || !agentId) {
         return res.status(400).json({ message: "origin, destination, and agentId are required" });
       }
@@ -1031,7 +1031,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         tripType,
         status: "ACTIVE"
       };
-      
+
       const negotiatedFares = await storage.getNegotiatedFares(negotiatedFareFilters);
       let fareSource = "API";
       let basePrice = 8500; // Mock API fare price
@@ -1051,14 +1051,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         channel,
         status: "ACTIVE"
       };
-      
+
       const discountRules = await storage.getDynamicDiscountRules(discountFilters);
-      
+
       for (const rule of discountRules) {
         // Check if rule applies to agent tier
         const agentTierArray = Array.isArray(rule.agentTier) ? rule.agentTier : [];
         const posArray = Array.isArray(rule.pos) ? rule.pos : [];
-        
+
         if (agentTierArray.includes(agentTier)) {
           if (rule.adjustmentType === "PERCENT") {
             const adjustmentValue = parseFloat(rule.adjustmentValue);
@@ -1084,18 +1084,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const ancillaryFilters = {
         status: "ACTIVE"
       };
-      
+
       const ancillaryRules = await storage.getAirAncillaryRules(ancillaryFilters);
       const ancillaries = [];
-      
+
       for (const rule of ancillaryRules) {
         const agentTierArray = Array.isArray(rule.agentTier) ? rule.agentTier : [];
-        
+
         if (agentTierArray.includes(agentTier)) {
           let baseAncillaryPrice = 2000; // Mock base price
           let sellPrice = baseAncillaryPrice;
           let discount = 0;
-          
+
           if (rule.adjustmentType === "FREE") {
             sellPrice = 0;
             discount = baseAncillaryPrice;
@@ -1106,7 +1106,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             discount = parseFloat(rule.adjustmentValue);
             sellPrice = Math.max(0, baseAncillaryPrice - discount);
           }
-          
+
           ancillaries.push({
             code: rule.ancillaryCode,
             base: baseAncillaryPrice,
@@ -1120,24 +1120,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const bundleFilters = {
         status: "ACTIVE"
       };
-      
+
       const availableBundles = await storage.getBundles(bundleFilters);
       const bundles = [];
-      
+
       for (const bundle of availableBundles) {
         const agentTierArray = Array.isArray(bundle.agentTier) ? bundle.agentTier : [];
         const posArray = Array.isArray(bundle.pos) ? bundle.pos : [];
-        
+
         if (agentTierArray.includes(agentTier)) {
           const bundlePricingFilters = {
             bundleCode: bundle.bundleCode,
             status: "ACTIVE"
           };
-          
+
           const pricingRules = await storage.getBundlePricingRules(bundlePricingFilters);
           let bundlePrice = 3000; // Mock base bundle price
           let saveVsIndiv = 600;
-          
+
           if (pricingRules.length > 0) {
             const rule = pricingRules[0];
             if (rule.discountType === "PERCENT") {
@@ -1150,7 +1150,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               saveVsIndiv = Math.round(discount);
             }
           }
-          
+
           bundles.push({
             code: bundle.bundleCode,
             sell: Math.round(bundlePrice),
@@ -1246,7 +1246,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Agent Routes
-  
+
   // Get all agents with optional filters
   app.get("/api/agents", async (req, res) => {
     try {
@@ -1262,7 +1262,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/agents", async (req, res) => {
     try {
       const validatedData = insertAgentSchema.parse(req.body);
-      
+
       // Check for conflicts
       const conflicts = await storage.checkAgentConflicts(validatedData);
       if (conflicts.length > 0) {
@@ -1310,7 +1310,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
         return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
       }
-      
+
       const agent = await storage.updateAgentStatus(req.params.id, status);
       res.json(agent);
     } catch (error: any) {
@@ -1329,7 +1329,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Channel Pricing Override Routes
-  
+
   // Get all channel pricing overrides with optional filters
   app.get("/api/channel-overrides", async (req, res) => {
     try {
@@ -1345,7 +1345,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/channel-overrides", async (req, res) => {
     try {
       const validatedData = insertChannelPricingOverrideSchema.parse(req.body);
-      
+
       // Check for conflicts
       const conflicts = await storage.checkChannelPricingOverrideConflicts(validatedData);
       if (conflicts.length > 0) {
@@ -1366,7 +1366,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/channel-overrides/simulate", async (req, res) => {
     try {
       const { basePrice, currency, overrideId } = req.body;
-      
+
       if (!basePrice || !currency || !overrideId) {
         return res.status(400).json({ message: "basePrice, currency, and overrideId are required" });
       }
@@ -1434,7 +1434,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
         return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
       }
-      
+
       const override = await storage.updateChannelPricingOverrideStatus(req.params.id, status);
       res.json(override);
     } catch (error: any) {
@@ -1453,7 +1453,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Cohort Routes
-  
+
   // Get all cohorts with optional filters
   app.get("/api/cohorts", async (req, res) => {
     try {
@@ -1469,7 +1469,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/cohorts", async (req, res) => {
     try {
       const validatedData = insertCohortSchema.parse(req.body);
-      
+
       // Check for conflicts
       const conflicts = await storage.checkCohortConflicts(validatedData);
       if (conflicts.length > 0) {
@@ -1517,7 +1517,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
         return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
       }
-      
+
       const cohort = await storage.updateCohortStatus(req.params.id, status);
       res.json(cohort);
     } catch (error: any) {
@@ -1539,7 +1539,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/cohorts/simulate", async (req, res) => {
     try {
       const { searchContext } = req.body;
-      
+
       if (!searchContext) {
         return res.status(400).json({ message: "searchContext is required" });
       }
@@ -1592,7 +1592,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Audit Logs Routes
-  
+
   // Get all audit logs with optional filters
   app.get("/api/audit-logs", async (req, res) => {
     try {
@@ -1656,7 +1656,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const filters = req.query;
       const logs = await storage.getAuditLogs(filters);
-      
+
       // Generate CSV content
       const headers = [
         "timestamp",
@@ -1667,7 +1667,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         "justification",
         "changes"
       ];
-      
+
       const csvRows = [
         headers.join(","),
         ...logs.map(log => [
@@ -1680,9 +1680,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           `"${JSON.stringify(log.diff || {}).replace(/"/g, '""')}"`
         ].join(","))
       ];
-      
+
       const csvContent = csvRows.join("\n");
-      
+
       res.setHeader("Content-Type", "text/csv");
       res.setHeader("Content-Disposition", "attachment; filename=audit_logs.csv");
       res.send(csvContent);
@@ -1702,7 +1702,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Agent Tier Management Routes
-  
+
   // Get all agent tiers with optional filters
   app.get("/api/tiers", async (req, res) => {
     try {
@@ -1718,7 +1718,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/tiers", async (req, res) => {
     try {
       const validatedData = insertAgentTierSchema.parse(req.body);
-      
+
       // Check for conflicts
       const conflicts = await storage.checkTierConflicts(validatedData);
       if (conflicts.length > 0) {
@@ -1766,7 +1766,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
         return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
       }
-      
+
       const tier = await storage.updateAgentTierStatus(req.params.id, status);
       res.json(tier);
     } catch (error: any) {
@@ -1785,7 +1785,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Agent Tier Assignment Routes
-  
+
   // Get all tier assignments with optional filters
   app.get("/api/tiers/assignments", async (req, res) => {
     try {
@@ -1801,7 +1801,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/tiers/override", async (req, res) => {
     try {
       const { agentId, tierCode, effectiveFrom, justification, assignedBy } = req.body;
-      
+
       if (!agentId || !tierCode || !effectiveFrom || !justification || !assignedBy) {
         return res.status(400).json({ 
           message: "agentId, tierCode, effectiveFrom, justification, and assignedBy are required" 
@@ -1823,7 +1823,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       const assignment = await storage.insertAgentTierAssignment(assignmentData);
-      
+
       // Create audit log
       const auditData = {
         user: assignedBy,
@@ -1848,7 +1848,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/tiers/assign", async (req, res) => {
     try {
       const { agentIds, effectiveFrom, assignedBy } = req.body;
-      
+
       if (!agentIds || !Array.isArray(agentIds) || !effectiveFrom || !assignedBy) {
         return res.status(400).json({ 
           message: "agentIds (array), effectiveFrom, and assignedBy are required" 
@@ -1862,10 +1862,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           // Calculate KPIs for agent
           const kpiData = await storage.calculateAgentKPIs(agentId, 'QUARTERLY');
-          
+
           // Evaluate tier based on KPIs
           const recommendedTier = await storage.evaluateAgentTier(agentId, kpiData);
-          
+
           // Check if tier has changed
           const currentAssignment = await storage.getCurrentAgentTierAssignment(agentId);
           if (currentAssignment?.tierCode === recommendedTier) {
@@ -1940,17 +1940,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/tiers/evaluate", async (req, res) => {
     try {
       const { agentId, window } = req.body;
-      
+
       if (!agentId || !window) {
         return res.status(400).json({ message: "agentId and window are required" });
       }
 
       // Calculate KPIs
       const kpiData = await storage.calculateAgentKPIs(agentId, window);
-      
+
       // Evaluate tier
       const recommendedTier = await storage.evaluateAgentTier(agentId, kpiData);
-      
+
       // Get current assignment
       const currentAssignment = await storage.getCurrentAgentTierAssignment(agentId);
 
@@ -1968,7 +1968,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Tier Assignment Engine Routes
-  
+
   // Get all assignment engines
   app.get("/api/tiers/engines", async (req, res) => {
     try {
@@ -2009,6 +2009,228 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error: any) {
       res.status(500).json({ message: "Failed to delete engine", error: error.message });
+    }
+  });
+
+  // Campaign Management Routes
+
+  // Get all campaigns with optional filters
+  app.get("/api/campaigns", async (req, res) => {
+    try {
+      const filters = req.query;
+      const campaigns = await storage.getCampaigns(filters);
+      res.json(campaigns);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch campaigns", error: error.message });
+    }
+  });
+
+  // Create single campaign
+  app.post("/api/campaigns", async (req, res) => {
+    try {
+      const validatedData = insertCampaignSchema.parse(req.body);
+
+      // Check for conflicts
+      const conflicts = await storage.checkCampaignConflicts(validatedData);
+      if (conflicts.length > 0) {
+        return res.status(409).json({ 
+          message: "Campaign conflicts detected", 
+          conflicts 
+        });
+      }
+
+      const campaign = await storage.insertCampaign(validatedData);
+      res.status(201).json(campaign);
+    } catch (error: any) {
+      res.status(400).json({ message: "Invalid campaign data", error: error.message });
+    }
+  });
+
+  // Activate campaign
+  app.post("/api/campaigns/:id/activate", async (req, res) => {
+    try {
+      const campaign = await storage.updateCampaignStatus(req.params.id, "ACTIVE");
+      res.json(campaign);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to activate campaign", error: error.message });
+    }
+  });
+
+  // Deactivate campaign
+  app.post("/api/campaigns/:id/deactivate", async (req, res) => {
+    try {
+      const campaign = await storage.updateCampaignStatus(req.params.id, "PAUSED");
+      res.json(campaign);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to deactivate campaign", error: error.message });
+    }
+  });
+
+  // Get campaign by ID
+  app.get("/api/campaigns/:id", async (req, res) => {
+    try {
+      const campaign = await storage.getCampaignById(req.params.id);
+      if (!campaign) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+      res.json(campaign);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch campaign", error: error.message });
+    }
+  });
+
+  // Update campaign
+  app.put("/api/campaigns/:id", async (req, res) => {
+    try {
+      const validatedData = insertCampaignSchema.parse(req.body);
+      const campaign = await storage.updateCampaign(req.params.id, validatedData);
+      res.json(campaign);
+    } catch (error: any) {
+      res.status(400).json({ message: "Failed to update campaign", error: error.message });
+    }
+  });
+
+  // Update campaign status
+  app.patch("/api/campaigns/:id/status", async (req, res) => {
+    try {
+      const { status } = req.body;
+      if (!status || !["DRAFT", "ACTIVE", "PAUSED", "COMPLETED", "CANCELLED"].includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+
+      const campaign = await storage.updateCampaignStatus(req.params.id, status);
+      res.json(campaign);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to update campaign status", error: error.message });
+    }
+  });
+
+  // Delete campaign
+  app.delete("/api/campaigns/:id", async (req, res) => {
+    try {
+      await storage.deleteCampaign(req.params.id);
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to delete campaign", error: error.message });
+    }
+  });
+
+  // Campaign Metrics Routes
+
+  // Get campaign metrics
+  app.get("/api/campaigns/:campaignCode/metrics", async (req, res) => {
+    try {
+      const filters = req.query;
+      const metrics = await storage.getCampaignMetrics(req.params.campaignCode, filters);
+
+      // Calculate aggregated metrics
+      const aggregated = metrics.reduce((acc, metric) => {
+        acc.sent += metric.sent || 0;
+        acc.delivered += metric.delivered || 0;
+        acc.opened += metric.opened || 0;
+        acc.clicked += metric.clicked || 0;
+        acc.purchased += metric.purchased || 0;
+        acc.revenueUplift += parseFloat(metric.revenueUplift || "0");
+        return acc;
+      }, {
+        sent: 0,
+        delivered: 0,
+        opened: 0,
+        clicked: 0,
+        purchased: 0,
+        revenueUplift: 0,
+        attachRate: 0,
+        roi: 0
+      });
+
+      // Calculate rates
+      if (aggregated.sent > 0) {
+        aggregated.attachRate = (aggregated.purchased / aggregated.sent) * 100;
+      }
+      if (aggregated.revenueUplift > 0) {
+        // Simplified ROI calculation - would need campaign cost data in real implementation
+        aggregated.roi = aggregated.revenueUplift / 1000; // Assuming $1000 campaign cost
+      }
+
+      res.json({
+        aggregated,
+        daily: metrics
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch campaign metrics", error: error.message });
+    }
+  });
+
+  // Record campaign metrics
+  app.post("/api/campaigns/:campaignCode/metrics", async (req, res) => {
+    try {
+      const validatedData = insertCampaignMetricsSchema.parse({
+        ...req.body,
+        campaignCode: req.params.campaignCode
+      });
+
+      const metrics = await storage.insertCampaignMetrics(validatedData);
+      res.status(201).json(metrics);
+    } catch (error: any) {
+      res.status(400).json({ message: "Invalid metrics data", error: error.message });
+    }
+  });
+
+  // Campaign Delivery Routes
+
+  // Get campaign deliveries
+  app.get("/api/campaigns/:campaignCode/deliveries", async (req, res) => {
+    try {
+      const filters = req.query;
+      const deliveries = await storage.getCampaignDeliveries(req.params.campaignCode, filters);
+      res.json(deliveries);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch campaign deliveries", error: error.message });
+    }
+  });
+
+  // Record campaign delivery
+  app.post("/api/campaigns/:campaignCode/deliveries", async (req, res) => {
+    try {
+      const validatedData = insertCampaignDeliverySchema.parse({
+        ...req.body,
+        campaignCode: req.params.campaignCode
+      });
+
+      const delivery = await storage.insertCampaignDelivery(validatedData);
+      res.status(201).json(delivery);
+    } catch (error: any) {
+      res.status(400).json({ message: "Invalid delivery data", error: error.message });
+    }
+  });
+
+  // Update delivery status
+  app.patch("/api/campaigns/deliveries/:id/status", async (req, res) => {
+    try {
+      const { status } = req.body;
+      if (!status || !["PENDING", "SENT", "DELIVERED", "FAILED"].includes(status)) {
+        return res.status(400).json({ message: "Invalid delivery status" });
+      }
+
+      const delivery = await storage.updateDeliveryStatus(req.params.id, status);
+      res.json(delivery);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to update delivery status", error: error.message });
+    }
+  });
+
+  // Record delivery event (opened, clicked, purchased)
+  app.post("/api/campaigns/deliveries/:id/events", async (req, res) => {
+    try {
+      const { event, data } = req.body;
+      if (!event || !["OPENED", "CLICKED", "PURCHASED"].includes(event)) {
+        return res.status(400).json({ message: "Invalid event type" });
+      }
+
+      await storage.recordDeliveryEvent(req.params.id, event, data);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to record delivery event", error: error.message });
     }
   });
 

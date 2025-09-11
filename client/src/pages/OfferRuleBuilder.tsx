@@ -412,13 +412,13 @@ export default function OfferRuleBuilder() {
     }
   };
 
-  const onCreateSubmit = (values: any) => {
-    console.log("Form values received:", values);
+  const onCreateSubmit = () => {
+    console.log("Create Rule button clicked");
     
-    // First validate using Ant Design form validation
+    // Validate all form fields
     createForm.validateFields()
       .then((validatedValues) => {
-        console.log("Validated form values:", validatedValues);
+        console.log("All form validation passed:", validatedValues);
         
         try {
           // Extract basic info from validated values
@@ -430,39 +430,8 @@ export default function OfferRuleBuilder() {
           const validTo = validatedValues.validTo;
           
           console.log("Extracted basic info:", { ruleCode, ruleName, ruleType, priority, validFrom, validTo });
-          
-          // Additional validation (this should not be needed if form validation works)
-          if (!ruleCode || ruleCode.trim() === '') {
-            alert("Rule Code is required");
-            setCurrentStep(0);
-            return;
-          }
-          
-          if (!ruleName || ruleName.trim() === '') {
-            alert("Rule Name is required");
-            setCurrentStep(0);
-            return;
-          }
-          
-          if (!ruleType) {
-            alert("Rule Type is required");
-            setCurrentStep(0);
-            return;
-          }
-          
-          if (!validFrom) {
-            alert("Valid From date is required");
-            setCurrentStep(0);
-            return;
-          }
-          
-          if (!validTo) {
-            alert("Valid To date is required");
-            setCurrentStep(0);
-            return;
-          }
 
-      const formattedData = {
+          const formattedData = {
             ruleCode: ruleCode.trim(),
             ruleName: ruleName.trim(),
             ruleType: ruleType,
@@ -1287,10 +1256,7 @@ export default function OfferRuleBuilder() {
                 ) : (
                   <AntButton
                     type="primary"
-                    onClick={() => {
-                      console.log("Create Rule button clicked");
-                      onCreateSubmit({});
-                    }}
+                    onClick={onCreateSubmit}
                     loading={createRuleMutation.isPending}
                   >
                     {createRuleMutation.isPending

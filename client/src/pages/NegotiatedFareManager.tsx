@@ -237,9 +237,9 @@ export default function NegotiatedFareManager() {
 
   // Fetch available cohorts
   const { data: availableCohorts } = useQuery({
-    queryKey: ["/api/cohorts"],
+    queryKey: ["/api/cohorts/list"], // Corrected API endpoint
     queryFn: async () => {
-      const response = await fetch("/api/cohorts");
+      const response = await fetch("/api/cohorts/list"); // Corrected API endpoint
       if (!response.ok) throw new Error("Failed to fetch cohorts");
       return response.json();
     },
@@ -993,7 +993,7 @@ export default function NegotiatedFareManager() {
                 option?.value?.toLowerCase().indexOf(input.toLowerCase()) >= 0
               }
             >
-              {availableCohorts.map((cohort) => (
+              {availableCohorts.map((cohort: any) => (
                 <AntSelect.Option key={cohort.code} value={cohort.code}>
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <span style={{ fontWeight: '500' }}>{cohort.code}</span>
@@ -1700,7 +1700,7 @@ export default function NegotiatedFareManager() {
                 option?.value?.toLowerCase().indexOf(input.toLowerCase()) >= 0
               }
             >
-              {availableCohorts.map((cohort) => (
+              {availableCohorts.map((cohort: any) => (
                 <AntSelect.Option key={cohort.code} value={cohort.code}>
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <span style={{ fontWeight: '500' }}>{cohort.code}</span>

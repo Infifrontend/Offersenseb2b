@@ -140,13 +140,16 @@ const countriesData = [
   { code: "IN", name: "India" },
 ];
 
-const availableCohorts = [
-  { code: "YOUTH", name: "Youth Fare Program" },
-  { code: "SENIOR", name: "Senior Discount" },
-  { code: "STUDENT", name: "Student Travel Offer" },
-  { code: "MILITARY", name: "Military Personnel Discount" },
-  { code: "FAMILY", name: "Family Travel Package" },
-];
+// Fetch available cohorts from the API
+const { data: availableCohorts = [] } = useQuery({
+  queryKey: ["cohorts"],
+  queryFn: async () => {
+    const response = await fetch("/api/cohorts/list");
+    if (!response.ok) throw new Error("Failed to fetch cohorts");
+    return response.json();
+  },
+});
+
 
 export default function DynamicDiscountEngine() {
   const [filters, setFilters] = useState({});
@@ -968,7 +971,7 @@ export default function DynamicDiscountEngine() {
                 option?.value?.toLowerCase().indexOf(input.toLowerCase()) >= 0
               }
             >
-              {availableCohorts.map((cohort) => (
+              {availableCohorts.map((cohort: any) => (
                 <AntSelect.Option key={cohort.code} value={cohort.code}>
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <span style={{ fontWeight: '500' }}>{cohort.code}</span>
@@ -1268,7 +1271,7 @@ export default function DynamicDiscountEngine() {
                 option?.value?.toLowerCase().indexOf(input.toLowerCase()) >= 0
               }
             >
-              {availableCohorts.map((cohort) => (
+              {availableCohorts.map((cohort: any) => (
                 <AntSelect.Option key={cohort.code} value={cohort.code}>
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <span style={{ fontWeight: '500' }}>{cohort.code}</span>

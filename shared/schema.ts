@@ -261,3 +261,66 @@ export type Bundle = typeof bundles.$inferSelect;
 export type InsertBundle = z.infer<typeof insertBundleSchema>;
 export type BundlePricingRule = typeof bundlePricingRules.$inferSelect;
 export type InsertBundlePricingRule = z.infer<typeof insertBundlePricingRuleSchema>;
+
+export const offerRules = pgTable("offer_rules", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ruleCode: varchar("rule_code", { length: 50 }).notNull().unique(),
+  ruleName: varchar("rule_name", { length: 200 }).notNull(),
+  ruleType: varchar("rule_type", { length: 30 }).notNull(), // FARE_DISCOUNT | ANCILLARY_DISCOUNT | BUNDLE_OFFER | MARKUP
+  conditions: json("conditions").notNull(), // complex conditions object
+  actions: json("actions").notNull(), // array of actions to execute
+  priority: integer("priority").notNull().default(1),
+  status: varchar("status", { length: 20 }).default("DRAFT"), // DRAFT | ACTIVE | INACTIVE | PENDING_APPROVAL
+  validFrom: date("valid_from").notNull(),
+  validTo: date("valid_to").notNull(),
+  justification: text("justification"), // required for overrides
+  approvedBy: varchar("approved_by", { length: 50 }),
+  approvedAt: timestamp("approved_at"),
+  createdBy: varchar("created_by", { length: 50 }).notNull(),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
+export const insertOfferRuleSchema = createInsertSchema(offerRules, {
+  conditions: z.object({
+    origin: z.string().optional(),
+    destination: z.string().optional(),
+    pos: z.array(z.string()).optional(),
+    agentTier: z.array(z.enum(["PLATINUM", "GOLD", "SILVER", "BRONZE"])).optional(),
+    cohortCodes: z.array(z.string()).optional(),
+    channel: z.array(z.enum(["API", "PORTAL", "MOBILE"])).optional(),
+    seasonCode: z.string().optional(),
+    bookingWindow: z.object({
+      min: z.number(),
+      max: z.number()
+    }).optional(),
+    travelWindow: z.object({
+      min: z.number(),
+      max: z.number()
+    }).optional(),
+    cabinClass: z.array(z.enum(["ECONOMY", "PREMIUM_ECONOMY", "BUSINESS", "FIRST"])).optional(),
+    tripType: z.array(z.enum(["ONE_WAY", "ROUND_TRIP", "MULTI_CITY"])).optional(),
+  }),
+  actions: z.array(z.object({
+    type: z.enum(["DISCOUNT", "MARKUP", "ADD_ANCILLARY", "ACTIVATE_BUNDLE", "SUPPRESS_PRODUCT", "ADD_BANNER"]),
+    scope: z.enum(["NEGOTIATED", "API", "ANCILLARY", "BUNDLE"]).optional(),
+    valueType: z.enum(["PERCENT", "AMOUNT", "FREE"]).optional(),
+    value: z.number().optional(),
+    ancillaryCode: z.string().optional(),
+    bundleCode: z.string().optional(),
+    productCode: z.string().optional(),
+    bannerText: z.string().optional(),
+    pricing: z.object({
+      type: z.enum(["PERCENT", "AMOUNT", "FREE"]),
+      value: z.number().optional()
+    }).optional(),
+  })),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  approvedAt: true,
+});
+
+export type OfferRule = typeof offerRules.$inferSelect;
+export type InsertOfferRule = z.infer<typeof insertOfferRuleSchema>;

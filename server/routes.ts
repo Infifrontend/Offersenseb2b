@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import multer from "multer";
 import csv from "csv-parser";
 import { Readable } from "stream";
-import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema, insertAirAncillaryRuleSchema, insertNonAirRateSchema, insertNonAirMarkupRuleSchema, insertBundleSchema, insertBundlePricingRuleSchema } from "../shared/schema";
+import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema, insertAirAncillaryRuleSchema, insertNonAirRateSchema, insertNonAirMarkupRuleSchema, insertBundleSchema, insertBundlePricingRuleSchema, insertOfferRuleSchema } from "../shared/schema";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -887,6 +887,120 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error: any) {
       res.status(500).json({ message: "Failed to delete bundle pricing rule", error: error.message });
+    }
+  });
+
+  // Offer Rules Routes
+  
+  // Get all offer rules with optional filters
+  app.get("/api/offer-rules", async (req, res) => {
+    try {
+      const filters = req.query;
+      const rules = await storage.getOfferRules(filters);
+      res.json(rules);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch offer rules", error: error.message });
+    }
+  });
+
+  // Create single offer rule
+  app.post("/api/offer-rules", async (req, res) => {
+    try {
+      const validatedData = insertOfferRuleSchema.parse(req.body);
+      
+      // Check for conflicts
+      const conflicts = await storage.checkOfferRuleConflicts(validatedData);
+      if (conflicts.length > 0) {
+        return res.status(409).json({ 
+          message: "Rule conflicts detected", 
+          conflicts 
+        });
+      }
+
+      const rule = await storage.insertOfferRule(validatedData);
+      res.status(201).json(rule);
+    } catch (error: any) {
+      res.status(400).json({ message: "Invalid rule data", error: error.message });
+    }
+  });
+
+  // Simulate offer rule application
+  app.post("/api/offer-rules/simulate", async (req, res) => {
+    try {
+      const { ruleId, context } = req.body;
+      
+      if (!ruleId || !context) {
+        return res.status(400).json({ message: "ruleId and context are required" });
+      }
+
+      const rule = await storage.getOfferRuleById(ruleId);
+      if (!rule) {
+        return res.status(404).json({ message: "Rule not found" });
+      }
+
+      // Basic simulation logic
+      const simulation = {
+        ruleApplied: rule.ruleCode,
+        ruleName: rule.ruleName,
+        ruleType: rule.ruleType,
+        conditions: rule.conditions,
+        actions: rule.actions,
+        context,
+        result: "Rule would be applied based on matching conditions"
+      };
+
+      res.json(simulation);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to simulate rule", error: error.message });
+    }
+  });
+
+  // Get rule by ID
+  app.get("/api/offer-rules/:id", async (req, res) => {
+    try {
+      const rule = await storage.getOfferRuleById(req.params.id);
+      if (!rule) {
+        return res.status(404).json({ message: "Rule not found" });
+      }
+      res.json(rule);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch rule", error: error.message });
+    }
+  });
+
+  // Update rule
+  app.put("/api/offer-rules/:id", async (req, res) => {
+    try {
+      const validatedData = insertOfferRuleSchema.parse(req.body);
+      const rule = await storage.updateOfferRule(req.params.id, validatedData);
+      res.json(rule);
+    } catch (error: any) {
+      res.status(400).json({ message: "Failed to update rule", error: error.message });
+    }
+  });
+
+  // Update rule status (with approval workflow)
+  app.patch("/api/offer-rules/:id/status", async (req, res) => {
+    try {
+      const { status, approver } = req.body;
+      if (!status || !["DRAFT", "PENDING_APPROVAL", "ACTIVE", "INACTIVE"].includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+      
+      const rule = await storage.updateOfferRuleStatus(req.params.id, status, approver);
+      res.json(rule);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to update rule status", error: error.message });
+    }
+  });
+
+  // Delete rule
+  app.delete("/api/offer-rules/:id", async (req, res) => {
+    try {
+      await storage.deleteOfferRule(req.params.id);
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to delete rule", error: error.message });
     }
   });
 

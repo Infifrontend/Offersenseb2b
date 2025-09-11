@@ -1,4 +1,4 @@
-import { users, negotiatedFares, dynamicDiscountRules, airAncillaryRules, nonAirRates, nonAirMarkupRules, bundles, bundlePricingRules, type User, type NegotiatedFare, type InsertUser, type InsertNegotiatedFare, type InsertDynamicDiscountRule, type InsertAirAncillaryRule, type InsertNonAirRate, type InsertNonAirMarkupRule, type InsertBundle, type InsertBundlePricingRule } from "../shared/schema";
+import { users, negotiatedFares, dynamicDiscountRules, airAncillaryRules, nonAirRates, nonAirMarkupRules, bundles, bundlePricingRules, offerRules, type User, type NegotiatedFare, type InsertNegotiatedFare, type DynamicDiscountRule, type InsertDynamicDiscountRule, type AirAncillaryRule, type InsertAirAncillaryRule, type NonAirRate, type InsertNonAirRate, type NonAirMarkupRule, type InsertNonAirMarkupRule, type Bundle, type InsertBundle, type BundlePricingRule, type InsertBundlePricingRule, type OfferRule, type InsertOfferRule } from "../shared/schema";
 import { db } from "./db";
 import { eq, and, or, gte, lte, ilike, inArray, sql } from "drizzle-orm";
 
@@ -65,6 +65,15 @@ export interface IStorage {
   updateBundlePricingRuleStatus(id: string, status: string): Promise<InsertBundlePricingRule>;
   deleteBundlePricingRule(id: string): Promise<void>;
   checkBundlePricingRuleConflicts(rule: InsertBundlePricingRule): Promise<InsertBundlePricingRule[]>;
+
+  // Offer Rules
+  getOfferRules(filters?: any): Promise<OfferRule[]>;
+  getOfferRuleById(id: string): Promise<OfferRule | null>;
+  insertOfferRule(rule: InsertOfferRule): Promise<OfferRule>;
+  updateOfferRule(id: string, rule: InsertOfferRule): Promise<OfferRule>;
+  updateOfferRuleStatus(id: string, status: string, approver?: string): Promise<OfferRule>;
+  deleteOfferRule(id: string): Promise<void>;
+  checkOfferRuleConflicts(rule: InsertOfferRule): Promise<OfferRule[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -623,6 +632,108 @@ export class DatabaseStorage implements IStorage {
           eq(bundlePricingRules.status, "ACTIVE")
         )
       );
+    return conflicts;
+  }
+
+  // Offer Rules
+  async getOfferRules(filters: any = {}): Promise<OfferRule[]> {
+    let query = db.select().from(offerRules);
+    const conditions: any[] = [];
+
+    if (filters.ruleCode) {
+      conditions.push(eq(offerRules.ruleCode, filters.ruleCode));
+    }
+    if (filters.ruleType) {
+      conditions.push(eq(offerRules.ruleType, filters.ruleType));
+    }
+    if (filters.status) {
+      conditions.push(eq(offerRules.status, filters.status));
+    }
+    if (filters.createdBy) {
+      conditions.push(eq(offerRules.createdBy, filters.createdBy));
+    }
+    if (filters.approvedBy) {
+      conditions.push(eq(offerRules.approvedBy, filters.approvedBy));
+    }
+    if (filters.validFrom) {
+      conditions.push(gte(offerRules.validFrom, filters.validFrom));
+    }
+    if (filters.validTo) {
+      conditions.push(lte(offerRules.validTo, filters.validTo));
+    }
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+
+    return await query.orderBy(offerRules.priority, offerRules.createdAt);
+  }
+
+  async getOfferRuleById(id: string): Promise<OfferRule | null> {
+    const result = await db.select().from(offerRules).where(eq(offerRules.id, id));
+    return result[0] || null;
+  }
+
+  async insertOfferRule(rule: InsertOfferRule): Promise<OfferRule> {
+    const result = await db.insert(offerRules).values(rule).returning();
+    return result[0];
+  }
+
+  async updateOfferRule(id: string, rule: InsertOfferRule): Promise<OfferRule> {
+    const result = await db.update(offerRules)
+      .set({ ...rule, updatedAt: new Date() })
+      .where(eq(offerRules.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async updateOfferRuleStatus(id: string, status: string, approver?: string): Promise<OfferRule> {
+    const updateData: any = { status, updatedAt: new Date() };
+
+    if (status === "ACTIVE" && approver) {
+      updateData.approvedBy = approver;
+      updateData.approvedAt = new Date();
+    }
+
+    const result = await db.update(offerRules)
+      .set(updateData)
+      .where(eq(offerRules.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteOfferRule(id: string): Promise<void> {
+    await db.delete(offerRules).where(eq(offerRules.id, id));
+  }
+
+  async checkOfferRuleConflicts(rule: InsertOfferRule): Promise<OfferRule[]> {
+    // Check for overlapping rules with same conditions and actions
+    const existingRules = await db.select().from(offerRules)
+      .where(and(
+        eq(offerRules.ruleType, rule.ruleType),
+        eq(offerRules.status, "ACTIVE"),
+        gte(offerRules.validTo, rule.validFrom),
+        lte(offerRules.validFrom, rule.validTo)
+      ));
+
+    // Basic conflict detection - can be enhanced with more sophisticated logic
+    const conflicts = existingRules.filter(existing => {
+      const existingConditions = existing.conditions as any;
+      const newConditions = rule.conditions as any;
+
+      // Check for overlapping conditions
+      const hasOverlap = (
+        (!existingConditions.pos && !newConditions.pos) ||
+        (existingConditions.pos && newConditions.pos && 
+         existingConditions.pos.some((p: string) => newConditions.pos.includes(p))) ||
+        (!existingConditions.agentTier && !newConditions.agentTier) ||
+        (existingConditions.agentTier && newConditions.agentTier && 
+         existingConditions.agentTier.some((t: string) => newConditions.agentTier.includes(t)))
+      );
+
+      return hasOverlap;
+    });
+
     return conflicts;
   }
 }

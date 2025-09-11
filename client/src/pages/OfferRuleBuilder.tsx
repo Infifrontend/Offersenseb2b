@@ -413,125 +413,156 @@ export default function OfferRuleBuilder() {
   };
 
   const onCreateSubmit = (values: any) => {
-    console.log("Form values:", values);
+    console.log("Form values received:", values);
     
-    try {
-      // Extract basic info - handle both direct field names and nested values
-      const ruleCode = values.ruleCode || values['ruleCode'];
-      const ruleName = values.ruleName || values['ruleName']; 
-      const ruleType = values.ruleType || values['ruleType'];
-      const priority = values.priority || values['priority'] || 1;
-      const validFrom = values.validFrom || values['validFrom'];
-      const validTo = values.validTo || values['validTo'];
-      
-      console.log("Extracted basic info:", { ruleCode, ruleName, ruleType, priority, validFrom, validTo });
-      
-      // Validate required fields first
-      if (!ruleCode || ruleCode.trim() === '') {
-        alert("Rule Code is required");
-        setCurrentStep(0); // Go back to basic info step
-        return;
-      }
-      
-      if (!ruleName || ruleName.trim() === '') {
-        alert("Rule Name is required");
-        setCurrentStep(0); // Go back to basic info step
-        return;
-      }
-      
-      if (!ruleType) {
-        alert("Rule Type is required");
-        setCurrentStep(0); // Go back to basic info step
-        return;
-      }
-      
-      if (!validFrom) {
-        alert("Valid From date is required");
-        setCurrentStep(0); // Go back to basic info step
-        return;
-      }
-      
-      if (!validTo) {
-        alert("Valid To date is required");
-        setCurrentStep(0); // Go back to basic info step
-        return;
-      }
-
-      const formattedData = {
-        ruleCode: ruleCode.trim(),
-        ruleName: ruleName.trim(),
-        ruleType: ruleType,
-        conditions: {
-          origin: values["conditions.origin"] || undefined,
-          destination: values["conditions.destination"] || undefined,
-          pos: values["conditions.pos"] || [],
-          agentTier: values["conditions.agentTier"] || [],
-          cohortCodes: values["conditions.cohortCodes"] || [],
-          channel: values["conditions.channel"] || [],
-          cabinClass: values["conditions.cabinClass"] || [],
-          tripType: values["conditions.tripType"] || [],
-          seasonCode: values["conditions.seasonCode"] || undefined,
-          bookingWindow:
-            values["conditions.bookingWindowMin"] &&
-            values["conditions.bookingWindowMax"]
-              ? {
-                  min: values["conditions.bookingWindowMin"],
-                  max: values["conditions.bookingWindowMax"],
-                }
-              : undefined,
-          travelWindow:
-            values["conditions.travelWindowMin"] &&
-            values["conditions.travelWindowMax"]
-              ? {
-                  min: values["conditions.travelWindowMin"],
-                  max: values["conditions.travelWindowMax"],
-                }
-              : undefined,
-        },
-        actions: (values.actions || []).map((action: any) => {
-          const formattedAction: any = {
-            type: action.type,
-          };
+    // First validate using Ant Design form validation
+    createForm.validateFields()
+      .then((validatedValues) => {
+        console.log("Validated form values:", validatedValues);
+        
+        try {
+          // Extract basic info from validated values
+          const ruleCode = validatedValues.ruleCode;
+          const ruleName = validatedValues.ruleName;
+          const ruleType = validatedValues.ruleType;
+          const priority = validatedValues.priority || 1;
+          const validFrom = validatedValues.validFrom;
+          const validTo = validatedValues.validTo;
           
-          if (action.scope) formattedAction.scope = action.scope;
-          if (action.valueType) formattedAction.valueType = action.valueType;
-          if (action.value !== undefined && action.value !== null) formattedAction.value = Number(action.value);
-          if (action.ancillaryCode) formattedAction.ancillaryCode = action.ancillaryCode;
-          if (action.bundleCode) formattedAction.bundleCode = action.bundleCode;
-          if (action.bannerText) formattedAction.bannerText = action.bannerText;
+          console.log("Extracted basic info:", { ruleCode, ruleName, ruleType, priority, validFrom, validTo });
           
-          // Add pricing object for compatibility
-          if (action.valueType && action.value !== undefined && action.value !== null) {
-            formattedAction.pricing = {
-              type: action.valueType,
-              value: Number(action.value)
-            };
+          // Additional validation (this should not be needed if form validation works)
+          if (!ruleCode || ruleCode.trim() === '') {
+            alert("Rule Code is required");
+            setCurrentStep(0);
+            return;
           }
           
-          return formattedAction;
-        }),
-        priority: priority,
-        validFrom: validFrom?.format ? validFrom.format("YYYY-MM-DD") : validFrom,
-        validTo: validTo?.format ? validTo.format("YYYY-MM-DD") : validTo,
-        justification: values.justification || undefined,
-        createdBy: "admin", // This would come from auth context in a real app
-        status: "DRAFT"
-      };
-      
-      console.log("Final formatted data:", formattedData);
-      
-      // Final validation check for actions
-      if (!formattedData.actions || formattedData.actions.length === 0) {
-        alert("At least one action is required");
-        setCurrentStep(2); // Go back to actions step
-        return;
-      }
-      
-      createRuleMutation.mutate(formattedData);
-    } catch (error) {
-      console.error("Error formatting offer rule data:", error);
-      alert(`Error creating rule: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
+          if (!ruleName || ruleName.trim() === '') {
+            alert("Rule Name is required");
+            setCurrentStep(0);
+            return;
+          }
+          
+          if (!ruleType) {
+            alert("Rule Type is required");
+            setCurrentStep(0);
+            return;
+          }
+          
+          if (!validFrom) {
+            alert("Valid From date is required");
+            setCurrentStep(0);
+            return;
+          }
+          
+          if (!validTo) {
+            alert("Valid To date is required");
+            setCurrentStep(0);
+            return;
+          }
+
+      const formattedData = {
+            ruleCode: ruleCode.trim(),
+            ruleName: ruleName.trim(),
+            ruleType: ruleType,
+            conditions: {
+              origin: validatedValues["conditions.origin"] || undefined,
+              destination: validatedValues["conditions.destination"] || undefined,
+              pos: validatedValues["conditions.pos"] || [],
+              agentTier: validatedValues["conditions.agentTier"] || [],
+              cohortCodes: validatedValues["conditions.cohortCodes"] || [],
+              channel: validatedValues["conditions.channel"] || [],
+              cabinClass: validatedValues["conditions.cabinClass"] || [],
+              tripType: validatedValues["conditions.tripType"] || [],
+              seasonCode: validatedValues["conditions.seasonCode"] || undefined,
+              bookingWindow:
+                validatedValues["conditions.bookingWindowMin"] &&
+                validatedValues["conditions.bookingWindowMax"]
+                  ? {
+                      min: validatedValues["conditions.bookingWindowMin"],
+                      max: validatedValues["conditions.bookingWindowMax"],
+                    }
+                  : undefined,
+              travelWindow:
+                validatedValues["conditions.travelWindowMin"] &&
+                validatedValues["conditions.travelWindowMax"]
+                  ? {
+                      min: validatedValues["conditions.travelWindowMin"],
+                      max: validatedValues["conditions.travelWindowMax"],
+                    }
+                  : undefined,
+            },
+            actions: (validatedValues.actions || []).map((action: any) => {
+              const formattedAction: any = {
+                type: action.type,
+              };
+              
+              if (action.scope) formattedAction.scope = action.scope;
+              if (action.valueType) formattedAction.valueType = action.valueType;
+              if (action.value !== undefined && action.value !== null) formattedAction.value = Number(action.value);
+              if (action.ancillaryCode) formattedAction.ancillaryCode = action.ancillaryCode;
+              if (action.bundleCode) formattedAction.bundleCode = action.bundleCode;
+              if (action.bannerText) formattedAction.bannerText = action.bannerText;
+              
+              // Add pricing object for compatibility
+              if (action.valueType && action.value !== undefined && action.value !== null) {
+                formattedAction.pricing = {
+                  type: action.valueType,
+                  value: Number(action.value)
+                };
+              }
+              
+              return formattedAction;
+            }),
+            priority: priority,
+            validFrom: validFrom?.format ? validFrom.format("YYYY-MM-DD") : validFrom,
+            validTo: validTo?.format ? validTo.format("YYYY-MM-DD") : validTo,
+            justification: validatedValues.justification || undefined,
+            createdBy: "admin", // This would come from auth context in a real app
+            status: "DRAFT"
+          };
+          
+          console.log("Final formatted data:", formattedData);
+          
+          // Final validation check for actions
+          if (!formattedData.actions || formattedData.actions.length === 0) {
+            alert("At least one action is required");
+            setCurrentStep(2); // Go back to actions step
+            return;
+          }
+          
+          createRuleMutation.mutate(formattedData);
+        } catch (error) {
+          console.error("Error formatting offer rule data:", error);
+          alert(`Error creating rule: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+      })
+      .catch((errorInfo) => {
+        console.log("Form validation failed:", errorInfo);
+        
+        // Check which fields failed validation and navigate to appropriate step
+        const failedFields = errorInfo.errorFields;
+        if (failedFields && failedFields.length > 0) {
+          const firstFailedField = failedFields[0].name[0];
+          console.log("First failed field:", firstFailedField);
+          
+          // Navigate to the step containing the failed field
+          if (['ruleCode', 'ruleName', 'ruleType', 'priority', 'validFrom', 'validTo'].includes(firstFailedField)) {
+            setCurrentStep(0); // Basic Info step
+          } else if (firstFailedField.startsWith('conditions.')) {
+            setCurrentStep(1); // Conditions step
+          } else if (firstFailedField === 'actions') {
+            setCurrentStep(2); // Actions step
+          } else {
+            setCurrentStep(3); // Review step
+          }
+          
+          // Show specific error message
+          const fieldErrors = failedFields.map((field: any) => `${field.name.join('.')}: ${field.errors.join(', ')}`).join('\n');
+          alert(`Please fill in the required fields:\n${fieldErrors}`);
+        }
+      });
   };
 
   const onEditSubmit = (values: any) => {
@@ -1216,16 +1247,39 @@ export default function OfferRuleBuilder() {
                   <AntButton
                     type="primary"
                     onClick={() => {
-                      // For steps other than actions step, allow proceeding without strict validation
-                      if (currentStep === 2) {
-                        // Actions step - ensure at least one action exists
-                        const actions = createForm.getFieldValue('actions') || [];
-                        if (actions.length === 0) {
-                          alert("Please add at least one action before proceeding");
-                          return;
+                      // Validate current step fields before proceeding
+                      const fieldsToValidate = getFieldsForStep(currentStep);
+                      
+                      if (fieldsToValidate.length > 0) {
+                        createForm.validateFields(fieldsToValidate)
+                          .then(() => {
+                            // For actions step, ensure at least one action exists
+                            if (currentStep === 2) {
+                              const actions = createForm.getFieldValue('actions') || [];
+                              if (actions.length === 0) {
+                                alert("Please add at least one action before proceeding");
+                                return;
+                              }
+                            }
+                            setCurrentStep(currentStep + 1);
+                          })
+                          .catch((errorInfo) => {
+                            console.log("Step validation failed:", errorInfo);
+                            const fieldErrors = errorInfo.errorFields.map((field: any) => 
+                              `${field.name.join('.')}: ${field.errors.join(', ')}`).join('\n');
+                            alert(`Please fill in the required fields:\n${fieldErrors}`);
+                          });
+                      } else {
+                        // No validation needed for this step
+                        if (currentStep === 2) {
+                          const actions = createForm.getFieldValue('actions') || [];
+                          if (actions.length === 0) {
+                            alert("Please add at least one action before proceeding");
+                            return;
+                          }
                         }
+                        setCurrentStep(currentStep + 1);
                       }
-                      setCurrentStep(currentStep + 1);
                     }}
                   >
                     Next
@@ -1234,10 +1288,8 @@ export default function OfferRuleBuilder() {
                   <AntButton
                     type="primary"
                     onClick={() => {
-                      // Get all form values and submit
-                      const allValues = createForm.getFieldsValue();
-                      console.log("All form values before submit:", allValues);
-                      onCreateSubmit(allValues);
+                      console.log("Create Rule button clicked");
+                      onCreateSubmit({});
                     }}
                     loading={createRuleMutation.isPending}
                   >

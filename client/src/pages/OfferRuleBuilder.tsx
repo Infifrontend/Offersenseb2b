@@ -416,10 +416,51 @@ export default function OfferRuleBuilder() {
     console.log("Form values:", values);
     
     try {
+      // Extract basic info - handle both direct field names and nested values
+      const ruleCode = values.ruleCode || values['ruleCode'];
+      const ruleName = values.ruleName || values['ruleName']; 
+      const ruleType = values.ruleType || values['ruleType'];
+      const priority = values.priority || values['priority'] || 1;
+      const validFrom = values.validFrom || values['validFrom'];
+      const validTo = values.validTo || values['validTo'];
+      
+      console.log("Extracted basic info:", { ruleCode, ruleName, ruleType, priority, validFrom, validTo });
+      
+      // Validate required fields first
+      if (!ruleCode || ruleCode.trim() === '') {
+        alert("Rule Code is required");
+        setCurrentStep(0); // Go back to basic info step
+        return;
+      }
+      
+      if (!ruleName || ruleName.trim() === '') {
+        alert("Rule Name is required");
+        setCurrentStep(0); // Go back to basic info step
+        return;
+      }
+      
+      if (!ruleType) {
+        alert("Rule Type is required");
+        setCurrentStep(0); // Go back to basic info step
+        return;
+      }
+      
+      if (!validFrom) {
+        alert("Valid From date is required");
+        setCurrentStep(0); // Go back to basic info step
+        return;
+      }
+      
+      if (!validTo) {
+        alert("Valid To date is required");
+        setCurrentStep(0); // Go back to basic info step
+        return;
+      }
+
       const formattedData = {
-        ruleCode: values.ruleCode,
-        ruleName: values.ruleName,
-        ruleType: values.ruleType,
+        ruleCode: ruleCode.trim(),
+        ruleName: ruleName.trim(),
+        ruleType: ruleType,
         conditions: {
           origin: values["conditions.origin"] || undefined,
           destination: values["conditions.destination"] || undefined,
@@ -469,29 +510,20 @@ export default function OfferRuleBuilder() {
           
           return formattedAction;
         }),
-        priority: values.priority || 1,
-        validFrom: values.validFrom?.format("YYYY-MM-DD"),
-        validTo: values.validTo?.format("YYYY-MM-DD"),
+        priority: priority,
+        validFrom: validFrom?.format ? validFrom.format("YYYY-MM-DD") : validFrom,
+        validTo: validTo?.format ? validTo.format("YYYY-MM-DD") : validTo,
         justification: values.justification || undefined,
         createdBy: "admin", // This would come from auth context in a real app
         status: "DRAFT"
       };
       
-      console.log("Formatted data:", formattedData);
+      console.log("Final formatted data:", formattedData);
       
-      // Validate that we have required data
-      if (!formattedData.ruleCode || !formattedData.ruleName || !formattedData.ruleType) {
-        alert("Missing required basic information");
-        return;
-      }
-      
-      if (!formattedData.validFrom || !formattedData.validTo) {
-        alert("Missing validity dates");
-        return;
-      }
-      
+      // Final validation check for actions
       if (!formattedData.actions || formattedData.actions.length === 0) {
         alert("At least one action is required");
+        setCurrentStep(2); // Go back to actions step
         return;
       }
       
@@ -1204,6 +1236,7 @@ export default function OfferRuleBuilder() {
                     onClick={() => {
                       // Get all form values and submit
                       const allValues = createForm.getFieldsValue();
+                      console.log("All form values before submit:", allValues);
                       onCreateSubmit(allValues);
                     }}
                     loading={createRuleMutation.isPending}

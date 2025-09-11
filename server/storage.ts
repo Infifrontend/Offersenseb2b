@@ -855,7 +855,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteOfferTrace(id: string): Promise<void> {
     await this.db.delete(offerTraces).where(eq(offerTraces.id, id));
-  },
+  }
 
   // Agent operations
   async getAgents(filters: any = {}): Promise<Agent[]> {
@@ -877,22 +877,22 @@ export class DatabaseStorage implements IStorage {
     }
 
     return await query;
-  },
+  }
 
   async insertAgent(agentData: InsertAgent): Promise<Agent> {
     const [agent] = await this.db.insert(agents).values(agentData).returning();
     return agent;
-  },
+  }
 
   async getAgentById(id: string): Promise<Agent | null> {
     const [agent] = await this.db.select().from(agents).where(eq(agents.id, id));
     return agent || null;
-  },
+  }
 
   async getAgentByAgentId(agentId: string): Promise<Agent | null> {
     const [agent] = await this.db.select().from(agents).where(eq(agents.agentId, agentId));
     return agent || null;
-  },
+  }
 
   async updateAgent(id: string, agentData: InsertAgent): Promise<Agent> {
     const [agent] = await this.db
@@ -901,7 +901,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(agents.id, id))
       .returning();
     return agent;
-  },
+  }
 
   async updateAgentStatus(id: string, status: string): Promise<Agent> {
     const [agent] = await this.db
@@ -910,11 +910,11 @@ export class DatabaseStorage implements IStorage {
       .where(eq(agents.id, id))
       .returning();
     return agent;
-  },
+  }
 
   async deleteAgent(id: string): Promise<void> {
     await this.db.delete(agents).where(eq(agents.id, id));
-  },
+  }
 
   async checkAgentConflicts(agentData: InsertAgent): Promise<any[]> {
     // Check for existing agent with same agentId
@@ -930,7 +930,7 @@ export class DatabaseStorage implements IStorage {
     }
 
     return conflicts;
-  },
+  }
 
   // Channel Pricing Override operations
   async getChannelPricingOverrides(filters: any = {}): Promise<ChannelPricingOverride[]> {
@@ -952,17 +952,17 @@ export class DatabaseStorage implements IStorage {
     }
 
     return await query.orderBy(desc(channelPricingOverrides.priority));
-  },
+  }
 
   async insertChannelPricingOverride(overrideData: InsertChannelPricingOverride): Promise<ChannelPricingOverride> {
     const [override] = await this.db.insert(channelPricingOverrides).values(overrideData).returning();
     return override;
-  },
+  }
 
   async getChannelPricingOverrideById(id: string): Promise<ChannelPricingOverride | null> {
     const [override] = await this.db.select().from(channelPricingOverrides).where(eq(channelPricingOverrides.id, id));
     return override || null;
-  },
+  }
 
   async updateChannelPricingOverride(id: string, overrideData: InsertChannelPricingOverride): Promise<ChannelPricingOverride> {
     const [override] = await this.db
@@ -971,7 +971,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(channelPricingOverrides.id, id))
       .returning();
     return override;
-  },
+  }
 
   async updateChannelPricingOverrideStatus(id: string, status: string): Promise<ChannelPricingOverride> {
     const [override] = await this.db
@@ -980,11 +980,11 @@ export class DatabaseStorage implements IStorage {
       .where(eq(channelPricingOverrides.id, id))
       .returning();
     return override;
-  },
+  }
 
   async deleteChannelPricingOverride(id: string): Promise<void> {
     await this.db.delete(channelPricingOverrides).where(eq(channelPricingOverrides.id, id));
-  },
+  }
 
   async checkChannelPricingOverrideConflicts(overrideData: InsertChannelPricingOverride): Promise<any[]> {
     // Check for overlapping overrides
@@ -1017,7 +1017,7 @@ export class DatabaseStorage implements IStorage {
     }
 
     return conflicts;
-  },
+  }
 };
 
 export const storage = new DatabaseStorage();

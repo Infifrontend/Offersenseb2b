@@ -300,7 +300,7 @@ export default function DynamicDiscountEngine() {
 
   return (
     <div className="space-y-6">
-      {/* Stats Cards 
+      {/* Stats Cards  */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -358,7 +358,6 @@ export default function DynamicDiscountEngine() {
           </CardContent>
         </Card>
       </div>
-      */}
       {/* Filter Bar */}
       <Card>
         <CardHeader>

@@ -856,8 +856,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
           if (!existingBundles || existingBundles.length === 0) {
-            console.log("Creating sample bundles first...");
-            const sampleBundles = [
+          console.log("Creating sample bundles first...");
+          const sampleBundles = [
               {
                 bundleCode: "TRAVEL_PLUS",
                 bundleName: "Travel Plus Package",
@@ -885,17 +885,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
             ];
 
             for (const bundleData of sampleBundles) {
-              try {
-                await storage.insertBundle(bundleData);
-                console.log(`Created bundle: ${bundleData.bundleCode}`);
-              } catch (bundleError) {
-                console.error(`Error creating bundle ${bundleData.bundleCode}:`, bundleError);
-              }
+            try {
+              await storage.insertBundle(bundleData);
+              console.log(`Created bundle: ${bundleData.bundleCode}`);
+            } catch (bundleError) {
+              console.error(`Error creating bundle ${bundleData.bundleCode}:`, bundleError);
             }
           }
+        }
 
           // Create sample bundle pricing rules
-          const sampleRules = [
+        const sampleRules = [
             {
               ruleCode: "BPR001",
               bundleCode: "TRAVEL_PLUS",
@@ -919,26 +919,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ];
 
           for (const ruleData of sampleRules) {
-            try {
-              await storage.insertBundlePricingRule(ruleData);
-              console.log(`Created pricing rule: ${ruleData.ruleCode}`);
-            } catch (ruleError) {
-              console.error(`Error creating pricing rule ${ruleData.ruleCode}:`, ruleError);
-            }
-          }
-
-          // Fetch the newly created rules
           try {
-            rules = await storage.getBundlePricingRules(filters);
-            console.log(`After sample creation: ${rules?.length || 0} bundle pricing rules`);
-          } catch (refetchError) {
-            console.error("Error refetching after sample creation:", refetchError);
-            rules = [];
+            await storage.insertBundlePricingRule(ruleData);
+            console.log(`Created pricing rule: ${ruleData.ruleCode}`);
+          } catch (ruleError) {
+            console.error(`Error creating pricing rule ${ruleData.ruleCode}:`, ruleError);
           }
-        } catch (createError: any) {
-          console.error("Error creating sample data:", createError);
-          console.error("Sample creation error stack:", createError.stack);
         }
+
+        // Fetch the newly created rules
+        try {
+          rules = await storage.getBundlePricingRules(filters);
+          console.log(`After sample creation: ${rules?.length || 0} bundle pricing rules`);
+        } catch (refetchError) {
+          console.error("Error refetching after sample creation:", refetchError);
+          rules = [];
+        }
+      }
       }
 
       // Always return an array

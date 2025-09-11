@@ -3,6 +3,8 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { LoadingProvider, useLoading } from "@/contexts/LoadingContext";
+import { LoadingOverlay } from "@/components/ui/spinner";
 import Layout from "@/components/Layout";
 import Dashboard from "@/pages/Dashboard";
 import NegotiatedFareManager from "@/pages/NegotiatedFareManager";
@@ -21,37 +23,43 @@ import AnalyticsSimulation from "@/pages/AnalyticsSimulation";
 import NotFound from "@/pages/not-found";
 
 function Router() {
+  const { isLoading } = useLoading();
+
   return (
-    <Layout>
-      <Switch>
-        <Route path="/" component={Dashboard} />
-        <Route path="/dashboard" component={Dashboard} />
-        <Route path="/negotiated-fare-manager" component={NegotiatedFareManager} />
-        <Route path="/dynamic-discount-engine" component={DynamicDiscountEngine} />
-        <Route path="/air-ancillaries-discounting" component={AirAncillariesDiscounting} />
-        <Route path="/non-air-ancillaries" component={NonAirAncillaries} />
-        <Route path="/ancillary-bundling-engine" component={AncillaryBundlingEngine} />
-        <Route path="/offer-rule-builder" component={OfferRuleBuilder} />
-        <Route path="/offer-composer" component={OfferComposer} />
-        <Route path="/agent-channel-manager" component={AgentChannelManager} />
-        <Route path="/cohort-manager" component={CohortManager} />
-        <Route path="/agent-tier-manager" component={AgentTierManager} />
-        <Route path="/campaign-manager" component={CampaignManager} />
-        <Route path="/logs-version-history" component={LogsVersionHistory} />
-        <Route path="/analytics-simulation" component={AnalyticsSimulation} />
-        <Route component={NotFound} />
-      </Switch>
-    </Layout>
+    <LoadingOverlay isLoading={isLoading} className="min-h-screen">
+      <Layout>
+        <Switch>
+          <Route path="/" component={Dashboard} />
+          <Route path="/dashboard" component={Dashboard} />
+          <Route path="/negotiated-fare-manager" component={NegotiatedFareManager} />
+          <Route path="/dynamic-discount-engine" component={DynamicDiscountEngine} />
+          <Route path="/air-ancillaries-discounting" component={AirAncillariesDiscounting} />
+          <Route path="/non-air-ancillaries" component={NonAirAncillaries} />
+          <Route path="/ancillary-bundling-engine" component={AncillaryBundlingEngine} />
+          <Route path="/offer-rule-builder" component={OfferRuleBuilder} />
+          <Route path="/offer-composer" component={OfferComposer} />
+          <Route path="/agent-channel-manager" component={AgentChannelManager} />
+          <Route path="/cohort-manager" component={CohortManager} />
+          <Route path="/agent-tier-manager" component={AgentTierManager} />
+          <Route path="/campaign-manager" component={CampaignManager} />
+          <Route path="/logs-version-history" component={LogsVersionHistory} />
+          <Route path="/analytics-simulation" component={AnalyticsSimulation} />
+          <Route component={NotFound} />
+        </Switch>
+      </Layout>
+    </LoadingOverlay>
   );
 }
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
+      <LoadingProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+        </TooltipProvider>
+      </LoadingProvider>
     </QueryClientProvider>
   );
 }

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -124,7 +123,9 @@ export default function NonAirAncillaries() {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isSimulateModalOpen, setIsSimulateModalOpen] = useState(false);
   const [selectedRate, setSelectedRate] = useState<NonAirRate | null>(null);
-  const [selectedRule, setSelectedRule] = useState<NonAirMarkupRule | null>(null);
+  const [selectedRule, setSelectedRule] = useState<NonAirMarkupRule | null>(
+    null,
+  );
   const [simulationResult, setSimulationResult] = useState<any>(null);
   const queryClient = useQueryClient();
   const [rateForm] = AntForm.useForm();
@@ -357,15 +358,6 @@ export default function NonAirAncillaries() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Non-Air Ancillaries</h1>
-          <p className="text-muted-foreground">
-            Manage supplier rates and markup rules for non-air products
-          </p>
-        </div>
-      </div>
-
       <Tabs activeKey={activeTab} onChange={setActiveTab}>
         <TabPane tab="Supplier Rates" key="rates">
           <div className="space-y-6">
@@ -430,7 +422,9 @@ export default function NonAirAncillaries() {
                             {getProductIcon(rate.productCode)}
                           </span>
                           <div>
-                            <div className="font-medium">{rate.supplierCode}</div>
+                            <div className="font-medium">
+                              {rate.supplierCode}
+                            </div>
                             <div className="text-sm text-gray-500">
                               {getProductLabel(rate.productCode)}
                             </div>
@@ -557,7 +551,9 @@ export default function NonAirAncillaries() {
                             {getProductIcon(rule.productCode)}
                           </span>
                           <div>
-                            <div className="font-medium">{rule.productCode}</div>
+                            <div className="font-medium">
+                              {rule.productCode}
+                            </div>
                             <div className="text-sm text-gray-500">
                               {rule.supplierCode || "All Suppliers"}
                             </div>
@@ -584,7 +580,11 @@ export default function NonAirAncillaries() {
                         <div className="flex flex-wrap gap-1">
                           {Array.isArray(rule.agentTier) &&
                             rule.agentTier.map((tier) => (
-                              <Badge key={tier} variant="outline" className="text-xs">
+                              <Badge
+                                key={tier}
+                                variant="outline"
+                                className="text-xs"
+                              >
                                 {tier}
                               </Badge>
                             ))}
@@ -779,7 +779,10 @@ export default function NonAirAncillaries() {
           </Row>
           <Row gutter={16}>
             <Col span={12}>
-              <AntForm.Item name="supplierCode" label="Supplier Code (Optional)">
+              <AntForm.Item
+                name="supplierCode"
+                label="Supplier Code (Optional)"
+              >
                 <AntInput placeholder="INSURECO (optional)" />
               </AntForm.Item>
             </Col>
@@ -875,11 +878,7 @@ export default function NonAirAncillaries() {
                 rules={[{ required: true, message: "Required" }]}
                 initialValue={1}
               >
-                <AntInputNumber
-                  style={{ width: "100%" }}
-                  min={1}
-                  max={100}
-                />
+                <AntInputNumber style={{ width: "100%" }} min={1} max={100} />
               </AntForm.Item>
             </Col>
           </Row>
@@ -937,7 +936,11 @@ export default function NonAirAncillaries() {
         onCancel={() => setIsSimulateModalOpen(false)}
         footer={null}
       >
-        <AntForm form={simulateForm} onFinish={handleSimulateRule} layout="vertical">
+        <AntForm
+          form={simulateForm}
+          onFinish={handleSimulateRule}
+          layout="vertical"
+        >
           <AntForm.Item
             name="ruleId"
             label="Select Rule"
@@ -1000,10 +1003,16 @@ export default function NonAirAncillaries() {
           <div className="mt-6 p-4 bg-gray-50 rounded-lg">
             <h4 className="font-semibold mb-2">Simulation Result</h4>
             <div className="space-y-2 text-sm">
-              <div>Base Rate: {simulationResult.currency} {simulationResult.baseRate}</div>
-              <div>Markup: {simulationResult.currency} {simulationResult.markup}</div>
+              <div>
+                Base Rate: {simulationResult.currency}{" "}
+                {simulationResult.baseRate}
+              </div>
+              <div>
+                Markup: {simulationResult.currency} {simulationResult.markup}
+              </div>
               <div className="font-semibold">
-                Final Rate: {simulationResult.currency} {simulationResult.adjustedRate}
+                Final Rate: {simulationResult.currency}{" "}
+                {simulationResult.adjustedRate}
               </div>
               <div>Rule Applied: {simulationResult.ruleApplied}</div>
             </div>
@@ -1030,19 +1039,31 @@ export default function NonAirAncillaries() {
             </div>
             <div>
               <label className="font-semibold">Product:</label>
-              <div>{getProductLabel(selectedRate.productCode)} ({selectedRate.productCode})</div>
+              <div>
+                {getProductLabel(selectedRate.productCode)} (
+                {selectedRate.productCode})
+              </div>
             </div>
             <div>
               <label className="font-semibold">Net Rate:</label>
-              <div>{selectedRate.currency} {parseFloat(selectedRate.netRate).toFixed(2)}</div>
+              <div>
+                {selectedRate.currency}{" "}
+                {parseFloat(selectedRate.netRate).toFixed(2)}
+              </div>
             </div>
             <div>
               <label className="font-semibold">Region:</label>
-              <div>{Array.isArray(selectedRate.region) ? selectedRate.region.join(", ") : selectedRate.region}</div>
+              <div>
+                {Array.isArray(selectedRate.region)
+                  ? selectedRate.region.join(", ")
+                  : selectedRate.region}
+              </div>
             </div>
             <div>
               <label className="font-semibold">Valid Period:</label>
-              <div>{selectedRate.validFrom} to {selectedRate.validTo}</div>
+              <div>
+                {selectedRate.validFrom} to {selectedRate.validTo}
+              </div>
             </div>
             {selectedRate.inventory && (
               <div>
@@ -1091,15 +1112,25 @@ export default function NonAirAncillaries() {
             </div>
             <div>
               <label className="font-semibold">Agent Tiers:</label>
-              <div>{Array.isArray(selectedRule.agentTier) ? selectedRule.agentTier.join(", ") : selectedRule.agentTier}</div>
+              <div>
+                {Array.isArray(selectedRule.agentTier)
+                  ? selectedRule.agentTier.join(", ")
+                  : selectedRule.agentTier}
+              </div>
             </div>
             <div>
               <label className="font-semibold">Point of Sale:</label>
-              <div>{Array.isArray(selectedRule.pos) ? selectedRule.pos.join(", ") : selectedRule.pos}</div>
+              <div>
+                {Array.isArray(selectedRule.pos)
+                  ? selectedRule.pos.join(", ")
+                  : selectedRule.pos}
+              </div>
             </div>
             <div>
               <label className="font-semibold">Valid Period:</label>
-              <div>{selectedRule.validFrom} to {selectedRule.validTo}</div>
+              <div>
+                {selectedRule.validFrom} to {selectedRule.validTo}
+              </div>
             </div>
           </div>
         )}
@@ -1113,7 +1144,11 @@ export default function NonAirAncillaries() {
         footer={null}
         width={800}
       >
-        <AntForm form={editRateForm} onFinish={handleEditRate} layout="vertical">
+        <AntForm
+          form={editRateForm}
+          onFinish={handleEditRate}
+          layout="vertical"
+        >
           <Row gutter={16}>
             <Col span={12}>
               <AntForm.Item
@@ -1234,7 +1269,11 @@ export default function NonAirAncillaries() {
         footer={null}
         width={800}
       >
-        <AntForm form={editRuleForm} onFinish={handleEditRule} layout="vertical">
+        <AntForm
+          form={editRuleForm}
+          onFinish={handleEditRule}
+          layout="vertical"
+        >
           <Row gutter={16}>
             <Col span={12}>
               <AntForm.Item
@@ -1257,7 +1296,10 @@ export default function NonAirAncillaries() {
           </Row>
           <Row gutter={16}>
             <Col span={12}>
-              <AntForm.Item name="supplierCode" label="Supplier Code (Optional)">
+              <AntForm.Item
+                name="supplierCode"
+                label="Supplier Code (Optional)"
+              >
                 <AntInput placeholder="INSURECO (optional)" />
               </AntForm.Item>
             </Col>
@@ -1352,11 +1394,7 @@ export default function NonAirAncillaries() {
                 label="Priority"
                 rules={[{ required: true, message: "Required" }]}
               >
-                <AntInputNumber
-                  style={{ width: "100%" }}
-                  min={1}
-                  max={100}
-                />
+                <AntInputNumber style={{ width: "100%" }} min={1} max={100} />
               </AntForm.Item>
             </Col>
           </Row>

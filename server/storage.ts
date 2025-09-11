@@ -1,4 +1,4 @@
-import { users, negotiatedFares, dynamicDiscountRules, airAncillaryRules, nonAirRates, nonAirMarkupRules, bundles, bundlePricingRules, offerRules, offerTraces, agents, channelPricingOverrides, cohorts, auditLogs, type InsertUser, type InsertNegotiatedFare, type InsertDynamicDiscountRule, type InsertAirAncillaryRule, type InsertNonAirRate, type InsertNonAirMarkupRule, type InsertBundle, type InsertBundlePricingRule, type InsertOfferRule, type InsertOfferTrace, type InsertAgent, type InsertChannelPricingOverride, type InsertCohort, type InsertAuditLog } from "../shared/schema";
+import { users, negotiatedFares, dynamicDiscountRules, airAncillaryRules, nonAirRates, nonAirMarkupRules, bundles, bundlePricingRules, offerRules, offerTraces, agents, channelPricingOverrides, cohorts, auditLogs, agentTiers, agentTierAssignments, tierAssignmentEngine, type InsertUser, type InsertNegotiatedFare, type InsertDynamicDiscountRule, type InsertAirAncillaryRule, type InsertNonAirRate, type InsertNonAirMarkupRule, type InsertBundle, type InsertBundlePricingRule, type InsertOfferRule, type InsertOfferTrace, type InsertAgent, type InsertChannelPricingOverride, type InsertCohort, type InsertAuditLog, type InsertAgentTier, type InsertAgentTierAssignment, type InsertTierAssignmentEngine } from "../shared/schema";
 import type {
   User,
   NegotiatedFare,
@@ -13,6 +13,9 @@ import type {
   Agent,
   ChannelPricingOverride,
   Cohort,
+  AgentTier,
+  AgentTierAssignment,
+  TierAssignmentEngine,
 } from "../shared/schema";
 import { db } from "./db";
 import { eq, and, or, gte, lte, ilike, inArray, sql, desc } from "drizzle-orm";
@@ -160,6 +163,31 @@ export interface IStorage {
     },
     getBeforeData?: () => Promise<any>
   ): Promise<T>;
+
+  // Agent Tier Management operations
+  getAgentTiers(filters?: any): Promise<AgentTier[]>;
+  insertAgentTier(tierData: InsertAgentTier): Promise<AgentTier>;
+  getAgentTierByCode(tierCode: string): Promise<AgentTier | null>;
+  getAgentTierById(id: string): Promise<AgentTier | null>;
+  updateAgentTier(id: string, tierData: InsertAgentTier): Promise<AgentTier>;
+  updateAgentTierStatus(id: string, status: string): Promise<AgentTier>;
+  deleteAgentTier(id: string): Promise<void>;
+
+  // Agent Tier Assignment operations
+  getAgentTierAssignments(filters?: any): Promise<AgentTierAssignment[]>;
+  insertAgentTierAssignment(assignmentData: InsertAgentTierAssignment): Promise<AgentTierAssignment>;
+  getCurrentAgentTierAssignment(agentId: string): Promise<AgentTierAssignment | null>;
+  supersedePreviousAssignments(agentId: string, newEffectiveFrom: string): Promise<void>;
+  updateAgentTierAssignment(id: string, assignmentData: Partial<InsertAgentTierAssignment>): Promise<AgentTierAssignment>;
+  deleteAgentTierAssignment(id: string): Promise<void>;
+
+  // Tier Assignment Engine operations
+  getTierAssignmentEngines(filters?: any): Promise<TierAssignmentEngine[]>;
+  insertTierAssignmentEngine(engineData: InsertTierAssignmentEngine): Promise<TierAssignmentEngine>;
+  getTierAssignmentEngineById(id: string): Promise<TierAssignmentEngine | null>;
+  updateTierAssignmentEngine(id: string, engineData: Partial<InsertTierAssignmentEngine>): Promise<TierAssignmentEngine>;
+  updateEngineRunTimestamps(id: string, lastRunAt: Date, nextRunAt: Date): Promise<void>;
+  deleteTierAssignmentEngine(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1187,97 +1215,245 @@ export class DatabaseStorage implements IStorage {
     await this.db.delete(auditLogs).where(eq(auditLogs.id, id));
   }
 
-  // Utility method to create audit log entries
-  async createAuditLog(params: {
-    user: string;
-    module: string;
-    entityId: string;
-    action: string;
-    beforeData?: any;
-    afterData?: any;
-    justification?: string;
-    ipAddress?: string;
-    userAgent?: string;
-    sessionId?: string;
-  }): Promise<InsertAuditLog> {
-    const diff: Record<string, { from: any; to: any }> = {};
+  // Agent Tier Management operations
+  async getAgentTiers(filters: any = {}): Promise<AgentTier[]> {
+    let query = this.db.select().from(agentTiers);
+    const conditions = [];
 
-    // Generate diff if both before and after data are provided
-    if (params.beforeData && params.afterData) {
-      const beforeKeys = Object.keys(params.beforeData);
-      const afterKeys = Object.keys(params.afterData);
-      const allKeys = new Set([...beforeKeys, ...afterKeys]);
+    if (filters.status) {
+      conditions.push(eq(agentTiers.status, filters.status));
+    }
+    if (filters.kpiWindow) {
+      conditions.push(eq(agentTiers.kpiWindow, filters.kpiWindow));
+    }
 
-      for (const key of allKeys) {
-        const beforeValue = params.beforeData[key];
-        const afterValue = params.afterData[key];
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
 
-        if (JSON.stringify(beforeValue) !== JSON.stringify(afterValue)) {
-          diff[key] = {
-            from: beforeValue,
-            to: afterValue
-          };
-        }
+    return await query.orderBy(
+      sql`CASE ${agentTiers.tierCode} 
+          WHEN 'PLATINUM' THEN 1 
+          WHEN 'GOLD' THEN 2 
+          WHEN 'SILVER' THEN 3 
+          WHEN 'BRONZE' THEN 4 
+          ELSE 5 END`
+    );
+  }
+
+  async insertAgentTier(tierData: InsertAgentTier): Promise<AgentTier> {
+    const [tier] = await this.db.insert(agentTiers).values(tierData).returning();
+    return tier;
+  }
+
+  async getAgentTierByCode(tierCode: string): Promise<AgentTier | null> {
+    const [tier] = await this.db.select().from(agentTiers).where(eq(agentTiers.tierCode, tierCode));
+    return tier || null;
+  }
+
+  async getAgentTierById(id: string): Promise<AgentTier | null> {
+    const [tier] = await this.db.select().from(agentTiers).where(eq(agentTiers.id, id));
+    return tier || null;
+  }
+
+  async updateAgentTier(id: string, tierData: InsertAgentTier): Promise<AgentTier> {
+    const [tier] = await this.db
+      .update(agentTiers)
+      .set({ ...tierData, updatedAt: new Date() })
+      .where(eq(agentTiers.id, id))
+      .returning();
+    return tier;
+  }
+
+  async updateAgentTierStatus(id: string, status: string): Promise<AgentTier> {
+    const [tier] = await this.db
+      .update(agentTiers)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(agentTiers.id, id))
+      .returning();
+    return tier;
+  }
+
+  async deleteAgentTier(id: string): Promise<void> {
+    await this.db.delete(agentTiers).where(eq(agentTiers.id, id));
+  }
+
+  // Agent Tier Assignment operations
+  async getAgentTierAssignments(filters: any = {}): Promise<AgentTierAssignment[]> {
+    let query = this.db.select().from(agentTierAssignments);
+    const conditions = [];
+
+    if (filters.agentId) {
+      conditions.push(eq(agentTierAssignments.agentId, filters.agentId));
+    }
+    if (filters.tierCode) {
+      conditions.push(eq(agentTierAssignments.tierCode, filters.tierCode));
+    }
+    if (filters.status) {
+      conditions.push(eq(agentTierAssignments.status, filters.status));
+    }
+    if (filters.assignmentType) {
+      conditions.push(eq(agentTierAssignments.assignmentType, filters.assignmentType));
+    }
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+
+    return await query.orderBy(desc(agentTierAssignments.effectiveFrom));
+  }
+
+  async insertAgentTierAssignment(assignmentData: InsertAgentTierAssignment): Promise<AgentTierAssignment> {
+    const [assignment] = await this.db.insert(agentTierAssignments).values(assignmentData).returning();
+    return assignment;
+  }
+
+  async getCurrentAgentTierAssignment(agentId: string): Promise<AgentTierAssignment | null> {
+    const [assignment] = await this.db
+      .select()
+      .from(agentTierAssignments)
+      .where(
+        and(
+          eq(agentTierAssignments.agentId, agentId),
+          eq(agentTierAssignments.status, "ACTIVE"),
+          sql`${agentTierAssignments.effectiveFrom} <= CURRENT_DATE`,
+          sql`(${agentTierAssignments.effectiveTo} IS NULL OR ${agentTierAssignments.effectiveTo} > CURRENT_DATE)`
+        )
+      )
+      .orderBy(desc(agentTierAssignments.effectiveFrom))
+      .limit(1);
+    return assignment || null;
+  }
+
+  async supersedePreviousAssignments(agentId: string, newEffectiveFrom: string): Promise<void> {
+    await this.db
+      .update(agentTierAssignments)
+      .set({ 
+        status: "SUPERSEDED", 
+        effectiveTo: newEffectiveFrom,
+        updatedAt: new Date() 
+      })
+      .where(
+        and(
+          eq(agentTierAssignments.agentId, agentId),
+          eq(agentTierAssignments.status, "ACTIVE")
+        )
+      );
+  }
+
+  async updateAgentTierAssignment(id: string, assignmentData: Partial<InsertAgentTierAssignment>): Promise<AgentTierAssignment> {
+    const [assignment] = await this.db
+      .update(agentTierAssignments)
+      .set({ ...assignmentData, updatedAt: new Date() })
+      .where(eq(agentTierAssignments.id, id))
+      .returning();
+    return assignment;
+  }
+
+  async deleteAgentTierAssignment(id: string): Promise<void> {
+    await this.db.delete(agentTierAssignments).where(eq(agentTierAssignments.id, id));
+  }
+
+  // Tier Assignment Engine operations
+  async getTierAssignmentEngines(filters: any = {}): Promise<TierAssignmentEngine[]> {
+    let query = this.db.select().from(tierAssignmentEngine);
+    const conditions = [];
+
+    if (filters.status) {
+      conditions.push(eq(tierAssignmentEngine.status, filters.status));
+    }
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+
+    return await query.orderBy(desc(tierAssignmentEngine.createdAt));
+  }
+
+  async insertTierAssignmentEngine(engineData: InsertTierAssignmentEngine): Promise<TierAssignmentEngine> {
+    const [engine] = await this.db.insert(tierAssignmentEngine).values(engineData).returning();
+    return engine;
+  }
+
+  async getTierAssignmentEngineById(id: string): Promise<TierAssignmentEngine | null> {
+    const [engine] = await this.db.select().from(tierAssignmentEngine).where(eq(tierAssignmentEngine.id, id));
+    return engine || null;
+  }
+
+  async updateTierAssignmentEngine(id: string, engineData: Partial<InsertTierAssignmentEngine>): Promise<TierAssignmentEngine> {
+    const [engine] = await this.db
+      .update(tierAssignmentEngine)
+      .set({ ...engineData, updatedAt: new Date() })
+      .where(eq(tierAssignmentEngine.id, id))
+      .returning();
+    return engine;
+  }
+
+  async updateEngineRunTimestamps(id: string, lastRunAt: Date, nextRunAt: Date): Promise<void> {
+    await this.db
+      .update(tierAssignmentEngine)
+      .set({ lastRunAt, nextRunAt, updatedAt: new Date() })
+      .where(eq(tierAssignmentEngine.id, id));
+  }
+
+  async deleteTierAssignmentEngine(id: string): Promise<void> {
+    await this.db.delete(tierAssignmentEngine).where(eq(tierAssignmentEngine.id, id));
+  }
+
+  // KPI calculation and tier evaluation helpers
+  async calculateAgentKPIs(agentId: string, window: 'MONTHLY' | 'QUARTERLY'): Promise<any> {
+    // Mock KPI calculation - in real implementation, this would aggregate from booking data
+    const mockKPIs = {
+      totalBookingValue: Math.floor(Math.random() * 100000000), // 0-100M
+      totalBookings: Math.floor(Math.random() * 2000), // 0-2000
+      avgBookingsPerMonth: Math.floor(Math.random() * 500), // 0-500
+      avgSearchesPerMonth: Math.floor(Math.random() * 6000), // 0-6000
+      conversionPct: Math.round((Math.random() * 15) * 100) / 100, // 0-15%
+    };
+    return mockKPIs;
+  }
+
+  async evaluateAgentTier(agentId: string, kpiData: any): Promise<string> {
+    const tiers = await this.getAgentTiers({ status: 'ACTIVE' });
+
+    // Sort tiers by requirements (highest to lowest)
+    const sortedTiers = tiers.sort((a, b) => {
+      const aThreshold = (a.kpiThresholds as any).totalBookingValueMin;
+      const bThreshold = (b.kpiThresholds as any).totalBookingValueMin;
+      return bThreshold - aThreshold;
+    });
+
+    // Find the highest tier the agent qualifies for
+    for (const tier of sortedTiers) {
+      const thresholds = tier.kpiThresholds as any;
+
+      if (kpiData.totalBookingValue >= thresholds.totalBookingValueMin &&
+          kpiData.totalBookings >= thresholds.totalBookingsMin &&
+          kpiData.avgBookingsPerMonth >= thresholds.avgBookingsPerMonthMin &&
+          kpiData.avgSearchesPerMonth >= thresholds.avgSearchesPerMonthMin &&
+          kpiData.conversionPct >= thresholds.conversionPctMin) {
+        return tier.tierCode;
       }
     }
 
-    const auditData: InsertAuditLog = {
-      user: params.user,
-      module: params.module,
-      entityId: params.entityId,
-      action: params.action,
-      beforeData: params.beforeData,
-      afterData: params.afterData,
-      diff: Object.keys(diff).length > 0 ? diff : null,
-      justification: params.justification,
-      ipAddress: params.ipAddress,
-      userAgent: params.userAgent,
-      sessionId: params.sessionId,
-      timestamp: new Date(),
-    };
-
-    return await this.insertAuditLog(auditData);
+    // Default to BRONZE if no tier qualifies
+    return 'BRONZE';
   }
 
-  // Helper method to wrap entity operations with audit logging
-  async withAuditLog<T>(
-    operation: () => Promise<T>,
-    auditParams: {
-      user: string;
-      module: string;
-      entityId: string;
-      action: string;
-      justification?: string;
-      ipAddress?: string;
-      userAgent?: string;
-      sessionId?: string;
-    },
-    getBeforeData?: () => Promise<any>
-  ): Promise<T> {
-    const beforeData = getBeforeData ? await getBeforeData() : null;
+  async checkTierConflicts(tierData: InsertAgentTier): Promise<any[]> {
+    const conflicts = [];
 
-    try {
-      const result = await operation();
-
-      // Create audit log after successful operation
-      await this.createAuditLog({
-        ...auditParams,
-        beforeData,
-        afterData: result,
+    // Check for duplicate tier code
+    const existingTier = await this.getAgentTierByCode(tierData.tierCode);
+    if (existingTier) {
+      conflicts.push({
+        type: 'DUPLICATE_TIER_CODE',
+        message: `Tier with code ${tierData.tierCode} already exists`,
+        conflictingTier: existingTier
       });
-
-      return result;
-    } catch (error) {
-      // Optionally log failed operations too
-      await this.createAuditLog({
-        ...auditParams,
-        action: `${auditParams.action}_FAILED`,
-        beforeData,
-        afterData: { error: error.message },
-      });
-
-      throw error;
     }
+
+    return conflicts;
   }
 }
 

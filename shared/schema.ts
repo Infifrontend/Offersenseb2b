@@ -516,3 +516,94 @@ export const insertAuditLogSchema = createInsertSchema(auditLogs, {
 
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
+
+// Agent Tier Management Tables
+export const agentTiers = pgTable("agent_tiers", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tierCode: varchar("tier_code", { length: 20 }).notNull().unique(), // PLATINUM | GOLD | SILVER | BRONZE
+  displayName: varchar("display_name", { length: 100 }).notNull(),
+  kpiWindow: varchar("kpi_window", { length: 20 }).notNull(), // MONTHLY | QUARTERLY
+  kpiThresholds: json("kpi_thresholds").notNull(), // KPI criteria object
+  defaultPricingPolicy: json("default_pricing_policy"), // default pricing rules
+  description: text("description"),
+  status: varchar("status", { length: 20 }).default("ACTIVE"), // ACTIVE | INACTIVE
+  createdBy: varchar("created_by", { length: 50 }).notNull(),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
+export const agentTierAssignments = pgTable("agent_tier_assignments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  agentId: varchar("agent_id", { length: 50 }).notNull(),
+  tierCode: varchar("tier_code", { length: 20 }).notNull(),
+  assignmentType: varchar("assignment_type", { length: 20 }).notNull(), // AUTO | MANUAL_OVERRIDE
+  effectiveFrom: date("effective_from").notNull(),
+  effectiveTo: date("effective_to"),
+  kpiData: json("kpi_data"), // snapshot of KPI values at assignment
+  assignedBy: varchar("assigned_by", { length: 50 }).notNull(),
+  justification: text("justification"),
+  status: varchar("status", { length: 20 }).default("ACTIVE"), // ACTIVE | SUPERSEDED
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
+export const tierAssignmentEngine = pgTable("tier_assignment_engine", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  engineCode: varchar("engine_code", { length: 50 }).notNull().unique(),
+  schedule: varchar("schedule", { length: 100 }).notNull(), // cron expression
+  reassignmentMode: varchar("reassignment_mode", { length: 20 }).notNull(), // AUTO | REVIEW
+  overrideAllowed: varchar("override_allowed", { length: 5 }).default("true"), // true/false
+  lastRunAt: timestamp("last_run_at"),
+  nextRunAt: timestamp("next_run_at"),
+  status: varchar("status", { length: 20 }).default("ACTIVE"), // ACTIVE | INACTIVE
+  createdBy: varchar("created_by", { length: 50 }).notNull(),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
+export const insertAgentTierSchema = createInsertSchema(agentTiers, {
+  kpiThresholds: z.object({
+    totalBookingValueMin: z.number().min(0),
+    totalBookingsMin: z.number().min(0),
+    avgBookingsPerMonthMin: z.number().min(0),
+    avgSearchesPerMonthMin: z.number().min(0),
+    conversionPctMin: z.number().min(0).max(100),
+  }),
+  defaultPricingPolicy: z.object({
+    type: z.enum(["PERCENT", "AMOUNT"]),
+    value: z.number(),
+  }).optional(),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAgentTierAssignmentSchema = createInsertSchema(agentTierAssignments, {
+  kpiData: z.object({
+    totalBookingValue: z.number().optional(),
+    totalBookings: z.number().optional(),
+    avgBookingsPerMonth: z.number().optional(),
+    avgSearchesPerMonth: z.number().optional(),
+    conversionPct: z.number().optional(),
+  }).optional(),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertTierAssignmentEngineSchema = createInsertSchema(tierAssignmentEngine).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  lastRunAt: true,
+  nextRunAt: true,
+});
+
+export type AgentTier = typeof agentTiers.$inferSelect;
+export type InsertAgentTier = z.infer<typeof insertAgentTierSchema>;
+export type AgentTierAssignment = typeof agentTierAssignments.$inferSelect;
+export type InsertAgentTierAssignment = z.infer<typeof insertAgentTierAssignmentSchema>;
+export type TierAssignmentEngine = typeof tierAssignmentEngine.$inferSelect;
+export type InsertTierAssignmentEngine = z.infer<typeof insertTierAssignmentEngineSchema>;

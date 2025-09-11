@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import multer from "multer";
 import csv from "csv-parser";
 import { Readable } from "stream";
-import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema, insertAirAncillaryRuleSchema, insertNonAirRateSchema, insertNonAirMarkupRuleSchema, insertBundleSchema, insertBundlePricingRuleSchema, insertOfferRuleSchema, insertOfferTraceSchema, insertAgentSchema, insertChannelPricingOverrideSchema, insertCohortSchema, insertAuditLogSchema } from "../shared/schema";
+import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema, insertAirAncillaryRuleSchema, insertNonAirRateSchema, insertNonAirMarkupRuleSchema, insertBundleSchema, insertBundlePricingRuleSchema, insertOfferRuleSchema, insertOfferTraceSchema, insertAgentSchema, insertChannelPricingOverrideSchema, insertCohortSchema, insertAuditLogSchema, insertAgentTierSchema, insertAgentTierAssignmentSchema, insertTierAssignmentEngineSchema } from "../shared/schema";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -1698,6 +1698,317 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error: any) {
       res.status(500).json({ message: "Failed to delete audit log", error: error.message });
+    }
+  });
+
+  // Agent Tier Management Routes
+  
+  // Get all agent tiers with optional filters
+  app.get("/api/tiers", async (req, res) => {
+    try {
+      const filters = req.query;
+      const tiers = await storage.getAgentTiers(filters);
+      res.json(tiers);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch agent tiers", error: error.message });
+    }
+  });
+
+  // Create single agent tier
+  app.post("/api/tiers", async (req, res) => {
+    try {
+      const validatedData = insertAgentTierSchema.parse(req.body);
+      
+      // Check for conflicts
+      const conflicts = await storage.checkTierConflicts(validatedData);
+      if (conflicts.length > 0) {
+        return res.status(409).json({ 
+          message: "Tier conflicts detected", 
+          conflicts 
+        });
+      }
+
+      const tier = await storage.insertAgentTier(validatedData);
+      res.status(201).json(tier);
+    } catch (error: any) {
+      res.status(400).json({ message: "Invalid tier data", error: error.message });
+    }
+  });
+
+  // Get tier by ID
+  app.get("/api/tiers/:id", async (req, res) => {
+    try {
+      const tier = await storage.getAgentTierById(req.params.id);
+      if (!tier) {
+        return res.status(404).json({ message: "Tier not found" });
+      }
+      res.json(tier);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch tier", error: error.message });
+    }
+  });
+
+  // Update tier
+  app.put("/api/tiers/:id", async (req, res) => {
+    try {
+      const validatedData = insertAgentTierSchema.parse(req.body);
+      const tier = await storage.updateAgentTier(req.params.id, validatedData);
+      res.json(tier);
+    } catch (error: any) {
+      res.status(400).json({ message: "Failed to update tier", error: error.message });
+    }
+  });
+
+  // Update tier status
+  app.patch("/api/tiers/:id/status", async (req, res) => {
+    try {
+      const { status } = req.body;
+      if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
+        return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
+      }
+      
+      const tier = await storage.updateAgentTierStatus(req.params.id, status);
+      res.json(tier);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to update tier status", error: error.message });
+    }
+  });
+
+  // Delete tier
+  app.delete("/api/tiers/:id", async (req, res) => {
+    try {
+      await storage.deleteAgentTier(req.params.id);
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to delete tier", error: error.message });
+    }
+  });
+
+  // Agent Tier Assignment Routes
+  
+  // Get all tier assignments with optional filters
+  app.get("/api/tiers/assignments", async (req, res) => {
+    try {
+      const filters = req.query;
+      const assignments = await storage.getAgentTierAssignments(filters);
+      res.json(assignments);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch tier assignments", error: error.message });
+    }
+  });
+
+  // Assign tier to agent (manual override)
+  app.post("/api/tiers/override", async (req, res) => {
+    try {
+      const { agentId, tierCode, effectiveFrom, justification, assignedBy } = req.body;
+      
+      if (!agentId || !tierCode || !effectiveFrom || !justification || !assignedBy) {
+        return res.status(400).json({ 
+          message: "agentId, tierCode, effectiveFrom, justification, and assignedBy are required" 
+        });
+      }
+
+      // Supersede previous assignments
+      await storage.supersedePreviousAssignments(agentId, effectiveFrom);
+
+      // Create new manual assignment
+      const assignmentData = {
+        agentId,
+        tierCode,
+        assignmentType: "MANUAL_OVERRIDE" as const,
+        effectiveFrom,
+        justification,
+        assignedBy,
+        status: "ACTIVE" as const,
+      };
+
+      const assignment = await storage.insertAgentTierAssignment(assignmentData);
+      
+      // Create audit log
+      const auditData = {
+        user: assignedBy,
+        module: "AgentTierAssignment",
+        entityId: assignment.id,
+        action: "MANUAL_OVERRIDE",
+        afterData: assignment,
+        justification,
+        ipAddress: req.ip,
+        userAgent: req.get("User-Agent"),
+        sessionId: req.sessionID || "unknown",
+      };
+      await storage.createAuditLog(auditData);
+
+      res.status(201).json(assignment);
+    } catch (error: any) {
+      res.status(400).json({ message: "Failed to override tier assignment", error: error.message });
+    }
+  });
+
+  // Auto-assign tiers based on KPIs
+  app.post("/api/tiers/assign", async (req, res) => {
+    try {
+      const { agentIds, effectiveFrom, assignedBy } = req.body;
+      
+      if (!agentIds || !Array.isArray(agentIds) || !effectiveFrom || !assignedBy) {
+        return res.status(400).json({ 
+          message: "agentIds (array), effectiveFrom, and assignedBy are required" 
+        });
+      }
+
+      const assignments = [];
+      const errors = [];
+
+      for (const agentId of agentIds) {
+        try {
+          // Calculate KPIs for agent
+          const kpiData = await storage.calculateAgentKPIs(agentId, 'QUARTERLY');
+          
+          // Evaluate tier based on KPIs
+          const recommendedTier = await storage.evaluateAgentTier(agentId, kpiData);
+          
+          // Check if tier has changed
+          const currentAssignment = await storage.getCurrentAgentTierAssignment(agentId);
+          if (currentAssignment?.tierCode === recommendedTier) {
+            continue; // No change needed
+          }
+
+          // Supersede previous assignments
+          await storage.supersedePreviousAssignments(agentId, effectiveFrom);
+
+          // Create new auto assignment
+          const assignmentData = {
+            agentId,
+            tierCode: recommendedTier,
+            assignmentType: "AUTO" as const,
+            effectiveFrom,
+            kpiData,
+            assignedBy,
+            justification: "Automatic tier assignment based on KPI evaluation",
+            status: "ACTIVE" as const,
+          };
+
+          const assignment = await storage.insertAgentTierAssignment(assignmentData);
+          assignments.push(assignment);
+
+          // Create audit log
+          const auditData = {
+            user: assignedBy,
+            module: "AgentTierAssignment",
+            entityId: assignment.id,
+            action: "AUTO_ASSIGNED",
+            afterData: assignment,
+            justification: "Automatic tier assignment based on KPI evaluation",
+            ipAddress: req.ip,
+            userAgent: req.get("User-Agent"),
+            sessionId: req.sessionID || "unknown",
+          };
+          await storage.createAuditLog(auditData);
+        } catch (error: any) {
+          errors.push({ agentId, error: error.message });
+        }
+      }
+
+      res.json({
+        success: true,
+        processed: agentIds.length,
+        assignments: assignments.length,
+        errors: errors.length,
+        data: {
+          assignments,
+          errors,
+        },
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to assign tiers", error: error.message });
+    }
+  });
+
+  // Get current tier for specific agent
+  app.get("/api/agents/:agentId/tier", async (req, res) => {
+    try {
+      const assignment = await storage.getCurrentAgentTierAssignment(req.params.agentId);
+      if (!assignment) {
+        return res.status(404).json({ message: "No active tier assignment found" });
+      }
+      res.json(assignment);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch agent tier", error: error.message });
+    }
+  });
+
+  // Evaluate agent for tier (simulation)
+  app.post("/api/tiers/evaluate", async (req, res) => {
+    try {
+      const { agentId, window } = req.body;
+      
+      if (!agentId || !window) {
+        return res.status(400).json({ message: "agentId and window are required" });
+      }
+
+      // Calculate KPIs
+      const kpiData = await storage.calculateAgentKPIs(agentId, window);
+      
+      // Evaluate tier
+      const recommendedTier = await storage.evaluateAgentTier(agentId, kpiData);
+      
+      // Get current assignment
+      const currentAssignment = await storage.getCurrentAgentTierAssignment(agentId);
+
+      res.json({
+        agentId,
+        window,
+        kpiData,
+        recommendedTier,
+        currentTier: currentAssignment?.tierCode || null,
+        tierChangeRequired: currentAssignment?.tierCode !== recommendedTier,
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to evaluate agent tier", error: error.message });
+    }
+  });
+
+  // Tier Assignment Engine Routes
+  
+  // Get all assignment engines
+  app.get("/api/tiers/engines", async (req, res) => {
+    try {
+      const filters = req.query;
+      const engines = await storage.getTierAssignmentEngines(filters);
+      res.json(engines);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch assignment engines", error: error.message });
+    }
+  });
+
+  // Create assignment engine
+  app.post("/api/tiers/engines", async (req, res) => {
+    try {
+      const validatedData = insertTierAssignmentEngineSchema.parse(req.body);
+      const engine = await storage.insertTierAssignmentEngine(validatedData);
+      res.status(201).json(engine);
+    } catch (error: any) {
+      res.status(400).json({ message: "Invalid engine data", error: error.message });
+    }
+  });
+
+  // Update assignment engine
+  app.put("/api/tiers/engines/:id", async (req, res) => {
+    try {
+      const validatedData = insertTierAssignmentEngineSchema.parse(req.body);
+      const engine = await storage.updateTierAssignmentEngine(req.params.id, validatedData);
+      res.json(engine);
+    } catch (error: any) {
+      res.status(400).json({ message: "Failed to update engine", error: error.message });
+    }
+  });
+
+  // Delete assignment engine
+  app.delete("/api/tiers/engines/:id", async (req, res) => {
+    try {
+      await storage.deleteTierAssignmentEngine(req.params.id);
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to delete engine", error: error.message });
     }
   });
 

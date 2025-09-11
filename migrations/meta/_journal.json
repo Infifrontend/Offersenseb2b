@@ -15,6 +15,13 @@
       "when": 1757563914193,
       "tag": "0001_nice_nightmare",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1757564301015,
+      "tag": "0002_tiresome_mathemanic",
+      "breakpoints": true
     }
   ]
 }

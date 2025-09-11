@@ -421,15 +421,34 @@ export default function OfferRuleBuilder() {
         console.log("All form validation passed:", validatedValues);
         
         try {
-          // Extract basic info from validated values
-          const ruleCode = validatedValues.ruleCode;
-          const ruleName = validatedValues.ruleName;
+          // Extract basic info from validated values with null checks
+          const ruleCode = validatedValues.ruleCode || '';
+          const ruleName = validatedValues.ruleName || '';
           const ruleType = validatedValues.ruleType;
           const priority = validatedValues.priority || 1;
           const validFrom = validatedValues.validFrom;
           const validTo = validatedValues.validTo;
           
           console.log("Extracted basic info:", { ruleCode, ruleName, ruleType, priority, validFrom, validTo });
+
+          // Additional validation for required fields
+          if (!ruleCode || ruleCode.trim() === '') {
+            alert("Rule Code is required");
+            setCurrentStep(0);
+            return;
+          }
+          
+          if (!ruleName || ruleName.trim() === '') {
+            alert("Rule Name is required");
+            setCurrentStep(0);
+            return;
+          }
+          
+          if (!ruleType) {
+            alert("Rule Type is required");
+            setCurrentStep(0);
+            return;
+          }
 
           const formattedData = {
             ruleCode: ruleCode.trim(),

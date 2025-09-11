@@ -369,22 +369,29 @@ export default function NegotiatedFareManager() {
       seatAllotment: values.seatAllotment || null,
       minStay: values.minStay || null,
       maxStay: values.maxStay || null,
-      blackoutDates: values.blackoutDates && values.blackoutDates.length > 0 
-        ? values.blackoutDates.map((dateRange: any) => {
-            if (Array.isArray(dateRange)) {
-              return dateRange.map((date: any) => date.format("YYYY-MM-DD"));
-            } else if (dateRange && dateRange.format) {
-              return dateRange.format("YYYY-MM-DD");
-            }
-            return dateRange;
-          }).flat()
-        : null,
-      eligibleAgentTiers: values.eligibleAgentTiers && values.eligibleAgentTiers.length > 0 
-        ? values.eligibleAgentTiers 
-        : ["BRONZE"],
-      eligibleCohorts: values.eligibleCohorts && values.eligibleCohorts.length > 0 
-        ? values.eligibleCohorts 
-        : null,
+      blackoutDates:
+        values.blackoutDates && values.blackoutDates.length > 0
+          ? values.blackoutDates
+              .map((dateRange: any) => {
+                if (Array.isArray(dateRange)) {
+                  return dateRange.map((date: any) =>
+                    date.format("YYYY-MM-DD"),
+                  );
+                } else if (dateRange && dateRange.format) {
+                  return dateRange.format("YYYY-MM-DD");
+                }
+                return dateRange;
+              })
+              .flat()
+          : null,
+      eligibleAgentTiers:
+        values.eligibleAgentTiers && values.eligibleAgentTiers.length > 0
+          ? values.eligibleAgentTiers
+          : ["BRONZE"],
+      eligibleCohorts:
+        values.eligibleCohorts && values.eligibleCohorts.length > 0
+          ? values.eligibleCohorts
+          : null,
       remarks: values.remarks || null,
     };
     createFareMutation.mutate(formattedData);
@@ -410,22 +417,29 @@ export default function NegotiatedFareManager() {
       seatAllotment: values.seatAllotment || null,
       minStay: values.minStay || null,
       maxStay: values.maxStay || null,
-      blackoutDates: values.blackoutDates && values.blackoutDates.length > 0 
-        ? values.blackoutDates.map((dateRange: any) => {
-            if (Array.isArray(dateRange)) {
-              return dateRange.map((date: any) => date.format("YYYY-MM-DD"));
-            } else if (dateRange && dateRange.format) {
-              return dateRange.format("YYYY-MM-DD");
-            }
-            return dateRange;
-          }).flat()
-        : null,
-      eligibleAgentTiers: values.eligibleAgentTiers && values.eligibleAgentTiers.length > 0 
-        ? values.eligibleAgentTiers 
-        : ["BRONZE"],
-      eligibleCohorts: values.eligibleCohorts && values.eligibleCohorts.length > 0 
-        ? values.eligibleCohorts 
-        : null,
+      blackoutDates:
+        values.blackoutDates && values.blackoutDates.length > 0
+          ? values.blackoutDates
+              .map((dateRange: any) => {
+                if (Array.isArray(dateRange)) {
+                  return dateRange.map((date: any) =>
+                    date.format("YYYY-MM-DD"),
+                  );
+                } else if (dateRange && dateRange.format) {
+                  return dateRange.format("YYYY-MM-DD");
+                }
+                return dateRange;
+              })
+              .flat()
+          : null,
+      eligibleAgentTiers:
+        values.eligibleAgentTiers && values.eligibleAgentTiers.length > 0
+          ? values.eligibleAgentTiers
+          : ["BRONZE"],
+      eligibleCohorts:
+        values.eligibleCohorts && values.eligibleCohorts.length > 0
+          ? values.eligibleCohorts
+          : null,
       remarks: values.remarks || null,
     };
     updateFareMutation.mutate({ id: selectedFare.id, data: formattedData });
@@ -456,7 +470,7 @@ export default function NegotiatedFareManager() {
       seatAllotment: fare.seatAllotment,
       minStay: fare.minStay,
       maxStay: fare.maxStay,
-      blackoutDates: fare.blackoutDates?.map(date => dayjs(date)) || [],
+      blackoutDates: fare.blackoutDates?.map((date) => dayjs(date)) || [],
       eligibleAgentTiers: fare.eligibleAgentTiers || [],
       eligibleCohorts: fare.eligibleCohorts || [],
       remarks: fare.remarks,
@@ -473,7 +487,7 @@ export default function NegotiatedFareManager() {
     <div className="space-y-6">
       {/* Header Section */}
       <div className="bg-white border-b">
-        <div className="px-6 py-4">
+        <div className="py-4">
           {/* Action Buttons */}
           <div className="flex gap-3">
             <Button
@@ -528,121 +542,125 @@ export default function NegotiatedFareManager() {
       </div>
 
       {/* Fare Inventory Section */}
-      <div className="px-6">
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold">Fare Inventory</h2>
-        </div>
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold">Fare Inventory</h2>
+      </div>
 
-        <div className="bg-white rounded-lg border">
-          {isLoading ? (
-            <div className="flex items-center justify-center p-12">
-              <div className="flex items-center gap-3">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                <span className="text-gray-600">Loading fares...</span>
-              </div>
+      <div className="bg-white rounded-lg border">
+        {isLoading ? (
+          <div className="flex items-center justify-center p-12">
+            <div className="flex items-center gap-3">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+              <span className="text-gray-600">Loading fares...</span>
             </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[180px]">Fare Code</TableHead>
-                  <TableHead className="w-[120px]">Route</TableHead>
-                  <TableHead className="w-[100px]">Class</TableHead>
-                  <TableHead className="w-[100px]">Trip Type</TableHead>
-                  <TableHead className="w-[100px]">Base Fare</TableHead>
-                  <TableHead className="w-[100px]">Brand</TableHead>
-                  <TableHead className="w-[80px]">Status</TableHead>
-                  <TableHead className="w-[120px]">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {displayFares?.map((fare: NegotiatedFare) => (
-                  <TableRow key={fare.id}>
-                    <TableCell className="font-medium">
-                      {fare.fareCode}
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm">
-                        {fare.origin} →<br />
-                        {fare.destination}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {fare.cabinClass === "PREMIUM_ECONOMY"
-                        ? "Premium"
-                        : fare.cabinClass === "ECONOMY"
-                          ? "Economy"
-                          : fare.cabinClass}
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm">
-                        {fare.tripType === "ROUND_TRIP"
-                          ? "Round Trip"
-                          : fare.tripType === "ONE_WAY"
-                            ? "One Way"
-                            : fare.tripType}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm">
-                        <div className="font-medium">{fare.currency}</div>
-                        <div>{fare.baseNetFare}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm font-medium">
-                        {fare.remarks?.includes("Premium")
-                          ? "none"
-                          : fare.remarks?.includes("special")
-                            ? "LITE"
-                            : fare.remarks?.includes("Regional")
-                              ? "SELL001"
-                              : "none"}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <span className={`text-sm font-medium ${
-                        fare.status === "ACTIVE" ? "text-green-600" : "text-red-600"
-                      }`}>
-                        {fare.status === "ACTIVE" ? "Active" : "Inactive"}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="p-1"
-                          onClick={() => handleViewFare(fare)}
-                        >
-                          <Eye className="w-4 h-4 text-gray-500" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="p-1"
-                          onClick={() => handleEditFare(fare)}
-                        >
-                          <Edit className="w-4 h-4 text-gray-500" />
-                        </Button>
-                        <div 
-                          className={`w-8 h-4 rounded-full relative cursor-pointer transition-colors ${
-                            fare.status === "ACTIVE" ? "bg-blue-600" : "bg-gray-300"
-                          }`}
-                          onClick={() => handleStatusToggle(fare)}
-                        >
-                          <div className={`w-3 h-3 bg-white rounded-full absolute top-0.5 shadow-sm transition-transform ${
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[180px]">Fare Code</TableHead>
+                <TableHead className="w-[120px]">Route</TableHead>
+                <TableHead className="w-[100px]">Class</TableHead>
+                <TableHead className="w-[100px]">Trip Type</TableHead>
+                <TableHead className="w-[100px]">Base Fare</TableHead>
+                <TableHead className="w-[100px]">Brand</TableHead>
+                <TableHead className="w-[80px]">Status</TableHead>
+                <TableHead className="w-[120px]">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {displayFares?.map((fare: NegotiatedFare) => (
+                <TableRow key={fare.id}>
+                  <TableCell className="font-medium">{fare.fareCode}</TableCell>
+                  <TableCell>
+                    <div className="text-sm">
+                      {fare.origin} →<br />
+                      {fare.destination}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-sm">
+                    {fare.cabinClass === "PREMIUM_ECONOMY"
+                      ? "Premium"
+                      : fare.cabinClass === "ECONOMY"
+                        ? "Economy"
+                        : fare.cabinClass}
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm">
+                      {fare.tripType === "ROUND_TRIP"
+                        ? "Round Trip"
+                        : fare.tripType === "ONE_WAY"
+                          ? "One Way"
+                          : fare.tripType}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm">
+                      <div className="font-medium">{fare.currency}</div>
+                      <div>{fare.baseNetFare}</div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm font-medium">
+                      {fare.remarks?.includes("Premium")
+                        ? "none"
+                        : fare.remarks?.includes("special")
+                          ? "LITE"
+                          : fare.remarks?.includes("Regional")
+                            ? "SELL001"
+                            : "none"}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <span
+                      className={`text-sm font-medium ${
+                        fare.status === "ACTIVE"
+                          ? "text-green-600"
+                          : "text-red-600"
+                      }`}
+                    >
+                      {fare.status === "ACTIVE" ? "Active" : "Inactive"}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="p-1"
+                        onClick={() => handleViewFare(fare)}
+                      >
+                        <Eye className="w-4 h-4 text-gray-500" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="p-1"
+                        onClick={() => handleEditFare(fare)}
+                      >
+                        <Edit className="w-4 h-4 text-gray-500" />
+                      </Button>
+                      <div
+                        className={`w-8 h-4 rounded-full relative cursor-pointer transition-colors ${
+                          fare.status === "ACTIVE"
+                            ? "bg-blue-600"
+                            : "bg-gray-300"
+                        }`}
+                        onClick={() => handleStatusToggle(fare)}
+                      >
+                        <div
+                          className={`w-3 h-3 bg-white rounded-full absolute top-0.5 shadow-sm transition-transform ${
                             fare.status === "ACTIVE" ? "right-0.5" : "left-0.5"
-                          }`}></div>
-                        </div>
+                          }`}
+                        ></div>
                       </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </div>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
       </div>
 
       <Modal
@@ -789,10 +807,7 @@ export default function NegotiatedFareManager() {
                   },
                 ]}
               >
-                <DatePicker 
-                  style={{ width: "100%" }} 
-                  format="DD/MM/YYYY"
-                />
+                <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
               </AntForm.Item>
             </Col>
             <Col span={12}>
@@ -803,10 +818,7 @@ export default function NegotiatedFareManager() {
                   { required: true, message: "Please select booking end date" },
                 ]}
               >
-                <DatePicker 
-                  style={{ width: "100%" }}
-                  format="DD/MM/YYYY"
-                />
+                <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
               </AntForm.Item>
             </Col>
           </Row>
@@ -823,10 +835,7 @@ export default function NegotiatedFareManager() {
                   },
                 ]}
               >
-                <DatePicker 
-                  style={{ width: "100%" }}
-                  format="DD/MM/YYYY"
-                />
+                <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
               </AntForm.Item>
             </Col>
             <Col span={12}>
@@ -837,10 +846,7 @@ export default function NegotiatedFareManager() {
                   { required: true, message: "Please select travel end date" },
                 ]}
               >
-                <DatePicker 
-                  style={{ width: "100%" }}
-                  format="DD/MM/YYYY"
-                />
+                <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
               </AntForm.Item>
             </Col>
           </Row>
@@ -912,7 +918,7 @@ export default function NegotiatedFareManager() {
           </Row>
 
           <AntForm.Item label="Blackout Dates (Optional)" name="blackoutDates">
-            <DatePicker.RangePicker 
+            <DatePicker.RangePicker
               multiple
               style={{ width: "100%" }}
               placeholder={["Select blackout dates", ""]}
@@ -920,12 +926,15 @@ export default function NegotiatedFareManager() {
             />
           </AntForm.Item>
 
-          <AntForm.Item label="Eligible Cohorts (Optional)" name="eligibleCohorts">
+          <AntForm.Item
+            label="Eligible Cohorts (Optional)"
+            name="eligibleCohorts"
+          >
             <AntSelect
               mode="tags"
               placeholder="Enter cohort codes (e.g., CORP001, VIP002)"
               style={{ width: "100%" }}
-              tokenSeparators={[',']}
+              tokenSeparators={[","]}
             />
           </AntForm.Item>
 
@@ -964,8 +973,12 @@ export default function NegotiatedFareManager() {
               <Eye className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Fare Details</h3>
-              <p className="text-sm text-gray-500">Complete fare information and settings</p>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Fare Details
+              </h3>
+              <p className="text-sm text-gray-500">
+                Complete fare information and settings
+              </p>
             </div>
           </div>
         }
@@ -975,12 +988,15 @@ export default function NegotiatedFareManager() {
           setSelectedFare(null);
         }}
         footer={[
-          <div key="footer" className="flex justify-between items-center w-full pt-4 border-t">
+          <div
+            key="footer"
+            className="flex justify-between items-center w-full pt-4 border-t"
+          >
             <div className="text-xs text-gray-500">
-              Created: {selectedFare ? formatDate(selectedFare.createdAt) : ''}
+              Created: {selectedFare ? formatDate(selectedFare.createdAt) : ""}
             </div>
-            <AntButton 
-              key="close" 
+            <AntButton
+              key="close"
               type="primary"
               onClick={() => {
                 setIsViewModalOpen(false);
@@ -989,7 +1005,7 @@ export default function NegotiatedFareManager() {
             >
               Close
             </AntButton>
-          </div>
+          </div>,
         ]}
         width={900}
         className="fare-details-modal"
@@ -999,42 +1015,60 @@ export default function NegotiatedFareManager() {
             {/* Status Badge */}
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                  selectedFare.status === "ACTIVE" 
-                    ? "bg-green-100 text-green-800" 
-                    : "bg-red-100 text-red-800"
-                }`}>
-                  <div className={`w-2 h-2 rounded-full mr-2 ${
-                    selectedFare.status === "ACTIVE" ? "bg-green-400" : "bg-red-400"
-                  }`}></div>
+                <span
+                  className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                    selectedFare.status === "ACTIVE"
+                      ? "bg-green-100 text-green-800"
+                      : "bg-red-100 text-red-800"
+                  }`}
+                >
+                  <div
+                    className={`w-2 h-2 rounded-full mr-2 ${
+                      selectedFare.status === "ACTIVE"
+                        ? "bg-green-400"
+                        : "bg-red-400"
+                    }`}
+                  ></div>
                   {selectedFare.status}
                 </span>
               </div>
-              <div className="text-sm text-gray-500">
-                ID: {selectedFare.id}
-              </div>
+              <div className="text-sm text-gray-500">ID: {selectedFare.id}</div>
             </div>
 
             {/* Main Fare Information */}
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-100">
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">Fare Information</h4>
+              <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                Fare Information
+              </h4>
               <Row gutter={[24, 16]}>
                 <Col span={8}>
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Airline Code</label>
-                    <div className="text-lg font-bold text-gray-900">{selectedFare.airlineCode}</div>
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      Airline Code
+                    </label>
+                    <div className="text-lg font-bold text-gray-900">
+                      {selectedFare.airlineCode}
+                    </div>
                   </div>
                 </Col>
                 <Col span={8}>
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Fare Code</label>
-                    <div className="text-lg font-bold text-blue-600">{selectedFare.fareCode}</div>
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      Fare Code
+                    </label>
+                    <div className="text-lg font-bold text-blue-600">
+                      {selectedFare.fareCode}
+                    </div>
                   </div>
                 </Col>
                 <Col span={8}>
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Base Fare</label>
-                    <div className="text-lg font-bold text-green-600">{selectedFare.currency} {selectedFare.baseNetFare}</div>
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      Base Fare
+                    </label>
+                    <div className="text-lg font-bold text-green-600">
+                      {selectedFare.currency} {selectedFare.baseNetFare}
+                    </div>
                   </div>
                 </Col>
               </Row>
@@ -1050,29 +1084,35 @@ export default function NegotiatedFareManager() {
                 <Col span={12}>
                   <div className="flex items-center gap-4">
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-gray-900">{selectedFare.origin}</div>
+                      <div className="text-2xl font-bold text-gray-900">
+                        {selectedFare.origin}
+                      </div>
                       <div className="text-xs text-gray-500">Origin</div>
                     </div>
                     <div className="flex-1 flex items-center">
                       <div className="w-full h-px bg-gray-300 relative">
                         <div className="absolute inset-0 flex items-center justify-center">
                           <div className="bg-white px-2 py-1 rounded-full border text-xs text-gray-600">
-                            {selectedFare.tripType.replace('_', ' ')}
+                            {selectedFare.tripType.replace("_", " ")}
                           </div>
                         </div>
                       </div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-gray-900">{selectedFare.destination}</div>
+                      <div className="text-2xl font-bold text-gray-900">
+                        {selectedFare.destination}
+                      </div>
                       <div className="text-xs text-gray-500">Destination</div>
                     </div>
                   </div>
                 </Col>
                 <Col span={12}>
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Cabin Class</label>
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      Cabin Class
+                    </label>
                     <div className="text-base font-semibold text-gray-900">
-                      {selectedFare.cabinClass.replace('_', ' ')}
+                      {selectedFare.cabinClass.replace("_", " ")}
                     </div>
                   </div>
                 </Col>
@@ -1089,11 +1129,15 @@ export default function NegotiatedFareManager() {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">From:</span>
-                    <span className="font-medium">{formatDate(selectedFare.bookingStartDate)}</span>
+                    <span className="font-medium">
+                      {formatDate(selectedFare.bookingStartDate)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">To:</span>
-                    <span className="font-medium">{formatDate(selectedFare.bookingEndDate)}</span>
+                    <span className="font-medium">
+                      {formatDate(selectedFare.bookingEndDate)}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -1105,11 +1149,15 @@ export default function NegotiatedFareManager() {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">From:</span>
-                    <span className="font-medium">{formatDate(selectedFare.travelStartDate)}</span>
+                    <span className="font-medium">
+                      {formatDate(selectedFare.travelStartDate)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">To:</span>
-                    <span className="font-medium">{formatDate(selectedFare.travelEndDate)}</span>
+                    <span className="font-medium">
+                      {formatDate(selectedFare.travelEndDate)}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -1125,25 +1173,38 @@ export default function NegotiatedFareManager() {
                 <Col span={12}>
                   <div className="space-y-3">
                     <div>
-                      <label className="text-sm font-medium text-gray-700">Point of Sale</label>
+                      <label className="text-sm font-medium text-gray-700">
+                        Point of Sale
+                      </label>
                       <div className="flex flex-wrap gap-1 mt-1">
                         {selectedFare.pos?.map((country, index) => (
-                          <span key={index} className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
+                          <span
+                            key={index}
+                            className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800"
+                          >
                             {country}
                           </span>
                         ))}
                       </div>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-700">Agent Tiers</label>
+                      <label className="text-sm font-medium text-gray-700">
+                        Agent Tiers
+                      </label>
                       <div className="flex flex-wrap gap-1 mt-1">
                         {selectedFare.eligibleAgentTiers?.map((tier, index) => (
-                          <span key={index} className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${
-                            tier === 'PLATINUM' ? 'bg-gray-100 text-gray-800' :
-                            tier === 'GOLD' ? 'bg-yellow-100 text-yellow-800' :
-                            tier === 'SILVER' ? 'bg-gray-100 text-gray-700' :
-                            'bg-orange-100 text-orange-800'
-                          }`}>
+                          <span
+                            key={index}
+                            className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${
+                              tier === "PLATINUM"
+                                ? "bg-gray-100 text-gray-800"
+                                : tier === "GOLD"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : tier === "SILVER"
+                                    ? "bg-gray-100 text-gray-700"
+                                    : "bg-orange-100 text-orange-800"
+                            }`}
+                          >
                             {tier}
                           </span>
                         ))}
@@ -1156,25 +1217,35 @@ export default function NegotiatedFareManager() {
                     <Row gutter={16}>
                       <Col span={8}>
                         <div>
-                          <label className="text-sm font-medium text-gray-700">Seat Allotment</label>
+                          <label className="text-sm font-medium text-gray-700">
+                            Seat Allotment
+                          </label>
                           <div className="text-lg font-semibold text-gray-900">
-                            {selectedFare.seatAllotment || 'Unlimited'}
+                            {selectedFare.seatAllotment || "Unlimited"}
                           </div>
                         </div>
                       </Col>
                       <Col span={8}>
                         <div>
-                          <label className="text-sm font-medium text-gray-700">Min Stay</label>
+                          <label className="text-sm font-medium text-gray-700">
+                            Min Stay
+                          </label>
                           <div className="text-lg font-semibold text-gray-900">
-                            {selectedFare.minStay ? `${selectedFare.minStay} days` : 'None'}
+                            {selectedFare.minStay
+                              ? `${selectedFare.minStay} days`
+                              : "None"}
                           </div>
                         </div>
                       </Col>
                       <Col span={8}>
                         <div>
-                          <label className="text-sm font-medium text-gray-700">Max Stay</label>
+                          <label className="text-sm font-medium text-gray-700">
+                            Max Stay
+                          </label>
                           <div className="text-lg font-semibold text-gray-900">
-                            {selectedFare.maxStay ? `${selectedFare.maxStay} days` : 'None'}
+                            {selectedFare.maxStay
+                              ? `${selectedFare.maxStay} days`
+                              : "None"}
                           </div>
                         </div>
                       </Col>
@@ -1185,40 +1256,57 @@ export default function NegotiatedFareManager() {
             </div>
 
             {/* Additional Information */}
-            {(selectedFare.eligibleCohorts?.length > 0 || selectedFare.blackoutDates?.length > 0 || selectedFare.remarks) && (
+            {(selectedFare.eligibleCohorts?.length > 0 ||
+              selectedFare.blackoutDates?.length > 0 ||
+              selectedFare.remarks) && (
               <div className="bg-gray-50 rounded-lg p-6 border">
                 <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                   <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
                   Additional Information
                 </h4>
                 <div className="space-y-4">
-                  {selectedFare.eligibleCohorts && selectedFare.eligibleCohorts.length > 0 && (
-                    <div>
-                      <label className="text-sm font-medium text-gray-700">Eligible Cohorts</label>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {selectedFare.eligibleCohorts.map((cohort, index) => (
-                          <span key={index} className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-indigo-100 text-indigo-800">
-                            {cohort}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {selectedFare.blackoutDates && selectedFare.blackoutDates.length > 0 && (
-                    <div>
-                      <label className="text-sm font-medium text-gray-700">Blackout Dates</label>
-                      <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-md">
-                        <div className="text-sm text-red-800">
-                          {selectedFare.blackoutDates.map(date => formatDate(date)).join(', ')}
+                  {selectedFare.eligibleCohorts &&
+                    selectedFare.eligibleCohorts.length > 0 && (
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">
+                          Eligible Cohorts
+                        </label>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {selectedFare.eligibleCohorts.map((cohort, index) => (
+                            <span
+                              key={index}
+                              className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-indigo-100 text-indigo-800"
+                            >
+                              {cohort}
+                            </span>
+                          ))}
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  {selectedFare.blackoutDates &&
+                    selectedFare.blackoutDates.length > 0 && (
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">
+                          Blackout Dates
+                        </label>
+                        <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-md">
+                          <div className="text-sm text-red-800">
+                            {selectedFare.blackoutDates
+                              .map((date) => formatDate(date))
+                              .join(", ")}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   {selectedFare.remarks && (
                     <div>
-                      <label className="text-sm font-medium text-gray-700">Remarks</label>
+                      <label className="text-sm font-medium text-gray-700">
+                        Remarks
+                      </label>
                       <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                        <div className="text-sm text-yellow-800">{selectedFare.remarks}</div>
+                        <div className="text-sm text-yellow-800">
+                          {selectedFare.remarks}
+                        </div>
                       </div>
                     </div>
                   )}
@@ -1378,10 +1466,7 @@ export default function NegotiatedFareManager() {
                   },
                 ]}
               >
-                <DatePicker 
-                  style={{ width: "100%" }}
-                  format="DD/MM/YYYY"
-                />
+                <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
               </AntForm.Item>
             </Col>
             <Col span={12}>
@@ -1392,10 +1477,7 @@ export default function NegotiatedFareManager() {
                   { required: true, message: "Please select booking end date" },
                 ]}
               >
-                <DatePicker 
-                  style={{ width: "100%" }}
-                  format="DD/MM/YYYY"
-                />
+                <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
               </AntForm.Item>
             </Col>
           </Row>
@@ -1412,10 +1494,7 @@ export default function NegotiatedFareManager() {
                   },
                 ]}
               >
-                <DatePicker 
-                  style={{ width: "100%" }}
-                  format="DD/MM/YYYY"
-                />
+                <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
               </AntForm.Item>
             </Col>
             <Col span={12}>
@@ -1426,10 +1505,7 @@ export default function NegotiatedFareManager() {
                   { required: true, message: "Please select travel end date" },
                 ]}
               >
-                <DatePicker 
-                  style={{ width: "100%" }}
-                  format="DD/MM/YYYY"
-                />
+                <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
               </AntForm.Item>
             </Col>
           </Row>
@@ -1501,7 +1577,7 @@ export default function NegotiatedFareManager() {
           </Row>
 
           <AntForm.Item label="Blackout Dates (Optional)" name="blackoutDates">
-            <DatePicker.RangePicker 
+            <DatePicker.RangePicker
               multiple
               style={{ width: "100%" }}
               placeholder={["Select blackout dates", ""]}
@@ -1509,12 +1585,15 @@ export default function NegotiatedFareManager() {
             />
           </AntForm.Item>
 
-          <AntForm.Item label="Eligible Cohorts (Optional)" name="eligibleCohorts">
+          <AntForm.Item
+            label="Eligible Cohorts (Optional)"
+            name="eligibleCohorts"
+          >
             <AntSelect
               mode="tags"
               placeholder="Enter cohort codes (e.g., CORP001, VIP002)"
               style={{ width: "100%" }}
-              tokenSeparators={[',']}
+              tokenSeparators={[","]}
             />
           </AntForm.Item>
 
@@ -1530,11 +1609,13 @@ export default function NegotiatedFareManager() {
                 gap: "8px",
               }}
             >
-              <AntButton onClick={() => {
-                setIsEditModalOpen(false);
-                setSelectedFare(null);
-                editForm.resetFields();
-              }}>
+              <AntButton
+                onClick={() => {
+                  setIsEditModalOpen(false);
+                  setSelectedFare(null);
+                  editForm.resetFields();
+                }}
+              >
                 Cancel
               </AntButton>
               <AntButton

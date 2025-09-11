@@ -216,7 +216,9 @@ export default function AirAncillariesDiscounting() {
       validTo: values.validDates[1].format("YYYY-MM-DD"),
       cohortCodes: values.cohortCodes || [],
       adjustmentValue:
-        values.adjustmentType === "FREE" ? null : values.adjustmentValue?.toString(),
+        values.adjustmentType === "FREE"
+          ? null
+          : values.adjustmentValue?.toString(),
     };
     delete formattedData.validDates;
     createRuleMutation.mutate(formattedData);
@@ -229,7 +231,9 @@ export default function AirAncillariesDiscounting() {
       validTo: values.validDates[1].format("YYYY-MM-DD"),
       cohortCodes: values.cohortCodes || [],
       adjustmentValue:
-        values.adjustmentType === "FREE" ? null : values.adjustmentValue?.toString(),
+        values.adjustmentType === "FREE"
+          ? null
+          : values.adjustmentValue?.toString(),
     };
     delete formattedData.validDates;
     updateRuleMutation.mutate({ id: selectedRule!.id, data: formattedData });
@@ -286,7 +290,7 @@ export default function AirAncillariesDiscounting() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/*<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Rules</CardTitle>
@@ -342,7 +346,7 @@ export default function AirAncillariesDiscounting() {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </div> */}
 
       {/* Filter Bar */}
       <Card>

@@ -1106,21 +1106,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const posArray = Array.isArray(rule.pos) ? rule.pos : [];
 
         if (agentTierArray.includes(agentTier)) {
+          const originalPrice = basePrice;
           if (rule.adjustmentType === "PERCENT") {
             const adjustmentValue = parseFloat(rule.adjustmentValue);
             basePrice = basePrice * (1 + adjustmentValue / 100);
             adjustments.push({
               rule: rule.ruleCode,
+              ruleName: `${rule.ruleCode} (${rule.adjustmentType})`,
               type: "PERCENT",
-              value: adjustmentValue
+              value: adjustmentValue,
+              originalPrice: originalPrice,
+              adjustedPrice: basePrice,
+              priority: rule.priority
             });
           } else if (rule.adjustmentType === "AMOUNT") {
             const adjustmentValue = parseFloat(rule.adjustmentValue);
             basePrice = basePrice + adjustmentValue;
             adjustments.push({
               rule: rule.ruleCode,
+              ruleName: `${rule.ruleCode} (${rule.adjustmentType})`,
               type: "AMOUNT",
-              value: adjustmentValue
+              value: adjustmentValue,
+              originalPrice: originalPrice,
+              adjustedPrice: basePrice,
+              priority: rule.priority
             });
           }
         }

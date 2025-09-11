@@ -44,6 +44,7 @@ import {
   Eye,
   Edit,
   Calculator,
+  History,
 } from "lucide-react";
 import type { DynamicDiscountRule } from "../../../shared/schema";
 import dayjs from "dayjs";
@@ -115,10 +116,12 @@ export default function DynamicDiscountEngine() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSimulateModalOpen, setIsSimulateModalOpen] = useState(false);
+  const [isTraceViewerOpen, setIsTraceViewerOpen] = useState(false);
   const [selectedRule, setSelectedRule] = useState<DynamicDiscountRule | null>(
     null,
   );
   const [simulationResult, setSimulationResult] = useState<any>(null);
+  const [executionTraces, setExecutionTraces] = useState<any[]>([]);
   const queryClient = useQueryClient();
   const [antForm] = AntForm.useForm();
   const [editForm] = AntForm.useForm();
@@ -235,6 +238,17 @@ export default function DynamicDiscountEngine() {
     },
   });
 
+  // Fetch execution traces
+  const { data: traces = [] } = useQuery({
+    queryKey: ["offer-traces"],
+    queryFn: async () => {
+      const response = await fetch("/api/offer/traces");
+      if (!response.ok) throw new Error("Failed to fetch traces");
+      return response.json();
+    },
+    enabled: isTraceViewerOpen,
+  });
+
   const handleCreateRule = (values: any) => {
     const formattedData = {
       ...values,
@@ -295,7 +309,14 @@ export default function DynamicDiscountEngine() {
   };
 
   if (isLoading) {
-    return <div className="p-6">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="text-lg font-medium text-gray-600">Loading discount rules...</div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -358,20 +379,56 @@ export default function DynamicDiscountEngine() {
           </CardContent>
         </Card>
       </div>
-      {/* Filter Bar */}
+      {/* Action Bar */}
       <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Filters</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-lg">Dynamic Discount Rules</CardTitle>
+            <CardDescription>
+              Manage real-time fare adjustments for API/GDS/NDC sources
+            </CardDescription>
+          </div>
+          <Button 
+            onClick={() => setIsCreateModalOpen(true)}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Create Rule
+          </Button>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <Input placeholder="Rule Code" />
-            <Input placeholder="Origin" />
-            <Input placeholder="Destination" />
-            <Input placeholder="Channel" />
-            <Button variant="outline">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+            <Input 
+              placeholder="Rule Code" 
+              value={filters.ruleCode || ''}
+              onChange={(e) => setFilters(prev => ({ ...prev, ruleCode: e.target.value }))}
+            />
+            <Input 
+              placeholder="Origin" 
+              value={filters.origin || ''}
+              onChange={(e) => setFilters(prev => ({ ...prev, origin: e.target.value }))}
+            />
+            <Input 
+              placeholder="Destination" 
+              value={filters.destination || ''}
+              onChange={(e) => setFilters(prev => ({ ...prev, destination: e.target.value }))}
+            />
+            <Input 
+              placeholder="Channel" 
+              value={filters.channel || ''}
+              onChange={(e) => setFilters(prev => ({ ...prev, channel: e.target.value }))}
+            />
+            <Input 
+              placeholder="Status" 
+              value={filters.status || ''}
+              onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
+            />
+            <Button 
+              variant="outline"
+              onClick={() => setFilters({})}
+            >
               <Filter className="w-4 h-4 mr-2" />
-              Apply Filters
+              Clear Filters
             </Button>
           </div>
         </CardContent>
@@ -379,13 +436,6 @@ export default function DynamicDiscountEngine() {
 
       {/* Rules Table */}
       <Card>
-        <CardHeader>
-          <CardTitle>Discount Rules</CardTitle>
-          <CardDescription>
-            Manage dynamic discount and markup rules for real-time fare
-            adjustments
-          </CardDescription>
-        </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
@@ -477,6 +527,14 @@ export default function DynamicDiscountEngine() {
                       >
                         <Calculator className="w-4 h-4 text-gray-500" />
                       </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="p-1"
+                        onClick={() => setIsTraceViewerOpen(true)}
+                      >
+                        <History className="w-4 h-4 text-gray-500" />
+                      </Button>
                       <div
                         className={`w-8 h-4 rounded-full relative cursor-pointer transition-colors ${
                           rule.status === "ACTIVE"
@@ -499,6 +557,23 @@ export default function DynamicDiscountEngine() {
               ))}
             </TableBody>
           </Table>
+          
+          {rules.length === 0 && (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                <TrendingUp className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No discount rules found</h3>
+              <p className="text-gray-500 mb-4">Get started by creating your first dynamic discount rule.</p>
+              <Button 
+                onClick={() => setIsCreateModalOpen(true)}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Your First Rule
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -1326,6 +1401,95 @@ export default function DynamicDiscountEngine() {
             </div>
           </AntForm.Item>
         </AntForm>
+      </Modal>
+
+      {/* Execution Trace Viewer Modal */}
+      <Modal
+        title="Execution Trace Viewer"
+        open={isTraceViewerOpen}
+        onCancel={() => setIsTraceViewerOpen(false)}
+        footer={[
+          <AntButton
+            key="close"
+            onClick={() => setIsTraceViewerOpen(false)}
+          >
+            Close
+          </AntButton>,
+        ]}
+        width={1200}
+      >
+        <div className="space-y-4">
+          <div className="text-sm text-gray-600 mb-4">
+            View execution traces for rule applications and fare adjustments
+          </div>
+          
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Trace ID</TableHead>
+                <TableHead>Agent</TableHead>
+                <TableHead>Route</TableHead>
+                <TableHead>Base Price</TableHead>
+                <TableHead>Final Price</TableHead>
+                <TableHead>Adjustments</TableHead>
+                <TableHead>Timestamp</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {traces.map((trace: any) => (
+                <TableRow key={trace.id}>
+                  <TableCell>
+                    <div className="font-mono text-sm">{trace.traceId}</div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm">
+                      <div className="font-medium">{trace.agentId}</div>
+                      <div className="text-gray-500">{trace.agentTier}</div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm">
+                      {trace.searchParams?.origin} → {trace.searchParams?.destination}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm font-medium">
+                      ${parseFloat(trace.basePrice).toFixed(2)}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm font-bold text-green-600">
+                      ${parseFloat(trace.finalOfferPrice).toFixed(2)}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {trace.adjustments?.map((adj: any, idx: number) => (
+                        <span
+                          key={idx}
+                          className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800"
+                        >
+                          {adj.rule}: {adj.type === "PERCENT" ? `${adj.value}%` : `$${adj.value}`}
+                        </span>
+                      ))}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm text-gray-500">
+                      {new Date(trace.createdAt).toLocaleString()}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          
+          {traces.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              No execution traces found
+            </div>
+          )}
+        </div>
       </Modal>
     </div>
   );

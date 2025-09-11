@@ -280,19 +280,6 @@ export default function AncillaryBundlingEngine() {
     retryDelay: 1000,
   });
 
-  // Fetch cohorts for the dropdown
-  const { data: availableCohorts = [] } = useQuery({
-    queryKey: ["cohorts"],
-    queryFn: async () => {
-      const response = await fetch("/api/cohorts/list");
-      if (!response.ok) {
-        console.error("Failed to fetch cohorts");
-        return [];
-      }
-      return response.json();
-    },
-  });
-
   // Create bundle mutation
   const createBundleMutation = useMutation({
     mutationFn: async (values: any) => {
@@ -1034,16 +1021,7 @@ export default function AncillaryBundlingEngine() {
               <AntSelect
                 mode="tags"
                 placeholder="Enter cohort codes"
-              >
-                {availableCohorts.map((cohort: any) => (
-                  <AntSelect.Option key={cohort.code} value={cohort.code}>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span style={{ fontWeight: '500', fontSize: '14px' }}>{cohort.name || `Cohort ${cohort.code}`}</span>
-                      <span style={{ fontSize: '12px', color: '#666' }}>Code: {cohort.code} • Type: {cohort.type || 'N/A'}</span>
-                    </div>
-                  </AntSelect.Option>
-                ))}
-              </AntSelect>
+              ></AntSelect>
             </AntForm.Item>
 
             <AntForm.Item label="Inventory Cap" name="inventoryCap">
@@ -1305,16 +1283,7 @@ export default function AncillaryBundlingEngine() {
               <AntSelect
                 mode="tags"
                 placeholder="Enter cohort codes"
-              >
-                {availableCohorts.map((cohort: any) => (
-                  <AntSelect.Option key={cohort.code} value={cohort.code}>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span style={{ fontWeight: '500', fontSize: '14px' }}>{cohort.name || `Cohort ${cohort.code}`}</span>
-                      <span style={{ fontSize: '12px', color: '#666' }}>Code: {cohort.code} • Type: {cohort.type || 'N/A'}</span>
-                    </div>
-                  </AntSelect.Option>
-                ))}
-              </AntSelect>
+              ></AntSelect>
             </AntForm.Item>
 
             <AntForm.Item label="Inventory Cap" name="inventoryCap">

@@ -236,17 +236,16 @@ export default function NegotiatedFareManager() {
   });
 
   // Fetch available cohorts
-  const { data: availableCohorts = [], isLoading: isCohortsLoading } = useQuery(
-    {
-      queryKey: ["cohorts-list"],
-      queryFn: async () => {
-        const response = await fetch("/api/cohorts");
-        if (!response.ok) throw new Error("Failed to fetch cohorts");
-        return response.json();
-      },
-      staleTime: 1000 * 60 * 5, // 5 minutes
+  const { data: availableCohorts = [], isLoading: isCohortsLoading } = useQuery({
+    queryKey: ["cohorts-list"],
+    queryFn: async () => {
+      const response = await fetch("/api/cohorts/list");
+      if (!response.ok) throw new Error("Failed to fetch cohorts");
+      return response.json();
     },
-  );
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
 
   // Use dummy data if no API data is available
   const displayFares = fares || dummyFares;
@@ -880,30 +879,24 @@ export default function NegotiatedFareManager() {
               { required: true, message: "Please select at least one POS" },
             ]}
           >
-            <AntCheckbox.Group style={{ width: "100%" }}>
+            <AntCheckbox.Group style={{ width: '100%' }}>
               <Row gutter={[16, 8]}>
                 {countriesData.map((country) => (
                   <Col span={6} key={country.code}>
-                    <AntCheckbox
+                    <AntCheckbox 
                       value={country.code}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        padding: "4px 8px",
-                        borderRadius: "4px",
-                        border: "1px solid #d9d9d9",
-                        marginBottom: "8px",
-                        fontSize: "14px",
+                      style={{ 
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        border: '1px solid #d9d9d9',
+                        marginBottom: '8px',
+                        fontSize: '14px'
                       }}
                     >
-                      <span style={{ fontWeight: "500" }}>{country.code}</span>
-                      <span
-                        style={{
-                          fontSize: "12px",
-                          color: "#666",
-                          marginLeft: "4px",
-                        }}
-                      >
+                      <span style={{ fontWeight: '500' }}>{country.code}</span>
+                      <span style={{ fontSize: '12px', color: '#666', marginLeft: '4px' }}>
                         {country.name}
                       </span>
                     </AntCheckbox>
@@ -920,23 +913,23 @@ export default function NegotiatedFareManager() {
               { required: true, message: "Please select at least one tier" },
             ]}
           >
-            <AntCheckbox.Group style={{ width: "100%" }}>
+            <AntCheckbox.Group style={{ width: '100%' }}>
               <Row gutter={[16, 8]}>
                 {agentTiers.map((tier) => (
                   <Col span={6} key={tier}>
-                    <AntCheckbox
+                    <AntCheckbox 
                       value={tier}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        padding: "4px 8px",
-                        borderRadius: "4px",
-                        border: "1px solid #d9d9d9",
-                        marginBottom: "8px",
-                        fontSize: "14px",
+                      style={{ 
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        border: '1px solid #d9d9d9',
+                        marginBottom: '8px',
+                        fontSize: '14px'
                       }}
                     >
-                      <span style={{ fontWeight: "500" }}>{tier}</span>
+                      <span style={{ fontWeight: '500' }}>{tier}</span>
                     </AntCheckbox>
                   </Col>
                 ))}
@@ -990,13 +983,7 @@ export default function NegotiatedFareManager() {
           >
             <AntSelect
               mode="multiple"
-              placeholder={
-                isCohortsLoading
-                  ? "Loading cohorts..."
-                  : availableCohorts.length === 0
-                    ? "No cohorts available"
-                    : "Select cohorts"
-              }
+              placeholder={isCohortsLoading ? "Loading cohorts..." : availableCohorts.length === 0 ? "No cohorts available" : "Select cohorts"}
               style={{ width: "100%" }}
               dropdownStyle={{ zIndex: 9999 }}
               getPopupContainer={(trigger) => trigger.parentElement}
@@ -1004,44 +991,22 @@ export default function NegotiatedFareManager() {
               showSearch
               loading={isCohortsLoading}
               disabled={isCohortsLoading}
-              notFoundContent={
-                isCohortsLoading ? "Loading..." : "No cohorts found"
-              }
+              notFoundContent={isCohortsLoading ? "Loading..." : "No cohorts found"}
               filterOption={(input, option) => {
-                const label =
-                  option?.children?.props?.children?.[0]?.props?.children ||
-                  option?.value ||
-                  "";
-                const code =
-                  option?.children?.props?.children?.[1]?.props?.children ||
-                  option?.value ||
-                  "";
-                return (
-                  label.toLowerCase().indexOf(input.toLowerCase()) >= 0 ||
-                  code.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                );
+                const label = option?.children?.props?.children?.[0]?.props?.children || option?.value || '';
+                const code = option?.children?.props?.children?.[1]?.props?.children || option?.value || '';
+                return label.toLowerCase().indexOf(input.toLowerCase()) >= 0 ||
+                       code.toLowerCase().indexOf(input.toLowerCase()) >= 0;
               }}
             >
               {availableCohorts.map((cohort: any) => (
                 <AntSelect.Option key={cohort.code} value={cohort.code}>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      padding: "2px 0",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontWeight: "500",
-                        fontSize: "14px",
-                        color: "#333",
-                      }}
-                    >
-                      {cohort.name || `Cohort ${cohort.code}`}
+                  <div style={{ display: 'flex', flexDirection: 'column', padding: '2px 0' }}>
+                    <span style={{ fontWeight: '500', fontSize: '14px', color: '#333' }}>
+                      {cohort.name || cohort.code}
                     </span>
-                    <span style={{ fontSize: "12px", color: "#666" }}>
-                      Code: {cohort.code} • Type: {cohort.type || 'N/A'}
+                    <span style={{ fontSize: '12px', color: '#666' }}>
+                      Code: {cohort.code} • Type: {cohort.type}
                     </span>
                   </div>
                 </AntSelect.Option>
@@ -1289,17 +1254,13 @@ export default function NegotiatedFareManager() {
                       </label>
                       <div className="flex flex-wrap gap-1 mt-1">
                         {selectedFare.pos?.map((countryCode, index) => {
-                          const country = countriesData.find(
-                            (c) => c.code === countryCode,
-                          );
+                          const country = countriesData.find(c => c.code === countryCode);
                           return (
                             <span
                               key={index}
                               className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800"
                             >
-                              {country
-                                ? `${country.code} (${country.name})`
-                                : countryCode}
+                              {country ? `${country.code} (${country.name})` : countryCode}
                             </span>
                           );
                         })}
@@ -1635,30 +1596,24 @@ export default function NegotiatedFareManager() {
               { required: true, message: "Please select at least one POS" },
             ]}
           >
-            <AntCheckbox.Group style={{ width: "100%" }}>
+            <AntCheckbox.Group style={{ width: '100%' }}>
               <Row gutter={[16, 8]}>
                 {countriesData.map((country) => (
                   <Col span={6} key={country.code}>
-                    <AntCheckbox
+                    <AntCheckbox 
                       value={country.code}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        padding: "4px 8px",
-                        borderRadius: "4px",
-                        border: "1px solid #d9d9d9",
-                        marginBottom: "8px",
-                        fontSize: "14px",
+                      style={{ 
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        border: '1px solid #d9d9d9',
+                        marginBottom: '8px',
+                        fontSize: '14px'
                       }}
                     >
-                      <span style={{ fontWeight: "500" }}>{country.code}</span>
-                      <span
-                        style={{
-                          fontSize: "12px",
-                          color: "#666",
-                          marginLeft: "4px",
-                        }}
-                      >
+                      <span style={{ fontWeight: '500' }}>{country.code}</span>
+                      <span style={{ fontSize: '12px', color: '#666', marginLeft: '4px' }}>
                         {country.name}
                       </span>
                     </AntCheckbox>
@@ -1675,23 +1630,23 @@ export default function NegotiatedFareManager() {
               { required: true, message: "Please select at least one tier" },
             ]}
           >
-            <AntCheckbox.Group style={{ width: "100%" }}>
+            <AntCheckbox.Group style={{ width: '100%' }}>
               <Row gutter={[16, 8]}>
                 {agentTiers.map((tier) => (
                   <Col span={6} key={tier}>
-                    <AntCheckbox
+                    <AntCheckbox 
                       value={tier}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        padding: "4px 8px",
-                        borderRadius: "4px",
-                        border: "1px solid #d9d9d9",
-                        marginBottom: "8px",
-                        fontSize: "14px",
+                      style={{ 
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        border: '1px solid #d9d9d9',
+                        marginBottom: '8px',
+                        fontSize: '14px'
                       }}
                     >
-                      <span style={{ fontWeight: "500" }}>{tier}</span>
+                      <span style={{ fontWeight: '500' }}>{tier}</span>
                     </AntCheckbox>
                   </Col>
                 ))}
@@ -1745,13 +1700,7 @@ export default function NegotiatedFareManager() {
           >
             <AntSelect
               mode="multiple"
-              placeholder={
-                isCohortsLoading
-                  ? "Loading cohorts..."
-                  : availableCohorts.length === 0
-                    ? "No cohorts available"
-                    : "Select cohorts"
-              }
+              placeholder={isCohortsLoading ? "Loading cohorts..." : availableCohorts.length === 0 ? "No cohorts available" : "Select cohorts"}
               style={{ width: "100%" }}
               dropdownStyle={{ zIndex: 9999 }}
               getPopupContainer={(trigger) => trigger.parentElement}
@@ -1759,44 +1708,22 @@ export default function NegotiatedFareManager() {
               showSearch
               loading={isCohortsLoading}
               disabled={isCohortsLoading}
-              notFoundContent={
-                isCohortsLoading ? "Loading..." : "No cohorts found"
-              }
+              notFoundContent={isCohortsLoading ? "Loading..." : "No cohorts found"}
               filterOption={(input, option) => {
-                const label =
-                  option?.children?.props?.children?.[0]?.props?.children ||
-                  option?.value ||
-                  "";
-                const code =
-                  option?.children?.props?.children?.[1]?.props?.children ||
-                  option?.value ||
-                  "";
-                return (
-                  label.toLowerCase().indexOf(input.toLowerCase()) >= 0 ||
-                  code.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                );
+                const label = option?.children?.props?.children?.[0]?.props?.children || option?.value || '';
+                const code = option?.children?.props?.children?.[1]?.props?.children || option?.value || '';
+                return label.toLowerCase().indexOf(input.toLowerCase()) >= 0 ||
+                       code.toLowerCase().indexOf(input.toLowerCase()) >= 0;
               }}
             >
               {availableCohorts.map((cohort: any) => (
                 <AntSelect.Option key={cohort.code} value={cohort.code}>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      padding: "2px 0",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontWeight: "500",
-                        fontSize: "14px",
-                        color: "#333",
-                      }}
-                    >
-                      {cohort.name || `Cohort ${cohort.code}`}
+                  <div style={{ display: 'flex', flexDirection: 'column', padding: '2px 0' }}>
+                    <span style={{ fontWeight: '500', fontSize: '14px', color: '#333' }}>
+                      {cohort.name || cohort.code}
                     </span>
-                    <span style={{ fontSize: "12px", color: "#666" }}>
-                      Code: {cohort.code} • Type: {cohort.type || 'N/A'}
+                    <span style={{ fontSize: '12px', color: '#666' }}>
+                      Code: {cohort.code} • Type: {cohort.type}
                     </span>
                   </div>
                 </AntSelect.Option>

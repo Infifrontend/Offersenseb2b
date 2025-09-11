@@ -54,7 +54,7 @@ import {
   Clock,
   AlertCircle,
   Square,
-  } from "lucide-react";
+} from "lucide-react";
 import dayjs from "dayjs";
 import { z } from "zod";
 import { Line, Bar, Pie } from "react-chartjs-2";
@@ -224,7 +224,7 @@ const getChannelIcon = (channel: string) => {
     case "PORTAL":
       return <Globe className="w-4 h-4" />;
     case "API":
-      return <Send className="w-4 h-4" />;
+      return <SendOutlined className="w-4 h-4" />;
     case "MOBILE":
       return <Smartphone className="w-4 h-4" />;
     default:
@@ -239,15 +239,6 @@ const formatCurrency = (value: number) => {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(value);
-};
-
-// Fetch available cohorts
-const fetchCohorts = async () => {
-  const response = await fetch("/api/cohorts/list");
-  if (!response.ok) {
-    throw new Error("Failed to fetch cohorts");
-  }
-  return response.json();
 };
 
 export default function CampaignManager() {
@@ -279,12 +270,6 @@ export default function CampaignManager() {
       if (!response.ok) throw new Error("Failed to fetch campaigns");
       return response.json();
     },
-  });
-
-  // Fetch available cohorts
-  const { data: availableCohorts = [] } = useQuery({
-    queryKey: ["/api/cohorts/list"],
-    queryFn: fetchCohorts,
   });
 
   const { data: campaignMetrics, isLoading: metricsLoading } = useQuery({
@@ -493,7 +478,7 @@ export default function CampaignManager() {
       render: (record: Campaign) => {
         const totalProducts = (record.products.ancillaries?.length || 0) + (record.products.bundles?.length || 0);
         if (totalProducts === 0) return <span className="text-gray-400">-</span>;
-
+        
         return (
           <div className="text-sm">
             <Tag color="green" size="small">
@@ -542,9 +527,9 @@ export default function CampaignManager() {
         if (record.comms.emailTemplateId) channels.push("Email");
         if (record.comms.whatsappTemplateId) channels.push("WhatsApp");
         if (record.comms.apiPush) channels.push("API");
-
+        
         if (channels.length === 0) return <span className="text-gray-400">-</span>;
-
+        
         return (
           <div className="text-xs">
             <Tag size="small">{channels.length} channel{channels.length > 1 ? 's' : ''}</Tag>

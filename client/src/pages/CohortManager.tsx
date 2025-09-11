@@ -277,7 +277,7 @@ export default function CohortManager() {
 
   const handleCreateOrUpdate = (values: any) => {
     console.log("Form values received:", values);
-
+    
     const formattedData: CohortFormData = {
       cohortCode: values.cohortCode,
       cohortName: values.cohortName,
@@ -518,8 +518,8 @@ export default function CohortManager() {
                         {availableCohorts.map((cohort: any) => (
                           <AntSelect.Option key={cohort.code} value={cohort.code}>
                             <div style={{ display: 'flex', flexDirection: 'column' }}>
-                              <span style={{ fontWeight: '500', fontSize: '14px' }}>{cohort.name || `Cohort ${cohort.code}`}</span>
-                              <span style={{ fontSize: '12px', color: '#666' }}>Code: {cohort.code} • Type: {cohort.type || 'N/A'}</span>
+                              <span style={{ fontWeight: '500', fontSize: '14px' }}>{cohort.name || cohort.code}</span>
+                              <span style={{ fontSize: '12px', color: '#666' }}>{cohort.code}</span>
                             </div>
                           </AntSelect.Option>
                         ))}

@@ -936,7 +936,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           rules = [];
         }
       }
-      }
 
       // Always return an array
       res.json(Array.isArray(rules) ? rules : []);

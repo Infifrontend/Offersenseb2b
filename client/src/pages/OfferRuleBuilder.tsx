@@ -372,7 +372,8 @@ export default function OfferRuleBuilder() {
       "conditions.origin": rule.conditions?.origin,
       "conditions.destination": rule.conditions?.destination,
       "conditions.seasonCode": rule.conditions?.seasonCode,
-      // Actions would be handled separately for complex structure
+      // Actions
+      actions: rule.actions || [],
     });
     setIsEditModalOpen(true);
   };
@@ -388,6 +389,8 @@ export default function OfferRuleBuilder() {
   };
 
   const onCreateSubmit = (values: any) => {
+    console.log("Form values:", values);
+    
     const formattedData = {
       ruleCode: values.ruleCode,
       ruleName: values.ruleName,
@@ -419,13 +422,27 @@ export default function OfferRuleBuilder() {
               }
             : undefined,
       },
-      actions: values.actions || [],
+      actions: (values.actions || []).map((action: any) => ({
+        type: action.type,
+        scope: action.scope || undefined,
+        valueType: action.valueType || undefined,
+        value: action.value || undefined,
+        ancillaryCode: action.ancillaryCode || undefined,
+        bundleCode: action.bundleCode || undefined,
+        bannerText: action.bannerText || undefined,
+        pricing: action.valueType && action.value ? {
+          type: action.valueType,
+          value: action.value
+        } : undefined,
+      })),
       priority: values.priority || 1,
       validFrom: values.validFrom?.format("YYYY-MM-DD"),
       validTo: values.validTo?.format("YYYY-MM-DD"),
       justification: values.justification,
       createdBy: "admin", // This would come from auth context
     };
+    
+    console.log("Formatted data:", formattedData);
     createRuleMutation.mutate(formattedData);
   };
 
@@ -447,7 +464,19 @@ export default function OfferRuleBuilder() {
         tripType: values["conditions.tripType"] || [],
         seasonCode: values["conditions.seasonCode"],
       },
-      actions: selectedRule.actions, // Keep existing actions for now
+      actions: (values.actions || []).map((action: any) => ({
+        type: action.type,
+        scope: action.scope || undefined,
+        valueType: action.valueType || undefined,
+        value: action.value || undefined,
+        ancillaryCode: action.ancillaryCode || undefined,
+        bundleCode: action.bundleCode || undefined,
+        bannerText: action.bannerText || undefined,
+        pricing: action.valueType && action.value ? {
+          type: action.valueType,
+          value: action.value
+        } : undefined,
+      })),
       priority: values.priority || 1,
       validFrom: values.validFrom?.format("YYYY-MM-DD"),
       validTo: values.validTo?.format("YYYY-MM-DD"),
@@ -934,17 +963,130 @@ export default function OfferRuleBuilder() {
                     configure multiple actions per rule.
                   </AlertDescription>
                 </Alert>
-                <div className="text-center py-8">
-                  <Layers className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    Action Builder
-                  </h3>
-                  <p className="text-gray-500 mb-4">
-                    Complex action configuration will be available in the next
-                    iteration
-                  </p>
-                  <Button variant="outline">Configure Actions</Button>
-                </div>
+
+                <AntCard title="⚡ Rule Actions" size="small">
+                  <AntForm.List name="actions">
+                    {(fields, { add, remove }) => (
+                      <>
+                        {fields.map(({ key, name, ...restField }) => (
+                          <div key={key} className="p-4 border border-gray-200 rounded-lg mb-4">
+                            <Row gutter={16}>
+                              <Col span={12}>
+                                <AntForm.Item
+                                  {...restField}
+                                  name={[name, 'type']}
+                                  label="Action Type"
+                                  rules={[{ required: true, message: 'Please select action type' }]}
+                                >
+                                  <AntSelect placeholder="Select action type">
+                                    {actionTypes.map((action) => (
+                                      <AntSelect.Option key={action.value} value={action.value}>
+                                        {action.icon} {action.label}
+                                      </AntSelect.Option>
+                                    ))}
+                                  </AntSelect>
+                                </AntForm.Item>
+                              </Col>
+                              <Col span={12}>
+                                <AntForm.Item
+                                  {...restField}
+                                  name={[name, 'scope']}
+                                  label="Scope (Optional)"
+                                >
+                                  <AntSelect placeholder="Select scope">
+                                    <AntSelect.Option value="NEGOTIATED">Negotiated Fares</AntSelect.Option>
+                                    <AntSelect.Option value="API">API Fares</AntSelect.Option>
+                                    <AntSelect.Option value="ANCILLARY">Ancillaries</AntSelect.Option>
+                                    <AntSelect.Option value="BUNDLE">Bundles</AntSelect.Option>
+                                  </AntSelect>
+                                </AntForm.Item>
+                              </Col>
+                            </Row>
+
+                            <Row gutter={16}>
+                              <Col span={8}>
+                                <AntForm.Item
+                                  {...restField}
+                                  name={[name, 'valueType']}
+                                  label="Value Type"
+                                >
+                                  <AntSelect placeholder="Select value type">
+                                    <AntSelect.Option value="PERCENT">Percentage</AntSelect.Option>
+                                    <AntSelect.Option value="AMOUNT">Fixed Amount</AntSelect.Option>
+                                    <AntSelect.Option value="FREE">Free</AntSelect.Option>
+                                  </AntSelect>
+                                </AntForm.Item>
+                              </Col>
+                              <Col span={8}>
+                                <AntForm.Item
+                                  {...restField}
+                                  name={[name, 'value']}
+                                  label="Value"
+                                >
+                                  <InputNumber
+                                    placeholder="Enter value"
+                                    style={{ width: "100%" }}
+                                    min={0}
+                                  />
+                                </AntForm.Item>
+                              </Col>
+                              <Col span={8}>
+                                <AntForm.Item
+                                  {...restField}
+                                  name={[name, 'ancillaryCode']}
+                                  label="Ancillary Code (Optional)"
+                                >
+                                  <AntInput placeholder="e.g., BAG20, SEAT_STD" />
+                                </AntForm.Item>
+                              </Col>
+                            </Row>
+
+                            <Row gutter={16}>
+                              <Col span={12}>
+                                <AntForm.Item
+                                  {...restField}
+                                  name={[name, 'bundleCode']}
+                                  label="Bundle Code (Optional)"
+                                >
+                                  <AntInput placeholder="e.g., COMFORT_PACK" />
+                                </AntForm.Item>
+                              </Col>
+                              <Col span={12}>
+                                <AntForm.Item
+                                  {...restField}
+                                  name={[name, 'bannerText']}
+                                  label="Banner Text (Optional)"
+                                >
+                                  <AntInput placeholder="Promotional banner text" />
+                                </AntForm.Item>
+                              </Col>
+                            </Row>
+
+                            <div className="flex justify-end">
+                              <AntButton 
+                                type="link" 
+                                danger 
+                                onClick={() => remove(name)}
+                                icon={<Trash2 className="w-4 h-4" />}
+                              >
+                                Remove Action
+                              </AntButton>
+                            </div>
+                          </div>
+                        ))}
+                        
+                        <AntButton
+                          type="dashed"
+                          onClick={() => add()}
+                          block
+                          icon={<Plus className="w-4 h-4" />}
+                        >
+                          Add Action
+                        </AntButton>
+                      </>
+                    )}
+                  </AntForm.List>
+                </AntCard>
               </div>
             )}
 
@@ -986,7 +1128,13 @@ export default function OfferRuleBuilder() {
                 {currentStep < steps.length - 1 ? (
                   <AntButton
                     type="primary"
-                    onClick={() => setCurrentStep(currentStep + 1)}
+                    onClick={() => {
+                      createForm.validateFields().then(() => {
+                        setCurrentStep(currentStep + 1);
+                      }).catch(() => {
+                        // Validation failed, stay on current step
+                      });
+                    }}
                   >
                     Next
                   </AntButton>

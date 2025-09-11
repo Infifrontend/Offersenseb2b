@@ -26,6 +26,7 @@ export interface IStorage {
   getNegotiatedFares(filters?: any): Promise<NegotiatedFare[]>;
   getNegotiatedFareById(id: string): Promise<NegotiatedFare | undefined>;
   updateNegotiatedFare(id: string, updates: Partial<InsertNegotiatedFare>): Promise<NegotiatedFare>;
+  updateNegotiatedFareStatus(id: string, status: string): Promise<NegotiatedFare>;
   deleteNegotiatedFare(id: string): Promise<void>;
   checkFareConflicts(fare: InsertNegotiatedFare): Promise<NegotiatedFare[]>;
 

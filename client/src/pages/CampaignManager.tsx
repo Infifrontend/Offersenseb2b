@@ -54,8 +54,7 @@ import {
   Clock,
   AlertCircle,
   Square,
-  SendOutlined,
-} from "lucide-react";
+  } from "lucide-react";
 import dayjs from "dayjs";
 import { z } from "zod";
 import { Line, Bar, Pie } from "react-chartjs-2";
@@ -225,7 +224,7 @@ const getChannelIcon = (channel: string) => {
     case "PORTAL":
       return <Globe className="w-4 h-4" />;
     case "API":
-      return <SendOutlined className="w-4 h-4" />;
+      return <Send className="w-4 h-4" />;
     case "MOBILE":
       return <Smartphone className="w-4 h-4" />;
     default:

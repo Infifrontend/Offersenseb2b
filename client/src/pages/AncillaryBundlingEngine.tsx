@@ -290,7 +290,7 @@ export default function AncillaryBundlingEngine() {
     queryKey: ["bundle-pricing-rules", pricingFilters],
     queryFn: async () => {
       const params = new URLSearchParams(pricingFilters);
-      const response = await fetch(`/api/bundles`);
+      const response = await fetch(`/api/bundles/pricing?${params}`);
       if (!response.ok) throw new Error("Failed to fetch bundle pricing rules");
       return response.json();
     },

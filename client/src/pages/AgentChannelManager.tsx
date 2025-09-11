@@ -1,34 +1,33 @@
-
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
-  Card as AntCard, 
-  Table, 
-  Button as AntButton, 
-  Space, 
-  Modal, 
-  Form as AntForm, 
-  Input, 
-  Select as AntSelect, 
-  DatePicker, 
-  InputNumber, 
-  message, 
-  Tabs, 
-  Tag, 
+import {
+  Card as AntCard,
+  Table,
+  Button as AntButton,
+  Space,
+  Modal,
+  Form as AntForm,
+  Input,
+  Select as AntSelect,
+  DatePicker,
+  InputNumber,
+  message,
+  Tabs,
+  Tag,
   Tooltip,
   Row,
   Col,
   Switch,
-  Popconfirm
+  Popconfirm,
 } from "antd";
-import { 
-  PlusOutlined, 
-  EditOutlined, 
-  DeleteOutlined, 
+import {
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
   EyeOutlined,
   PlayCircleOutlined,
   DownloadOutlined,
-  ReloadOutlined 
+  ReloadOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { z } from "zod";
@@ -39,7 +38,9 @@ const agentFormSchema = z.object({
   agencyName: z.string().min(1, "Agency name is required"),
   iataCode: z.string().optional(),
   tier: z.enum(["PLATINUM", "GOLD", "SILVER", "BRONZE"]),
-  allowedChannels: z.array(z.enum(["API", "PORTAL", "MOBILE"])).min(1, "At least one channel required"),
+  allowedChannels: z
+    .array(z.enum(["API", "PORTAL", "MOBILE"]))
+    .min(1, "At least one channel required"),
   commissionProfileId: z.string().optional(),
   pos: z.array(z.string()).min(1, "At least one POS required"),
   status: z.enum(["ACTIVE", "INACTIVE"]).default("ACTIVE"),
@@ -100,20 +101,29 @@ const posList = ["IN", "AE", "SA", "KW", "BH", "OM", "QA", "US", "UK", "CA"];
 
 const getTierColor = (tier: string) => {
   switch (tier) {
-    case "PLATINUM": return "#722ed1";
-    case "GOLD": return "#faad14";
-    case "SILVER": return "#8c8c8c";
-    case "BRONZE": return "#d4380d";
-    default: return "#1890ff";
+    case "PLATINUM":
+      return "#722ed1";
+    case "GOLD":
+      return "#faad14";
+    case "SILVER":
+      return "#8c8c8c";
+    case "BRONZE":
+      return "#d4380d";
+    default:
+      return "#1890ff";
   }
 };
 
 const getChannelIcon = (channel: string) => {
   switch (channel) {
-    case "API": return "🔗";
-    case "PORTAL": return "🌐";
-    case "MOBILE": return "📱";
-    default: return "📱";
+    case "API":
+      return "🔗";
+    case "PORTAL":
+      return "🌐";
+    case "MOBILE":
+      return "📱";
+    default:
+      return "📱";
   }
 };
 
@@ -123,12 +133,17 @@ export default function AgentChannelManager() {
   const [isAgentModalVisible, setIsAgentModalVisible] = useState(false);
   const [isOverrideModalVisible, setIsOverrideModalVisible] = useState(false);
   const [editingAgent, setEditingAgent] = useState<Agent | null>(null);
-  const [editingOverride, setEditingOverride] = useState<ChannelOverride | null>(null);
+  const [editingOverride, setEditingOverride] =
+    useState<ChannelOverride | null>(null);
   const [activeTab, setActiveTab] = useState("agents");
   const queryClient = useQueryClient();
 
   // API calls
-  const { data: agents = [], isLoading: loadingAgents, refetch: refetchAgents } = useQuery({
+  const {
+    data: agents = [],
+    isLoading: loadingAgents,
+    refetch: refetchAgents,
+  } = useQuery({
     queryKey: ["agents"],
     queryFn: async () => {
       const response = await fetch("/api/agents");
@@ -137,7 +152,11 @@ export default function AgentChannelManager() {
     },
   });
 
-  const { data: overrides = [], isLoading: loadingOverrides, refetch: refetchOverrides } = useQuery({
+  const {
+    data: overrides = [],
+    isLoading: loadingOverrides,
+    refetch: refetchOverrides,
+  } = useQuery({
     queryKey: ["channel-overrides"],
     queryFn: async () => {
       const response = await fetch("/api/channel-overrides");
@@ -232,7 +251,13 @@ export default function AgentChannelManager() {
   });
 
   const updateOverrideMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: OverrideFormData }) => {
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: OverrideFormData;
+    }) => {
       const response = await fetch(`/api/channel-overrides/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -255,7 +280,9 @@ export default function AgentChannelManager() {
 
   const deleteOverrideMutation = useMutation({
     mutationFn: async (id: string) => {
-      const response = await fetch(`/api/channel-overrides/${id}`, { method: "DELETE" });
+      const response = await fetch(`/api/channel-overrides/${id}`, {
+        method: "DELETE",
+      });
       if (!response.ok) throw new Error("Failed to delete channel override");
     },
     onSuccess: () => {
@@ -302,7 +329,10 @@ export default function AgentChannelManager() {
     try {
       const validatedData = agentFormSchema.parse(values);
       if (editingAgent) {
-        await updateAgentMutation.mutateAsync({ id: editingAgent.id, data: validatedData });
+        await updateAgentMutation.mutateAsync({
+          id: editingAgent.id,
+          data: validatedData,
+        });
       } else {
         await createAgentMutation.mutateAsync(validatedData);
       }
@@ -319,7 +349,10 @@ export default function AgentChannelManager() {
     try {
       const validatedData = overrideFormSchema.parse(values);
       if (editingOverride) {
-        await updateOverrideMutation.mutateAsync({ id: editingOverride.id, data: validatedData });
+        await updateOverrideMutation.mutateAsync({
+          id: editingOverride.id,
+          data: validatedData,
+        });
       } else {
         await createOverrideMutation.mutateAsync(validatedData);
       }
@@ -359,9 +392,7 @@ export default function AgentChannelManager() {
       dataIndex: "tier",
       key: "tier",
       width: 100,
-      render: (tier: string) => (
-        <Tag color={getTierColor(tier)}>{tier}</Tag>
-      ),
+      render: (tier: string) => <Tag color={getTierColor(tier)}>{tier}</Tag>,
     },
     {
       title: "Channels",
@@ -370,7 +401,7 @@ export default function AgentChannelManager() {
       width: 120,
       render: (channels: string[]) => (
         <Space size={4}>
-          {channels.map(channel => (
+          {channels.map((channel) => (
             <Tooltip key={channel} title={channel}>
               <span>{getChannelIcon(channel)}</span>
             </Tooltip>
@@ -385,8 +416,10 @@ export default function AgentChannelManager() {
       width: 120,
       render: (pos: string[]) => (
         <Space size={4} wrap>
-          {pos.slice(0, 3).map(p => (
-            <Tag key={p} size="small">{p}</Tag>
+          {pos.slice(0, 3).map((p) => (
+            <Tag key={p} size="small">
+              {p}
+            </Tag>
           ))}
           {pos.length > 3 && <Tag size="small">+{pos.length - 3}</Tag>}
         </Space>
@@ -420,11 +453,7 @@ export default function AgentChannelManager() {
             onConfirm={() => deleteAgentMutation.mutate(record.id)}
           >
             <Tooltip title="Delete">
-              <AntButton
-                type="text"
-                icon={<DeleteOutlined />}
-                danger
-              />
+              <AntButton type="text" icon={<DeleteOutlined />} danger />
             </Tooltip>
           </Popconfirm>
         </Space>
@@ -459,7 +488,15 @@ export default function AgentChannelManager() {
       key: "productScope",
       width: 120,
       render: (scope: string) => (
-        <Tag color={scope === "FARE" ? "blue" : scope === "ANCILLARY" ? "orange" : "purple"}>
+        <Tag
+          color={
+            scope === "FARE"
+              ? "blue"
+              : scope === "ANCILLARY"
+                ? "orange"
+                : "purple"
+          }
+        >
           {scope}
         </Tag>
       ),
@@ -470,7 +507,8 @@ export default function AgentChannelManager() {
       width: 140,
       render: (record: ChannelOverride) => (
         <span>
-          {record.adjustmentType === "PERCENT" ? "%" : "$"}{record.adjustmentValue}
+          {record.adjustmentType === "PERCENT" ? "%" : "$"}
+          {record.adjustmentValue}
         </span>
       ),
     },
@@ -481,8 +519,10 @@ export default function AgentChannelManager() {
       width: 120,
       render: (pos: string[]) => (
         <Space size={4} wrap>
-          {pos.slice(0, 3).map(p => (
-            <Tag key={p} size="small">{p}</Tag>
+          {pos.slice(0, 3).map((p) => (
+            <Tag key={p} size="small">
+              {p}
+            </Tag>
           ))}
           {pos.length > 3 && <Tag size="small">+{pos.length - 3}</Tag>}
         </Space>
@@ -538,11 +578,7 @@ export default function AgentChannelManager() {
             onConfirm={() => deleteOverrideMutation.mutate(record.id)}
           >
             <Tooltip title="Delete">
-              <AntButton
-                type="text"
-                icon={<DeleteOutlined />}
-                danger
-              />
+              <AntButton type="text" icon={<DeleteOutlined />} danger />
             </Tooltip>
           </Popconfirm>
         </Space>
@@ -552,26 +588,6 @@ export default function AgentChannelManager() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold">Agent & Channel Manager</h1>
-          <p className="text-gray-600 mt-1">
-            Manage agent groups and distribution channel-specific rules
-          </p>
-        </div>
-        <Space>
-          <AntButton
-            icon={<ReloadOutlined />}
-            onClick={() => {
-              refetchAgents();
-              refetchOverrides();
-            }}
-          >
-            Refresh
-          </AntButton>
-        </Space>
-      </div>
-
       <Tabs
         activeKey={activeTab}
         onChange={setActiveTab}
@@ -696,10 +712,7 @@ export default function AgentChannelManager() {
 
           <Row gutter={16}>
             <Col span={12}>
-              <AntForm.Item
-                name="iataCode"
-                label="IATA Code (Optional)"
-              >
+              <AntForm.Item name="iataCode" label="IATA Code (Optional)">
                 <Input placeholder="1234567" />
               </AntForm.Item>
             </Col>
@@ -718,7 +731,9 @@ export default function AgentChannelManager() {
               <AntForm.Item
                 name="allowedChannels"
                 label="Allowed Channels"
-                rules={[{ required: true, message: "At least one channel required" }]}
+                rules={[
+                  { required: true, message: "At least one channel required" },
+                ]}
               >
                 <AntSelect mode="multiple" placeholder="Select channels">
                   {channels.map((channel) => (
@@ -736,7 +751,9 @@ export default function AgentChannelManager() {
               <AntForm.Item
                 name="pos"
                 label="Point of Sale"
-                rules={[{ required: true, message: "At least one POS required" }]}
+                rules={[
+                  { required: true, message: "At least one POS required" },
+                ]}
               >
                 <AntSelect mode="multiple" placeholder="Select regions">
                   {posList.map((pos) => (
@@ -753,10 +770,12 @@ export default function AgentChannelManager() {
             <AntButton onClick={() => setIsAgentModalVisible(false)}>
               Cancel
             </AntButton>
-            <AntButton 
-              type="primary" 
+            <AntButton
+              type="primary"
               htmlType="submit"
-              loading={createAgentMutation.isPending || updateAgentMutation.isPending}
+              loading={
+                createAgentMutation.isPending || updateAgentMutation.isPending
+              }
             >
               {editingAgent ? "Update" : "Create"} Agent
             </AntButton>
@@ -766,7 +785,11 @@ export default function AgentChannelManager() {
 
       {/* Channel Override Modal */}
       <Modal
-        title={editingOverride ? "Edit Channel Override" : "Create New Channel Override"}
+        title={
+          editingOverride
+            ? "Edit Channel Override"
+            : "Create New Channel Override"
+        }
         open={isOverrideModalVisible}
         onCancel={() => {
           setIsOverrideModalVisible(false);
@@ -813,7 +836,9 @@ export default function AgentChannelManager() {
               <AntForm.Item
                 name="productScope"
                 label="Product Scope"
-                rules={[{ required: true, message: "Product scope is required" }]}
+                rules={[
+                  { required: true, message: "Product scope is required" },
+                ]}
               >
                 <AntSelect placeholder="Select scope">
                   {productScopes.map((scope) => (
@@ -830,9 +855,9 @@ export default function AgentChannelManager() {
                 label="Priority"
                 rules={[{ required: true, message: "Priority is required" }]}
               >
-                <InputNumber 
-                  placeholder="1" 
-                  min={1} 
+                <InputNumber
+                  placeholder="1"
+                  min={1}
                   style={{ width: "100%" }}
                 />
               </AntForm.Item>
@@ -858,12 +883,16 @@ export default function AgentChannelManager() {
               <AntForm.Item
                 name="adjustmentType"
                 label="Adjustment Type"
-                rules={[{ required: true, message: "Adjustment type is required" }]}
+                rules={[
+                  { required: true, message: "Adjustment type is required" },
+                ]}
               >
                 <AntSelect placeholder="Select type">
                   {adjustmentTypes.map((type) => (
                     <AntSelect.Option key={type} value={type}>
-                      {type === "PERCENT" ? "Percentage (%)" : "Fixed Amount ($)"}
+                      {type === "PERCENT"
+                        ? "Percentage (%)"
+                        : "Fixed Amount ($)"}
                     </AntSelect.Option>
                   ))}
                 </AntSelect>
@@ -873,7 +902,9 @@ export default function AgentChannelManager() {
               <AntForm.Item
                 name="adjustmentValue"
                 label="Adjustment Value"
-                rules={[{ required: true, message: "Adjustment value is required" }]}
+                rules={[
+                  { required: true, message: "Adjustment value is required" },
+                ]}
               >
                 <Input placeholder="10.50" />
               </AntForm.Item>
@@ -885,7 +916,9 @@ export default function AgentChannelManager() {
               <AntForm.Item
                 name="validFrom"
                 label="Valid From"
-                rules={[{ required: true, message: "Valid from date is required" }]}
+                rules={[
+                  { required: true, message: "Valid from date is required" },
+                ]}
               >
                 <DatePicker style={{ width: "100%" }} />
               </AntForm.Item>
@@ -894,7 +927,9 @@ export default function AgentChannelManager() {
               <AntForm.Item
                 name="validTo"
                 label="Valid To"
-                rules={[{ required: true, message: "Valid to date is required" }]}
+                rules={[
+                  { required: true, message: "Valid to date is required" },
+                ]}
               >
                 <DatePicker style={{ width: "100%" }} />
               </AntForm.Item>
@@ -905,10 +940,13 @@ export default function AgentChannelManager() {
             <AntButton onClick={() => setIsOverrideModalVisible(false)}>
               Cancel
             </AntButton>
-            <AntButton 
-              type="primary" 
+            <AntButton
+              type="primary"
               htmlType="submit"
-              loading={createOverrideMutation.isPending || updateOverrideMutation.isPending}
+              loading={
+                createOverrideMutation.isPending ||
+                updateOverrideMutation.isPending
+              }
             >
               {editingOverride ? "Update" : "Create"} Override
             </AntButton>

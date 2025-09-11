@@ -1,19 +1,18 @@
-
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
-  Card as AntCard, 
-  Table, 
-  Button as AntButton, 
-  Space, 
-  Modal, 
-  Form as AntForm, 
-  Input, 
-  Select as AntSelect, 
-  InputNumber, 
-  message, 
-  Tabs, 
-  Tag, 
+import {
+  Card as AntCard,
+  Table,
+  Button as AntButton,
+  Space,
+  Modal,
+  Form as AntForm,
+  Input,
+  Select as AntSelect,
+  InputNumber,
+  message,
+  Tabs,
+  Tag,
   Tooltip,
   Row,
   Col,
@@ -25,13 +24,13 @@ import {
   Badge,
   Alert,
   Descriptions,
-  DatePicker
+  DatePicker,
 } from "antd";
-import { 
+import {
   TrophyOutlined,
-  PlusOutlined, 
-  EditOutlined, 
-  DeleteOutlined, 
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
   EyeOutlined,
   PlayCircleOutlined,
   DownloadOutlined,
@@ -43,7 +42,7 @@ import {
   BarChartOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
-  ExclamationCircleOutlined
+  ExclamationCircleOutlined,
 } from "@ant-design/icons";
 import { Trophy, Crown, Award, Medal } from "lucide-react";
 import dayjs from "dayjs";
@@ -64,10 +63,12 @@ const tierFormSchema = z.object({
     avgSearchesPerMonthMin: z.number().min(0),
     conversionPctMin: z.number().min(0).max(100),
   }),
-  defaultPricingPolicy: z.object({
-    type: z.enum(["PERCENT", "AMOUNT"]),
-    value: z.number(),
-  }).optional(),
+  defaultPricingPolicy: z
+    .object({
+      type: z.enum(["PERCENT", "AMOUNT"]),
+      value: z.number(),
+    })
+    .optional(),
   description: z.string().optional(),
   status: z.enum(["ACTIVE", "INACTIVE"]).default("ACTIVE"),
   createdBy: z.string().default("current-user"),
@@ -85,7 +86,9 @@ const overrideFormSchema = z.object({
   agentId: z.string().min(1, "Agent ID is required"),
   tierCode: z.enum(["PLATINUM", "GOLD", "SILVER", "BRONZE"]),
   effectiveFrom: z.string(),
-  justification: z.string().min(10, "Justification must be at least 10 characters"),
+  justification: z
+    .string()
+    .min(10, "Justification must be at least 10 characters"),
   assignedBy: z.string().default("current-user"),
 });
 
@@ -153,28 +156,38 @@ const reassignmentModes = ["AUTO", "REVIEW"];
 
 const getTierIcon = (tierCode: string) => {
   switch (tierCode) {
-    case "PLATINUM": return <Crown className="w-4 h-4" style={{ color: "#722ed1" }} />;
-    case "GOLD": return <Trophy className="w-4 h-4" style={{ color: "#faad14" }} />;
-    case "SILVER": return <Award className="w-4 h-4" style={{ color: "#8c8c8c" }} />;
-    case "BRONZE": return <Medal className="w-4 h-4" style={{ color: "#d4380d" }} />;
-    default: return <UserOutlined style={{ color: "#1890ff" }} />;
+    case "PLATINUM":
+      return <Crown className="w-4 h-4" style={{ color: "#722ed1" }} />;
+    case "GOLD":
+      return <Trophy className="w-4 h-4" style={{ color: "#faad14" }} />;
+    case "SILVER":
+      return <Award className="w-4 h-4" style={{ color: "#8c8c8c" }} />;
+    case "BRONZE":
+      return <Medal className="w-4 h-4" style={{ color: "#d4380d" }} />;
+    default:
+      return <UserOutlined style={{ color: "#1890ff" }} />;
   }
 };
 
 const getTierColor = (tierCode: string) => {
   switch (tierCode) {
-    case "PLATINUM": return "#722ed1";
-    case "GOLD": return "#faad14";
-    case "SILVER": return "#8c8c8c";
-    case "BRONZE": return "#d4380d";
-    default: return "#1890ff";
+    case "PLATINUM":
+      return "#722ed1";
+    case "GOLD":
+      return "#faad14";
+    case "SILVER":
+      return "#8c8c8c";
+    case "BRONZE":
+      return "#d4380d";
+    default:
+      return "#1890ff";
   }
 };
 
 const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(value);
@@ -186,10 +199,14 @@ export default function AgentTierManager() {
   const [isTierModalVisible, setIsTierModalVisible] = useState(false);
   const [isEngineModalVisible, setIsEngineModalVisible] = useState(false);
   const [isOverrideModalVisible, setIsOverrideModalVisible] = useState(false);
-  const [isAssignmentModalVisible, setIsAssignmentModalVisible] = useState(false);
-  const [isEvaluationModalVisible, setIsEvaluationModalVisible] = useState(false);
+  const [isAssignmentModalVisible, setIsAssignmentModalVisible] =
+    useState(false);
+  const [isEvaluationModalVisible, setIsEvaluationModalVisible] =
+    useState(false);
   const [editingTier, setEditingTier] = useState<AgentTier | null>(null);
-  const [editingEngine, setEditingEngine] = useState<AssignmentEngine | null>(null);
+  const [editingEngine, setEditingEngine] = useState<AssignmentEngine | null>(
+    null,
+  );
   const [selectedTier, setSelectedTier] = useState<AgentTier | null>(null);
   const [evaluationResult, setEvaluationResult] = useState<any>(null);
 
@@ -201,31 +218,43 @@ export default function AgentTierManager() {
   const [evaluationForm] = AntForm.useForm();
 
   // Data fetching
-  const { data: tiers = [], isLoading: tiersLoading, refetch: refetchTiers } = useQuery({
+  const {
+    data: tiers = [],
+    isLoading: tiersLoading,
+    refetch: refetchTiers,
+  } = useQuery({
     queryKey: ["/api/tiers"],
     queryFn: async () => {
       const response = await fetch("/api/tiers");
       if (!response.ok) throw new Error("Failed to fetch tiers");
       return response.json();
-    }
+    },
   });
 
-  const { data: assignments = [], isLoading: assignmentsLoading, refetch: refetchAssignments } = useQuery({
+  const {
+    data: assignments = [],
+    isLoading: assignmentsLoading,
+    refetch: refetchAssignments,
+  } = useQuery({
     queryKey: ["/api/tiers/assignments"],
     queryFn: async () => {
       const response = await fetch("/api/tiers/assignments");
       if (!response.ok) throw new Error("Failed to fetch assignments");
       return response.json();
-    }
+    },
   });
 
-  const { data: engines = [], isLoading: enginesLoading, refetch: refetchEngines } = useQuery({
+  const {
+    data: engines = [],
+    isLoading: enginesLoading,
+    refetch: refetchEngines,
+  } = useQuery({
     queryKey: ["/api/tiers/engines"],
     queryFn: async () => {
       const response = await fetch("/api/tiers/engines");
       if (!response.ok) throw new Error("Failed to fetch engines");
       return response.json();
-    }
+    },
   });
 
   // Mutations
@@ -250,7 +279,7 @@ export default function AgentTierManager() {
     },
     onError: (error: Error) => {
       message.error(error.message);
-    }
+    },
   });
 
   const updateTierMutation = useMutation({
@@ -272,7 +301,7 @@ export default function AgentTierManager() {
     },
     onError: (error: Error) => {
       message.error(error.message);
-    }
+    },
   });
 
   const deleteTierMutation = useMutation({
@@ -288,7 +317,7 @@ export default function AgentTierManager() {
     },
     onError: (error: Error) => {
       message.error(error.message);
-    }
+    },
   });
 
   const createEngineMutation = useMutation({
@@ -309,7 +338,7 @@ export default function AgentTierManager() {
     },
     onError: (error: Error) => {
       message.error(error.message);
-    }
+    },
   });
 
   const overrideTierMutation = useMutation({
@@ -330,7 +359,7 @@ export default function AgentTierManager() {
     },
     onError: (error: Error) => {
       message.error(error.message);
-    }
+    },
   });
 
   const bulkAssignMutation = useMutation({
@@ -344,14 +373,16 @@ export default function AgentTierManager() {
       return response.json();
     },
     onSuccess: (result) => {
-      message.success(`Successfully processed ${result.assignments} tier assignments`);
+      message.success(
+        `Successfully processed ${result.assignments} tier assignments`,
+      );
       setIsAssignmentModalVisible(false);
       assignmentForm.resetFields();
       refetchAssignments();
     },
     onError: (error: Error) => {
       message.error(error.message);
-    }
+    },
   });
 
   const evaluateTierMutation = useMutation({
@@ -370,7 +401,7 @@ export default function AgentTierManager() {
     },
     onError: (error: Error) => {
       message.error(error.message);
-    }
+    },
   });
 
   // Event handlers
@@ -404,7 +435,7 @@ export default function AgentTierManager() {
     try {
       const validatedData = overrideFormSchema.parse({
         ...values,
-        effectiveFrom: values.effectiveFrom.format('YYYY-MM-DD'),
+        effectiveFrom: values.effectiveFrom.format("YYYY-MM-DD"),
       });
       overrideTierMutation.mutate(validatedData);
     } catch (error: any) {
@@ -414,11 +445,14 @@ export default function AgentTierManager() {
 
   const handleBulkAssignment = async (values: any) => {
     try {
-      const agentIds = values.agentIds.split('\n').map((id: string) => id.trim()).filter(Boolean);
+      const agentIds = values.agentIds
+        .split("\n")
+        .map((id: string) => id.trim())
+        .filter(Boolean);
       bulkAssignMutation.mutate({
         agentIds,
-        effectiveFrom: values.effectiveFrom.format('YYYY-MM-DD'),
-        assignedBy: 'current-user'
+        effectiveFrom: values.effectiveFrom.format("YYYY-MM-DD"),
+        assignedBy: "current-user",
       });
     } catch (error: any) {
       message.error("Validation failed");
@@ -467,17 +501,20 @@ export default function AgentTierManager() {
     {
       title: "Min Booking Value",
       key: "minBookingValue",
-      render: (record: AgentTier) => formatCurrency(record.kpiThresholds.totalBookingValueMin),
+      render: (record: AgentTier) =>
+        formatCurrency(record.kpiThresholds.totalBookingValueMin),
     },
     {
       title: "Min Bookings",
       key: "minBookings",
-      render: (record: AgentTier) => record.kpiThresholds.totalBookingsMin.toLocaleString(),
+      render: (record: AgentTier) =>
+        record.kpiThresholds.totalBookingsMin.toLocaleString(),
     },
     {
       title: "Min Conversion %",
       key: "minConversion",
-      render: (record: AgentTier) => `${record.kpiThresholds.conversionPctMin}%`,
+      render: (record: AgentTier) =>
+        `${record.kpiThresholds.conversionPctMin}%`,
     },
     {
       title: "Default Policy",
@@ -487,7 +524,9 @@ export default function AgentTierManager() {
         const { type, value } = record.defaultPricingPolicy;
         return (
           <Tag color={value < 0 ? "green" : value > 0 ? "red" : "blue"}>
-            {value > 0 ? "+" : ""}{value}{type === "PERCENT" ? "%" : " USD"}
+            {value > 0 ? "+" : ""}
+            {value}
+            {type === "PERCENT" ? "%" : " USD"}
           </Tag>
         );
       },
@@ -497,8 +536,8 @@ export default function AgentTierManager() {
       dataIndex: "status",
       key: "status",
       render: (status: string) => (
-        <Badge 
-          status={status === "ACTIVE" ? "success" : "default"} 
+        <Badge
+          status={status === "ACTIVE" ? "success" : "default"}
           text={status}
         />
       ),
@@ -509,16 +548,16 @@ export default function AgentTierManager() {
       render: (record: AgentTier) => (
         <Space>
           <Tooltip title="View Details">
-            <AntButton 
-              icon={<EyeOutlined />} 
-              size="small" 
+            <AntButton
+              icon={<EyeOutlined />}
+              size="small"
               onClick={() => handleViewTier(record)}
             />
           </Tooltip>
           <Tooltip title="Edit Tier">
-            <AntButton 
-              icon={<EditOutlined />} 
-              size="small" 
+            <AntButton
+              icon={<EditOutlined />}
+              size="small"
               onClick={() => handleEditTier(record)}
             />
           </Tooltip>
@@ -527,11 +566,7 @@ export default function AgentTierManager() {
             onConfirm={() => deleteTierMutation.mutate(record.id)}
           >
             <Tooltip title="Delete Tier">
-              <AntButton 
-                icon={<DeleteOutlined />} 
-                size="small" 
-                danger
-              />
+              <AntButton icon={<DeleteOutlined />} size="small" danger />
             </Tooltip>
           </Popconfirm>
         </Space>
@@ -576,7 +611,8 @@ export default function AgentTierManager() {
       title: "Effective To",
       dataIndex: "effectiveTo",
       key: "effectiveTo",
-      render: (date?: string) => date ? dayjs(date).format("MMM DD, YYYY") : "Current",
+      render: (date?: string) =>
+        date ? dayjs(date).format("MMM DD, YYYY") : "Current",
     },
     {
       title: "Assigned By",
@@ -588,8 +624,8 @@ export default function AgentTierManager() {
       dataIndex: "status",
       key: "status",
       render: (status: string) => (
-        <Badge 
-          status={status === "ACTIVE" ? "success" : "default"} 
+        <Badge
+          status={status === "ACTIVE" ? "success" : "default"}
           text={status}
         />
       ),
@@ -612,7 +648,9 @@ export default function AgentTierManager() {
       title: "Schedule",
       dataIndex: "schedule",
       key: "schedule",
-      render: (schedule: string) => <code className="bg-gray-100 px-2 py-1 rounded">{schedule}</code>,
+      render: (schedule: string) => (
+        <code className="bg-gray-100 px-2 py-1 rounded">{schedule}</code>
+      ),
     },
     {
       title: "Mode",
@@ -627,8 +665,8 @@ export default function AgentTierManager() {
       dataIndex: "overrideAllowed",
       key: "overrideAllowed",
       render: (allowed: string) => (
-        <Badge 
-          status={allowed === "true" ? "success" : "error"} 
+        <Badge
+          status={allowed === "true" ? "success" : "error"}
           text={allowed === "true" ? "Yes" : "No"}
         />
       ),
@@ -637,21 +675,23 @@ export default function AgentTierManager() {
       title: "Last Run",
       dataIndex: "lastRunAt",
       key: "lastRunAt",
-      render: (date?: string) => date ? dayjs(date).format("MMM DD, YYYY HH:mm") : "Never",
+      render: (date?: string) =>
+        date ? dayjs(date).format("MMM DD, YYYY HH:mm") : "Never",
     },
     {
       title: "Next Run",
       dataIndex: "nextRunAt",
       key: "nextRunAt",
-      render: (date?: string) => date ? dayjs(date).format("MMM DD, YYYY HH:mm") : "Not Scheduled",
+      render: (date?: string) =>
+        date ? dayjs(date).format("MMM DD, YYYY HH:mm") : "Not Scheduled",
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
       render: (status: string) => (
-        <Badge 
-          status={status === "ACTIVE" ? "success" : "default"} 
+        <Badge
+          status={status === "ACTIVE" ? "success" : "default"}
           text={status}
         />
       ),
@@ -662,9 +702,9 @@ export default function AgentTierManager() {
       render: (record: AssignmentEngine) => (
         <Space>
           <Tooltip title="Edit Engine">
-            <AntButton 
-              icon={<EditOutlined />} 
-              size="small" 
+            <AntButton
+              icon={<EditOutlined />}
+              size="small"
               onClick={() => {
                 setEditingEngine(record);
                 engineForm.setFieldsValue(record);
@@ -675,19 +715,16 @@ export default function AgentTierManager() {
           <Popconfirm
             title="Are you sure you want to delete this engine?"
             onConfirm={() => {
-              fetch(`/api/tiers/engines/${record.id}`, { method: 'DELETE' })
-                .then(() => {
-                  message.success('Engine deleted successfully');
-                  refetchEngines();
-                });
+              fetch(`/api/tiers/engines/${record.id}`, {
+                method: "DELETE",
+              }).then(() => {
+                message.success("Engine deleted successfully");
+                refetchEngines();
+              });
             }}
           >
             <Tooltip title="Delete Engine">
-              <AntButton 
-                icon={<DeleteOutlined />} 
-                size="small" 
-                danger
-              />
+              <AntButton icon={<DeleteOutlined />} size="small" danger />
             </Tooltip>
           </Popconfirm>
         </Space>
@@ -701,26 +738,20 @@ export default function AgentTierManager() {
     return acc;
   }, {});
 
-  const activeAssignments = assignments.filter((a: TierAssignment) => a.status === "ACTIVE");
-  const assignmentStats = activeAssignments.reduce((acc: any, assignment: TierAssignment) => {
-    acc[assignment.tierCode] = (acc[assignment.tierCode] || 0) + 1;
-    return acc;
-  }, {});
+  const activeAssignments = assignments.filter(
+    (a: TierAssignment) => a.status === "ACTIVE",
+  );
+  const assignmentStats = activeAssignments.reduce(
+    (acc: any, assignment: TierAssignment) => {
+      acc[assignment.tierCode] = (acc[assignment.tierCode] || 0) + 1;
+      return acc;
+    },
+    {},
+  );
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Trophy className="w-6 h-6 text-primary" />
-            Agent Tier Manager
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Define agent tiers with eligibility rules based on KPIs and manage tier assignments.
-          </p>
-        </div>
-      </div>
 
       {/* Statistics Cards */}
       <Row gutter={16}>
@@ -730,7 +761,7 @@ export default function AgentTierManager() {
               title="Total Tiers"
               value={tiers.length}
               prefix={<TrophyOutlined />}
-              valueStyle={{ color: '#3f8600' }}
+              valueStyle={{ color: "#3f8600" }}
             />
           </AntCard>
         </Col>
@@ -740,7 +771,7 @@ export default function AgentTierManager() {
               title="Active Assignments"
               value={activeAssignments.length}
               prefix={<UserOutlined />}
-              valueStyle={{ color: '#1890ff' }}
+              valueStyle={{ color: "#1890ff" }}
             />
           </AntCard>
         </Col>
@@ -750,7 +781,7 @@ export default function AgentTierManager() {
               title="Assignment Engines"
               value={engines.length}
               prefix={<SettingOutlined />}
-              valueStyle={{ color: '#722ed1' }}
+              valueStyle={{ color: "#722ed1" }}
             />
           </AntCard>
         </Col>
@@ -758,27 +789,38 @@ export default function AgentTierManager() {
           <AntCard>
             <Statistic
               title="Manual Overrides"
-              value={assignments.filter((a: TierAssignment) => a.assignmentType === "MANUAL_OVERRIDE").length}
+              value={
+                assignments.filter(
+                  (a: TierAssignment) => a.assignmentType === "MANUAL_OVERRIDE",
+                ).length
+              }
               prefix={<ExclamationCircleOutlined />}
-              valueStyle={{ color: '#fa8c16' }}
+              valueStyle={{ color: "#fa8c16" }}
             />
           </AntCard>
         </Col>
       </Row>
 
       {/* Main Content */}
-      <Tabs activeKey={activeTab} onChange={setActiveTab} className="bg-white p-4 rounded-lg">
+      <Tabs
+        activeKey={activeTab}
+        onChange={setActiveTab}
+        className="bg-white p-4 rounded-lg"
+      >
         <TabPane tab="Tier Definitions" key="tiers">
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <div>
-                <h3 className="text-lg font-semibold">Agent Tier Definitions</h3>
+                <h3 className="text-lg font-semibold">
+                  Agent Tier Definitions
+                </h3>
                 <p className="text-sm text-muted-foreground">
-                  Define tier criteria and KPI thresholds for automatic agent classification.
+                  Define tier criteria and KPI thresholds for automatic agent
+                  classification.
                 </p>
               </div>
-              <AntButton 
-                type="primary" 
+              <AntButton
+                type="primary"
                 icon={<PlusOutlined />}
                 onClick={() => {
                   setEditingTier(null);
@@ -810,14 +852,14 @@ export default function AgentTierManager() {
                 </p>
               </div>
               <Space>
-                <AntButton 
+                <AntButton
                   icon={<PlayCircleOutlined />}
                   onClick={() => setIsAssignmentModalVisible(true)}
                 >
                   Bulk Assign
                 </AntButton>
-                <AntButton 
-                  type="primary" 
+                <AntButton
+                  type="primary"
                   icon={<EditOutlined />}
                   onClick={() => setIsOverrideModalVisible(true)}
                 >
@@ -828,7 +870,7 @@ export default function AgentTierManager() {
 
             {/* Assignment Statistics */}
             <Row gutter={16} className="mb-4">
-              {tierCodes.map(tierCode => (
+              {tierCodes.map((tierCode) => (
                 <Col span={6} key={tierCode}>
                   <AntCard size="small">
                     <div className="flex items-center justify-between">
@@ -836,8 +878,8 @@ export default function AgentTierManager() {
                         {getTierIcon(tierCode)}
                         <span className="font-medium">{tierCode}</span>
                       </div>
-                      <Badge 
-                        count={assignmentStats[tierCode] || 0} 
+                      <Badge
+                        count={assignmentStats[tierCode] || 0}
                         style={{ backgroundColor: getTierColor(tierCode) }}
                       />
                     </div>
@@ -860,13 +902,15 @@ export default function AgentTierManager() {
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <div>
-                <h3 className="text-lg font-semibold">Tier Assignment Engines</h3>
+                <h3 className="text-lg font-semibold">
+                  Tier Assignment Engines
+                </h3>
                 <p className="text-sm text-muted-foreground">
                   Configure automated tier assignment schedules and policies.
                 </p>
               </div>
-              <AntButton 
-                type="primary" 
+              <AntButton
+                type="primary"
                 icon={<PlusOutlined />}
                 onClick={() => {
                   setEditingEngine(null);
@@ -893,7 +937,8 @@ export default function AgentTierManager() {
             <div>
               <h3 className="text-lg font-semibold">Agent Tier Evaluation</h3>
               <p className="text-sm text-muted-foreground">
-                Evaluate individual agents against tier criteria and preview tier recommendations.
+                Evaluate individual agents against tier criteria and preview
+                tier recommendations.
               </p>
             </div>
 
@@ -912,16 +957,23 @@ export default function AgentTierManager() {
                 </AntForm.Item>
                 <AntForm.Item
                   name="window"
-                  rules={[{ required: true, message: "KPI window is required" }]}
+                  rules={[
+                    { required: true, message: "KPI window is required" },
+                  ]}
                 >
-                  <AntSelect placeholder="Select KPI Window" style={{ width: 150 }}>
+                  <AntSelect
+                    placeholder="Select KPI Window"
+                    style={{ width: 150 }}
+                  >
                     <AntSelect.Option value="MONTHLY">Monthly</AntSelect.Option>
-                    <AntSelect.Option value="QUARTERLY">Quarterly</AntSelect.Option>
+                    <AntSelect.Option value="QUARTERLY">
+                      Quarterly
+                    </AntSelect.Option>
                   </AntSelect>
                 </AntForm.Item>
                 <AntForm.Item>
-                  <AntButton 
-                    type="primary" 
+                  <AntButton
+                    type="primary"
                     htmlType="submit"
                     loading={evaluateTierMutation.isPending}
                     icon={<BarChartOutlined />}
@@ -935,16 +987,20 @@ export default function AgentTierManager() {
                 <div className="space-y-4">
                   <Alert
                     message={
-                      evaluationResult.tierChangeRequired 
-                        ? "Tier Change Recommended" 
+                      evaluationResult.tierChangeRequired
+                        ? "Tier Change Recommended"
                         : "No Tier Change Needed"
                     }
                     description={
                       evaluationResult.tierChangeRequired
-                        ? `Agent should be upgraded/downgraded from ${evaluationResult.currentTier || 'No Tier'} to ${evaluationResult.recommendedTier}`
+                        ? `Agent should be upgraded/downgraded from ${evaluationResult.currentTier || "No Tier"} to ${evaluationResult.recommendedTier}`
                         : `Agent remains in ${evaluationResult.currentTier} tier`
                     }
-                    type={evaluationResult.tierChangeRequired ? "warning" : "success"}
+                    type={
+                      evaluationResult.tierChangeRequired
+                        ? "warning"
+                        : "success"
+                    }
                     showIcon
                   />
 
@@ -953,7 +1009,9 @@ export default function AgentTierManager() {
                       <AntCard title="Current KPI Performance" size="small">
                         <Descriptions column={1} size="small">
                           <Descriptions.Item label="Booking Value">
-                            {formatCurrency(evaluationResult.kpiData.totalBookingValue)}
+                            {formatCurrency(
+                              evaluationResult.kpiData.totalBookingValue,
+                            )}
                           </Descriptions.Item>
                           <Descriptions.Item label="Total Bookings">
                             {evaluationResult.kpiData.totalBookings.toLocaleString()}
@@ -974,20 +1032,36 @@ export default function AgentTierManager() {
                       <AntCard title="Tier Recommendation" size="small">
                         <div className="flex items-center gap-4">
                           <div className="text-center">
-                            <div className="text-sm text-gray-500 mb-1">Current</div>
+                            <div className="text-sm text-gray-500 mb-1">
+                              Current
+                            </div>
                             <div className="flex items-center gap-2">
-                              {evaluationResult.currentTier ? getTierIcon(evaluationResult.currentTier) : "-"}
-                              <Tag color={evaluationResult.currentTier ? getTierColor(evaluationResult.currentTier) : "default"}>
+                              {evaluationResult.currentTier
+                                ? getTierIcon(evaluationResult.currentTier)
+                                : "-"}
+                              <Tag
+                                color={
+                                  evaluationResult.currentTier
+                                    ? getTierColor(evaluationResult.currentTier)
+                                    : "default"
+                                }
+                              >
                                 {evaluationResult.currentTier || "No Tier"}
                               </Tag>
                             </div>
                           </div>
                           <div>→</div>
                           <div className="text-center">
-                            <div className="text-sm text-gray-500 mb-1">Recommended</div>
+                            <div className="text-sm text-gray-500 mb-1">
+                              Recommended
+                            </div>
                             <div className="flex items-center gap-2">
                               {getTierIcon(evaluationResult.recommendedTier)}
-                              <Tag color={getTierColor(evaluationResult.recommendedTier)}>
+                              <Tag
+                                color={getTierColor(
+                                  evaluationResult.recommendedTier,
+                                )}
+                              >
                                 {evaluationResult.recommendedTier}
                               </Tag>
                             </div>
@@ -1044,7 +1118,9 @@ export default function AgentTierManager() {
               <AntForm.Item
                 name="displayName"
                 label="Display Name"
-                rules={[{ required: true, message: "Display name is required" }]}
+                rules={[
+                  { required: true, message: "Display name is required" },
+                ]}
               >
                 <Input placeholder="e.g., Platinum Elite" />
               </AntForm.Item>
@@ -1086,56 +1162,76 @@ export default function AgentTierManager() {
             <Row gutter={16}>
               <Col span={12}>
                 <AntForm.Item
-                  name={['kpiThresholds', 'totalBookingValueMin']}
+                  name={["kpiThresholds", "totalBookingValueMin"]}
                   label="Min Total Booking Value ($)"
                   rules={[{ required: true, message: "Required" }]}
                 >
                   <InputNumber
                     placeholder="50000000"
                     min={0}
-                    formatter={value => `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                    parser={value => value!.replace(/\$\s?|(,*)/g, '') as any}
+                    formatter={(value) =>
+                      `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    }
+                    parser={(value) => value!.replace(/\$\s?|(,*)/g, "") as any}
                     style={{ width: "100%" }}
                   />
                 </AntForm.Item>
               </Col>
               <Col span={12}>
                 <AntForm.Item
-                  name={['kpiThresholds', 'totalBookingsMin']}
+                  name={["kpiThresholds", "totalBookingsMin"]}
                   label="Min Total Bookings"
                   rules={[{ required: true, message: "Required" }]}
                 >
-                  <InputNumber placeholder="1500" min={0} style={{ width: "100%" }} />
+                  <InputNumber
+                    placeholder="1500"
+                    min={0}
+                    style={{ width: "100%" }}
+                  />
                 </AntForm.Item>
               </Col>
             </Row>
             <Row gutter={16}>
               <Col span={12}>
                 <AntForm.Item
-                  name={['kpiThresholds', 'avgBookingsPerMonthMin']}
+                  name={["kpiThresholds", "avgBookingsPerMonthMin"]}
                   label="Min Avg Bookings/Month"
                   rules={[{ required: true, message: "Required" }]}
                 >
-                  <InputNumber placeholder="400" min={0} style={{ width: "100%" }} />
+                  <InputNumber
+                    placeholder="400"
+                    min={0}
+                    style={{ width: "100%" }}
+                  />
                 </AntForm.Item>
               </Col>
               <Col span={12}>
                 <AntForm.Item
-                  name={['kpiThresholds', 'avgSearchesPerMonthMin']}
+                  name={["kpiThresholds", "avgSearchesPerMonthMin"]}
                   label="Min Avg Searches/Month"
                   rules={[{ required: true, message: "Required" }]}
                 >
-                  <InputNumber placeholder="5000" min={0} style={{ width: "100%" }} />
+                  <InputNumber
+                    placeholder="5000"
+                    min={0}
+                    style={{ width: "100%" }}
+                  />
                 </AntForm.Item>
               </Col>
             </Row>
             <Col span={12}>
               <AntForm.Item
-                name={['kpiThresholds', 'conversionPctMin']}
+                name={["kpiThresholds", "conversionPctMin"]}
                 label="Min Conversion Rate (%)"
                 rules={[{ required: true, message: "Required" }]}
               >
-                <InputNumber placeholder="8.0" min={0} max={100} step={0.1} style={{ width: "100%" }} />
+                <InputNumber
+                  placeholder="8.0"
+                  min={0}
+                  max={100}
+                  step={0.1}
+                  style={{ width: "100%" }}
+                />
               </AntForm.Item>
             </Col>
           </div>
@@ -1145,21 +1241,23 @@ export default function AgentTierManager() {
             <Row gutter={16}>
               <Col span={12}>
                 <AntForm.Item
-                  name={['defaultPricingPolicy', 'type']}
+                  name={["defaultPricingPolicy", "type"]}
                   label="Adjustment Type"
                 >
                   <AntSelect placeholder="Select type">
-                    <AntSelect.Option value="PERCENT">Percentage</AntSelect.Option>
+                    <AntSelect.Option value="PERCENT">
+                      Percentage
+                    </AntSelect.Option>
                     <AntSelect.Option value="AMOUNT">Amount</AntSelect.Option>
                   </AntSelect>
                 </AntForm.Item>
               </Col>
               <Col span={12}>
                 <AntForm.Item
-                  name={['defaultPricingPolicy', 'value']}
+                  name={["defaultPricingPolicy", "value"]}
                   label="Adjustment Value"
                 >
-                  <InputNumber 
+                  <InputNumber
                     placeholder="-2 (discount) or +1 (markup)"
                     step={0.1}
                     style={{ width: "100%" }}
@@ -1169,21 +1267,14 @@ export default function AgentTierManager() {
             </Row>
           </div>
 
-          <AntForm.Item
-            name="description"
-            label="Description"
-          >
-            <Input.TextArea 
+          <AntForm.Item name="description" label="Description">
+            <Input.TextArea
               placeholder="Optional description of this tier..."
               rows={3}
             />
           </AntForm.Item>
 
-          <AntForm.Item
-            name="createdBy"
-            initialValue="current-user"
-            hidden
-          >
+          <AntForm.Item name="createdBy" initialValue="current-user" hidden>
             <Input />
           </AntForm.Item>
 
@@ -1191,10 +1282,14 @@ export default function AgentTierManager() {
             <AntButton onClick={() => setIsTierModalVisible(false)}>
               Cancel
             </AntButton>
-            <AntButton 
-              type="primary" 
+            <AntButton
+              type="primary"
               htmlType="submit"
-              loading={editingTier ? updateTierMutation.isPending : createTierMutation.isPending}
+              loading={
+                editingTier
+                  ? updateTierMutation.isPending
+                  : createTierMutation.isPending
+              }
             >
               {editingTier ? "Update Tier" : "Create Tier"}
             </AntButton>
@@ -1204,7 +1299,9 @@ export default function AgentTierManager() {
 
       {/* Assignment Engine Modal */}
       <Modal
-        title={editingEngine ? "Edit Assignment Engine" : "Create Assignment Engine"}
+        title={
+          editingEngine ? "Edit Assignment Engine" : "Create Assignment Engine"
+        }
         open={isEngineModalVisible}
         onCancel={() => {
           setIsEngineModalVisible(false);
@@ -1256,7 +1353,9 @@ export default function AgentTierManager() {
               <AntForm.Item
                 name="overrideAllowed"
                 label="Override Allowed"
-                rules={[{ required: true, message: "Override setting is required" }]}
+                rules={[
+                  { required: true, message: "Override setting is required" },
+                ]}
               >
                 <AntSelect placeholder="Select option">
                   <AntSelect.Option value="true">Yes</AntSelect.Option>
@@ -1266,11 +1365,7 @@ export default function AgentTierManager() {
             </Col>
           </Row>
 
-          <AntForm.Item
-            name="createdBy"
-            initialValue="current-user"
-            hidden
-          >
+          <AntForm.Item name="createdBy" initialValue="current-user" hidden>
             <Input />
           </AntForm.Item>
 
@@ -1278,8 +1373,8 @@ export default function AgentTierManager() {
             <AntButton onClick={() => setIsEngineModalVisible(false)}>
               Cancel
             </AntButton>
-            <AntButton 
-              type="primary" 
+            <AntButton
+              type="primary"
               htmlType="submit"
               loading={createEngineMutation.isPending}
             >
@@ -1349,9 +1444,11 @@ export default function AgentTierManager() {
             label="Effective From"
             rules={[{ required: true, message: "Effective date is required" }]}
           >
-            <DatePicker 
-              style={{ width: "100%" }} 
-              disabledDate={(current) => current && current < dayjs().startOf('day')}
+            <DatePicker
+              style={{ width: "100%" }}
+              disabledDate={(current) =>
+                current && current < dayjs().startOf("day")
+              }
             />
           </AntForm.Item>
 
@@ -1360,20 +1457,19 @@ export default function AgentTierManager() {
             label="Justification"
             rules={[
               { required: true, message: "Justification is required" },
-              { min: 10, message: "Justification must be at least 10 characters" }
+              {
+                min: 10,
+                message: "Justification must be at least 10 characters",
+              },
             ]}
           >
-            <Input.TextArea 
+            <Input.TextArea
               placeholder="Provide detailed justification for this manual tier override..."
               rows={4}
             />
           </AntForm.Item>
 
-          <AntForm.Item
-            name="assignedBy"
-            initialValue="current-user"
-            hidden
-          >
+          <AntForm.Item name="assignedBy" initialValue="current-user" hidden>
             <Input />
           </AntForm.Item>
 
@@ -1381,8 +1477,8 @@ export default function AgentTierManager() {
             <AntButton onClick={() => setIsOverrideModalVisible(false)}>
               Cancel
             </AntButton>
-            <AntButton 
-              type="primary" 
+            <AntButton
+              type="primary"
               htmlType="submit"
               loading={overrideTierMutation.isPending}
             >
@@ -1420,9 +1516,11 @@ export default function AgentTierManager() {
           <AntForm.Item
             name="agentIds"
             label="Agent IDs"
-            rules={[{ required: true, message: "At least one Agent ID is required" }]}
+            rules={[
+              { required: true, message: "At least one Agent ID is required" },
+            ]}
           >
-            <Input.TextArea 
+            <Input.TextArea
               placeholder="Enter Agent IDs (one per line)&#10;AGT001&#10;AGT002&#10;AGT003"
               rows={6}
             />
@@ -1434,17 +1532,15 @@ export default function AgentTierManager() {
             rules={[{ required: true, message: "Effective date is required" }]}
             initialValue={dayjs()}
           >
-            <DatePicker 
-              style={{ width: "100%" }}
-            />
+            <DatePicker style={{ width: "100%" }} />
           </AntForm.Item>
 
           <div className="flex justify-end gap-2">
             <AntButton onClick={() => setIsAssignmentModalVisible(false)}>
               Cancel
             </AntButton>
-            <AntButton 
-              type="primary" 
+            <AntButton
+              type="primary"
               htmlType="submit"
               loading={bulkAssignMutation.isPending}
             >
@@ -1462,7 +1558,7 @@ export default function AgentTierManager() {
         footer={[
           <AntButton key="close" onClick={() => setSelectedTier(null)}>
             Close
-          </AntButton>
+          </AntButton>,
         ]}
         width={700}
       >
@@ -1471,22 +1567,33 @@ export default function AgentTierManager() {
             <div className="flex items-center gap-4">
               {getTierIcon(selectedTier.tierCode)}
               <div>
-                <h3 className="text-lg font-semibold">{selectedTier.displayName}</h3>
+                <h3 className="text-lg font-semibold">
+                  {selectedTier.displayName}
+                </h3>
                 <p className="text-sm text-gray-500">
                   {selectedTier.tierCode} • {selectedTier.kpiWindow} Evaluation
                 </p>
               </div>
               <div className="ml-auto">
-                <Badge 
-                  status={selectedTier.status === "ACTIVE" ? "success" : "default"} 
+                <Badge
+                  status={
+                    selectedTier.status === "ACTIVE" ? "success" : "default"
+                  }
                   text={selectedTier.status}
                 />
               </div>
             </div>
 
-            <Descriptions title="KPI Thresholds" column={2} bordered size="small">
+            <Descriptions
+              title="KPI Thresholds"
+              column={2}
+              bordered
+              size="small"
+            >
               <Descriptions.Item label="Min Booking Value">
-                {formatCurrency(selectedTier.kpiThresholds.totalBookingValueMin)}
+                {formatCurrency(
+                  selectedTier.kpiThresholds.totalBookingValueMin,
+                )}
               </Descriptions.Item>
               <Descriptions.Item label="Min Total Bookings">
                 {selectedTier.kpiThresholds.totalBookingsMin.toLocaleString()}
@@ -1502,18 +1609,33 @@ export default function AgentTierManager() {
               </Descriptions.Item>
               <Descriptions.Item label="Default Policy">
                 {selectedTier.defaultPricingPolicy ? (
-                  <Tag color={selectedTier.defaultPricingPolicy.value < 0 ? "green" : selectedTier.defaultPricingPolicy.value > 0 ? "red" : "blue"}>
-                    {selectedTier.defaultPricingPolicy.value > 0 ? "+" : ""}{selectedTier.defaultPricingPolicy.value}
-                    {selectedTier.defaultPricingPolicy.type === "PERCENT" ? "%" : " USD"}
+                  <Tag
+                    color={
+                      selectedTier.defaultPricingPolicy.value < 0
+                        ? "green"
+                        : selectedTier.defaultPricingPolicy.value > 0
+                          ? "red"
+                          : "blue"
+                    }
+                  >
+                    {selectedTier.defaultPricingPolicy.value > 0 ? "+" : ""}
+                    {selectedTier.defaultPricingPolicy.value}
+                    {selectedTier.defaultPricingPolicy.type === "PERCENT"
+                      ? "%"
+                      : " USD"}
                   </Tag>
-                ) : "-"}
+                ) : (
+                  "-"
+                )}
               </Descriptions.Item>
             </Descriptions>
 
             {selectedTier.description && (
               <div>
                 <h4 className="font-medium mb-2">Description</h4>
-                <p className="text-sm text-gray-600">{selectedTier.description}</p>
+                <p className="text-sm text-gray-600">
+                  {selectedTier.description}
+                </p>
               </div>
             )}
 

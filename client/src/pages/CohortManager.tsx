@@ -1,60 +1,64 @@
-
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  Edit, 
-  Trash2, 
-  Eye, 
-  Users, 
+import {
+  Plus,
+  Search,
+  Filter,
+  Edit,
+  Trash2,
+  Eye,
+  Users,
   TestTube,
   Download,
   Upload,
-  MoreHorizontal
+  MoreHorizontal,
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "../components/ui/table";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "../components/ui/dialog";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "../components/ui/dropdown-menu";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "../components/ui/select";
 import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
 import { useToast } from "../hooks/use-toast";
 
 // Form components from Ant Design for complex forms
-import { 
-  Form as AntForm, 
-  Input as AntInput, 
-  Select as AntSelect, 
+import {
+  Form as AntForm,
+  Input as AntInput,
+  Select as AntSelect,
   Button as AntButton,
   Row,
   Col,
@@ -62,7 +66,7 @@ import {
   Tabs as AntTabs,
   Card as AntCard,
   Space,
-  Divider
+  Divider,
 } from "antd";
 
 interface Cohort {
@@ -113,7 +117,7 @@ export default function CohortManager() {
       Object.entries(filters).forEach(([key, value]) => {
         if (value && value !== "all") params.append(key, value);
       });
-      
+
       const response = await fetch(`/api/cohorts?${params}`);
       if (!response.ok) throw new Error("Failed to fetch cohorts");
       return response.json();
@@ -141,10 +145,10 @@ export default function CohortManager() {
       toast({ title: "Success", description: "Cohort created successfully" });
     },
     onError: (error: Error) => {
-      toast({ 
-        title: "Error", 
+      toast({
+        title: "Error",
         description: error.message,
-        variant: "destructive" 
+        variant: "destructive",
       });
     },
   });
@@ -171,10 +175,10 @@ export default function CohortManager() {
       toast({ title: "Success", description: "Cohort updated successfully" });
     },
     onError: (error: Error) => {
-      toast({ 
-        title: "Error", 
+      toast({
+        title: "Error",
         description: error.message,
-        variant: "destructive" 
+        variant: "destructive",
       });
     },
   });
@@ -192,10 +196,10 @@ export default function CohortManager() {
       toast({ title: "Success", description: "Cohort deleted successfully" });
     },
     onError: (error: Error) => {
-      toast({ 
-        title: "Error", 
+      toast({
+        title: "Error",
         description: error.message,
-        variant: "destructive" 
+        variant: "destructive",
       });
     },
   });
@@ -216,10 +220,10 @@ export default function CohortManager() {
       toast({ title: "Success", description: "Status updated successfully" });
     },
     onError: (error: Error) => {
-      toast({ 
-        title: "Error", 
+      toast({
+        title: "Error",
         description: error.message,
-        variant: "destructive" 
+        variant: "destructive",
       });
     },
   });
@@ -236,16 +240,16 @@ export default function CohortManager() {
       return response.json();
     },
     onSuccess: (data) => {
-      toast({ 
-        title: "Simulation Complete", 
-        description: `Matched ${data.matchedCount} cohorts: ${data.matchedCohorts.join(", ")}` 
+      toast({
+        title: "Simulation Complete",
+        description: `Matched ${data.matchedCount} cohorts: ${data.matchedCohorts.join(", ")}`,
       });
     },
     onError: (error: Error) => {
-      toast({ 
-        title: "Error", 
+      toast({
+        title: "Error",
         description: error.message,
-        variant: "destructive" 
+        variant: "destructive",
       });
     },
   });
@@ -261,7 +265,10 @@ export default function CohortManager() {
     };
 
     if (selectedCohort) {
-      updateCohortMutation.mutate({ id: selectedCohort.id, data: formattedData });
+      updateCohortMutation.mutate({
+        id: selectedCohort.id,
+        data: formattedData,
+      });
     } else {
       createCohortMutation.mutate(formattedData);
     }
@@ -273,40 +280,50 @@ export default function CohortManager() {
     if (values.pos && values.pos.length > 0) {
       criteria.pos = values.pos;
     }
-    
+
     if (values.channel) {
       criteria.channel = values.channel;
     }
-    
+
     if (values.device) {
       criteria.device = values.device;
     }
-    
+
     if (values.season) {
       criteria.season = values.season;
     }
 
-    if (values.bookingWindowMin !== undefined && values.bookingWindowMax !== undefined) {
+    if (
+      values.bookingWindowMin !== undefined &&
+      values.bookingWindowMax !== undefined
+    ) {
       criteria.bookingWindow = {
         min: values.bookingWindowMin,
-        max: values.bookingWindowMax
+        max: values.bookingWindowMax,
       };
     }
 
-    if (values.bookingFrequency || values.avgBookingValueMin || values.preferredCabinClass) {
+    if (
+      values.bookingFrequency ||
+      values.avgBookingValueMin ||
+      values.preferredCabinClass
+    ) {
       criteria.behavior = {};
-      
+
       if (values.bookingFrequency) {
         criteria.behavior.bookingFrequency = values.bookingFrequency;
       }
-      
-      if (values.avgBookingValueMin !== undefined && values.avgBookingValueMax !== undefined) {
+
+      if (
+        values.avgBookingValueMin !== undefined &&
+        values.avgBookingValueMax !== undefined
+      ) {
         criteria.behavior.averageBookingValue = {
           min: values.avgBookingValueMin,
-          max: values.avgBookingValueMax
+          max: values.avgBookingValueMax,
         };
       }
-      
+
       if (values.preferredCabinClass && values.preferredCabinClass.length > 0) {
         criteria.behavior.preferredCabinClass = values.preferredCabinClass;
       }
@@ -318,7 +335,7 @@ export default function CohortManager() {
   const handleEdit = (cohort: Cohort) => {
     setSelectedCohort(cohort);
     const criteria = cohort.criteria as any;
-    
+
     form.setFieldsValue({
       cohortCode: cohort.cohortCode,
       cohortName: cohort.cohortName,
@@ -343,7 +360,7 @@ export default function CohortManager() {
       pos: "US",
       channel: "PORTAL",
       device: "DESKTOP",
-      bookingDaysAhead: 14
+      bookingDaysAhead: 14,
     };
     simulateCohortMutation.mutate(searchContext);
   };
@@ -356,9 +373,9 @@ export default function CohortManager() {
   const getTypeBadge = (type: string) => {
     const colors: Record<string, string> = {
       MARKET: "bg-blue-100 text-blue-800",
-      CHANNEL: "bg-green-100 text-green-800", 
+      CHANNEL: "bg-green-100 text-green-800",
       SEASON: "bg-yellow-100 text-yellow-800",
-      BEHAVIOR: "bg-purple-100 text-purple-800"
+      BEHAVIOR: "bg-purple-100 text-purple-800",
     };
     return (
       <Badge className={colors[type] || "bg-gray-100 text-gray-800"}>
@@ -371,20 +388,10 @@ export default function CohortManager() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Cohort Manager</h1>
-          <p className="text-muted-foreground">
-            Define and manage customer segments for targeted rules and campaigns
-          </p>
-        </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={handleSimulate}>
-            <TestTube className="h-4 w-4 mr-2" />
-            Test Assignment
-          </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button 
+              <Button
                 onClick={() => {
                   setSelectedCohort(null);
                   form.resetFields();
@@ -394,13 +401,17 @@ export default function CohortManager() {
                 New Cohort
               </Button>
             </DialogTrigger>
+            <Button variant="outline" onClick={handleSimulate}>
+              <TestTube className="h-4 w-4 mr-2" />
+              Test Assignment
+            </Button>
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>
                   {selectedCohort ? "Edit Cohort" : "Create New Cohort"}
                 </DialogTitle>
               </DialogHeader>
-              
+
               <AntForm
                 form={form}
                 layout="vertical"
@@ -495,20 +506,26 @@ export default function CohortManager() {
                         </AntForm.Item>
                       </Col>
                       <Col span={8}>
-                        <AntForm.Item name="bookingWindowMin" label="Booking Window Min (days)">
-                          <AntInputNumber 
-                            style={{ width: "100%" }} 
-                            placeholder="7" 
-                            min={0} 
+                        <AntForm.Item
+                          name="bookingWindowMin"
+                          label="Booking Window Min (days)"
+                        >
+                          <AntInputNumber
+                            style={{ width: "100%" }}
+                            placeholder="7"
+                            min={0}
                           />
                         </AntForm.Item>
                       </Col>
                       <Col span={8}>
-                        <AntForm.Item name="bookingWindowMax" label="Booking Window Max (days)">
-                          <AntInputNumber 
-                            style={{ width: "100%" }} 
-                            placeholder="90" 
-                            min={0} 
+                        <AntForm.Item
+                          name="bookingWindowMax"
+                          label="Booking Window Max (days)"
+                        >
+                          <AntInputNumber
+                            style={{ width: "100%" }}
+                            placeholder="90"
+                            min={0}
                           />
                         </AntForm.Item>
                       </Col>
@@ -518,7 +535,10 @@ export default function CohortManager() {
                   <AntTabs.TabPane tab="Behavior Criteria" key="2">
                     <Row gutter={16}>
                       <Col span={12}>
-                        <AntForm.Item name="bookingFrequency" label="Booking Frequency">
+                        <AntForm.Item
+                          name="bookingFrequency"
+                          label="Booking Frequency"
+                        >
                           <AntSelect placeholder="Select frequency">
                             {bookingFrequencies.map((freq) => (
                               <AntSelect.Option key={freq} value={freq}>
@@ -529,7 +549,10 @@ export default function CohortManager() {
                         </AntForm.Item>
                       </Col>
                       <Col span={12}>
-                        <AntForm.Item name="preferredCabinClass" label="Preferred Cabin Class">
+                        <AntForm.Item
+                          name="preferredCabinClass"
+                          label="Preferred Cabin Class"
+                        >
                           <AntSelect
                             mode="multiple"
                             placeholder="Select cabin classes"
@@ -546,21 +569,27 @@ export default function CohortManager() {
 
                     <Row gutter={16}>
                       <Col span={12}>
-                        <AntForm.Item name="avgBookingValueMin" label="Avg Booking Value Min">
-                          <AntInputNumber 
-                            style={{ width: "100%" }} 
-                            placeholder="500" 
-                            min={0} 
+                        <AntForm.Item
+                          name="avgBookingValueMin"
+                          label="Avg Booking Value Min"
+                        >
+                          <AntInputNumber
+                            style={{ width: "100%" }}
+                            placeholder="500"
+                            min={0}
                             precision={2}
                           />
                         </AntForm.Item>
                       </Col>
                       <Col span={12}>
-                        <AntForm.Item name="avgBookingValueMax" label="Avg Booking Value Max">
-                          <AntInputNumber 
-                            style={{ width: "100%" }} 
-                            placeholder="5000" 
-                            min={0} 
+                        <AntForm.Item
+                          name="avgBookingValueMax"
+                          label="Avg Booking Value Max"
+                        >
+                          <AntInputNumber
+                            style={{ width: "100%" }}
+                            placeholder="5000"
+                            min={0}
                             precision={2}
                           />
                         </AntForm.Item>
@@ -573,10 +602,13 @@ export default function CohortManager() {
                   <AntButton onClick={() => setIsDialogOpen(false)}>
                     Cancel
                   </AntButton>
-                  <AntButton 
-                    type="primary" 
+                  <AntButton
+                    type="primary"
                     htmlType="submit"
-                    loading={createCohortMutation.isPending || updateCohortMutation.isPending}
+                    loading={
+                      createCohortMutation.isPending ||
+                      updateCohortMutation.isPending
+                    }
                   >
                     {selectedCohort ? "Update" : "Create"} Cohort
                   </AntButton>
@@ -601,7 +633,9 @@ export default function CohortManager() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active</CardTitle>
-            <Badge variant="default" className="h-4">Active</Badge>
+            <Badge variant="default" className="h-4">
+              Active
+            </Badge>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -623,7 +657,9 @@ export default function CohortManager() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Behavior Type</CardTitle>
-            <Badge className="bg-purple-100 text-purple-800 h-4">Behavior</Badge>
+            <Badge className="bg-purple-100 text-purple-800 h-4">
+              Behavior
+            </Badge>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -646,14 +682,21 @@ export default function CohortManager() {
                 id="cohortCode"
                 placeholder="Search by code..."
                 value={filters.cohortCode}
-                onChange={(e) => setFilters(prev => ({ ...prev, cohortCode: e.target.value }))}
+                onChange={(e) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    cohortCode: e.target.value,
+                  }))
+                }
               />
             </div>
             <div>
               <Label htmlFor="type">Type</Label>
               <Select
                 value={filters.type}
-                onValueChange={(value) => setFilters(prev => ({ ...prev, type: value }))}
+                onValueChange={(value) =>
+                  setFilters((prev) => ({ ...prev, type: value }))
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="All types" />
@@ -661,7 +704,9 @@ export default function CohortManager() {
                 <SelectContent>
                   <SelectItem value="all">All types</SelectItem>
                   {cohortTypes.map((type) => (
-                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -670,7 +715,9 @@ export default function CohortManager() {
               <Label htmlFor="status">Status</Label>
               <Select
                 value={filters.status}
-                onValueChange={(value) => setFilters(prev => ({ ...prev, status: value }))}
+                onValueChange={(value) =>
+                  setFilters((prev) => ({ ...prev, status: value }))
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="All statuses" />
@@ -683,9 +730,11 @@ export default function CohortManager() {
               </Select>
             </div>
             <div className="flex items-end">
-              <Button 
-                variant="outline" 
-                onClick={() => setFilters({ cohortCode: "", type: "all", status: "all" })}
+              <Button
+                variant="outline"
+                onClick={() =>
+                  setFilters({ cohortCode: "", type: "all", status: "all" })
+                }
                 className="w-full"
               >
                 Reset
@@ -722,14 +771,19 @@ export default function CohortManager() {
                 </TableRow>
               ) : cohorts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                  <TableCell
+                    colSpan={7}
+                    className="text-center py-8 text-muted-foreground"
+                  >
                     No cohorts found
                   </TableCell>
                 </TableRow>
               ) : (
                 cohorts.map((cohort: Cohort) => (
                   <TableRow key={cohort.id}>
-                    <TableCell className="font-medium">{cohort.cohortCode}</TableCell>
+                    <TableCell className="font-medium">
+                      {cohort.cohortCode}
+                    </TableCell>
                     <TableCell>{cohort.cohortName}</TableCell>
                     <TableCell>{getTypeBadge(cohort.type)}</TableCell>
                     <TableCell>
@@ -753,17 +807,26 @@ export default function CohortManager() {
                             <Edit className="h-4 w-4 mr-2" />
                             Edit
                           </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={() => updateStatusMutation.mutate({
-                              id: cohort.id,
-                              status: cohort.status === "ACTIVE" ? "INACTIVE" : "ACTIVE"
-                            })}
+                          <DropdownMenuItem
+                            onClick={() =>
+                              updateStatusMutation.mutate({
+                                id: cohort.id,
+                                status:
+                                  cohort.status === "ACTIVE"
+                                    ? "INACTIVE"
+                                    : "ACTIVE",
+                              })
+                            }
                           >
                             <Eye className="h-4 w-4 mr-2" />
-                            {cohort.status === "ACTIVE" ? "Deactivate" : "Activate"}
+                            {cohort.status === "ACTIVE"
+                              ? "Deactivate"
+                              : "Activate"}
                           </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={() => deleteCohortMutation.mutate(cohort.id)}
+                          <DropdownMenuItem
+                            onClick={() =>
+                              deleteCohortMutation.mutate(cohort.id)
+                            }
                             className="text-red-600"
                           >
                             <Trash2 className="h-4 w-4 mr-2" />

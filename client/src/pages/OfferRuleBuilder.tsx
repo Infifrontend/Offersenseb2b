@@ -477,9 +477,9 @@ export default function OfferRuleBuilder() {
   return (
     <div className="space-y-6">
       {/* Header Section */}
-      <div className="bg-white border-b">
-        <div className="py-4">
-          <div className="flex items-center justify-between mb-4"></div>
+      <div className="">
+        <div className="">
+          <div className="flex items-center justify-between"></div>
 
           {/* Filter Section */}
           <div className="flex gap-3">

@@ -486,8 +486,8 @@ export default function NegotiatedFareManager() {
   return (
     <div className="space-y-6">
       {/* Header Section */}
-      <div className="bg-white border-b">
-        <div className="py-4">
+      <div className="">
+        <div className="">
           {/* Action Buttons */}
           <div className="flex gap-3">
             <Button

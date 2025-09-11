@@ -1,13 +1,12 @@
-
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
-  History, 
-  Search, 
-  Filter, 
-  Download, 
-  Trash2, 
-  Eye, 
+import {
+  History,
+  Search,
+  Filter,
+  Download,
+  Trash2,
+  Eye,
   Calendar,
   User,
   Settings,
@@ -15,47 +14,52 @@ import {
   FileText,
   Clock,
   Database,
-  Activity
+  Activity,
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "../components/ui/table";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "../components/ui/dialog";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "../components/ui/select";
 import { Label } from "../components/ui/label";
 import { useToast } from "../hooks/use-toast";
 import { format } from "date-fns";
 
 // Form components from Ant Design for date range selection
-import { 
-  DatePicker, 
+import {
+  DatePicker,
   Space,
   Tabs as AntTabs,
   Statistic,
   Row,
   Col,
-  Empty
+  Empty,
 } from "antd";
 
 const { RangePicker } = DatePicker;
@@ -99,9 +103,9 @@ export default function LogsVersionHistory() {
     ...(moduleFilter && moduleFilter !== "all" && { module: moduleFilter }),
     ...(actionFilter && actionFilter !== "all" && { action: actionFilter }),
     ...(userFilter && { user: userFilter }),
-    ...(dateRange && { 
-      startDate: dateRange[0], 
-      endDate: dateRange[1] 
+    ...(dateRange && {
+      startDate: dateRange[0],
+      endDate: dateRange[1],
     }),
   };
 
@@ -113,7 +117,7 @@ export default function LogsVersionHistory() {
       Object.entries(filters).forEach(([key, value]) => {
         if (value) params.append(key, value);
       });
-      
+
       const response = await fetch(`/api/audit-logs?${params}`);
       if (!response.ok) throw new Error("Failed to fetch audit logs");
       return response.json();
@@ -125,7 +129,9 @@ export default function LogsVersionHistory() {
     queryKey: ["audit-logs-entity", selectedEntityId],
     queryFn: async () => {
       if (!selectedEntityId) return [];
-      const response = await fetch(`/api/audit-logs/entity/${selectedEntityId}`);
+      const response = await fetch(
+        `/api/audit-logs/entity/${selectedEntityId}`,
+      );
       if (!response.ok) throw new Error("Failed to fetch entity history");
       return response.json();
     },
@@ -139,15 +145,15 @@ export default function LogsVersionHistory() {
       Object.entries(filters).forEach(([key, value]) => {
         if (value) params.append(key, value);
       });
-      
+
       const response = await fetch(`/api/audit-logs/export?${params}`);
       if (!response.ok) throw new Error("Failed to export logs");
-      
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `audit_logs_${new Date().toISOString().split('T')[0]}.csv`;
+      a.download = `audit_logs_${new Date().toISOString().split("T")[0]}.csv`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -170,7 +176,13 @@ export default function LogsVersionHistory() {
 
   // Rollback entity
   const rollbackMutation = useMutation({
-    mutationFn: async ({ logId, justification }: { logId: string; justification: string }) => {
+    mutationFn: async ({
+      logId,
+      justification,
+    }: {
+      logId: string;
+      justification: string;
+    }) => {
       const response = await fetch(`/api/audit-logs/${logId}/rollback`, {
         method: "POST",
         headers: {
@@ -179,12 +191,12 @@ export default function LogsVersionHistory() {
         },
         body: JSON.stringify({ justification }),
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to rollback");
       }
-      
+
       return response.json();
     },
     onSuccess: () => {
@@ -205,28 +217,36 @@ export default function LogsVersionHistory() {
   });
 
   // Filter logs based on search term
-  const filteredLogs = auditLogs.filter((log: AuditLog) =>
-    log.entityId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    log.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    log.module.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredLogs = auditLogs.filter(
+    (log: AuditLog) =>
+      log.entityId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      log.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      log.module.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   // Get action badge variant
   const getActionVariant = (action: string) => {
     switch (action) {
-      case "CREATED": return "default";
-      case "UPDATED": return "secondary";
-      case "DELETED": return "destructive";
-      case "STATUS_CHANGED": return "outline";
-      default: return "default";
+      case "CREATED":
+        return "default";
+      case "UPDATED":
+        return "secondary";
+      case "DELETED":
+        return "destructive";
+      case "STATUS_CHANGED":
+        return "outline";
+      default:
+        return "default";
     }
   };
 
   // Calculate statistics
   const totalLogs = filteredLogs.length;
-  const uniqueUsers = new Set(filteredLogs.map((log: AuditLog) => log.user)).size;
-  const uniqueModules = new Set(filteredLogs.map((log: AuditLog) => log.module)).size;
+  const uniqueUsers = new Set(filteredLogs.map((log: AuditLog) => log.user))
+    .size;
+  const uniqueModules = new Set(filteredLogs.map((log: AuditLog) => log.module))
+    .size;
   const recentChanges = filteredLogs.filter((log: AuditLog) => {
     const logDate = new Date(log.timestamp);
     const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
@@ -243,8 +263,12 @@ export default function LogsVersionHistory() {
           <div key={field} className="text-sm">
             <span className="font-medium">{field}:</span>
             <div className="ml-4">
-              <div className="text-red-600">- {JSON.stringify(change.from)}</div>
-              <div className="text-green-600">+ {JSON.stringify(change.to)}</div>
+              <div className="text-red-600">
+                - {JSON.stringify(change.from)}
+              </div>
+              <div className="text-green-600">
+                + {JSON.stringify(change.to)}
+              </div>
             </div>
           </div>
         ))}
@@ -256,13 +280,10 @@ export default function LogsVersionHistory() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Logs & Version History</h1>
-          <p className="text-sm text-muted-foreground">
-            Monitor system changes and maintain compliance records
-          </p>
-        </div>
-        <Button onClick={() => exportLogsMutation.mutate()} disabled={exportLogsMutation.isPending}>
+        <Button
+          onClick={() => exportLogsMutation.mutate()}
+          disabled={exportLogsMutation.isPending}
+        >
           <Download className="w-4 h-4 mr-2" />
           Export Logs
         </Button>
@@ -343,9 +364,15 @@ export default function LogsVersionHistory() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All modules</SelectItem>
-                  <SelectItem value="NegotiatedFare">Negotiated Fares</SelectItem>
-                  <SelectItem value="DynamicDiscountRule">Dynamic Discounts</SelectItem>
-                  <SelectItem value="AirAncillaryRule">Air Ancillaries</SelectItem>
+                  <SelectItem value="NegotiatedFare">
+                    Negotiated Fares
+                  </SelectItem>
+                  <SelectItem value="DynamicDiscountRule">
+                    Dynamic Discounts
+                  </SelectItem>
+                  <SelectItem value="AirAncillaryRule">
+                    Air Ancillaries
+                  </SelectItem>
                   <SelectItem value="NonAirRate">Non-Air Rates</SelectItem>
                   <SelectItem value="Bundle">Bundles</SelectItem>
                   <SelectItem value="OfferRule">Offer Rules</SelectItem>
@@ -380,14 +407,14 @@ export default function LogsVersionHistory() {
             </div>
             <div>
               <Label htmlFor="daterange">Date Range</Label>
-              <Space direction="vertical" style={{ width: '100%' }}>
+              <Space direction="vertical" style={{ width: "100%" }}>
                 <RangePicker
-                  style={{ width: '100%' }}
+                  style={{ width: "100%" }}
                   onChange={(dates) => {
                     if (dates && dates[0] && dates[1]) {
                       setDateRange([
                         dates[0].toISOString(),
-                        dates[1].toISOString()
+                        dates[1].toISOString(),
                       ]);
                     } else {
                       setDateRange(null);
@@ -434,7 +461,10 @@ export default function LogsVersionHistory() {
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4 text-muted-foreground" />
-                        {format(new Date(log.timestamp), "MMM dd, yyyy HH:mm:ss")}
+                        {format(
+                          new Date(log.timestamp),
+                          "MMM dd, yyyy HH:mm:ss",
+                        )}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -478,19 +508,21 @@ export default function LogsVersionHistory() {
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
-                        {log.beforeData && log.action !== "CREATED" && log.action !== "ROLLBACK" && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedLog(log);
-                              setRollbackDialogOpen(true);
-                            }}
-                            title="Rollback to this version"
-                          >
-                            <RefreshCw className="w-4 h-4" />
-                          </Button>
-                        )}
+                        {log.beforeData &&
+                          log.action !== "CREATED" &&
+                          log.action !== "ROLLBACK" && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedLog(log);
+                                setRollbackDialogOpen(true);
+                              }}
+                              title="Rollback to this version"
+                            >
+                              <RefreshCw className="w-4 h-4" />
+                            </Button>
+                          )}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -512,7 +544,9 @@ export default function LogsVersionHistory() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label className="text-sm font-medium">Timestamp</Label>
-                  <p className="text-sm">{format(new Date(selectedLog.timestamp), "PPpp")}</p>
+                  <p className="text-sm">
+                    {format(new Date(selectedLog.timestamp), "PPpp")}
+                  </p>
                 </div>
                 <div>
                   <Label className="text-sm font-medium">User</Label>
@@ -537,7 +571,7 @@ export default function LogsVersionHistory() {
                   <p className="text-sm">{selectedLog.ipAddress || "-"}</p>
                 </div>
               </div>
-              
+
               {selectedLog.justification && (
                 <div>
                   <Label className="text-sm font-medium">Justification</Label>
@@ -546,9 +580,7 @@ export default function LogsVersionHistory() {
               )}
 
               {selectedLog.diff && Object.keys(selectedLog.diff).length > 0 && (
-                <div>
-                  {renderDiffDetails(selectedLog.diff)}
-                </div>
+                <div>{renderDiffDetails(selectedLog.diff)}</div>
               )}
 
               <AntTabs defaultActiveKey="before">
@@ -572,7 +604,9 @@ export default function LogsVersionHistory() {
       <Dialog open={entityHistoryOpen} onOpenChange={setEntityHistoryOpen}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Entity Version History: {selectedEntityId}</DialogTitle>
+            <DialogTitle>
+              Entity Version History: {selectedEntityId}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             {entityHistory.length === 0 ? (
@@ -592,7 +626,10 @@ export default function LogsVersionHistory() {
                   {entityHistory.map((log: AuditLog) => (
                     <TableRow key={log.id}>
                       <TableCell>
-                        {format(new Date(log.timestamp), "MMM dd, yyyy HH:mm:ss")}
+                        {format(
+                          new Date(log.timestamp),
+                          "MMM dd, yyyy HH:mm:ss",
+                        )}
                       </TableCell>
                       <TableCell>{log.user}</TableCell>
                       <TableCell>
@@ -623,18 +660,30 @@ export default function LogsVersionHistory() {
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Are you sure you want to rollback this entity to its previous version? This action will create a new audit log entry.
+              Are you sure you want to rollback this entity to its previous
+              version? This action will create a new audit log entry.
             </p>
             {selectedLog && (
               <div className="bg-muted p-3 rounded text-sm">
-                <div><strong>Entity:</strong> {selectedLog.entityId}</div>
-                <div><strong>Module:</strong> {selectedLog.module}</div>
-                <div><strong>Action:</strong> {selectedLog.action}</div>
-                <div><strong>Date:</strong> {format(new Date(selectedLog.timestamp), "PPpp")}</div>
+                <div>
+                  <strong>Entity:</strong> {selectedLog.entityId}
+                </div>
+                <div>
+                  <strong>Module:</strong> {selectedLog.module}
+                </div>
+                <div>
+                  <strong>Action:</strong> {selectedLog.action}
+                </div>
+                <div>
+                  <strong>Date:</strong>{" "}
+                  {format(new Date(selectedLog.timestamp), "PPpp")}
+                </div>
               </div>
             )}
             <div>
-              <Label htmlFor="rollback-justification">Justification (required)</Label>
+              <Label htmlFor="rollback-justification">
+                Justification (required)
+              </Label>
               <Input
                 id="rollback-justification"
                 placeholder="Explain why you are rolling back this change..."
@@ -643,8 +692,8 @@ export default function LogsVersionHistory() {
               />
             </div>
             <div className="flex justify-end gap-2">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => {
                   setRollbackDialogOpen(false);
                   setRollbackJustification("");
@@ -658,12 +707,14 @@ export default function LogsVersionHistory() {
                   if (selectedLog && rollbackJustification.trim()) {
                     rollbackMutation.mutate({
                       logId: selectedLog.id,
-                      justification: rollbackJustification
+                      justification: rollbackJustification,
                     });
                     setRollbackJustification("");
                   }
                 }}
-                disabled={!rollbackJustification.trim() || rollbackMutation.isPending}
+                disabled={
+                  !rollbackJustification.trim() || rollbackMutation.isPending
+                }
               >
                 {rollbackMutation.isPending ? "Rolling back..." : "Rollback"}
               </Button>

@@ -1,21 +1,20 @@
-
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
-  Card as AntCard, 
-  Table, 
-  Button as AntButton, 
-  Space, 
-  Modal, 
-  Form as AntForm, 
-  Input, 
-  Select as AntSelect, 
-  Switch, 
-  DatePicker, 
-  InputNumber, 
-  message, 
-  Tabs, 
-  Tag, 
+import {
+  Card as AntCard,
+  Table,
+  Button as AntButton,
+  Space,
+  Modal,
+  Form as AntForm,
+  Input,
+  Select as AntSelect,
+  Switch,
+  DatePicker,
+  InputNumber,
+  message,
+  Tabs,
+  Tag,
   Tooltip,
   Row,
   Col,
@@ -28,13 +27,13 @@ import {
   Timeline,
   Divider,
   Radio,
-  Checkbox
+  Checkbox,
 } from "antd";
-import { 
+import {
   Megaphone,
-  Plus, 
-  Edit, 
-  Trash2, 
+  Plus,
+  Edit,
+  Trash2,
   Eye,
   Play,
   Pause,
@@ -54,7 +53,7 @@ import {
   CheckCircle,
   Clock,
   AlertCircle,
-  Square
+  Square,
 } from "lucide-react";
 import dayjs from "dayjs";
 import { z } from "zod";
@@ -70,7 +69,7 @@ import {
   Tooltip as ChartTooltip,
   Legend,
   ArcElement,
-} from 'chart.js';
+} from "chart.js";
 
 // Register Chart.js components
 ChartJS.register(
@@ -82,7 +81,7 @@ ChartJS.register(
   Title,
   ChartTooltip,
   Legend,
-  ArcElement
+  ArcElement,
 );
 
 const { TabPane } = Tabs;
@@ -95,7 +94,9 @@ const campaignFormSchema = z.object({
   campaignName: z.string().min(1, "Campaign name is required"),
   target: z.object({
     cohorts: z.array(z.string()).optional(),
-    agentTiers: z.array(z.enum(["PLATINUM", "GOLD", "SILVER", "BRONZE"])).optional(),
+    agentTiers: z
+      .array(z.enum(["PLATINUM", "GOLD", "SILVER", "BRONZE"]))
+      .optional(),
     pos: z.array(z.string()).optional(),
     channel: z.array(z.enum(["PORTAL", "API", "MOBILE"])).optional(),
   }),
@@ -121,7 +122,9 @@ const campaignFormSchema = z.object({
     whatsappTemplateId: z.string().optional(),
     apiPush: z.boolean().optional(),
   }),
-  status: z.enum(["DRAFT", "ACTIVE", "PAUSED", "COMPLETED", "CANCELLED"]).default("DRAFT"),
+  status: z
+    .enum(["DRAFT", "ACTIVE", "PAUSED", "COMPLETED", "CANCELLED"])
+    .default("DRAFT"),
   createdBy: z.string().default("current-user"),
 });
 
@@ -178,37 +181,61 @@ interface CampaignMetrics {
 type CampaignFormData = z.infer<typeof campaignFormSchema>;
 
 // Constants
-const campaignStatuses = ["DRAFT", "ACTIVE", "PAUSED", "COMPLETED", "CANCELLED"];
+const campaignStatuses = [
+  "DRAFT",
+  "ACTIVE",
+  "PAUSED",
+  "COMPLETED",
+  "CANCELLED",
+];
 const offerTypes = ["PERCENT", "AMOUNT", "SPECIAL_PRICE"];
 const channels = ["PORTAL", "API", "MOBILE"];
 const agentTiers = ["PLATINUM", "GOLD", "SILVER", "BRONZE"];
-const ancillaryProducts = ["BAG20", "BAG32", "SEAT_STD", "SEAT_EXTRA", "MEAL_STD", "WIFI_STD", "LOUNGE_PASS"];
+const ancillaryProducts = [
+  "BAG20",
+  "BAG32",
+  "SEAT_STD",
+  "SEAT_EXTRA",
+  "MEAL_STD",
+  "WIFI_STD",
+  "LOUNGE_PASS",
+];
 const bundleProducts = ["COMFORT_PLUS", "BUSINESS_SELECT", "PREMIUM_PACKAGE"];
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case "ACTIVE": return "success";
-    case "DRAFT": return "default";
-    case "PAUSED": return "warning";
-    case "COMPLETED": return "blue";
-    case "CANCELLED": return "error";
-    default: return "default";
+    case "ACTIVE":
+      return "success";
+    case "DRAFT":
+      return "default";
+    case "PAUSED":
+      return "warning";
+    case "COMPLETED":
+      return "blue";
+    case "CANCELLED":
+      return "error";
+    default:
+      return "default";
   }
 };
 
 const getChannelIcon = (channel: string) => {
   switch (channel) {
-    case "PORTAL": return <Globe className="w-4 h-4" />;
-    case "API": return <SendOutlined className="w-4 h-4" />;
-    case "MOBILE": return <Smartphone className="w-4 h-4" />;
-    default: return <Globe className="w-4 h-4" />;
+    case "PORTAL":
+      return <Globe className="w-4 h-4" />;
+    case "API":
+      return <SendOutlined className="w-4 h-4" />;
+    case "MOBILE":
+      return <Smartphone className="w-4 h-4" />;
+    default:
+      return <Globe className="w-4 h-4" />;
   }
 };
 
 const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(value);
@@ -218,40 +245,55 @@ export default function CampaignManager() {
   // State management
   const [activeTab, setActiveTab] = useState("campaigns");
   const [isCampaignModalVisible, setIsCampaignModalVisible] = useState(false);
-  const [isPerformanceModalVisible, setIsPerformanceModalVisible] = useState(false);
+  const [isPerformanceModalVisible, setIsPerformanceModalVisible] =
+    useState(false);
   const [editingCampaign, setEditingCampaign] = useState<Campaign | null>(null);
-  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
-  const [metricsDateRange, setMetricsDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>(null);
+  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(
+    null,
+  );
+  const [metricsDateRange, setMetricsDateRange] = useState<
+    [dayjs.Dayjs, dayjs.Dayjs] | null
+  >(null);
 
   const queryClient = useQueryClient();
   const [campaignForm] = AntForm.useForm<CampaignFormData>();
 
   // Data fetching
-  const { data: campaigns = [], isLoading: campaignsLoading, refetch: refetchCampaigns } = useQuery({
+  const {
+    data: campaigns = [],
+    isLoading: campaignsLoading,
+    refetch: refetchCampaigns,
+  } = useQuery({
     queryKey: ["/api/campaigns"],
     queryFn: async () => {
       const response = await fetch("/api/campaigns");
       if (!response.ok) throw new Error("Failed to fetch campaigns");
       return response.json();
-    }
+    },
   });
 
   const { data: campaignMetrics, isLoading: metricsLoading } = useQuery({
-    queryKey: ["/api/campaigns/metrics", selectedCampaign?.campaignCode, metricsDateRange],
+    queryKey: [
+      "/api/campaigns/metrics",
+      selectedCampaign?.campaignCode,
+      metricsDateRange,
+    ],
     queryFn: async () => {
       if (!selectedCampaign) return null;
-      
+
       const params = new URLSearchParams();
       if (metricsDateRange) {
-        params.append('startDate', metricsDateRange[0].format('YYYY-MM-DD'));
-        params.append('endDate', metricsDateRange[1].format('YYYY-MM-DD'));
+        params.append("startDate", metricsDateRange[0].format("YYYY-MM-DD"));
+        params.append("endDate", metricsDateRange[1].format("YYYY-MM-DD"));
       }
-      
-      const response = await fetch(`/api/campaigns/${selectedCampaign.campaignCode}/metrics?${params}`);
+
+      const response = await fetch(
+        `/api/campaigns/${selectedCampaign.campaignCode}/metrics?${params}`,
+      );
       if (!response.ok) throw new Error("Failed to fetch metrics");
       return response.json();
     },
-    enabled: !!selectedCampaign
+    enabled: !!selectedCampaign,
   });
 
   // Mutations
@@ -276,11 +318,17 @@ export default function CampaignManager() {
     },
     onError: (error: Error) => {
       message.error(error.message);
-    }
+    },
   });
 
   const updateCampaignMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: CampaignFormData }) => {
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: CampaignFormData;
+    }) => {
       const response = await fetch(`/api/campaigns/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -298,7 +346,7 @@ export default function CampaignManager() {
     },
     onError: (error: Error) => {
       message.error(error.message);
-    }
+    },
   });
 
   const deleteCampaignMutation = useMutation({
@@ -314,7 +362,7 @@ export default function CampaignManager() {
     },
     onError: (error: Error) => {
       message.error(error.message);
-    }
+    },
   });
 
   const updateStatusMutation = useMutation({
@@ -333,7 +381,7 @@ export default function CampaignManager() {
     },
     onError: (error: Error) => {
       message.error(error.message);
-    }
+    },
   });
 
   // Event handlers
@@ -343,13 +391,16 @@ export default function CampaignManager() {
         ...values,
         lifecycle: {
           ...values.lifecycle,
-          startDate: values.lifecycle.startDate.format('YYYY-MM-DD'),
-          endDate: values.lifecycle.endDate.format('YYYY-MM-DD'),
-        }
+          startDate: values.lifecycle.startDate.format("YYYY-MM-DD"),
+          endDate: values.lifecycle.endDate.format("YYYY-MM-DD"),
+        },
       });
-      
+
       if (editingCampaign) {
-        updateCampaignMutation.mutate({ id: editingCampaign.id, data: validatedData });
+        updateCampaignMutation.mutate({
+          id: editingCampaign.id,
+          data: validatedData,
+        });
       } else {
         createCampaignMutation.mutate(validatedData);
       }
@@ -366,14 +417,14 @@ export default function CampaignManager() {
         ...campaign.lifecycle,
         startDate: dayjs(campaign.lifecycle.startDate),
         endDate: dayjs(campaign.lifecycle.endDate),
-      }
+      },
     });
     setIsCampaignModalVisible(true);
   };
 
   const handleViewPerformance = (campaign: Campaign) => {
     setSelectedCampaign(campaign);
-    setMetricsDateRange([dayjs().subtract(30, 'days'), dayjs()]);
+    setMetricsDateRange([dayjs().subtract(30, "days"), dayjs()]);
     setIsPerformanceModalVisible(true);
   };
 
@@ -400,8 +451,10 @@ export default function CampaignManager() {
         <div className="space-y-1">
           {record.target.agentTiers && record.target.agentTiers.length > 0 && (
             <div className="flex gap-1">
-              {record.target.agentTiers.slice(0, 2).map(tier => (
-                <Tag key={tier} size="small">{tier}</Tag>
+              {record.target.agentTiers.slice(0, 2).map((tier) => (
+                <Tag key={tier} size="small">
+                  {tier}
+                </Tag>
               ))}
               {record.target.agentTiers.length > 2 && (
                 <Tag size="small">+{record.target.agentTiers.length - 2}</Tag>
@@ -410,11 +463,15 @@ export default function CampaignManager() {
           )}
           {record.target.cohorts && record.target.cohorts.length > 0 && (
             <div className="flex gap-1">
-              {record.target.cohorts.slice(0, 2).map(cohort => (
-                <Tag key={cohort} color="blue" size="small">{cohort}</Tag>
+              {record.target.cohorts.slice(0, 2).map((cohort) => (
+                <Tag key={cohort} color="blue" size="small">
+                  {cohort}
+                </Tag>
               ))}
               {record.target.cohorts.length > 2 && (
-                <Tag color="blue" size="small">+{record.target.cohorts.length - 2}</Tag>
+                <Tag color="blue" size="small">
+                  +{record.target.cohorts.length - 2}
+                </Tag>
               )}
             </div>
           )}
@@ -426,23 +483,32 @@ export default function CampaignManager() {
       key: "products",
       render: (record: Campaign) => (
         <div className="space-y-1">
-          {record.products.ancillaries && record.products.ancillaries.length > 0 && (
-            <div className="flex gap-1">
-              {record.products.ancillaries.slice(0, 2).map(product => (
-                <Tag key={product} color="green" size="small">{product}</Tag>
-              ))}
-              {record.products.ancillaries.length > 2 && (
-                <Tag color="green" size="small">+{record.products.ancillaries.length - 2}</Tag>
-              )}
-            </div>
-          )}
+          {record.products.ancillaries &&
+            record.products.ancillaries.length > 0 && (
+              <div className="flex gap-1">
+                {record.products.ancillaries.slice(0, 2).map((product) => (
+                  <Tag key={product} color="green" size="small">
+                    {product}
+                  </Tag>
+                ))}
+                {record.products.ancillaries.length > 2 && (
+                  <Tag color="green" size="small">
+                    +{record.products.ancillaries.length - 2}
+                  </Tag>
+                )}
+              </div>
+            )}
           {record.products.bundles && record.products.bundles.length > 0 && (
             <div className="flex gap-1">
-              {record.products.bundles.slice(0, 2).map(bundle => (
-                <Tag key={bundle} color="purple" size="small">{bundle}</Tag>
+              {record.products.bundles.slice(0, 2).map((bundle) => (
+                <Tag key={bundle} color="purple" size="small">
+                  {bundle}
+                </Tag>
               ))}
               {record.products.bundles.length > 2 && (
-                <Tag color="purple" size="small">+{record.products.bundles.length - 2}</Tag>
+                <Tag color="purple" size="small">
+                  +{record.products.bundles.length - 2}
+                </Tag>
               )}
             </div>
           )}
@@ -470,7 +536,9 @@ export default function CampaignManager() {
       render: (record: Campaign) => (
         <div className="text-sm">
           <div>{dayjs(record.lifecycle.startDate).format("MMM DD, YYYY")}</div>
-          <div className="text-gray-500">to {dayjs(record.lifecycle.endDate).format("MMM DD, YYYY")}</div>
+          <div className="text-gray-500">
+            to {dayjs(record.lifecycle.endDate).format("MMM DD, YYYY")}
+          </div>
         </div>
       ),
     },
@@ -479,10 +547,26 @@ export default function CampaignManager() {
       key: "channels",
       render: (record: Campaign) => (
         <div className="flex gap-1">
-          {record.comms.portalBanner && <Tag icon={<Globe className="w-3 h-3" />} size="small">Portal</Tag>}
-          {record.comms.emailTemplateId && <Tag icon={<Mail className="w-3 h-3" />} size="small">Email</Tag>}
-          {record.comms.whatsappTemplateId && <Tag icon={<MessageSquare className="w-3 h-3" />} size="small">WhatsApp</Tag>}
-          {record.comms.apiPush && <Tag icon={<Send className="w-3 h-3" />} size="small">API</Tag>}
+          {record.comms.portalBanner && (
+            <Tag icon={<Globe className="w-3 h-3" />} size="small">
+              Portal
+            </Tag>
+          )}
+          {record.comms.emailTemplateId && (
+            <Tag icon={<Mail className="w-3 h-3" />} size="small">
+              Email
+            </Tag>
+          )}
+          {record.comms.whatsappTemplateId && (
+            <Tag icon={<MessageSquare className="w-3 h-3" />} size="small">
+              WhatsApp
+            </Tag>
+          )}
+          {record.comms.apiPush && (
+            <Tag icon={<Send className="w-3 h-3" />} size="small">
+              API
+            </Tag>
+          )}
         </div>
       ),
     },
@@ -491,10 +575,7 @@ export default function CampaignManager() {
       dataIndex: "status",
       key: "status",
       render: (status: string) => (
-        <Badge 
-          status={getStatusColor(status) as any} 
-          text={status}
-        />
+        <Badge status={getStatusColor(status) as any} text={status} />
       ),
     },
     {
@@ -503,23 +584,23 @@ export default function CampaignManager() {
       render: (record: Campaign) => (
         <Space>
           <Tooltip title="View Performance">
-            <AntButton 
-              icon={<BarChart3 className="w-4 h-4" />} 
-              size="small" 
+            <AntButton
+              icon={<BarChart3 className="w-4 h-4" />}
+              size="small"
               onClick={() => handleViewPerformance(record)}
             />
           </Tooltip>
           <Tooltip title="Edit Campaign">
-            <AntButton 
-              icon={<Edit className="w-4 h-4" />} 
-              size="small" 
+            <AntButton
+              icon={<Edit className="w-4 h-4" />}
+              size="small"
               onClick={() => handleEditCampaign(record)}
             />
           </Tooltip>
           {record.status === "DRAFT" || record.status === "PAUSED" ? (
             <Tooltip title="Activate Campaign">
-              <AntButton 
-                icon={<Play className="w-4 h-4" />} 
+              <AntButton
+                icon={<Play className="w-4 h-4" />}
                 size="small"
                 type="primary"
                 onClick={() => handleStatusChange(record, "ACTIVE")}
@@ -527,8 +608,8 @@ export default function CampaignManager() {
             </Tooltip>
           ) : record.status === "ACTIVE" ? (
             <Tooltip title="Pause Campaign">
-              <AntButton 
-                icon={<Pause className="w-4 h-4" />} 
+              <AntButton
+                icon={<Pause className="w-4 h-4" />}
                 size="small"
                 onClick={() => handleStatusChange(record, "PAUSED")}
               />
@@ -539,9 +620,9 @@ export default function CampaignManager() {
             onConfirm={() => deleteCampaignMutation.mutate(record.id)}
           >
             <Tooltip title="Delete Campaign">
-              <AntButton 
-                icon={<Trash2 className="w-4 h-4" />} 
-                size="small" 
+              <AntButton
+                icon={<Trash2 className="w-4 h-4" />}
+                size="small"
                 danger
               />
             </Tooltip>
@@ -557,22 +638,13 @@ export default function CampaignManager() {
     return acc;
   }, {});
 
-  const activeCampaigns = campaigns.filter((c: Campaign) => c.status === "ACTIVE");
+  const activeCampaigns = campaigns.filter(
+    (c: Campaign) => c.status === "ACTIVE",
+  );
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Megaphone className="w-6 h-6 text-primary" />
-            Campaign Manager
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Design and launch targeted promotional campaigns for ancillary upsells.
-          </p>
-        </div>
-      </div>
 
       {/* Statistics Cards */}
       <Row gutter={16}>
@@ -582,7 +654,7 @@ export default function CampaignManager() {
               title="Total Campaigns"
               value={campaigns.length}
               prefix={<Megaphone className="w-4 h-4" />}
-              valueStyle={{ color: '#3f8600' }}
+              valueStyle={{ color: "#3f8600" }}
             />
           </AntCard>
         </Col>
@@ -592,7 +664,7 @@ export default function CampaignManager() {
               title="Active Campaigns"
               value={activeCampaigns.length}
               prefix={<Play className="w-4 h-4" />}
-              valueStyle={{ color: '#1890ff' }}
+              valueStyle={{ color: "#1890ff" }}
             />
           </AntCard>
         </Col>
@@ -602,7 +674,7 @@ export default function CampaignManager() {
               title="Draft Campaigns"
               value={campaignStats.DRAFT || 0}
               prefix={<Edit className="w-4 h-4" />}
-              valueStyle={{ color: '#722ed1' }}
+              valueStyle={{ color: "#722ed1" }}
             />
           </AntCard>
         </Col>
@@ -612,25 +684,30 @@ export default function CampaignManager() {
               title="Completed Campaigns"
               value={campaignStats.COMPLETED || 0}
               prefix={<CheckCircle className="w-4 h-4" />}
-              valueStyle={{ color: '#52c41a' }}
+              valueStyle={{ color: "#52c41a" }}
             />
           </AntCard>
         </Col>
       </Row>
 
       {/* Main Content */}
-      <Tabs activeKey={activeTab} onChange={setActiveTab} className="bg-white p-4 rounded-lg">
+      <Tabs
+        activeKey={activeTab}
+        onChange={setActiveTab}
+        className="bg-white p-4 rounded-lg"
+      >
         <TabPane tab="Campaign Management" key="campaigns">
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <div>
                 <h3 className="text-lg font-semibold">Campaign Management</h3>
                 <p className="text-sm text-muted-foreground">
-                  Create, manage, and monitor ancillary upsell campaigns across multiple channels.
+                  Create, manage, and monitor ancillary upsell campaigns across
+                  multiple channels.
                 </p>
               </div>
-              <AntButton 
-                type="primary" 
+              <AntButton
+                type="primary"
                 icon={<Plus className="w-4 h-4" />}
                 onClick={() => {
                   setEditingCampaign(null);
@@ -655,9 +732,12 @@ export default function CampaignManager() {
         <TabPane tab="Performance Dashboard" key="performance">
           <div className="space-y-4">
             <div>
-              <h3 className="text-lg font-semibold">Campaign Performance Overview</h3>
+              <h3 className="text-lg font-semibold">
+                Campaign Performance Overview
+              </h3>
               <p className="text-sm text-muted-foreground">
-                Monitor campaign effectiveness, conversion rates, and revenue impact.
+                Monitor campaign effectiveness, conversion rates, and revenue
+                impact.
               </p>
             </div>
 
@@ -672,11 +752,11 @@ export default function CampaignManager() {
               <Row gutter={16}>
                 {activeCampaigns.slice(0, 3).map((campaign: Campaign) => (
                   <Col span={8} key={campaign.id}>
-                    <AntCard 
+                    <AntCard
                       title={campaign.campaignName}
                       extra={
-                        <AntButton 
-                          size="small" 
+                        <AntButton
+                          size="small"
                           onClick={() => handleViewPerformance(campaign)}
                         >
                           View Details
@@ -691,15 +771,21 @@ export default function CampaignManager() {
                         <div className="flex justify-between">
                           <span>Duration:</span>
                           <span className="text-sm">
-                            {dayjs(campaign.lifecycle.startDate).format("MMM DD")} - {dayjs(campaign.lifecycle.endDate).format("MMM DD")}
+                            {dayjs(campaign.lifecycle.startDate).format(
+                              "MMM DD",
+                            )}{" "}
+                            -{" "}
+                            {dayjs(campaign.lifecycle.endDate).format("MMM DD")}
                           </span>
                         </div>
                         <div className="flex justify-between">
                           <span>Offer:</span>
                           <Tag color="orange">
-                            {campaign.offer.type === "PERCENT" ? `${campaign.offer.value}% Off` : 
-                             campaign.offer.type === "AMOUNT" ? `$${campaign.offer.value} Off` :
-                             `$${campaign.offer.specialPrice}`}
+                            {campaign.offer.type === "PERCENT"
+                              ? `${campaign.offer.value}% Off`
+                              : campaign.offer.type === "AMOUNT"
+                                ? `$${campaign.offer.value} Off`
+                                : `$${campaign.offer.specialPrice}`}
                           </Tag>
                         </div>
                       </div>
@@ -735,7 +821,9 @@ export default function CampaignManager() {
               <AntForm.Item
                 name="campaignCode"
                 label="Campaign Code"
-                rules={[{ required: true, message: "Campaign code is required" }]}
+                rules={[
+                  { required: true, message: "Campaign code is required" },
+                ]}
               >
                 <Input placeholder="PRETRAVEL_BAG_PUSH" />
               </AntForm.Item>
@@ -744,7 +832,9 @@ export default function CampaignManager() {
               <AntForm.Item
                 name="campaignName"
                 label="Campaign Name"
-                rules={[{ required: true, message: "Campaign name is required" }]}
+                rules={[
+                  { required: true, message: "Campaign name is required" },
+                ]}
               >
                 <Input placeholder="Pre-Travel Baggage Upsell" />
               </AntForm.Item>
@@ -752,29 +842,29 @@ export default function CampaignManager() {
           </Row>
 
           <Divider orientation="left">Target Audience</Divider>
-          
+
           <Row gutter={16}>
             <Col span={12}>
-              <AntForm.Item
-                name={['target', 'agentTiers']}
-                label="Agent Tiers"
-              >
+              <AntForm.Item name={["target", "agentTiers"]} label="Agent Tiers">
                 <AntSelect
                   mode="multiple"
                   placeholder="Select agent tiers"
-                  options={agentTiers.map(tier => ({ label: tier, value: tier }))}
+                  options={agentTiers.map((tier) => ({
+                    label: tier,
+                    value: tier,
+                  }))}
                 />
               </AntForm.Item>
             </Col>
             <Col span={12}>
-              <AntForm.Item
-                name={['target', 'channel']}
-                label="Channels"
-              >
+              <AntForm.Item name={["target", "channel"]} label="Channels">
                 <AntSelect
                   mode="multiple"
                   placeholder="Select channels"
-                  options={channels.map(channel => ({ label: channel, value: channel }))}
+                  options={channels.map((channel) => ({
+                    label: channel,
+                    value: channel,
+                  }))}
                 />
               </AntForm.Item>
             </Col>
@@ -782,26 +872,29 @@ export default function CampaignManager() {
 
           <Row gutter={16}>
             <Col span={12}>
-              <AntForm.Item
-                name={['target', 'cohorts']}
-                label="Cohorts"
-              >
+              <AntForm.Item name={["target", "cohorts"]} label="Cohorts">
                 <AntSelect
                   mode="multiple"
                   placeholder="Select cohorts"
                   options={[
-                    { label: "POST_BOOKING_WINDOW", value: "POST_BOOKING_WINDOW" },
-                    { label: "FREQUENT_TRAVELERS", value: "FREQUENT_TRAVELERS" },
-                    { label: "BUSINESS_TRAVELERS", value: "BUSINESS_TRAVELERS" },
+                    {
+                      label: "POST_BOOKING_WINDOW",
+                      value: "POST_BOOKING_WINDOW",
+                    },
+                    {
+                      label: "FREQUENT_TRAVELERS",
+                      value: "FREQUENT_TRAVELERS",
+                    },
+                    {
+                      label: "BUSINESS_TRAVELERS",
+                      value: "BUSINESS_TRAVELERS",
+                    },
                   ]}
                 />
               </AntForm.Item>
             </Col>
             <Col span={12}>
-              <AntForm.Item
-                name={['target', 'pos']}
-                label="Point of Sale"
-              >
+              <AntForm.Item name={["target", "pos"]} label="Point of Sale">
                 <AntSelect
                   mode="multiple"
                   placeholder="Select POS countries"
@@ -821,25 +914,31 @@ export default function CampaignManager() {
           <Row gutter={16}>
             <Col span={12}>
               <AntForm.Item
-                name={['products', 'ancillaries']}
+                name={["products", "ancillaries"]}
                 label="Ancillary Products"
               >
                 <AntSelect
                   mode="multiple"
                   placeholder="Select ancillary products"
-                  options={ancillaryProducts.map(product => ({ label: product, value: product }))}
+                  options={ancillaryProducts.map((product) => ({
+                    label: product,
+                    value: product,
+                  }))}
                 />
               </AntForm.Item>
             </Col>
             <Col span={12}>
               <AntForm.Item
-                name={['products', 'bundles']}
+                name={["products", "bundles"]}
                 label="Bundle Products"
               >
                 <AntSelect
                   mode="multiple"
                   placeholder="Select bundle products"
-                  options={bundleProducts.map(bundle => ({ label: bundle, value: bundle }))}
+                  options={bundleProducts.map((bundle) => ({
+                    label: bundle,
+                    value: bundle,
+                  }))}
                 />
               </AntForm.Item>
             </Col>
@@ -848,27 +947,26 @@ export default function CampaignManager() {
           <Row gutter={16}>
             <Col span={8}>
               <AntForm.Item
-                name={['offer', 'type']}
+                name={["offer", "type"]}
                 label="Offer Type"
                 rules={[{ required: true, message: "Offer type is required" }]}
               >
                 <AntSelect placeholder="Select offer type">
-                  {offerTypes.map(type => (
+                  {offerTypes.map((type) => (
                     <AntSelect.Option key={type} value={type}>
-                      {type === "PERCENT" ? "Percentage Discount" : 
-                       type === "AMOUNT" ? "Amount Discount" : 
-                       "Special Price"}
+                      {type === "PERCENT"
+                        ? "Percentage Discount"
+                        : type === "AMOUNT"
+                          ? "Amount Discount"
+                          : "Special Price"}
                     </AntSelect.Option>
                   ))}
                 </AntSelect>
               </AntForm.Item>
             </Col>
             <Col span={8}>
-              <AntForm.Item
-                name={['offer', 'value']}
-                label="Discount Value"
-              >
-                <InputNumber 
+              <AntForm.Item name={["offer", "value"]} label="Discount Value">
+                <InputNumber
                   placeholder="10 (for 10% or $10)"
                   style={{ width: "100%" }}
                   min={0}
@@ -877,10 +975,10 @@ export default function CampaignManager() {
             </Col>
             <Col span={8}>
               <AntForm.Item
-                name={['offer', 'specialPrice']}
+                name={["offer", "specialPrice"]}
                 label="Special Price"
               >
-                <InputNumber 
+                <InputNumber
                   placeholder="99.99"
                   style={{ width: "100%" }}
                   min={0}
@@ -895,7 +993,7 @@ export default function CampaignManager() {
           <Row gutter={16}>
             <Col span={12}>
               <AntForm.Item
-                name={['lifecycle', 'startDate']}
+                name={["lifecycle", "startDate"]}
                 label="Start Date"
                 rules={[{ required: true, message: "Start date is required" }]}
               >
@@ -904,7 +1002,7 @@ export default function CampaignManager() {
             </Col>
             <Col span={12}>
               <AntForm.Item
-                name={['lifecycle', 'endDate']}
+                name={["lifecycle", "endDate"]}
                 label="End Date"
                 rules={[{ required: true, message: "End date is required" }]}
               >
@@ -916,18 +1014,15 @@ export default function CampaignManager() {
           <Row gutter={16}>
             <Col span={8}>
               <AntForm.Item
-                name={['lifecycle', 'frequency']}
+                name={["lifecycle", "frequency"]}
                 label="Frequency (Cron)"
               >
                 <Input placeholder="0 10 * * * (daily at 10 AM)" />
               </AntForm.Item>
             </Col>
             <Col span={8}>
-              <AntForm.Item
-                name={['lifecycle', 'maxSends']}
-                label="Max Sends"
-              >
-                <InputNumber 
+              <AntForm.Item name={["lifecycle", "maxSends"]} label="Max Sends">
+                <InputNumber
                   placeholder="3"
                   style={{ width: "100%" }}
                   min={1}
@@ -936,10 +1031,10 @@ export default function CampaignManager() {
             </Col>
             <Col span={8}>
               <AntForm.Item
-                name={['lifecycle', 'capPerPNR']}
+                name={["lifecycle", "capPerPNR"]}
                 label="Cap Per PNR"
               >
-                <InputNumber 
+                <InputNumber
                   placeholder="1"
                   style={{ width: "100%" }}
                   min={1}
@@ -953,7 +1048,7 @@ export default function CampaignManager() {
           <Row gutter={16}>
             <Col span={6}>
               <AntForm.Item
-                name={['comms', 'portalBanner']}
+                name={["comms", "portalBanner"]}
                 label="Portal Banner"
                 valuePropName="checked"
               >
@@ -962,7 +1057,7 @@ export default function CampaignManager() {
             </Col>
             <Col span={6}>
               <AntForm.Item
-                name={['comms', 'apiPush']}
+                name={["comms", "apiPush"]}
                 label="API Push"
                 valuePropName="checked"
               >
@@ -971,7 +1066,7 @@ export default function CampaignManager() {
             </Col>
             <Col span={6}>
               <AntForm.Item
-                name={['comms', 'emailTemplateId']}
+                name={["comms", "emailTemplateId"]}
                 label="Email Template"
               >
                 <Input placeholder="TMP_BAG10" />
@@ -979,7 +1074,7 @@ export default function CampaignManager() {
             </Col>
             <Col span={6}>
               <AntForm.Item
-                name={['comms', 'whatsappTemplateId']}
+                name={["comms", "whatsappTemplateId"]}
                 label="WhatsApp Template"
               >
                 <Input placeholder="WA_UPSELL_01" />
@@ -987,19 +1082,11 @@ export default function CampaignManager() {
             </Col>
           </Row>
 
-          <AntForm.Item
-            name="status"
-            initialValue="DRAFT"
-            hidden
-          >
+          <AntForm.Item name="status" initialValue="DRAFT" hidden>
             <Input />
           </AntForm.Item>
 
-          <AntForm.Item
-            name="createdBy"
-            initialValue="current-user"
-            hidden
-          >
+          <AntForm.Item name="createdBy" initialValue="current-user" hidden>
             <Input />
           </AntForm.Item>
 
@@ -1007,10 +1094,14 @@ export default function CampaignManager() {
             <AntButton onClick={() => setIsCampaignModalVisible(false)}>
               Cancel
             </AntButton>
-            <AntButton 
-              type="primary" 
+            <AntButton
+              type="primary"
               htmlType="submit"
-              loading={editingCampaign ? updateCampaignMutation.isPending : createCampaignMutation.isPending}
+              loading={
+                editingCampaign
+                  ? updateCampaignMutation.isPending
+                  : createCampaignMutation.isPending
+              }
             >
               {editingCampaign ? "Update Campaign" : "Create Campaign"}
             </AntButton>
@@ -1027,9 +1118,12 @@ export default function CampaignManager() {
           setSelectedCampaign(null);
         }}
         footer={[
-          <AntButton key="close" onClick={() => setIsPerformanceModalVisible(false)}>
+          <AntButton
+            key="close"
+            onClick={() => setIsPerformanceModalVisible(false)}
+          >
             Close
-          </AntButton>
+          </AntButton>,
         ]}
         width={1200}
       >
@@ -1037,8 +1131,12 @@ export default function CampaignManager() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-semibold">{selectedCampaign.campaignName}</h3>
-                <p className="text-sm text-gray-500">{selectedCampaign.campaignCode}</p>
+                <h3 className="text-lg font-semibold">
+                  {selectedCampaign.campaignName}
+                </h3>
+                <p className="text-sm text-gray-500">
+                  {selectedCampaign.campaignCode}
+                </p>
               </div>
               <RangePicker
                 value={metricsDateRange}
@@ -1057,7 +1155,7 @@ export default function CampaignManager() {
                         title="Sent"
                         value={campaignMetrics.aggregated.sent}
                         prefix={<Send className="w-4 h-4" />}
-                        valueStyle={{ fontSize: '18px' }}
+                        valueStyle={{ fontSize: "18px" }}
                       />
                     </AntCard>
                   </Col>
@@ -1067,7 +1165,7 @@ export default function CampaignManager() {
                         title="Delivered"
                         value={campaignMetrics.aggregated.delivered}
                         prefix={<CheckCircle className="w-4 h-4" />}
-                        valueStyle={{ fontSize: '18px', color: '#52c41a' }}
+                        valueStyle={{ fontSize: "18px", color: "#52c41a" }}
                       />
                     </AntCard>
                   </Col>
@@ -1077,7 +1175,7 @@ export default function CampaignManager() {
                         title="Opened"
                         value={campaignMetrics.aggregated.opened}
                         prefix={<Eye className="w-4 h-4" />}
-                        valueStyle={{ fontSize: '18px', color: '#1890ff' }}
+                        valueStyle={{ fontSize: "18px", color: "#1890ff" }}
                       />
                     </AntCard>
                   </Col>
@@ -1087,7 +1185,7 @@ export default function CampaignManager() {
                         title="Clicked"
                         value={campaignMetrics.aggregated.clicked}
                         prefix={<MousePointer className="w-4 h-4" />}
-                        valueStyle={{ fontSize: '18px', color: '#722ed1' }}
+                        valueStyle={{ fontSize: "18px", color: "#722ed1" }}
                       />
                     </AntCard>
                   </Col>
@@ -1097,7 +1195,7 @@ export default function CampaignManager() {
                         title="Purchased"
                         value={campaignMetrics.aggregated.purchased}
                         prefix={<ShoppingCart className="w-4 h-4" />}
-                        valueStyle={{ fontSize: '18px', color: '#fa8c16' }}
+                        valueStyle={{ fontSize: "18px", color: "#fa8c16" }}
                       />
                     </AntCard>
                   </Col>
@@ -1105,9 +1203,11 @@ export default function CampaignManager() {
                     <AntCard size="small">
                       <Statistic
                         title="Revenue Uplift"
-                        value={formatCurrency(campaignMetrics.aggregated.revenueUplift)}
+                        value={formatCurrency(
+                          campaignMetrics.aggregated.revenueUplift,
+                        )}
                         prefix={<DollarSign className="w-4 h-4" />}
-                        valueStyle={{ fontSize: '18px', color: '#52c41a' }}
+                        valueStyle={{ fontSize: "18px", color: "#52c41a" }}
                       />
                     </AntCard>
                   </Col>
@@ -1117,18 +1217,32 @@ export default function CampaignManager() {
                 <Row gutter={16}>
                   <Col span={8}>
                     <AntCard title="Delivery Rate" size="small">
-                      <Progress 
-                        percent={campaignMetrics.aggregated.sent > 0 ? 
-                          Math.round((campaignMetrics.aggregated.delivered / campaignMetrics.aggregated.sent) * 100) : 0}
+                      <Progress
+                        percent={
+                          campaignMetrics.aggregated.sent > 0
+                            ? Math.round(
+                                (campaignMetrics.aggregated.delivered /
+                                  campaignMetrics.aggregated.sent) *
+                                  100,
+                              )
+                            : 0
+                        }
                         status="active"
                       />
                     </AntCard>
                   </Col>
                   <Col span={8}>
                     <AntCard title="Open Rate" size="small">
-                      <Progress 
-                        percent={campaignMetrics.aggregated.delivered > 0 ? 
-                          Math.round((campaignMetrics.aggregated.opened / campaignMetrics.aggregated.delivered) * 100) : 0}
+                      <Progress
+                        percent={
+                          campaignMetrics.aggregated.delivered > 0
+                            ? Math.round(
+                                (campaignMetrics.aggregated.opened /
+                                  campaignMetrics.aggregated.delivered) *
+                                  100,
+                              )
+                            : 0
+                        }
                         status="active"
                         strokeColor="#1890ff"
                       />
@@ -1136,8 +1250,10 @@ export default function CampaignManager() {
                   </Col>
                   <Col span={8}>
                     <AntCard title="Attach Rate" size="small">
-                      <Progress 
-                        percent={Math.round(campaignMetrics.aggregated.attachRate)}
+                      <Progress
+                        percent={Math.round(
+                          campaignMetrics.aggregated.attachRate,
+                        )}
                         status="active"
                         strokeColor="#fa8c16"
                       />
@@ -1155,15 +1271,26 @@ export default function CampaignManager() {
                       {selectedCampaign.target.channel?.join(", ") || "-"}
                     </Descriptions.Item>
                     <Descriptions.Item label="Offer">
-                      {selectedCampaign.offer.type === "PERCENT" ? `${selectedCampaign.offer.value}% Off` : 
-                       selectedCampaign.offer.type === "AMOUNT" ? `$${selectedCampaign.offer.value} Off` :
-                       `$${selectedCampaign.offer.specialPrice}`}
+                      {selectedCampaign.offer.type === "PERCENT"
+                        ? `${selectedCampaign.offer.value}% Off`
+                        : selectedCampaign.offer.type === "AMOUNT"
+                          ? `$${selectedCampaign.offer.value} Off`
+                          : `$${selectedCampaign.offer.specialPrice}`}
                     </Descriptions.Item>
                     <Descriptions.Item label="Products">
-                      {[...(selectedCampaign.products.ancillaries || []), ...(selectedCampaign.products.bundles || [])].join(", ") || "-"}
+                      {[
+                        ...(selectedCampaign.products.ancillaries || []),
+                        ...(selectedCampaign.products.bundles || []),
+                      ].join(", ") || "-"}
                     </Descriptions.Item>
                     <Descriptions.Item label="Duration">
-                      {dayjs(selectedCampaign.lifecycle.startDate).format("MMM DD, YYYY")} - {dayjs(selectedCampaign.lifecycle.endDate).format("MMM DD, YYYY")}
+                      {dayjs(selectedCampaign.lifecycle.startDate).format(
+                        "MMM DD, YYYY",
+                      )}{" "}
+                      -{" "}
+                      {dayjs(selectedCampaign.lifecycle.endDate).format(
+                        "MMM DD, YYYY",
+                      )}
                     </Descriptions.Item>
                     <Descriptions.Item label="Max Sends">
                       {selectedCampaign.lifecycle.maxSends || "Unlimited"}

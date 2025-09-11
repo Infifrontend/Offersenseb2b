@@ -1,29 +1,55 @@
-
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { 
-  BarChart3, 
-  Play, 
-  Search, 
-  TrendingUp, 
-  TrendingDown, 
-  Brain, 
-  Clock, 
-  CheckCircle, 
-  XCircle, 
+import {
+  BarChart3,
+  Play,
+  Search,
+  TrendingUp,
+  TrendingDown,
+  Brain,
+  Clock,
+  CheckCircle,
+  XCircle,
   Loader2,
   Plus,
   Eye,
@@ -35,12 +61,16 @@ import {
   Percent,
   BarChart,
   PieChart,
-  LineChart
+  LineChart,
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import type { Simulation, InsertSimulation, InsightQuery } from "../../../shared/schema";
+import type {
+  Simulation,
+  InsertSimulation,
+  InsightQuery,
+} from "../../../shared/schema";
 
 const simulationFormSchema = z.object({
   scenarioName: z.string().min(1, "Scenario name is required"),
@@ -70,16 +100,20 @@ const simulationFormSchema = z.object({
 
 const queryFormSchema = z.object({
   queryText: z.string().min(1, "Query is required"),
-  filters: z.object({
-    timeRange: z.object({
-      start: z.string(),
-      end: z.string(),
-    }).optional(),
-    pos: z.array(z.string()).optional(),
-    agentTier: z.array(z.string()).optional(),
-    cohorts: z.array(z.string()).optional(),
-    channel: z.array(z.string()).optional(),
-  }).optional(),
+  filters: z
+    .object({
+      timeRange: z
+        .object({
+          start: z.string(),
+          end: z.string(),
+        })
+        .optional(),
+      pos: z.array(z.string()).optional(),
+      agentTier: z.array(z.string()).optional(),
+      cohorts: z.array(z.string()).optional(),
+      channel: z.array(z.string()).optional(),
+    })
+    .optional(),
 });
 
 const countries = ["US", "GB", "DE", "FR", "IN", "AU", "CA", "SG", "AE", "SA"];
@@ -89,7 +123,8 @@ const channels = ["API", "PORTAL", "MOBILE"];
 export default function AnalyticsSimulation() {
   const [activeTab, setActiveTab] = useState("simulations");
   const [isSimulationModalOpen, setIsSimulationModalOpen] = useState(false);
-  const [selectedSimulation, setSelectedSimulation] = useState<Simulation | null>(null);
+  const [selectedSimulation, setSelectedSimulation] =
+    useState<Simulation | null>(null);
   const [isViewSimulationOpen, setIsViewSimulationOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [isQuerying, setIsQuerying] = useState(false);
@@ -102,14 +137,14 @@ export default function AnalyticsSimulation() {
       scope: {},
       change: {
         ruleType: "DISCOUNT",
-        adjustment: { type: "PERCENT", value: 0 }
+        adjustment: { type: "PERCENT", value: 0 },
       },
       forecast: {
         revenueChangePct: "+0.0",
         conversionChangePct: "+0.0",
-        marginImpactPct: "+0.0"
-      }
-    }
+        marginImpactPct: "+0.0",
+      },
+    },
   });
 
   // Fetch simulations
@@ -119,7 +154,7 @@ export default function AnalyticsSimulation() {
       const response = await fetch("/api/simulations");
       if (!response.ok) throw new Error("Failed to fetch simulations");
       return response.json() as Promise<Simulation[]>;
-    }
+    },
   });
 
   // Fetch insight queries
@@ -129,7 +164,7 @@ export default function AnalyticsSimulation() {
       const response = await fetch("/api/insights/queries");
       if (!response.ok) throw new Error("Failed to fetch insight queries");
       return response.json() as Promise<InsightQuery[]>;
-    }
+    },
   });
 
   // Create simulation mutation
@@ -137,8 +172,11 @@ export default function AnalyticsSimulation() {
     mutationFn: async (data: z.infer<typeof simulationFormSchema>) => {
       const response = await fetch("/api/simulations", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-user": "analyst_user" },
-        body: JSON.stringify(data)
+        headers: {
+          "Content-Type": "application/json",
+          "x-user": "analyst_user",
+        },
+        body: JSON.stringify(data),
       });
       if (!response.ok) throw new Error("Failed to create simulation");
       return response.json();
@@ -147,7 +185,7 @@ export default function AnalyticsSimulation() {
       queryClient.invalidateQueries({ queryKey: ["simulations"] });
       setIsSimulationModalOpen(false);
       simulationForm.reset();
-    }
+    },
   });
 
   // Run simulation mutation
@@ -155,14 +193,14 @@ export default function AnalyticsSimulation() {
     mutationFn: async (id: string) => {
       const response = await fetch(`/api/simulations/${id}/run`, {
         method: "POST",
-        headers: { "x-user": "analyst_user" }
+        headers: { "x-user": "analyst_user" },
       });
       if (!response.ok) throw new Error("Failed to run simulation");
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["simulations"] });
-    }
+    },
   });
 
   // Submit query mutation
@@ -170,8 +208,11 @@ export default function AnalyticsSimulation() {
     mutationFn: async (queryData: { queryText: string; filters?: any }) => {
       const response = await fetch("/api/insights/query", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-user": "analyst_user" },
-        body: JSON.stringify(queryData)
+        headers: {
+          "Content-Type": "application/json",
+          "x-user": "analyst_user",
+        },
+        body: JSON.stringify(queryData),
       });
       if (!response.ok) throw new Error("Failed to process query");
       return response.json();
@@ -179,22 +220,24 @@ export default function AnalyticsSimulation() {
     onSuccess: (data) => {
       setLastQuery(data);
       queryClient.invalidateQueries({ queryKey: ["insight-queries"] });
-    }
+    },
   });
 
-  const handleSimulationSubmit = (data: z.infer<typeof simulationFormSchema>) => {
+  const handleSimulationSubmit = (
+    data: z.infer<typeof simulationFormSchema>,
+  ) => {
     createSimulationMutation.mutate(data);
   };
 
   const handleQuerySubmit = () => {
     if (!query.trim()) return;
-    
+
     setIsQuerying(true);
     submitQueryMutation.mutate(
       { queryText: query },
       {
-        onSettled: () => setIsQuerying(false)
-      }
+        onSettled: () => setIsQuerying(false),
+      },
     );
   };
 
@@ -203,29 +246,34 @@ export default function AnalyticsSimulation() {
       DRAFT: "bg-gray-100 text-gray-800",
       RUNNING: "bg-blue-100 text-blue-800",
       COMPLETED: "bg-green-100 text-green-800",
-      CANCELLED: "bg-red-100 text-red-800"
+      CANCELLED: "bg-red-100 text-red-800",
     };
-    return <Badge className={colors[status as keyof typeof colors] || "bg-gray-100 text-gray-800"}>{status}</Badge>;
+    return (
+      <Badge
+        className={
+          colors[status as keyof typeof colors] || "bg-gray-100 text-gray-800"
+        }
+      >
+        {status}
+      </Badge>
+    );
   };
 
   const getChangeIcon = (value: string) => {
-    if (value.startsWith('+')) return <TrendingUp className="h-4 w-4 text-green-600" />;
-    if (value.startsWith('-')) return <TrendingDown className="h-4 w-4 text-red-600" />;
+    if (value.startsWith("+"))
+      return <TrendingUp className="h-4 w-4 text-green-600" />;
+    if (value.startsWith("-"))
+      return <TrendingDown className="h-4 w-4 text-red-600" />;
     return <BarChart className="h-4 w-4 text-gray-600" />;
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Analytics & Simulation</h2>
-          <p className="text-muted-foreground">
-            Run what-if scenarios and get insights using natural language queries
-          </p>
-        </div>
-      </div>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="space-y-4"
+      >
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="simulations" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
@@ -241,7 +289,10 @@ export default function AnalyticsSimulation() {
         <TabsContent value="simulations" className="space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-xl font-semibold">What-If Scenarios</h3>
-            <Dialog open={isSimulationModalOpen} onOpenChange={setIsSimulationModalOpen}>
+            <Dialog
+              open={isSimulationModalOpen}
+              onOpenChange={setIsSimulationModalOpen}
+            >
               <DialogTrigger asChild>
                 <Button className="flex items-center gap-2">
                   <Plus className="h-4 w-4" />
@@ -255,9 +306,14 @@ export default function AnalyticsSimulation() {
                     Define a scenario to analyze potential business impact
                   </DialogDescription>
                 </DialogHeader>
-                
+
                 <Form {...simulationForm}>
-                  <form onSubmit={simulationForm.handleSubmit(handleSimulationSubmit)} className="space-y-4">
+                  <form
+                    onSubmit={simulationForm.handleSubmit(
+                      handleSimulationSubmit,
+                    )}
+                    className="space-y-4"
+                  >
                     <FormField
                       control={simulationForm.control}
                       name="scenarioName"
@@ -265,7 +321,10 @@ export default function AnalyticsSimulation() {
                         <FormItem>
                           <FormLabel>Scenario Name</FormLabel>
                           <FormControl>
-                            <Input placeholder="e.g., Gold discount +2% in GCC" {...field} />
+                            <Input
+                              placeholder="e.g., Gold discount +2% in GCC"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -284,7 +343,7 @@ export default function AnalyticsSimulation() {
                           <Input placeholder="LHR" />
                         </div>
                       </div>
-                      
+
                       <div className="space-y-2">
                         <Label>Point of Sale</Label>
                         <Select>
@@ -292,8 +351,10 @@ export default function AnalyticsSimulation() {
                             <SelectValue placeholder="Select countries" />
                           </SelectTrigger>
                           <SelectContent>
-                            {countries.map(country => (
-                              <SelectItem key={country} value={country}>{country}</SelectItem>
+                            {countries.map((country) => (
+                              <SelectItem key={country} value={country}>
+                                {country}
+                              </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
@@ -306,8 +367,10 @@ export default function AnalyticsSimulation() {
                             <SelectValue placeholder="Select tiers" />
                           </SelectTrigger>
                           <SelectContent>
-                            {agentTiers.map(tier => (
-                              <SelectItem key={tier} value={tier}>{tier}</SelectItem>
+                            {agentTiers.map((tier) => (
+                              <SelectItem key={tier} value={tier}>
+                                {tier}
+                              </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
@@ -320,8 +383,10 @@ export default function AnalyticsSimulation() {
                             <SelectValue placeholder="Select channels" />
                           </SelectTrigger>
                           <SelectContent>
-                            {channels.map(channel => (
-                              <SelectItem key={channel} value={channel}>{channel}</SelectItem>
+                            {channels.map((channel) => (
+                              <SelectItem key={channel} value={channel}>
+                                {channel}
+                              </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
@@ -336,16 +401,23 @@ export default function AnalyticsSimulation() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Change Type</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                <SelectItem value="DISCOUNT">Discount</SelectItem>
+                                <SelectItem value="DISCOUNT">
+                                  Discount
+                                </SelectItem>
                                 <SelectItem value="MARKUP">Markup</SelectItem>
-                                <SelectItem value="ANCILLARY">Ancillary</SelectItem>
+                                <SelectItem value="ANCILLARY">
+                                  Ancillary
+                                </SelectItem>
                                 <SelectItem value="BUNDLE">Bundle</SelectItem>
                               </SelectContent>
                             </Select>
@@ -353,7 +425,7 @@ export default function AnalyticsSimulation() {
                           </FormItem>
                         )}
                       />
-                      
+
                       <div className="grid grid-cols-2 gap-4">
                         <FormField
                           control={simulationForm.control}
@@ -361,14 +433,19 @@ export default function AnalyticsSimulation() {
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Adjustment Type</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <Select
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                              >
                                 <FormControl>
                                   <SelectTrigger>
                                     <SelectValue />
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  <SelectItem value="PERCENT">Percent</SelectItem>
+                                  <SelectItem value="PERCENT">
+                                    Percent
+                                  </SelectItem>
                                   <SelectItem value="AMOUNT">Amount</SelectItem>
                                 </SelectContent>
                               </Select>
@@ -376,7 +453,7 @@ export default function AnalyticsSimulation() {
                             </FormItem>
                           )}
                         />
-                        
+
                         <FormField
                           control={simulationForm.control}
                           name="change.adjustment.value"
@@ -384,11 +461,13 @@ export default function AnalyticsSimulation() {
                             <FormItem>
                               <FormLabel>Value</FormLabel>
                               <FormControl>
-                                <Input 
-                                  type="number" 
+                                <Input
+                                  type="number"
                                   step="0.1"
                                   {...field}
-                                  onChange={e => field.onChange(parseFloat(e.target.value))}
+                                  onChange={(e) =>
+                                    field.onChange(parseFloat(e.target.value))
+                                  }
                                 />
                               </FormControl>
                               <FormMessage />
@@ -414,7 +493,7 @@ export default function AnalyticsSimulation() {
                             </FormItem>
                           )}
                         />
-                        
+
                         <FormField
                           control={simulationForm.control}
                           name="forecast.conversionChangePct"
@@ -428,7 +507,7 @@ export default function AnalyticsSimulation() {
                             </FormItem>
                           )}
                         />
-                        
+
                         <FormField
                           control={simulationForm.control}
                           name="forecast.marginImpactPct"
@@ -442,7 +521,7 @@ export default function AnalyticsSimulation() {
                             </FormItem>
                           )}
                         />
-                        
+
                         <FormField
                           control={simulationForm.control}
                           name="forecast.attachRateChangePct"
@@ -467,8 +546,13 @@ export default function AnalyticsSimulation() {
                       >
                         Cancel
                       </Button>
-                      <Button type="submit" disabled={createSimulationMutation.isPending}>
-                        {createSimulationMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      <Button
+                        type="submit"
+                        disabled={createSimulationMutation.isPending}
+                      >
+                        {createSimulationMutation.isPending && (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        )}
                         Create Simulation
                       </Button>
                     </DialogFooter>
@@ -487,18 +571,26 @@ export default function AnalyticsSimulation() {
               <Card>
                 <CardContent className="text-center py-8">
                   <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No simulations created yet</p>
+                  <p className="text-muted-foreground">
+                    No simulations created yet
+                  </p>
                 </CardContent>
               </Card>
             ) : (
-              simulations.map(simulation => (
-                <Card key={simulation.id} className="hover:shadow-md transition-shadow">
+              simulations.map((simulation) => (
+                <Card
+                  key={simulation.id}
+                  className="hover:shadow-md transition-shadow"
+                >
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <div>
-                        <CardTitle className="text-lg">{simulation.scenarioName}</CardTitle>
+                        <CardTitle className="text-lg">
+                          {simulation.scenarioName}
+                        </CardTitle>
                         <CardDescription className="mt-1">
-                          Created {new Date(simulation.createdAt!).toLocaleDateString()}
+                          Created{" "}
+                          {new Date(simulation.createdAt!).toLocaleDateString()}
                         </CardDescription>
                       </div>
                       <div className="flex items-center gap-2">
@@ -518,7 +610,9 @@ export default function AnalyticsSimulation() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => runSimulationMutation.mutate(simulation.id)}
+                              onClick={() =>
+                                runSimulationMutation.mutate(simulation.id)
+                              }
                               disabled={runSimulationMutation.isPending}
                             >
                               {runSimulationMutation.isPending ? (
@@ -537,17 +631,24 @@ export default function AnalyticsSimulation() {
                       <div className="flex items-center gap-4 text-sm">
                         <div className="flex items-center gap-1">
                           <Target className="h-4 w-4 text-muted-foreground" />
-                          <span>{(simulation.change as any)?.ruleType || "N/A"}</span>
+                          <span>
+                            {(simulation.change as any)?.ruleType || "N/A"}
+                          </span>
                         </div>
                         <div className="flex items-center gap-1">
                           <Percent className="h-4 w-4 text-muted-foreground" />
-                          <span>{(simulation.change as any)?.adjustment?.value || 0}%</span>
+                          <span>
+                            {(simulation.change as any)?.adjustment?.value || 0}
+                            %
+                          </span>
                         </div>
                       </div>
 
                       <div className="grid grid-cols-3 gap-4 text-sm">
                         <div className="flex items-center gap-2">
-                          {getChangeIcon((simulation.forecast as any)?.revenueChangePct)}
+                          {getChangeIcon(
+                            (simulation.forecast as any)?.revenueChangePct,
+                          )}
                           <div>
                             <div className="font-medium">Revenue</div>
                             <div className="text-muted-foreground">
@@ -556,16 +657,23 @@ export default function AnalyticsSimulation() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          {getChangeIcon((simulation.forecast as any)?.conversionChangePct)}
+                          {getChangeIcon(
+                            (simulation.forecast as any)?.conversionChangePct,
+                          )}
                           <div>
                             <div className="font-medium">Conversion</div>
                             <div className="text-muted-foreground">
-                              {(simulation.forecast as any)?.conversionChangePct}
+                              {
+                                (simulation.forecast as any)
+                                  ?.conversionChangePct
+                              }
                             </div>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          {getChangeIcon((simulation.forecast as any)?.marginImpactPct)}
+                          {getChangeIcon(
+                            (simulation.forecast as any)?.marginImpactPct,
+                          )}
                           <div>
                             <div className="font-medium">Margin</div>
                             <div className="text-muted-foreground">
@@ -575,43 +683,79 @@ export default function AnalyticsSimulation() {
                         </div>
                       </div>
 
-                      {simulation.actualResults && simulation.status === "COMPLETED" && (
-                        <>
-                          <Separator />
-                          <div className="space-y-2">
-                            <div className="text-sm font-medium">Actual vs Forecast</div>
-                            <div className="grid grid-cols-3 gap-4 text-sm">
-                              <div>
-                                <div className="text-muted-foreground">Revenue</div>
-                                <div className="flex items-center gap-2">
-                                  <span>{(simulation.actualResults as any)?.revenueChangePct}</span>
-                                  <span className="text-xs text-muted-foreground">
-                                    vs {(simulation.forecast as any)?.revenueChangePct}
-                                  </span>
-                                </div>
+                      {simulation.actualResults &&
+                        simulation.status === "COMPLETED" && (
+                          <>
+                            <Separator />
+                            <div className="space-y-2">
+                              <div className="text-sm font-medium">
+                                Actual vs Forecast
                               </div>
-                              <div>
-                                <div className="text-muted-foreground">Conversion</div>
-                                <div className="flex items-center gap-2">
-                                  <span>{(simulation.actualResults as any)?.conversionChangePct}</span>
-                                  <span className="text-xs text-muted-foreground">
-                                    vs {(simulation.forecast as any)?.conversionChangePct}
-                                  </span>
+                              <div className="grid grid-cols-3 gap-4 text-sm">
+                                <div>
+                                  <div className="text-muted-foreground">
+                                    Revenue
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span>
+                                      {
+                                        (simulation.actualResults as any)
+                                          ?.revenueChangePct
+                                      }
+                                    </span>
+                                    <span className="text-xs text-muted-foreground">
+                                      vs{" "}
+                                      {
+                                        (simulation.forecast as any)
+                                          ?.revenueChangePct
+                                      }
+                                    </span>
+                                  </div>
                                 </div>
-                              </div>
-                              <div>
-                                <div className="text-muted-foreground">Margin</div>
-                                <div className="flex items-center gap-2">
-                                  <span>{(simulation.actualResults as any)?.marginImpactPct}</span>
-                                  <span className="text-xs text-muted-foreground">
-                                    vs {(simulation.forecast as any)?.marginImpactPct}
-                                  </span>
+                                <div>
+                                  <div className="text-muted-foreground">
+                                    Conversion
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span>
+                                      {
+                                        (simulation.actualResults as any)
+                                          ?.conversionChangePct
+                                      }
+                                    </span>
+                                    <span className="text-xs text-muted-foreground">
+                                      vs{" "}
+                                      {
+                                        (simulation.forecast as any)
+                                          ?.conversionChangePct
+                                      }
+                                    </span>
+                                  </div>
+                                </div>
+                                <div>
+                                  <div className="text-muted-foreground">
+                                    Margin
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span>
+                                      {
+                                        (simulation.actualResults as any)
+                                          ?.marginImpactPct
+                                      }
+                                    </span>
+                                    <span className="text-xs text-muted-foreground">
+                                      vs{" "}
+                                      {
+                                        (simulation.forecast as any)
+                                          ?.marginImpactPct
+                                      }
+                                    </span>
+                                  </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        </>
-                      )}
+                          </>
+                        )}
                     </div>
                   </CardContent>
                 </Card>
@@ -623,9 +767,12 @@ export default function AnalyticsSimulation() {
         {/* NLP Insight Console Tab */}
         <TabsContent value="insights" className="space-y-4">
           <div>
-            <h3 className="text-xl font-semibold mb-2">Ask Anything About Your Business</h3>
+            <h3 className="text-xl font-semibold mb-2">
+              Ask Anything About Your Business
+            </h3>
             <p className="text-muted-foreground mb-4">
-              Use natural language to query performance data, discover insights, and get answers to your business questions.
+              Use natural language to query performance data, discover insights,
+              and get answers to your business questions.
             </p>
           </div>
 
@@ -650,12 +797,16 @@ export default function AnalyticsSimulation() {
                     }
                   }}
                 />
-                <Button 
-                  onClick={handleQuerySubmit} 
+                <Button
+                  onClick={handleQuerySubmit}
                   disabled={isQuerying || !query.trim()}
                   className="self-end"
                 >
-                  {isQuerying ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                  {isQuerying ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Search className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
 
@@ -669,8 +820,8 @@ export default function AnalyticsSimulation() {
                     "Which routes have the highest conversion rates?",
                     "What's the ROI of our recent campaigns?",
                     "Show me ancillary attachment rates by channel",
-                    "Which discount rules are triggered most often?"
-                  ].map(sampleQuery => (
+                    "Which discount rules are triggered most often?",
+                  ].map((sampleQuery) => (
                     <Button
                       key={sampleQuery}
                       variant="outline"
@@ -699,17 +850,22 @@ export default function AnalyticsSimulation() {
                             <Separator orientation="vertical" className="h-4" />
                             <div className="flex items-center gap-1">
                               <Brain className="h-4 w-4" />
-                              {Math.round(((lastQuery.response as any)?.confidence || 0) * 100)}% confidence
+                              {Math.round(
+                                ((lastQuery.response as any)?.confidence || 0) *
+                                  100,
+                              )}
+                              % confidence
                             </div>
                           </>
                         )}
                       </div>
                     </div>
-                    
+
                     <Alert>
                       <Brain className="h-4 w-4" />
                       <AlertDescription className="text-sm leading-relaxed">
-                        {(lastQuery.response as any)?.answer || "No answer available"}
+                        {(lastQuery.response as any)?.answer ||
+                          "No answer available"}
                       </AlertDescription>
                     </Alert>
 
@@ -723,7 +879,11 @@ export default function AnalyticsSimulation() {
                         </CardHeader>
                         <CardContent>
                           <pre className="text-xs bg-muted p-3 rounded-md overflow-auto">
-                            {JSON.stringify((lastQuery.response as any).data, null, 2)}
+                            {JSON.stringify(
+                              (lastQuery.response as any).data,
+                              null,
+                              2,
+                            )}
                           </pre>
                         </CardContent>
                       </Card>
@@ -731,7 +891,8 @@ export default function AnalyticsSimulation() {
 
                     {(lastQuery.response as any)?.sources && (
                       <div className="text-xs text-muted-foreground">
-                        Sources: {(lastQuery.response as any).sources.join(", ")}
+                        Sources:{" "}
+                        {(lastQuery.response as any).sources.join(", ")}
                       </div>
                     )}
                   </div>
@@ -751,19 +912,30 @@ export default function AnalyticsSimulation() {
                   <Loader2 className="h-6 w-6 animate-spin" />
                 </div>
               ) : insightQueries.length === 0 ? (
-                <p className="text-muted-foreground text-center py-4">No queries yet</p>
+                <p className="text-muted-foreground text-center py-4">
+                  No queries yet
+                </p>
               ) : (
                 <div className="space-y-3">
-                  {insightQueries.slice(0, 5).map(query => (
-                    <div key={query.id} className="border rounded-lg p-3 space-y-2">
+                  {insightQueries.slice(0, 5).map((query) => (
+                    <div
+                      key={query.id}
+                      className="border rounded-lg p-3 space-y-2"
+                    >
                       <div className="flex items-start justify-between">
                         <p className="text-sm font-medium truncate flex-1 mr-2">
                           {query.queryText}
                         </p>
                         <div className="flex items-center gap-2">
-                          {query.status === "COMPLETED" && <CheckCircle className="h-4 w-4 text-green-600" />}
-                          {query.status === "ERROR" && <XCircle className="h-4 w-4 text-red-600" />}
-                          {query.status === "PROCESSING" && <Loader2 className="h-4 w-4 animate-spin text-blue-600" />}
+                          {query.status === "COMPLETED" && (
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                          )}
+                          {query.status === "ERROR" && (
+                            <XCircle className="h-4 w-4 text-red-600" />
+                          )}
+                          {query.status === "PROCESSING" && (
+                            <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                          )}
                           <span className="text-xs text-muted-foreground">
                             {new Date(query.createdAt!).toLocaleString()}
                           </span>
@@ -784,7 +956,10 @@ export default function AnalyticsSimulation() {
       </Tabs>
 
       {/* View Simulation Dialog */}
-      <Dialog open={isViewSimulationOpen} onOpenChange={setIsViewSimulationOpen}>
+      <Dialog
+        open={isViewSimulationOpen}
+        onOpenChange={setIsViewSimulationOpen}
+      >
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{selectedSimulation?.scenarioName}</DialogTitle>
@@ -792,7 +967,7 @@ export default function AnalyticsSimulation() {
               Simulation details and results
             </DialogDescription>
           </DialogHeader>
-          
+
           {selectedSimulation && (
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-4 text-sm">
@@ -837,13 +1012,17 @@ export default function AnalyticsSimulation() {
                     </pre>
                   </div>
                 </div>
-                
+
                 {selectedSimulation.actualResults && (
                   <div>
                     <Label className="font-medium">Actual Results</Label>
                     <div className="mt-2 p-3 bg-muted rounded-md">
                       <pre className="text-xs">
-                        {JSON.stringify(selectedSimulation.actualResults, null, 2)}
+                        {JSON.stringify(
+                          selectedSimulation.actualResults,
+                          null,
+                          2,
+                        )}
                       </pre>
                     </div>
                   </div>

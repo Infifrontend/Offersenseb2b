@@ -279,8 +279,6 @@ export default function AncillaryBundlingEngine() {
     retry: 3,
     retryDelay: 1000,
   });
-    },
-  });
 
   // Create bundle mutation
   const createBundleMutation = useMutation({

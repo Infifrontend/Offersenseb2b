@@ -203,18 +203,24 @@ export default function AncillaryBundlingEngine() {
   const { toast } = useToast();
 
   // State for bundle pricing rules
-  const [selectedBundlePricingRule, setSelectedBundlePricingRule] = useState<BundlePricingRule | null>(null);
+  const [selectedBundlePricingRule, setSelectedBundlePricingRule] =
+    useState<BundlePricingRule | null>(null);
   const [isCreateBundleModalOpen, setIsCreateBundleModalOpen] = useState(false);
-  const [isCreatePricingModalOpen, setIsCreatePricingModalOpen] = useState(false);
+  const [isCreatePricingModalOpen, setIsCreatePricingModalOpen] =
+    useState(false);
   const [isViewBundleModalOpen, setIsViewBundleModalOpen] = useState(false);
   const [isViewPricingModalOpen, setIsViewPricingModalOpen] = useState(false);
   const [isEditBundleModalOpen, setIsEditBundleModalOpen] = useState(false);
   const [isEditPricingModalOpen, setIsEditPricingModalOpen] = useState(false);
   const [isSimulateModalOpen, setIsSimulateModalOpen] = useState(false);
-  const [isCreateBundlePricingModalOpen, setIsCreateBundlePricingModalOpen] = useState(false);
-  const [isEditBundlePricingModalOpen, setIsEditBundlePricingModalOpen] = useState(false);
-  const [isSimulateBundlePricingModalOpen, setIsSimulateBundlePricingModalOpen] = useState(false);
-
+  const [isCreateBundlePricingModalOpen, setIsCreateBundlePricingModalOpen] =
+    useState(false);
+  const [isEditBundlePricingModalOpen, setIsEditBundlePricingModalOpen] =
+    useState(false);
+  const [
+    isSimulateBundlePricingModalOpen,
+    setIsSimulateBundlePricingModalOpen,
+  ] = useState(false);
 
   // Form instances
   const bundleForm = useForm<BundleFormData>({
@@ -264,7 +270,6 @@ export default function AncillaryBundlingEngine() {
     },
   });
 
-
   // Fetch bundles
   const { data: bundles = [], isLoading: bundlesLoading } = useQuery({
     queryKey: ["bundles", filters],
@@ -287,11 +292,17 @@ export default function AncillaryBundlingEngine() {
     queryFn: async () => {
       console.log("Fetching bundle pricing rules from /api/bundles/pricing");
       const params = new URLSearchParams(pricingFilters);
-      const response = await fetch(`/api/bundles/pricing?${params}`);
+      const response = await fetch(`/api/bundles/pricing`);
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("Failed to fetch bundle pricing rules:", response.status, errorText);
-        throw new Error(`Failed to fetch bundle pricing rules: ${response.statusText}`);
+        console.error(
+          "Failed to fetch bundle pricing rules:",
+          response.status,
+          errorText,
+        );
+        throw new Error(
+          `Failed to fetch bundle pricing rules: ${response.statusText}`,
+        );
       }
       const data = await response.json();
       console.log("Bundle pricing rules response:", data);
@@ -301,7 +312,10 @@ export default function AncillaryBundlingEngine() {
       } else if (data && data.data && Array.isArray(data.data)) {
         return data.data;
       } else {
-        console.warn("Unexpected response format for bundle pricing rules:", data);
+        console.warn(
+          "Unexpected response format for bundle pricing rules:",
+          data,
+        );
         return [];
       }
     },
@@ -808,7 +822,9 @@ export default function AncillaryBundlingEngine() {
           <div className="flex justify-between items-center">
             <div>
               <h2 className="text-2xl font-bold">Bundle Pricing Rules</h2>
-              <p className="text-muted-foreground">Manage bundle pricing and discount rules</p>
+              <p className="text-muted-foreground">
+                Manage bundle pricing and discount rules
+              </p>
             </div>
             <Button onClick={() => setIsCreatePricingModalOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
@@ -825,7 +841,9 @@ export default function AncillaryBundlingEngine() {
               ) : pricingError ? (
                 <div className="text-center py-12 text-red-500">
                   Error loading pricing rules: {pricingError.message}
-                  <Button onClick={refetchPricingRules} className="ml-4">Retry</Button>
+                  <Button onClick={refetchPricingRules} className="ml-4">
+                    Retry
+                  </Button>
                 </div>
               ) : pricingRules.length === 0 ? (
                 <div className="text-center py-12">
@@ -859,11 +877,15 @@ export default function AncillaryBundlingEngine() {
                     <TableBody>
                       {pricingRules.map((rule: BundlePricingRule) => (
                         <TableRow key={rule.id}>
-                          <TableCell className="font-medium">{rule.ruleCode || 'N/A'}</TableCell>
-                          <TableCell>{rule.bundleCode || 'N/A'}</TableCell>
+                          <TableCell className="font-medium">
+                            {rule.ruleCode || "N/A"}
+                          </TableCell>
+                          <TableCell>{rule.bundleCode || "N/A"}</TableCell>
                           <TableCell>
                             <Badge variant="outline" className="capitalize">
-                              {rule.discountType ? rule.discountType.toLowerCase() : 'N/A'}
+                              {rule.discountType
+                                ? rule.discountType.toLowerCase()
+                                : "N/A"}
                             </Badge>
                           </TableCell>
                           <TableCell>
@@ -876,15 +898,23 @@ export default function AncillaryBundlingEngine() {
                             {rule.validFrom && rule.validTo ? (
                               <>
                                 <div>{formatDate(rule.validFrom)}</div>
-                                <div className="text-gray-500">to {formatDate(rule.validTo)}</div>
+                                <div className="text-gray-500">
+                                  to {formatDate(rule.validTo)}
+                                </div>
                               </>
                             ) : (
-                              'N/A'
+                              "N/A"
                             )}
                           </TableCell>
                           <TableCell>
-                            <Badge variant={rule.status === "ACTIVE" ? "default" : "secondary"}>
-                              {rule.status || 'INACTIVE'}
+                            <Badge
+                              variant={
+                                rule.status === "ACTIVE"
+                                  ? "default"
+                                  : "secondary"
+                              }
+                            >
+                              {rule.status || "INACTIVE"}
                             </Badge>
                           </TableCell>
                           <TableCell>
@@ -892,21 +922,27 @@ export default function AncillaryBundlingEngine() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handleSimulateBundlePricing(rule)}
+                                onClick={() =>
+                                  handleSimulateBundlePricing(rule)
+                                }
                               >
                                 <Play className="h-4 w-4" />
                               </Button>
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handleEditBundlePricingRule(rule)}
+                                onClick={() =>
+                                  handleEditBundlePricingRule(rule)
+                                }
                               >
                                 <Edit className="h-4 w-4" />
                               </Button>
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handleDeleteBundlePricingRule(rule.id)}
+                                onClick={() =>
+                                  handleDeleteBundlePricingRule(rule.id)
+                                }
                                 disabled={deleteBundlePricingMutation.isPending}
                               >
                                 <Trash2 className="h-4 w-4" />
@@ -1046,39 +1082,39 @@ export default function AncillaryBundlingEngine() {
           </div>
 
           <AntForm.Item label="Cohort Codes (Optional)" name="cohortCodes">
-              <AntSelect
-                mode="tags"
-                placeholder="Enter cohort codes"
-                style={{ width: "100%" }}
-                dropdownStyle={{ zIndex: 9999 }}
-                getPopupContainer={(trigger) => trigger.parentElement}
-                virtual={false}
-                showSearch
-                filterOption={(input, option) =>
-                  option?.children?.toLowerCase().indexOf(input.toLowerCase()) >=
-                    0 ||
-                  option?.value?.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                }
-              >
-                {availableCohorts.map((cohort: any) => (
-                  <AntSelect.Option key={cohort.id} value={cohort.cohortName}>
-                    <div style={{ display: "flex", flexDirection: "column" }}>
-                      <div className="cls-cohort-dropdwon">
-                        <p>{cohort.cohortName}</p>{" "}
-                        <span className="text-gray-600">{cohort.cohortCode}</span>
-                      </div>
+            <AntSelect
+              mode="tags"
+              placeholder="Enter cohort codes"
+              style={{ width: "100%" }}
+              dropdownStyle={{ zIndex: 9999 }}
+              getPopupContainer={(trigger) => trigger.parentElement}
+              virtual={false}
+              showSearch
+              filterOption={(input, option) =>
+                option?.children?.toLowerCase().indexOf(input.toLowerCase()) >=
+                  0 ||
+                option?.value?.toLowerCase().indexOf(input.toLowerCase()) >= 0
+              }
+            >
+              {availableCohorts.map((cohort: any) => (
+                <AntSelect.Option key={cohort.id} value={cohort.cohortName}>
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    <div className="cls-cohort-dropdwon">
+                      <p>{cohort.cohortName}</p>{" "}
+                      <span className="text-gray-600">{cohort.cohortCode}</span>
                     </div>
-                  </AntSelect.Option>
-                ))}
-              </AntSelect>
-            </AntForm.Item>
+                  </div>
+                </AntSelect.Option>
+              ))}
+            </AntSelect>
+          </AntForm.Item>
 
           <AntForm.Item label="Inventory Cap" name="inventoryCap">
-              <AntInputNumber
-                placeholder="Optional inventory limit"
-                style={{ width: "100%" }}
-              />
-            </AntForm.Item>
+            <AntInputNumber
+              placeholder="Optional inventory limit"
+              style={{ width: "100%" }}
+            />
+          </AntForm.Item>
 
           <AntForm.Item
             label="Valid Period"
@@ -1327,39 +1363,39 @@ export default function AncillaryBundlingEngine() {
           </div>
 
           <AntForm.Item label="Cohort Codes (Optional)" name="cohortCodes">
-              <AntSelect
-                mode="tags"
-                placeholder="Enter cohort codes"
-                style={{ width: "100%" }}
-                dropdownStyle={{ zIndex: 9999 }}
-                getPopupContainer={(trigger) => trigger.parentElement}
-                virtual={false}
-                showSearch
-                filterOption={(input, option) =>
-                  option?.children?.toLowerCase().indexOf(input.toLowerCase()) >=
-                    0 ||
-                  option?.value?.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                }
-              >
-                {availableCohorts.map((cohort: any) => (
-                  <AntSelect.Option key={cohort.id} value={cohort.cohortName}>
-                    <div style={{ display: "flex", flexDirection: "column" }}>
-                      <div className="cls-cohort-dropdwon">
-                        <p>{cohort.cohortName}</p>{" "}
-                        <span className="text-gray-600">{cohort.cohortCode}</span>
-                      </div>
+            <AntSelect
+              mode="tags"
+              placeholder="Enter cohort codes"
+              style={{ width: "100%" }}
+              dropdownStyle={{ zIndex: 9999 }}
+              getPopupContainer={(trigger) => trigger.parentElement}
+              virtual={false}
+              showSearch
+              filterOption={(input, option) =>
+                option?.children?.toLowerCase().indexOf(input.toLowerCase()) >=
+                  0 ||
+                option?.value?.toLowerCase().indexOf(input.toLowerCase()) >= 0
+              }
+            >
+              {availableCohorts.map((cohort: any) => (
+                <AntSelect.Option key={cohort.id} value={cohort.cohortName}>
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    <div className="cls-cohort-dropdwon">
+                      <p>{cohort.cohortName}</p>{" "}
+                      <span className="text-gray-600">{cohort.cohortCode}</span>
                     </div>
-                  </AntSelect.Option>
-                ))}
-              </AntSelect>
-            </AntForm.Item>
+                  </div>
+                </AntSelect.Option>
+              ))}
+            </AntSelect>
+          </AntForm.Item>
 
           <AntForm.Item label="Inventory Cap" name="inventoryCap">
-              <AntInputNumber
-                placeholder="Optional inventory limit"
-                style={{ width: "100%" }}
-              />
-            </AntForm.Item>
+            <AntInputNumber
+              placeholder="Optional inventory limit"
+              style={{ width: "100%" }}
+            />
+          </AntForm.Item>
 
           <AntForm.Item
             label="Valid Period"
@@ -1504,9 +1540,14 @@ export default function AncillaryBundlingEngine() {
         open={isViewBundleModalOpen}
         onCancel={() => setIsViewBundleModalOpen(false)}
         footer={[
-          <div key="footer" className="flex justify-between items-center w-full">
+          <div
+            key="footer"
+            className="flex justify-between items-center w-full"
+          >
             <div className="text-xs text-gray-500">
-              Created: {selectedBundle && dayjs(selectedBundle.createdAt).format("MMM DD, YYYY HH:mm")}
+              Created:{" "}
+              {selectedBundle &&
+                dayjs(selectedBundle.createdAt).format("MMM DD, YYYY HH:mm")}
             </div>
             <Space>
               <AntButton
@@ -1536,15 +1577,25 @@ export default function AncillaryBundlingEngine() {
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-100">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl">{getBundleTypeIcon(selectedBundle.bundleType)}</span>
+                  <span className="text-2xl">
+                    {getBundleTypeIcon(selectedBundle.bundleType)}
+                  </span>
                   <div>
-                    <h4 className="text-lg font-semibold text-gray-900">{selectedBundle.bundleName}</h4>
-                    <p className="text-sm text-gray-600">{selectedBundle.bundleCode}</p>
+                    <h4 className="text-lg font-semibold text-gray-900">
+                      {selectedBundle.bundleName}
+                    </h4>
+                    <p className="text-sm text-gray-600">
+                      {selectedBundle.bundleCode}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge
-                    variant={selectedBundle.status === "ACTIVE" ? "default" : "secondary"}
+                    variant={
+                      selectedBundle.status === "ACTIVE"
+                        ? "default"
+                        : "secondary"
+                    }
                     className="text-sm px-3 py-1"
                   >
                     {selectedBundle.status}
@@ -1567,7 +1618,9 @@ export default function AncillaryBundlingEngine() {
                   </h5>
                   <div className="space-y-3">
                     <div>
-                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Channel</label>
+                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                        Channel
+                      </label>
                       <div className="mt-1">
                         <Badge variant="secondary" className="text-sm">
                           {selectedBundle.channel}
@@ -1575,15 +1628,21 @@ export default function AncillaryBundlingEngine() {
                       </div>
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Season Code</label>
+                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                        Season Code
+                      </label>
                       <p className="text-sm font-medium text-gray-900 mt-1">
                         {selectedBundle.seasonCode || "Not specified"}
                       </p>
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Inventory Cap</label>
+                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                        Inventory Cap
+                      </label>
                       <p className="text-sm font-medium text-gray-900 mt-1">
-                        {selectedBundle.inventoryCap ? selectedBundle.inventoryCap.toLocaleString() : "Unlimited"}
+                        {selectedBundle.inventoryCap
+                          ? selectedBundle.inventoryCap.toLocaleString()
+                          : "Unlimited"}
                       </p>
                     </div>
                   </div>
@@ -1614,9 +1673,13 @@ export default function AncillaryBundlingEngine() {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100">
                       <div>
-                        <label className="text-xs font-medium text-green-700 uppercase tracking-wide">Valid From</label>
+                        <label className="text-xs font-medium text-green-700 uppercase tracking-wide">
+                          Valid From
+                        </label>
                         <p className="text-sm font-semibold text-green-900">
-                          {dayjs(selectedBundle.validFrom).format("MMMM DD, YYYY")}
+                          {dayjs(selectedBundle.validFrom).format(
+                            "MMMM DD, YYYY",
+                          )}
                         </p>
                       </div>
                       <div className="text-green-600">
@@ -1625,9 +1688,13 @@ export default function AncillaryBundlingEngine() {
                     </div>
                     <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-100">
                       <div>
-                        <label className="text-xs font-medium text-red-700 uppercase tracking-wide">Valid To</label>
+                        <label className="text-xs font-medium text-red-700 uppercase tracking-wide">
+                          Valid To
+                        </label>
                         <p className="text-sm font-semibold text-red-900">
-                          {dayjs(selectedBundle.validTo).format("MMMM DD, YYYY")}
+                          {dayjs(selectedBundle.validTo).format(
+                            "MMMM DD, YYYY",
+                          )}
                         </p>
                       </div>
                       <div className="text-red-600">
@@ -1635,7 +1702,12 @@ export default function AncillaryBundlingEngine() {
                       </div>
                     </div>
                     <div className="text-center text-sm text-gray-500">
-                      Duration: {dayjs(selectedBundle.validTo).diff(dayjs(selectedBundle.validFrom), 'days')} days
+                      Duration:{" "}
+                      {dayjs(selectedBundle.validTo).diff(
+                        dayjs(selectedBundle.validFrom),
+                        "days",
+                      )}{" "}
+                      days
                     </div>
                   </div>
                 </Card>
@@ -1650,7 +1722,9 @@ export default function AncillaryBundlingEngine() {
               </h5>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Point of Sale</label>
+                  <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                    Point of Sale
+                  </label>
                   <div className="flex flex-wrap gap-1 mt-2">
                     {selectedBundle.pos.map((pos) => (
                       <Tag key={pos} color="orange" className="text-sm">
@@ -1660,7 +1734,9 @@ export default function AncillaryBundlingEngine() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Agent Tiers</label>
+                  <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                    Agent Tiers
+                  </label>
                   <div className="flex flex-wrap gap-1 mt-2">
                     {selectedBundle.agentTier.map((tier) => (
                       <Tag key={tier} color="green" className="text-sm">
@@ -1669,33 +1745,44 @@ export default function AncillaryBundlingEngine() {
                     ))}
                   </div>
                 </div>
-                {selectedBundle.cohortCodes && selectedBundle.cohortCodes.length > 0 && (
-                  <div>
-                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Cohort Codes</label>
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {selectedBundle.cohortCodes.map((cohort) => (
-                        <Tag key={cohort} color="purple" className="text-sm">
-                          {cohort}
-                        </Tag>
-                      ))}
+                {selectedBundle.cohortCodes &&
+                  selectedBundle.cohortCodes.length > 0 && (
+                    <div>
+                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                        Cohort Codes
+                      </label>
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {selectedBundle.cohortCodes.map((cohort) => (
+                          <Tag key={cohort} color="purple" className="text-sm">
+                            {cohort}
+                          </Tag>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
               </div>
             </Card>
 
             {/* Additional Information */}
             <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
               <div>
-                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Created</label>
+                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                  Created
+                </label>
                 <p className="text-sm text-gray-900 font-medium">
-                  {dayjs(selectedBundle.createdAt).format("MMMM DD, YYYY [at] HH:mm")}
+                  {dayjs(selectedBundle.createdAt).format(
+                    "MMMM DD, YYYY [at] HH:mm",
+                  )}
                 </p>
               </div>
               <div>
-                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Last Updated</label>
+                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                  Last Updated
+                </label>
                 <p className="text-sm text-gray-900 font-medium">
-                  {dayjs(selectedBundle.updatedAt).format("MMMM DD, YYYY [at] HH:mm")}
+                  {dayjs(selectedBundle.updatedAt).format(
+                    "MMMM DD, YYYY [at] HH:mm",
+                  )}
                 </p>
               </div>
             </div>

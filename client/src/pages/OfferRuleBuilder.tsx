@@ -400,13 +400,30 @@ export default function OfferRuleBuilder() {
   const getFieldsForStep = (step: number) => {
     switch (step) {
       case 0: // Basic Info
-        return ['ruleCode', 'ruleName', 'ruleType', 'priority', 'validFrom', 'validTo'];
+        return [
+          "ruleCode",
+          "ruleName",
+          "ruleType",
+          "priority",
+          "validFrom",
+          "validTo",
+        ];
       case 1: // Conditions
-        return ['conditions.origin', 'conditions.destination', 'conditions.pos', 'conditions.agentTier', 'conditions.cohortCodes', 'conditions.channel', 'conditions.cabinClass', 'conditions.tripType', 'conditions.seasonCode'];
+        return [
+          "conditions.origin",
+          "conditions.destination",
+          "conditions.pos",
+          "conditions.agentTier",
+          "conditions.cohortCodes",
+          "conditions.channel",
+          "conditions.cabinClass",
+          "conditions.tripType",
+          "conditions.seasonCode",
+        ];
       case 2: // Actions
-        return ['actions'];
+        return ["actions"];
       case 3: // Review
-        return ['justification'];
+        return ["justification"];
       default:
         return [];
     }
@@ -414,12 +431,13 @@ export default function OfferRuleBuilder() {
 
   const onCreateSubmit = () => {
     console.log("Create Rule button clicked");
-    
+
     // Validate all form fields
-    createForm.validateFields()
+    createForm
+      .validateFields()
       .then((validatedValues) => {
         console.log("All form validation passed:", validatedValues);
-        
+
         try {
           // Extract basic info from validated values
           const ruleCode = validatedValues.ruleCode?.trim();
@@ -428,16 +446,23 @@ export default function OfferRuleBuilder() {
           const priority = validatedValues.priority || 1;
           const validFrom = validatedValues.validFrom;
           const validTo = validatedValues.validTo;
-          
-          console.log("Extracted basic info:", { ruleCode, ruleName, ruleType, priority, validFrom, validTo });
+
+          console.log("Extracted basic info:", {
+            ruleCode,
+            ruleName,
+            ruleType,
+            priority,
+            validFrom,
+            validTo,
+          });
 
           // Validate actions exist
-          const actions = validatedValues.actions || [];
-          if (actions.length === 0) {
-            alert("At least one action is required");
-            setCurrentStep(2);
-            return;
-          }
+          // const actions = validatedValues.actions || [];
+          // if (actions.length === 0) {
+          //   alert("At least one action is required");
+          //   setCurrentStep(2);
+          //   return;
+          // }
 
           const formattedData = {
             ruleCode,
@@ -445,7 +470,8 @@ export default function OfferRuleBuilder() {
             ruleType,
             conditions: {
               origin: validatedValues["conditions.origin"] || undefined,
-              destination: validatedValues["conditions.destination"] || undefined,
+              destination:
+                validatedValues["conditions.destination"] || undefined,
               pos: validatedValues["conditions.pos"] || [],
               agentTier: validatedValues["conditions.agentTier"] || [],
               cohortCodes: validatedValues["conditions.cohortCodes"] || [],
@@ -474,62 +500,89 @@ export default function OfferRuleBuilder() {
               const formattedAction: any = {
                 type: action.type,
               };
-              
+
               if (action.scope) formattedAction.scope = action.scope;
-              if (action.valueType) formattedAction.valueType = action.valueType;
-              if (action.value !== undefined && action.value !== null) formattedAction.value = Number(action.value);
-              if (action.ancillaryCode) formattedAction.ancillaryCode = action.ancillaryCode;
-              if (action.bundleCode) formattedAction.bundleCode = action.bundleCode;
-              if (action.bannerText) formattedAction.bannerText = action.bannerText;
-              
+              if (action.valueType)
+                formattedAction.valueType = action.valueType;
+              if (action.value !== undefined && action.value !== null)
+                formattedAction.value = Number(action.value);
+              if (action.ancillaryCode)
+                formattedAction.ancillaryCode = action.ancillaryCode;
+              if (action.bundleCode)
+                formattedAction.bundleCode = action.bundleCode;
+              if (action.bannerText)
+                formattedAction.bannerText = action.bannerText;
+
               // Add pricing object for compatibility
-              if (action.valueType && action.value !== undefined && action.value !== null) {
+              if (
+                action.valueType &&
+                action.value !== undefined &&
+                action.value !== null
+              ) {
                 formattedAction.pricing = {
                   type: action.valueType,
-                  value: Number(action.value)
+                  value: Number(action.value),
                 };
               }
-              
+
               return formattedAction;
             }),
             priority,
-            validFrom: validFrom?.format ? validFrom.format("YYYY-MM-DD") : validFrom,
+            validFrom: validFrom?.format
+              ? validFrom.format("YYYY-MM-DD")
+              : validFrom,
             validTo: validTo?.format ? validTo.format("YYYY-MM-DD") : validTo,
             justification: validatedValues.justification || undefined,
             createdBy: "admin", // This would come from auth context in a real app
-            status: "DRAFT"
+            status: "DRAFT",
           };
-          
+
           console.log("Final formatted data:", formattedData);
-          
+
           createRuleMutation.mutate(formattedData);
         } catch (error) {
           console.error("Error formatting offer rule data:", error);
-          alert(`Error creating rule: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          alert(
+            `Error creating rule: ${error instanceof Error ? error.message : "Unknown error"}`,
+          );
         }
       })
       .catch((errorInfo) => {
         console.log("Form validation failed:", errorInfo);
-        
+
         // Check which fields failed validation and navigate to appropriate step
         const failedFields = errorInfo.errorFields;
         if (failedFields && failedFields.length > 0) {
           const firstFailedField = failedFields[0].name[0];
           console.log("First failed field:", firstFailedField);
-          
+
           // Navigate to the step containing the failed field
-          if (['ruleCode', 'ruleName', 'ruleType', 'priority', 'validFrom', 'validTo'].includes(firstFailedField)) {
+          if (
+            [
+              "ruleCode",
+              "ruleName",
+              "ruleType",
+              "priority",
+              "validFrom",
+              "validTo",
+            ].includes(firstFailedField)
+          ) {
             setCurrentStep(0); // Basic Info step
-          } else if (firstFailedField.startsWith('conditions.')) {
+          } else if (firstFailedField.startsWith("conditions.")) {
             setCurrentStep(1); // Conditions step
-          } else if (firstFailedField === 'actions') {
+          } else if (firstFailedField === "actions") {
             setCurrentStep(2); // Actions step
           } else {
             setCurrentStep(3); // Review step
           }
-          
+
           // Show specific error message
-          const fieldErrors = failedFields.map((field: any) => `${field.name.join('.')}: ${field.errors.join(', ')}`).join('\n');
+          const fieldErrors = failedFields
+            .map(
+              (field: any) =>
+                `${field.name.join(".")}: ${field.errors.join(", ")}`,
+            )
+            .join("\n");
           alert(`Please fill in the required fields:\n${fieldErrors}`);
         }
       });
@@ -561,10 +614,13 @@ export default function OfferRuleBuilder() {
         ancillaryCode: action.ancillaryCode || undefined,
         bundleCode: action.bundleCode || undefined,
         bannerText: action.bannerText || undefined,
-        pricing: action.valueType && action.value ? {
-          type: action.valueType,
-          value: action.value
-        } : undefined,
+        pricing:
+          action.valueType && action.value
+            ? {
+                type: action.valueType,
+                value: action.value,
+              }
+            : undefined,
       })),
       priority: values.priority || 1,
       validFrom: values.validFrom?.format("YYYY-MM-DD"),
@@ -803,11 +859,7 @@ export default function OfferRuleBuilder() {
         <div className="mt-6">
           <Steps current={currentStep} items={steps} className="mb-8" />
 
-          <AntForm
-            form={createForm}
-            layout="vertical"
-            autoComplete="off"
-          >
+          <AntForm form={createForm} layout="vertical" autoComplete="off">
             {currentStep === 0 && (
               <div className="space-y-4">
                 <Row gutter={16}>
@@ -982,11 +1034,18 @@ export default function OfferRuleBuilder() {
                       style={{ width: "100%" }}
                     >
                       {availableCohorts?.map((cohort: any) => (
-                        <AntSelect.Option key={cohort.id} value={cohort.cohortName}>
-                          <div style={{ display: "flex", flexDirection: "column" }}>
+                        <AntSelect.Option
+                          key={cohort.id}
+                          value={cohort.cohortName}
+                        >
+                          <div
+                            style={{ display: "flex", flexDirection: "column" }}
+                          >
                             <div className="cls-cohort-dropdwon">
                               <p>{cohort.cohortName}</p>{" "}
-                              <span className="text-gray-600">{cohort.cohortCode}</span>
+                              <span className="text-gray-600">
+                                {cohort.cohortCode}
+                              </span>
                             </div>
                           </div>
                         </AntSelect.Option>
@@ -1057,18 +1116,29 @@ export default function OfferRuleBuilder() {
                     {(fields, { add, remove }) => (
                       <>
                         {fields.map(({ key, name, ...restField }) => (
-                          <div key={key} className="p-4 border border-gray-200 rounded-lg mb-4">
+                          <div
+                            key={key}
+                            className="p-4 border border-gray-200 rounded-lg mb-4"
+                          >
                             <Row gutter={16}>
                               <Col span={12}>
                                 <AntForm.Item
                                   {...restField}
-                                  name={[name, 'type']}
+                                  name={[name, "type"]}
                                   label="Action Type"
-                                  rules={[{ required: true, message: 'Please select action type' }]}
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: "Please select action type",
+                                    },
+                                  ]}
                                 >
                                   <AntSelect placeholder="Select action type">
                                     {actionTypes.map((action) => (
-                                      <AntSelect.Option key={action.value} value={action.value}>
+                                      <AntSelect.Option
+                                        key={action.value}
+                                        value={action.value}
+                                      >
                                         {action.icon} {action.label}
                                       </AntSelect.Option>
                                     ))}
@@ -1078,14 +1148,22 @@ export default function OfferRuleBuilder() {
                               <Col span={12}>
                                 <AntForm.Item
                                   {...restField}
-                                  name={[name, 'scope']}
+                                  name={[name, "scope"]}
                                   label="Scope (Optional)"
                                 >
                                   <AntSelect placeholder="Select scope">
-                                    <AntSelect.Option value="NEGOTIATED">Negotiated Fares</AntSelect.Option>
-                                    <AntSelect.Option value="API">API Fares</AntSelect.Option>
-                                    <AntSelect.Option value="ANCILLARY">Ancillaries</AntSelect.Option>
-                                    <AntSelect.Option value="BUNDLE">Bundles</AntSelect.Option>
+                                    <AntSelect.Option value="NEGOTIATED">
+                                      Negotiated Fares
+                                    </AntSelect.Option>
+                                    <AntSelect.Option value="API">
+                                      API Fares
+                                    </AntSelect.Option>
+                                    <AntSelect.Option value="ANCILLARY">
+                                      Ancillaries
+                                    </AntSelect.Option>
+                                    <AntSelect.Option value="BUNDLE">
+                                      Bundles
+                                    </AntSelect.Option>
                                   </AntSelect>
                                 </AntForm.Item>
                               </Col>
@@ -1095,20 +1173,26 @@ export default function OfferRuleBuilder() {
                               <Col span={8}>
                                 <AntForm.Item
                                   {...restField}
-                                  name={[name, 'valueType']}
+                                  name={[name, "valueType"]}
                                   label="Value Type"
                                 >
                                   <AntSelect placeholder="Select value type">
-                                    <AntSelect.Option value="PERCENT">Percentage</AntSelect.Option>
-                                    <AntSelect.Option value="AMOUNT">Fixed Amount</AntSelect.Option>
-                                    <AntSelect.Option value="FREE">Free</AntSelect.Option>
+                                    <AntSelect.Option value="PERCENT">
+                                      Percentage
+                                    </AntSelect.Option>
+                                    <AntSelect.Option value="AMOUNT">
+                                      Fixed Amount
+                                    </AntSelect.Option>
+                                    <AntSelect.Option value="FREE">
+                                      Free
+                                    </AntSelect.Option>
                                   </AntSelect>
                                 </AntForm.Item>
                               </Col>
                               <Col span={8}>
                                 <AntForm.Item
                                   {...restField}
-                                  name={[name, 'value']}
+                                  name={[name, "value"]}
                                   label="Value"
                                 >
                                   <InputNumber
@@ -1121,7 +1205,7 @@ export default function OfferRuleBuilder() {
                               <Col span={8}>
                                 <AntForm.Item
                                   {...restField}
-                                  name={[name, 'ancillaryCode']}
+                                  name={[name, "ancillaryCode"]}
                                   label="Ancillary Code (Optional)"
                                 >
                                   <AntInput placeholder="e.g., BAG20, SEAT_STD" />
@@ -1133,7 +1217,7 @@ export default function OfferRuleBuilder() {
                               <Col span={12}>
                                 <AntForm.Item
                                   {...restField}
-                                  name={[name, 'bundleCode']}
+                                  name={[name, "bundleCode"]}
                                   label="Bundle Code (Optional)"
                                 >
                                   <AntInput placeholder="e.g., COMFORT_PACK" />
@@ -1142,7 +1226,7 @@ export default function OfferRuleBuilder() {
                               <Col span={12}>
                                 <AntForm.Item
                                   {...restField}
-                                  name={[name, 'bannerText']}
+                                  name={[name, "bannerText"]}
                                   label="Banner Text (Optional)"
                                 >
                                   <AntInput placeholder="Promotional banner text" />
@@ -1151,9 +1235,9 @@ export default function OfferRuleBuilder() {
                             </Row>
 
                             <div className="flex justify-end">
-                              <AntButton 
-                                type="link" 
-                                danger 
+                              <AntButton
+                                type="link"
+                                danger
                                 onClick={() => remove(name)}
                                 icon={<Trash2 className="w-4 h-4" />}
                               >
@@ -1162,7 +1246,7 @@ export default function OfferRuleBuilder() {
                             </div>
                           </div>
                         ))}
-                        
+
                         <AntButton
                           type="dashed"
                           onClick={() => add()}
@@ -1219,15 +1303,19 @@ export default function OfferRuleBuilder() {
                     onClick={() => {
                       // Validate current step fields before proceeding
                       const fieldsToValidate = getFieldsForStep(currentStep);
-                      
+
                       if (fieldsToValidate.length > 0) {
-                        createForm.validateFields(fieldsToValidate)
+                        createForm
+                          .validateFields(fieldsToValidate)
                           .then(() => {
                             // For actions step, ensure at least one action exists
                             if (currentStep === 2) {
-                              const actions = createForm.getFieldValue('actions') || [];
+                              const actions =
+                                createForm.getFieldValue("actions") || [];
                               if (actions.length === 0) {
-                                alert("Please add at least one action before proceeding");
+                                alert(
+                                  "Please add at least one action before proceeding",
+                                );
                                 return;
                               }
                             }
@@ -1235,16 +1323,25 @@ export default function OfferRuleBuilder() {
                           })
                           .catch((errorInfo) => {
                             console.log("Step validation failed:", errorInfo);
-                            const fieldErrors = errorInfo.errorFields.map((field: any) => 
-                              `${field.name.join('.')}: ${field.errors.join(', ')}`).join('\n');
-                            alert(`Please fill in the required fields:\n${fieldErrors}`);
+                            const fieldErrors = errorInfo.errorFields
+                              .map(
+                                (field: any) =>
+                                  `${field.name.join(".")}: ${field.errors.join(", ")}`,
+                              )
+                              .join("\n");
+                            alert(
+                              `Please fill in the required fields:\n${fieldErrors}`,
+                            );
                           });
                       } else {
                         // No validation needed for this step
                         if (currentStep === 2) {
-                          const actions = createForm.getFieldValue('actions') || [];
+                          const actions =
+                            createForm.getFieldValue("actions") || [];
                           if (actions.length === 0) {
-                            alert("Please add at least one action before proceeding");
+                            alert(
+                              "Please add at least one action before proceeding",
+                            );
                             return;
                           }
                         }

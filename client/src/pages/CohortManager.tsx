@@ -67,6 +67,7 @@ import {
   Card as AntCard,
   Space,
   Divider,
+  Checkbox as AntCheckbox,
 } from "antd";
 
 interface Cohort {
@@ -448,9 +449,12 @@ export default function CohortManager() {
                     <AntForm.Item
                       name="type"
                       label="Cohort Type"
-                      rules={[{ required: true, message: "Required" }]}
+                      rules={[{ required: true, message: "Please select a cohort type" }]}
                     >
-                      <AntSelect placeholder="Select type">
+                      <AntSelect 
+                        placeholder="Select cohort type"
+                        allowClear
+                      >
                         {cohortTypes.map((type) => (
                           <AntSelect.Option key={type} value={type}>
                             {type}
@@ -471,14 +475,217 @@ export default function CohortManager() {
                 <AntTabs defaultActiveKey="1">
                   <AntTabs.TabPane tab="Basic Criteria" key="1">
                     <Row gutter={16}>
-                      <Col span={8}>
+                      <Col span={24}>
                         <AntForm.Item name="pos" label="Point of Sale">
-                          <AntSelect
-                            mode="tags"
-                            placeholder="Enter country codes (e.g., US, GB)"
-                          />
+                          <AntCheckbox.Group style={{ width: "100%" }}>
+                            <Row gutter={[16, 8]}>
+                              <Col span={6}>
+                                <AntCheckbox
+                                  value="US"
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    padding: "4px 8px",
+                                    borderRadius: "4px",
+                                    border: "1px solid #d9d9d9",
+                                    marginBottom: "8px",
+                                    fontSize: "14px",
+                                  }}
+                                >
+                                  <span style={{ fontWeight: "500" }}>US</span>
+                                  <span
+                                    style={{
+                                      fontSize: "12px",
+                                      color: "#666",
+                                      marginLeft: "4px",
+                                    }}
+                                  >
+                                    United States
+                                  </span>
+                                </AntCheckbox>
+                              </Col>
+                              <Col span={6}>
+                                <AntCheckbox
+                                  value="GB"
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    padding: "4px 8px",
+                                    borderRadius: "4px",
+                                    border: "1px solid #d9d9d9",
+                                    marginBottom: "8px",
+                                    fontSize: "14px",
+                                  }}
+                                >
+                                  <span style={{ fontWeight: "500" }}>GB</span>
+                                  <span
+                                    style={{
+                                      fontSize: "12px",
+                                      color: "#666",
+                                      marginLeft: "4px",
+                                    }}
+                                  >
+                                    United Kingdom
+                                  </span>
+                                </AntCheckbox>
+                              </Col>
+                              <Col span={6}>
+                                <AntCheckbox
+                                  value="DE"
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    padding: "4px 8px",
+                                    borderRadius: "4px",
+                                    border: "1px solid #d9d9d9",
+                                    marginBottom: "8px",
+                                    fontSize: "14px",
+                                  }}
+                                >
+                                  <span style={{ fontWeight: "500" }}>DE</span>
+                                  <span
+                                    style={{
+                                      fontSize: "12px",
+                                      color: "#666",
+                                      marginLeft: "4px",
+                                    }}
+                                  >
+                                    Germany
+                                  </span>
+                                </AntCheckbox>
+                              </Col>
+                              <Col span={6}>
+                                <AntCheckbox
+                                  value="FR"
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    padding: "4px 8px",
+                                    borderRadius: "4px",
+                                    border: "1px solid #d9d9d9",
+                                    marginBottom: "8px",
+                                    fontSize: "14px",
+                                  }}
+                                >
+                                  <span style={{ fontWeight: "500" }}>FR</span>
+                                  <span
+                                    style={{
+                                      fontSize: "12px",
+                                      color: "#666",
+                                      marginLeft: "4px",
+                                    }}
+                                  >
+                                    France
+                                  </span>
+                                </AntCheckbox>
+                              </Col>
+                              <Col span={6}>
+                                <AntCheckbox
+                                  value="IN"
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    padding: "4px 8px",
+                                    borderRadius: "4px",
+                                    border: "1px solid #d9d9d9",
+                                    marginBottom: "8px",
+                                    fontSize: "14px",
+                                  }}
+                                >
+                                  <span style={{ fontWeight: "500" }}>IN</span>
+                                  <span
+                                    style={{
+                                      fontSize: "12px",
+                                      color: "#666",
+                                      marginLeft: "4px",
+                                    }}
+                                  >
+                                    India
+                                  </span>
+                                </AntCheckbox>
+                              </Col>
+                              <Col span={6}>
+                                <AntCheckbox
+                                  value="AU"
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    padding: "4px 8px",
+                                    borderRadius: "4px",
+                                    border: "1px solid #d9d9d9",
+                                    marginBottom: "8px",
+                                    fontSize: "14px",
+                                  }}
+                                >
+                                  <span style={{ fontWeight: "500" }}>AU</span>
+                                  <span
+                                    style={{
+                                      fontSize: "12px",
+                                      color: "#666",
+                                      marginLeft: "4px",
+                                    }}
+                                  >
+                                    Australia
+                                  </span>
+                                </AntCheckbox>
+                              </Col>
+                              <Col span={6}>
+                                <AntCheckbox
+                                  value="CA"
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    padding: "4px 8px",
+                                    borderRadius: "4px",
+                                    border: "1px solid #d9d9d9",
+                                    marginBottom: "8px",
+                                    fontSize: "14px",
+                                  }}
+                                >
+                                  <span style={{ fontWeight: "500" }}>CA</span>
+                                  <span
+                                    style={{
+                                      fontSize: "12px",
+                                      color: "#666",
+                                      marginLeft: "4px",
+                                    }}
+                                  >
+                                    Canada
+                                  </span>
+                                </AntCheckbox>
+                              </Col>
+                              <Col span={6}>
+                                <AntCheckbox
+                                  value="SG"
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    padding: "4px 8px",
+                                    borderRadius: "4px",
+                                    border: "1px solid #d9d9d9",
+                                    marginBottom: "8px",
+                                    fontSize: "14px",
+                                  }}
+                                >
+                                  <span style={{ fontWeight: "500" }}>SG</span>
+                                  <span
+                                    style={{
+                                      fontSize: "12px",
+                                      color: "#666",
+                                      marginLeft: "4px",
+                                    }}
+                                  >
+                                    Singapore
+                                  </span>
+                                </AntCheckbox>
+                              </Col>
+                            </Row>
+                          </AntCheckbox.Group>
                         </AntForm.Item>
                       </Col>
+                    </Row>
+                    <Row gutter={16}>
+                      <Col span={8}>
                       <Col span={8}>
                         <AntForm.Item name="channel" label="Channel">
                           <AntSelect placeholder="Select channel">

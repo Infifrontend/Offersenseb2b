@@ -691,21 +691,6 @@ export default function AirAncillariesDiscounting() {
               <AntForm.Item
                 label="Adjustment Value"
                 name="adjustmentValue"
-                rules={[
-                  ({ getFieldValue }) => ({
-                    validator(_, value) {
-                      if (getFieldValue("adjustmentType") === "FREE") {
-                        return Promise.resolve();
-                      }
-                      if (!value) {
-                        return Promise.reject(
-                          new Error("Adjustment value is required"),
-                        );
-                      }
-                      return Promise.resolve();
-                    },
-                  }),
-                ]}
               >
                 <AntInputNumber placeholder="10" style={{ width: "100%" }} />
               </AntForm.Item>
@@ -932,21 +917,6 @@ export default function AirAncillariesDiscounting() {
               <AntForm.Item
                 label="Adjustment Value"
                 name="adjustmentValue"
-                rules={[
-                  ({ getFieldValue }) => ({
-                    validator(_, value) {
-                      if (getFieldValue("adjustmentType") === "FREE") {
-                        return Promise.resolve();
-                      }
-                      if (!value) {
-                        return Promise.reject(
-                          new Error("Adjustment value is required"),
-                        );
-                      }
-                      return Promise.Resolve();
-                    },
-                  }),
-                ]}
               >
                 <AntInputNumber placeholder="10" style={{ width: "100%" }} />
               </AntForm.Item>

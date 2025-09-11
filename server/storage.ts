@@ -1,4 +1,4 @@
-import { users, negotiatedFares, dynamicDiscountRules, airAncillaryRules, nonAirRates, nonAirMarkupRules, bundles, bundlePricingRules, offerRules, offerTraces, agents, channelPricingOverrides, cohorts, auditLogs, agentTiers, agentTierAssignments, tierAssignmentEngine, campaigns, campaignMetrics, campaignDeliveries, type InsertUser, type InsertNegotiatedFare, type InsertDynamicDiscountRule, type InsertAirAncillaryRule, type InsertNonAirRate, type InsertNonAirMarkupRule, type InsertBundle, type InsertBundlePricingRule, type InsertOfferRule, type InsertOfferTrace, type InsertAgent, type InsertChannelPricingOverride, type InsertCohort, type InsertAuditLog, type InsertAgentTier, type InsertAgentTierAssignment, type InsertTierAssignmentEngine, type InsertCampaign, type InsertCampaignMetrics, type InsertCampaignDelivery } from "../shared/schema";
+import { users, negotiatedFares, dynamicDiscountRules, airAncillaryRules, nonAirRates, nonAirMarkupRules, bundles, bundlePricingRules, offerRules, offerTraces, agents, channelPricingOverrides, cohorts, auditLogs, agentTiers, agentTierAssignments, tierAssignmentEngine, campaigns, campaignMetrics, campaignDeliveries, simulations, insightQueries } from "../shared/schema";
 import type {
   User,
   NegotiatedFare,
@@ -19,6 +19,8 @@ import type {
   Campaign,
   CampaignMetrics,
   CampaignDelivery,
+  Simulation,
+  InsightQuery,
 } from "../shared/schema";
 import { db } from "./db";
 import { eq, and, or, gte, lte, ilike, inArray, sql, desc } from "drizzle-orm";
@@ -212,6 +214,21 @@ export interface IStorage {
   insertCampaignDelivery(deliveryData: InsertCampaignDelivery): Promise<CampaignDelivery>;
   updateDeliveryStatus(id: string, status: string, timestamp?: Date): Promise<CampaignDelivery>;
   recordDeliveryEvent(id: string, event: string, data?: any): Promise<void>;
+
+  // Simulation methods
+  getSimulations(filters?: any): Promise<Simulation[]>;
+  getSimulationById(id: string): Promise<Simulation | null>;
+  insertSimulation(data: Partial<Simulation>): Promise<Simulation>;
+  updateSimulation(id: string, data: Partial<Simulation>): Promise<Simulation>;
+  updateSimulationStatus(id: string, status: string): Promise<Simulation>;
+  deleteSimulation(id: string): Promise<void>;
+  runSimulation(id: string): Promise<Simulation>;
+
+  // Insight Query methods
+  getInsightQueries(filters?: any): Promise<InsightQuery[]>;
+  getInsightQueryById(id: string): Promise<InsightQuery | null>;
+  insertInsightQuery(data: Partial<InsightQuery>): Promise<InsightQuery>;
+  processInsightQuery(id: string): Promise<InsightQuery>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1741,29 +1758,232 @@ export class DatabaseStorage implements IStorage {
     return delivery;
   }
 
-  async recordDeliveryEvent(id: string, event: string, data?: any): Promise<void> {
-    const updateData: any = {};
-    const timestamp = new Date();
+  async recordDeliveryEvent(deliveryId: string, event: string, data?: any) {
+    await this.db.update(campaignDeliveries)
+      .set({
+        [`${event.toLowerCase()}At`]: new Date(),
+        ...(event === "PURCHASED" && data?.amount && { purchaseAmount: data.amount.toString() })
+      })
+      .where(eq(campaignDeliveries.id, deliveryId));
+  }
 
-    switch (event) {
-      case 'OPENED':
-        updateData.openedAt = timestamp;
-        break;
-      case 'CLICKED':
-        updateData.clickedAt = timestamp;
-        break;
-      case 'PURCHASED':
-        updateData.purchasedAt = timestamp;
-        if (data?.amount) {
-          updateData.purchaseAmount = data.amount;
-        }
-        break;
+  // Simulation methods
+  async getSimulations(filters: any = {}): Promise<Simulation[]> {
+    let query = this.db.select().from(simulations);
+
+    if (filters.status) {
+      query = query.where(eq(simulations.status, filters.status));
     }
 
-    await this.db
-      .update(campaignDeliveries)
-      .set(updateData)
-      .where(eq(campaignDeliveries.id, id));
+    if (filters.createdBy) {
+      query = query.where(eq(simulations.createdBy, filters.createdBy));
+    }
+
+    return query.orderBy(desc(simulations.createdAt));
+  }
+
+  async getSimulationById(id: string): Promise<Simulation | null> {
+    const result = await this.db.select().from(simulations).where(eq(simulations.id, id));
+    return result[0] || null;
+  }
+
+  async insertSimulation(data: Partial<Simulation>): Promise<Simulation> {
+    const result = await this.db.insert(simulations).values(data).returning();
+    return result[0];
+  }
+
+  async updateSimulation(id: string, data: Partial<Simulation>): Promise<Simulation> {
+    const result = await this.db.update(simulations)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(simulations.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async updateSimulationStatus(id: string, status: string): Promise<Simulation> {
+    const result = await this.db.update(simulations)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(simulations.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteSimulation(id: string): Promise<void> {
+    await this.db.delete(simulations).where(eq(simulations.id, id));
+  }
+
+  async runSimulation(id: string): Promise<Simulation> {
+    // Mock simulation engine - in real implementation would integrate with actual analytics
+    const simulation = await this.getSimulationById(id);
+    if (!simulation) throw new Error("Simulation not found");
+
+    // Update status to running
+    await this.updateSimulationStatus(id, "RUNNING");
+
+    // Simulate processing time
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // Generate mock results based on the forecast with some variance
+    const forecast = simulation.forecast as any;
+    const actualResults = {
+      revenueChangePct: this.addVariance(forecast.revenueChangePct),
+      conversionChangePct: this.addVariance(forecast.conversionChangePct),
+      marginImpactPct: this.addVariance(forecast.marginImpactPct),
+      attachRateChangePct: forecast.attachRateChangePct ? this.addVariance(forecast.attachRateChangePct) : undefined,
+    };
+
+    // Update with results
+    return this.updateSimulation(id, {
+      status: "COMPLETED",
+      actualResults
+    });
+  }
+
+  private addVariance(value: string): string {
+    const numValue = parseFloat(value.replace(/[+%]/g, ''));
+    const variance = (Math.random() - 0.5) * 0.4; // ±20% variance
+    const result = numValue + variance;
+    return (result >= 0 ? '+' : '') + result.toFixed(1);
+  }
+
+  // Insight Query methods
+  async getInsightQueries(filters: any = {}): Promise<InsightQuery[]> {
+    let query = this.db.select().from(insightQueries);
+
+    if (filters.status) {
+      query = query.where(eq(insightQueries.status, filters.status));
+    }
+
+    if (filters.createdBy) {
+      query = query.where(eq(insightQueries.createdBy, filters.createdBy));
+    }
+
+    return query.orderBy(desc(insightQueries.createdAt));
+  }
+
+  async getInsightQueryById(id: string): Promise<InsightQuery | null> {
+    const result = await this.db.select().from(insightQueries).where(eq(insightQueries.id, id));
+    return result[0] || null;
+  }
+
+  async insertInsightQuery(data: Partial<InsightQuery>): Promise<InsightQuery> {
+    const result = await this.db.insert(insightQueries).values(data).returning();
+    return result[0];
+  }
+
+  async processInsightQuery(id: string): Promise<InsightQuery> {
+    const query = await this.getInsightQueryById(id);
+    if (!query) throw new Error("Query not found");
+
+    // Update status to processing
+    await this.db.update(insightQueries)
+      .set({ status: "PROCESSING" })
+      .where(eq(insightQueries.id, id));
+
+    const startTime = Date.now();
+
+    try {
+      // Mock NLP processing - in real implementation would integrate with NLP service
+      const response = await this.mockNLPProcessor(query.queryText, query.filters);
+      const executionTime = Date.now() - startTime;
+
+      // Update with results
+      await this.db.update(insightQueries)
+        .set({
+          status: "COMPLETED",
+          response,
+          executionTimeMs: executionTime
+        })
+        .where(eq(insightQueries.id, id));
+
+      return { ...query, response, executionTimeMs: executionTime, status: "COMPLETED" };
+    } catch (error) {
+      const executionTime = Date.now() - startTime;
+      await this.db.update(insightQueries)
+        .set({
+          status: "ERROR",
+          response: { answer: "Error processing query", error: error instanceof Error ? error.message : "Unknown error" },
+          executionTimeMs: executionTime
+        })
+        .where(eq(insightQueries.id, id));
+
+      throw error;
+    }
+  }
+
+  private async mockNLPProcessor(queryText: string, filters: any): Promise<any> {
+    // Mock NLP processing with predefined responses
+    const lowercaseQuery = queryText.toLowerCase();
+
+    if (lowercaseQuery.includes("revenue") || lowercaseQuery.includes("sales")) {
+      return {
+        answer: "Based on historical data, revenue has increased by 12.3% over the past quarter, with the highest growth in the GCC region (+18.2%) and among Gold tier agents (+15.7%). Portal channel contributed 67% of total revenue.",
+        data: {
+          totalRevenue: "$2.4M",
+          growth: "+12.3%",
+          topRegion: "GCC (+18.2%)",
+          topTier: "Gold (+15.7%)",
+          channelBreakdown: { portal: "67%", api: "28%", mobile: "5%" }
+        },
+        confidence: 0.89,
+        sources: ["negotiated_fares", "offer_traces", "campaign_metrics"]
+      };
+    }
+
+    if (lowercaseQuery.includes("conversion") || lowercaseQuery.includes("attach")) {
+      return {
+        answer: "Current conversion rate is 4.2% across all channels, with ancillary attachment rate at 34%. Platinum tier agents achieve 6.8% conversion, while Bronze tier averages 2.1%. Mobile channel shows the lowest conversion at 1.9%.",
+        data: {
+          overallConversion: "4.2%",
+          ancillaryAttachment: "34%",
+          tierPerformance: { platinum: "6.8%", gold: "4.9%", silver: "3.2%", bronze: "2.1%" },
+          channelPerformance: { portal: "5.1%", api: "4.8%", mobile: "1.9%" }
+        },
+        confidence: 0.92,
+        sources: ["offer_traces", "agent_tier_assignments", "campaign_deliveries"]
+      };
+    }
+
+    if (lowercaseQuery.includes("discount") || lowercaseQuery.includes("pricing")) {
+      return {
+        answer: "Average discount applied is 8.5% across all bookings. Dynamic discount rules are triggered in 42% of searches, with highest usage in competitive routes like DXB-LHR (65% trigger rate). Margin impact averages -2.1%.",
+        data: {
+          avgDiscount: "8.5%",
+          rulesTriggerRate: "42%",
+          topRoute: "DXB-LHR (65%)",
+          marginImpact: "-2.1%",
+          discountDistribution: { "0-5%": "28%", "5-10%": "45%", "10-15%": "22%", "15%+": "5%" }
+        },
+        confidence: 0.86,
+        sources: ["dynamic_discount_rules", "offer_traces", "negotiated_fares"]
+      };
+    }
+
+    if (lowercaseQuery.includes("campaign") || lowercaseQuery.includes("marketing")) {
+      return {
+        answer: "Active campaigns show 2.8% average uplift in conversion. 'Pre-Travel Baggage Upsell' campaign achieved highest ROI at 4.2x with 78% delivery rate. Email channel outperforms WhatsApp by 23%.",
+        data: {
+          campaignUplift: "2.8%",
+          topCampaign: "Pre-Travel Baggage Upsell (4.2x ROI)",
+          deliveryRate: "78%",
+          channelPerformance: { email: "45%", whatsapp: "22%", portal: "33%" }
+        },
+        confidence: 0.91,
+        sources: ["campaigns", "campaign_metrics", "campaign_deliveries"]
+      };
+    }
+
+    // Default response for unrecognized queries
+    return {
+      answer: `I found ${Math.floor(Math.random() * 1000) + 100} relevant records for your query. The analysis shows varied performance patterns across different segments. For more specific insights, try asking about revenue, conversion rates, discounts, or campaign performance.`,
+      data: {
+        recordsFound: Math.floor(Math.random() * 1000) + 100,
+        timeRange: filters?.timeRange || "Last 30 days",
+        scope: "All markets and tiers"
+      },
+      confidence: 0.65,
+      sources: ["multiple_tables"]
+    };
   }
 }
 

@@ -714,3 +714,92 @@ export type CampaignMetrics = typeof campaignMetrics.$inferSelect;
 export type InsertCampaignMetrics = z.infer<typeof insertCampaignMetricsSchema>;
 export type CampaignDelivery = typeof campaignDeliveries.$inferSelect;
 export type InsertCampaignDelivery = z.infer<typeof insertCampaignDeliverySchema>;
+
+// Analytics & Simulation Tables
+export const simulations = pgTable("simulations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  scenarioName: varchar("scenario_name", { length: 200 }).notNull(),
+  scope: json("scope").notNull(), // target scope: OD, pos, tiers, cohorts, channel
+  change: json("change").notNull(), // proposed rule changes
+  forecast: json("forecast").notNull(), // forecast metrics
+  actualResults: json("actual_results"), // actual performance data
+  status: varchar("status", { length: 20 }).default("DRAFT"), // DRAFT | RUNNING | COMPLETED | CANCELLED
+  createdBy: varchar("created_by", { length: 50 }).notNull(),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
+export const insightQueries = pgTable("insight_queries", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  queryText: text("query_text").notNull(),
+  filters: json("filters"), // time range, pos, tiers/cohorts filters
+  response: json("response"), // NLP processing result and answer
+  executionTimeMs: integer("execution_time_ms"),
+  status: varchar("status", { length: 20 }).default("PENDING"), // PENDING | PROCESSING | COMPLETED | ERROR
+  createdBy: varchar("created_by", { length: 50 }).notNull(),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const insertSimulationSchema = createInsertSchema(simulations, {
+  scope: z.object({
+    origin: z.string().optional(),
+    destination: z.string().optional(),
+    pos: z.array(z.string()).optional(),
+    agentTier: z.array(z.enum(["PLATINUM", "GOLD", "SILVER", "BRONZE"])).optional(),
+    cohorts: z.array(z.string()).optional(),
+    channel: z.array(z.enum(["API", "PORTAL", "MOBILE"])).optional(),
+  }),
+  change: z.object({
+    ruleCode: z.string().optional(),
+    ruleType: z.enum(["DISCOUNT", "MARKUP", "ANCILLARY", "BUNDLE"]),
+    adjustment: z.object({
+      type: z.enum(["PERCENT", "AMOUNT"]),
+      value: z.number(),
+    }),
+    description: z.string().optional(),
+  }),
+  forecast: z.object({
+    revenueChangePct: z.string(),
+    conversionChangePct: z.string(),
+    marginImpactPct: z.string(),
+    attachRateChangePct: z.string().optional(),
+    customerSatisfactionImpact: z.string().optional(),
+  }),
+  actualResults: z.object({
+    revenueChangePct: z.string(),
+    conversionChangePct: z.string(),
+    marginImpactPct: z.string(),
+    attachRateChangePct: z.string().optional(),
+  }).optional(),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertInsightQuerySchema = createInsertSchema(insightQueries, {
+  filters: z.object({
+    timeRange: z.object({
+      start: z.string(),
+      end: z.string(),
+    }).optional(),
+    pos: z.array(z.string()).optional(),
+    agentTier: z.array(z.enum(["PLATINUM", "GOLD", "SILVER", "BRONZE"])).optional(),
+    cohorts: z.array(z.string()).optional(),
+    channel: z.array(z.enum(["API", "PORTAL", "MOBILE"])).optional(),
+  }).optional(),
+  response: z.object({
+    answer: z.string(),
+    data: z.any().optional(),
+    confidence: z.number().optional(),
+    sources: z.array(z.string()).optional(),
+  }).optional(),
+}).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type Simulation = typeof simulations.$inferSelect;
+export type InsertSimulation = z.infer<typeof insertSimulationSchema>;
+export type InsightQuery = typeof insightQueries.$inferSelect;
+export type InsertInsightQuery = z.infer<typeof insertInsightQuerySchema>;

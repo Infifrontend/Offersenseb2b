@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import multer from "multer";
 import csv from "csv-parser";
 import { Readable } from "stream";
-import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema, insertAirAncillaryRuleSchema, insertNonAirRateSchema, insertNonAirMarkupRuleSchema, insertBundleSchema, insertBundlePricingRuleSchema, insertOfferRuleSchema, insertOfferTraceSchema, insertAgentSchema, insertChannelPricingOverrideSchema, insertCohortSchema, insertAuditLogSchema, insertAgentTierSchema, insertAgentTierAssignmentSchema, insertTierAssignmentEngineSchema, insertCampaignSchema, insertCampaignMetricsSchema, insertCampaignDeliverySchema } from "../shared/schema";
+import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema, insertAirAncillaryRuleSchema, insertNonAirRateSchema, insertNonAirMarkupRuleSchema, insertBundleSchema, insertBundlePricingRuleSchema, insertOfferRuleSchema, insertOfferTraceSchema, insertAgentSchema, insertChannelPricingOverrideSchema, insertCohortSchema, insertAuditLogSchema, insertAgentTierSchema, insertAgentTierAssignmentSchema, insertTierAssignmentEngineSchema, insertCampaignSchema, insertCampaignMetricsSchema, insertCampaignDeliverySchema, insertSimulationSchema, insertInsightQuerySchema } from "../shared/schema";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -2346,6 +2346,144 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error: any) {
       res.status(500).json({ message: "Failed to record delivery event", error: error.message });
+    }
+  });
+
+  // Analytics & Simulation Routes
+
+  // Simulation Routes
+  app.get("/api/simulations", async (req, res) => {
+    try {
+      const filters = req.query;
+      const simulations = await storage.getSimulations(filters);
+      res.json(simulations);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch simulations", error: error.message });
+    }
+  });
+
+  app.post("/api/simulations", async (req, res) => {
+    try {
+      const validatedData = insertSimulationSchema.parse(req.body);
+      const user = req.header("x-user") || "system";
+      
+      const simulation = await storage.insertSimulation({
+        ...validatedData,
+        createdBy: user
+      });
+      
+      res.status(201).json(simulation);
+    } catch (error: any) {
+      res.status(400).json({ message: "Invalid simulation data", error: error.message });
+    }
+  });
+
+  app.get("/api/simulations/:id", async (req, res) => {
+    try {
+      const simulation = await storage.getSimulationById(req.params.id);
+      if (!simulation) {
+        return res.status(404).json({ message: "Simulation not found" });
+      }
+      res.json(simulation);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch simulation", error: error.message });
+    }
+  });
+
+  app.put("/api/simulations/:id", async (req, res) => {
+    try {
+      const validatedData = insertSimulationSchema.parse(req.body);
+      const simulation = await storage.updateSimulation(req.params.id, validatedData);
+      res.json(simulation);
+    } catch (error: any) {
+      res.status(400).json({ message: "Failed to update simulation", error: error.message });
+    }
+  });
+
+  app.post("/api/simulations/:id/run", async (req, res) => {
+    try {
+      const result = await storage.runSimulation(req.params.id);
+      res.json(result);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to run simulation", error: error.message });
+    }
+  });
+
+  app.patch("/api/simulations/:id/status", async (req, res) => {
+    try {
+      const { status } = req.body;
+      if (!status || !["DRAFT", "RUNNING", "COMPLETED", "CANCELLED"].includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+
+      const simulation = await storage.updateSimulationStatus(req.params.id, status);
+      res.json(simulation);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to update simulation status", error: error.message });
+    }
+  });
+
+  app.delete("/api/simulations/:id", async (req, res) => {
+    try {
+      await storage.deleteSimulation(req.params.id);
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to delete simulation", error: error.message });
+    }
+  });
+
+  // Insight Query Routes
+  app.get("/api/insights/queries", async (req, res) => {
+    try {
+      const filters = req.query;
+      const queries = await storage.getInsightQueries(filters);
+      res.json(queries);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch insight queries", error: error.message });
+    }
+  });
+
+  app.post("/api/insights/query", async (req, res) => {
+    try {
+      const { queryText, filters } = req.body;
+      const user = req.header("x-user") || "system";
+
+      if (!queryText) {
+        return res.status(400).json({ message: "Query text is required" });
+      }
+
+      // Create query record
+      const query = await storage.insertInsightQuery({
+        queryText,
+        filters,
+        createdBy: user
+      });
+
+      // Process query asynchronously
+      try {
+        const result = await storage.processInsightQuery(query.id);
+        res.json(result);
+      } catch (processingError: any) {
+        res.status(500).json({ 
+          message: "Query processing failed", 
+          error: processingError.message,
+          queryId: query.id 
+        });
+      }
+    } catch (error: any) {
+      res.status(400).json({ message: "Invalid query data", error: error.message });
+    }
+  });
+
+  app.get("/api/insights/queries/:id", async (req, res) => {
+    try {
+      const query = await storage.getInsightQueryById(req.params.id);
+      if (!query) {
+        return res.status(404).json({ message: "Query not found" });
+      }
+      res.json(query);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch query", error: error.message });
     }
   });
 

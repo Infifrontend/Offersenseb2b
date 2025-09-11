@@ -111,7 +111,7 @@ export default function CohortManager() {
   });
 
   // Fetch cohorts
-  const { data: cohorts = [], isLoading } = useQuery({
+  const { data: cohorts = [], isLoading, error } = useQuery({
     queryKey: ["cohorts", filters],
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -123,7 +123,14 @@ export default function CohortManager() {
       if (!response.ok) throw new Error("Failed to fetch cohorts");
       return response.json();
     },
+    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
+
+  // Log cohorts data for debugging
+  console.log("Cohorts data:", cohorts);
+  console.log("Loading state:", isLoading);
+  console.log("Error state:", error);
 
   // Create cohort mutation
   const createCohortMutation = useMutation({

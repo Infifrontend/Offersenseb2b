@@ -930,20 +930,37 @@ export class DatabaseStorage implements IStorage {
 
     // Basic conflict detection - can be enhanced with more sophisticated logic
     const conflicts = existingRules.filter(existing => {
-      const existingConditions = existing.conditions as any;
-      const newConditions = rule.conditions as any;
+        const existingConditions = existing.conditions as any;
+        const newConditions = rule.conditions as any;
 
-      // Check for overlapping conditions
-      const hasOverlap = (
-        (!existingConditions.pos && !newConditions.pos) ||
-        (existingConditions.pos && newConditions.pos &&
-         existingConditions.pos.some((p: string) => newConditions.pos.includes(p))) ||
-        (!existingConditions.agentTier && !newConditions.agentTier) ||
-        (existingConditions.agentTier && newConditions.agentTier &&
-         existingConditions.agentTier.some((t: string) => newConditions.agentTier.includes(t)))
-      );
+        // Check for overlapping conditions
+        let hasOverlap = false;
 
-      return hasOverlap;
+        // Check POS overlap
+        if (existingConditions.pos && newConditions.pos) {
+          const posOverlap = existingConditions.pos.some((pos: string) => 
+            newConditions.pos.includes(pos)
+          );
+          if (posOverlap) hasOverlap = true;
+        }
+
+        // Check agent tier overlap
+        if (existingConditions.agentTier && newConditions.agentTier) {
+          const tierOverlap = existingConditions.agentTier.some((tier: string) => 
+            newConditions.agentTier.includes(tier)
+          );
+          if (tierOverlap) hasOverlap = true;
+        }
+
+        // Check channel overlap
+        if (existingConditions.channel && newConditions.channel) {
+          const channelOverlap = existingConditions.channel.some((channel: string) => 
+            newConditions.channel.includes(channel)
+          );
+          if (channelOverlap) hasOverlap = true;
+        }
+
+        return hasOverlap;
     });
 
     return conflicts;

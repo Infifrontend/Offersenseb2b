@@ -184,9 +184,16 @@ export default function AncillaryBundlingEngine() {
     queryKey: ["bundle-pricing-rules", pricingFilters],
     queryFn: async () => {
       const params = new URLSearchParams(pricingFilters);
+      console.log("Fetching pricing rules with params:", params.toString());
       const response = await fetch(`/api/bundles/pricing?${params}`);
-      if (!response.ok) throw new Error("Failed to fetch bundle pricing rules");
-      return response.json();
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Failed to fetch bundle pricing rules:", errorText);
+        throw new Error(`Failed to fetch bundle pricing rules: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log("Received pricing rules data:", data);
+      return data;
     },
   });
 
@@ -480,17 +487,18 @@ export default function AncillaryBundlingEngine() {
       title: "Rule Code",
       dataIndex: "ruleCode",
       key: "ruleCode",
-      render: (text: string) => <span className="font-medium">{text}</span>,
+      render: (text: string) => <span className="font-medium">{text || 'N/A'}</span>,
     },
     {
       title: "Bundle Code",
       dataIndex: "bundleCode",
       key: "bundleCode",
+      render: (text: string) => <span>{text || 'N/A'}</span>,
     },
     {
       title: "Discount",
       key: "discount",
-      render: (_: any, record: BundlePricingRule) => (
+      render: (_: any, record: any) => (
         <div className="flex items-center gap-1">
           <DollarSign className="h-4 w-4" />
           <span>
@@ -503,7 +511,7 @@ export default function AncillaryBundlingEngine() {
       title: "Priority",
       dataIndex: "priority",
       key: "priority",
-      render: (priority: number) => <Badge variant="outline">P{priority}</Badge>,
+      render: (priority: number) => <Badge variant="outline">P{priority || 1}</Badge>,
     },
     {
       title: "Status",
@@ -511,23 +519,29 @@ export default function AncillaryBundlingEngine() {
       key: "status",
       render: (status: string) => (
         <Badge variant={status === "ACTIVE" ? "default" : "secondary"}>
-          {status}
+          {status || 'INACTIVE'}
         </Badge>
       ),
     },
     {
       title: "Valid Period",
       key: "validPeriod",
-      render: (_: any, record: BundlePricingRule) => (
+      render: (_: any, record: any) => (
         <span className="text-sm">
-          {dayjs(record.validFrom).format("MMM DD")} - {dayjs(record.validTo).format("MMM DD, YYYY")}
+          {record.validFrom && record.validTo ? (
+            <>
+              {dayjs(record.validFrom).format("MMM DD")} - {dayjs(record.validTo).format("MMM DD, YYYY")}
+            </>
+          ) : (
+            'N/A'
+          )}
         </span>
       ),
     },
     {
       title: "Actions",
       key: "actions",
-      render: (_: any, record: BundlePricingRule) => (
+      render: (_: any, record: any) => (
         <Space size="small">
           <Button
             size="sm"
@@ -620,7 +634,16 @@ export default function AncillaryBundlingEngine() {
                 loading={pricingLoading}
                 rowKey="id"
                 pagination={{ pageSize: 10 }}
+                locale={{
+                  emptyText: pricingLoading ? 'Loading...' : 'No pricing rules found. Create your first pricing rule to get started.'
+                }}
               />
+              {!pricingLoading && pricingRules.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p>No pricing rules configured yet.</p>
+                  <p>Click "Create Pricing Rule" to add your first rule.</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

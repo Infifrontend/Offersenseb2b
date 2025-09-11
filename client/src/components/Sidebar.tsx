@@ -153,7 +153,7 @@ export default function Sidebar({
             }`}
           >
             <h1 className="text-lg font-bold text-primary-foreground">
-              Offersenseb2b
+              OffersenseB2B
             </h1>
             <p className="text-xs text-white text-opacity-80">
               Travel Management

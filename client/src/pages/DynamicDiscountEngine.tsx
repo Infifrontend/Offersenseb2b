@@ -408,7 +408,7 @@ export default function DynamicDiscountEngine() {
         Create Rule
       </Button>
       {/* Header Card */}
-      <Card>
+      {/* <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle className="text-lg">Dynamic Discount Rules</CardTitle>
@@ -417,17 +417,17 @@ export default function DynamicDiscountEngine() {
             </CardDescription>
           </div>
         </CardHeader>
-      </Card>
+      </Card> */}
 
       {/* Sticky Filter Icon */}
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed top-5 right-0 z-50 cls-filter-sticky cls-filter-sticky button">
         <Sheet open={isFilterDrawerOpen} onOpenChange={setIsFilterDrawerOpen}>
           <SheetTrigger asChild>
             <Button
               size="lg"
-              className="h-14 w-14 rounded-full shadow-lg bg-blue-600 hover:bg-blue-700 text-white"
+              className="h-14 w-14 rounded-full shadow-lg clr-bg-clr hover:bg-blue-700 text-white"
             >
-              <Filter className="w-6 h-6" />
+              <Filter className="" />
             </Button>
           </SheetTrigger>
           <SheetContent side="right" className="w-96 overflow-y-auto">
@@ -446,7 +446,10 @@ export default function DynamicDiscountEngine() {
                     placeholder="Enter rule code..."
                     value={filters.ruleCode || ""}
                     onChange={(e) =>
-                      setFilters((prev) => ({ ...prev, ruleCode: e.target.value }))
+                      setFilters((prev) => ({
+                        ...prev,
+                        ruleCode: e.target.value,
+                      }))
                     }
                   />
                 </div>
@@ -457,7 +460,10 @@ export default function DynamicDiscountEngine() {
                     placeholder="Enter origin..."
                     value={filters.origin || ""}
                     onChange={(e) =>
-                      setFilters((prev) => ({ ...prev, origin: e.target.value }))
+                      setFilters((prev) => ({
+                        ...prev,
+                        origin: e.target.value,
+                      }))
                     }
                   />
                 </div>
@@ -468,7 +474,10 @@ export default function DynamicDiscountEngine() {
                     placeholder="Enter destination..."
                     value={filters.destination || ""}
                     onChange={(e) =>
-                      setFilters((prev) => ({ ...prev, destination: e.target.value }))
+                      setFilters((prev) => ({
+                        ...prev,
+                        destination: e.target.value,
+                      }))
                     }
                   />
                 </div>
@@ -477,7 +486,10 @@ export default function DynamicDiscountEngine() {
                   <Select
                     value={filters.channel || "ALL"}
                     onValueChange={(value) =>
-                      setFilters((prev) => ({ ...prev, channel: value === "ALL" ? "" : value }))
+                      setFilters((prev) => ({
+                        ...prev,
+                        channel: value === "ALL" ? "" : value,
+                      }))
                     }
                   >
                     <SelectTrigger>
@@ -496,7 +508,10 @@ export default function DynamicDiscountEngine() {
                   <Select
                     value={filters.status || "ALL"}
                     onValueChange={(value) =>
-                      setFilters((prev) => ({ ...prev, status: value === "ALL" ? "" : value }))
+                      setFilters((prev) => ({
+                        ...prev,
+                        status: value === "ALL" ? "" : value,
+                      }))
                     }
                   >
                     <SelectTrigger>
@@ -514,7 +529,10 @@ export default function DynamicDiscountEngine() {
                   <Select
                     value={filters.fareSource || "ALL"}
                     onValueChange={(value) =>
-                      setFilters((prev) => ({ ...prev, fareSource: value === "ALL" ? "" : value }))
+                      setFilters((prev) => ({
+                        ...prev,
+                        fareSource: value === "ALL" ? "" : value,
+                      }))
                     }
                   >
                     <SelectTrigger>
@@ -531,7 +549,10 @@ export default function DynamicDiscountEngine() {
                   <Select
                     value={filters.agentTier || "ALL"}
                     onValueChange={(value) =>
-                      setFilters((prev) => ({ ...prev, agentTier: value === "ALL" ? "" : value }))
+                      setFilters((prev) => ({
+                        ...prev,
+                        agentTier: value === "ALL" ? "" : value,
+                      }))
                     }
                   >
                     <SelectTrigger>
@@ -703,7 +724,7 @@ export default function DynamicDiscountEngine() {
               </p>
               <Button
                 onClick={() => setIsCreateModalOpen(true)}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="cls-primary-bg hover:bg-blue-700"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Create Your First Rule

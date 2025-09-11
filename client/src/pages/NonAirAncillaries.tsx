@@ -1138,7 +1138,12 @@ export default function NonAirAncillaries() {
 
       {/* View Rule Modal */}
       <Modal
-        title="Rule Details"
+        title={
+          <div className="flex items-center space-x-2">
+            <span className="text-lg">📋</span>
+            <span>Markup Rule Details</span>
+          </div>
+        }
         open={isViewRuleModalOpen}
         onCancel={() => setIsViewRuleModalOpen(false)}
         footer={[
@@ -1146,59 +1151,206 @@ export default function NonAirAncillaries() {
             Close
           </AntButton>,
         ]}
+        width={600}
       >
         {selectedRule && (
-          <div className="space-y-4">
-            <div>
-              <label className="font-semibold">Rule Code:</label>
-              <div>{selectedRule.ruleCode}</div>
-            </div>
-            <div>
-              <label className="font-semibold">Product Code:</label>
-              <div>{selectedRule.productCode}</div>
-            </div>
-            {selectedRule.supplierCode && (
-              <div>
-                <label className="font-semibold">Supplier Code:</label>
-                <div>{selectedRule.supplierCode}</div>
+          <div className="space-y-6">
+            {/* Basic Information */}
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h4 className="text-sm font-semibold text-blue-800 mb-3">
+                Basic Information
+              </h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Rule Code
+                  </label>
+                  <div className="font-medium text-gray-900">
+                    {selectedRule.ruleCode}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Priority
+                  </label>
+                  <div className="font-medium text-gray-900">
+                    {selectedRule.priority}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Product Code
+                  </label>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg">
+                      {getProductIcon(selectedRule.productCode)}
+                    </span>
+                    <div>
+                      <div className="font-medium text-gray-900">
+                        {selectedRule.productCode}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {getProductLabel(selectedRule.productCode)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Supplier Code
+                  </label>
+                  <div className="font-medium text-gray-900">
+                    {selectedRule.supplierCode || "All Suppliers"}
+                  </div>
+                </div>
               </div>
-            )}
-            <div>
-              <label className="font-semibold">Adjustment:</label>
-              <div>
-                {selectedRule.adjustmentType === "PERCENT"
-                  ? `+${selectedRule.adjustmentValue}%`
-                  : `+${selectedRule.adjustmentValue} ${selectedRule.adjustmentType}`}
+            </div>
+
+            {/* Adjustment Details */}
+            <div className="bg-green-50 p-4 rounded-lg">
+              <h4 className="text-sm font-semibold text-green-800 mb-3">
+                Adjustment Configuration
+              </h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Adjustment Type
+                  </label>
+                  <div className="font-medium text-gray-900">
+                    {selectedRule.adjustmentType}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Adjustment Value
+                  </label>
+                  <div className={`font-bold text-lg ${
+                    selectedRule.adjustmentType === "PERCENT"
+                      ? "text-blue-600"
+                      : "text-orange-600"
+                  }`}>
+                    {selectedRule.adjustmentType === "PERCENT"
+                      ? `+${selectedRule.adjustmentValue}%`
+                      : `+$${selectedRule.adjustmentValue}`}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Channel
+                  </label>
+                  <div className="font-medium text-gray-900">
+                    {selectedRule.channel}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Status
+                  </label>
+                  <Badge
+                    variant={
+                      selectedRule.status === "ACTIVE" ? "default" : "secondary"
+                    }
+                  >
+                    {selectedRule.status}
+                  </Badge>
+                </div>
               </div>
             </div>
-            <div>
-              <label className="font-semibold">Agent Tiers:</label>
-              <div>
-                {Array.isArray(selectedRule.agentTier)
-                  ? selectedRule.agentTier.join(", ")
-                  : selectedRule.agentTier}
+
+            {/* Targeting Rules */}
+            <div className="bg-purple-50 p-4 rounded-lg">
+              <h4 className="text-sm font-semibold text-purple-800 mb-3">
+                Targeting Rules
+              </h4>
+              <div className="space-y-3">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Agent Tiers
+                  </label>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {Array.isArray(selectedRule.agentTier) &&
+                      selectedRule.agentTier.map((tier) => (
+                        <Badge
+                          key={tier}
+                          variant="outline"
+                          className="bg-blue-100 text-blue-800"
+                        >
+                          {tier}
+                        </Badge>
+                      ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Point of Sale
+                  </label>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {Array.isArray(selectedRule.pos) &&
+                      selectedRule.pos.map((region) => (
+                        <Badge
+                          key={region}
+                          variant="outline"
+                          className="bg-green-100 text-green-800"
+                        >
+                          {region}
+                        </Badge>
+                      ))}
+                  </div>
+                </div>
+                {selectedRule.cohortCodes && selectedRule.cohortCodes.length > 0 && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">
+                      Eligible Cohorts
+                    </label>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {selectedRule.cohortCodes.map((cohortCode, index) => {
+                        const cohort = availableCohorts.find((c: any) => 
+                          c.cohortName === cohortCode || c.cohortCode === cohortCode
+                        );
+                        return (
+                          <span
+                            key={index}
+                            className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-800"
+                            title={cohort ? `${cohort.cohortName} (${cohort.cohortCode})` : cohortCode}
+                          >
+                            {cohort ? cohort.cohortCode : cohortCode}
+                          </span>
+                        );
+                      })}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      This markup will only apply to users in these cohorts
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
-            <div>
-              <label className="font-semibold">Point of Sale:</label>
-              <div>
-                {Array.isArray(selectedRule.pos)
-                  ? selectedRule.pos.join(", ")
-                  : selectedRule.pos}
+
+            {/* Validity Period */}
+            <div className="bg-orange-50 p-4 rounded-lg">
+              <h4 className="text-sm font-semibold text-orange-800 mb-3">
+                Validity Period
+              </h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Valid From
+                  </label>
+                  <div className="font-medium text-gray-900">
+                    {selectedRule.validFrom}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Valid To
+                  </label>
+                  <div className="font-medium text-gray-900">
+                    {selectedRule.validTo}
+                  </div>
+                </div>
               </div>
-            </div>
-            <div>
-              <label className="font-semibold">Valid Period:</label>
-              <div>
-                {selectedRule.validFrom} to {selectedRule.validTo}
-              </div>
-            </div>
-            <div>
-              <label className="font-semibold">Cohort Codes:</label>
-              <div>
-                {Array.isArray(selectedRule.cohortCodes)
-                  ? selectedRule.cohortCodes.join(", ")
-                  : "N/A"}
+              <div className="mt-2 text-xs text-gray-500">
+                Rule is active between these dates (inclusive)
               </div>
             </div>
           </div>

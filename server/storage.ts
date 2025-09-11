@@ -1279,6 +1279,6 @@ export class DatabaseStorage implements IStorage {
       throw error;
     }
   }
-};
+}
 
 export const storage = new DatabaseStorage();

@@ -281,15 +281,27 @@ export default function DynamicDiscountEngine() {
   });
 
   const handleCreateRule = (values: any) => {
-    const formattedData = {
-      ...values,
-      validFrom: values.validDates[0].format("YYYY-MM-DD"),
-      validTo: values.validDates[1].format("YYYY-MM-DD"),
-      stackable: values.stackable ? "true" : "false",
-      cohortCodes: values.cohortCodes || [],
-    };
-    delete formattedData.validDates;
-    createRuleMutation.mutate(formattedData);
+    try {
+      const formattedData = {
+        ...values,
+        validFrom: values.validDates[0].format("YYYY-MM-DD"),
+        validTo: values.validDates[1].format("YYYY-MM-DD"),
+        stackable: values.stackable ? "true" : "false",
+        cohortCodes: values.cohortCodes || [],
+        adjustmentValue: values.adjustmentValue.toString(),
+      };
+      delete formattedData.validDates;
+      
+      console.log("Submitting rule data:", formattedData);
+      createRuleMutation.mutate(formattedData);
+    } catch (error) {
+      console.error("Error formatting rule data:", error);
+      toast({
+        title: "Error",
+        description: "Failed to format rule data",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleEditRule = (values: any) => {

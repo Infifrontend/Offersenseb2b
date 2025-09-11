@@ -394,9 +394,27 @@ export class DatabaseStorage implements IStorage {
     return result[0] || undefined;
   }
 
-  async insertDynamicDiscountRule(rule: InsertDynamicDiscountRule): Promise<InsertDynamicDiscountRule> {
-    const result = await this.db.insert(dynamicDiscountRules).values(rule).returning();
-    return result[0];
+  async insertDynamicDiscountRule(data: any): Promise<InsertDynamicDiscountRule> {
+    try {
+      console.log("Inserting rule into database:", data);
+
+      // Ensure required fields are present and properly formatted
+      const ruleData = {
+        ...data,
+        adjustmentValue: data.adjustmentValue.toString(),
+        stackable: data.stackable || "false",
+        priority: data.priority || 1,
+        status: data.status || "ACTIVE"
+      };
+
+      const [rule] = await this.db.insert(dynamicDiscountRules).values(ruleData).returning();
+      console.log("Successfully inserted rule:", rule);
+
+      return rule;
+    } catch (error: any) {
+      console.error("Database error inserting rule:", error);
+      throw error;
+    }
   }
 
   async updateDynamicDiscountRule(id: string, rule: Partial<InsertDynamicDiscountRule>): Promise<InsertDynamicDiscountRule> {

@@ -838,7 +838,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Fetching bundle pricing rules with filters:", filters);
       const rules = await storage.getBundlePricingRules(filters);
       console.log(`Found ${rules?.length || 0} bundle pricing rules`);
-      res.json(rules || []);
+
+      // If no rules found and no specific filters, create sample data
+      if (rules.length === 0 && Object.keys(filters).length === 0) {
+        console.log("No bundle pricing rules found, creating sample data...");
+        try {
+          // Create sample bundle pricing rules
+          const sampleRules = [
+            {
+              ruleCode: "BPR001",
+              bundleCode: "TRAVEL_PLUS",
+              discountType: "PERCENT",
+              discountValue: "15.00",
+              priority: 1,
+              status: "ACTIVE",
+              validFrom: "2024-01-01",
+              validTo: "2024-12-31",
+            },
+            {
+              ruleCode: "BPR002", 
+              bundleCode: "PREMIUM_PACK",
+              discountType: "AMOUNT",
+              discountValue: "50.00",
+              priority: 2,
+              status: "ACTIVE",
+              validFrom: "2024-01-01",
+              validTo: "2024-12-31",
+            }
+          ];
+
+          for (const ruleData of sampleRules) {
+            await storage.insertBundlePricingRule(ruleData);
+          }
+
+          // Fetch the newly created rules
+          const newRules = await storage.getBundlePricingRules(filters);
+          console.log(`Created ${newRules.length} sample bundle pricing rules`);
+          return res.json(newRules);
+        } catch (createError: any) {
+          console.error("Error creating sample data:", createError);
+        }
+      }
+
+      res.json(rules);
     } catch (error: any) {
       console.error("Error fetching bundle pricing rules:", error);
       res.status(500).json({ message: "Failed to fetch bundle pricing rules", error: error.message });

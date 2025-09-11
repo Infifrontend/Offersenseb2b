@@ -750,16 +750,22 @@ export class DatabaseStorage implements IStorage {
 
       let query = this.db.select().from(bundlePricingRules);
 
+      const conditions = [];
+
       if (filters.status) {
-        query = query.where(eq(bundlePricingRules.status, filters.status));
+        conditions.push(eq(bundlePricingRules.status, filters.status));
       }
 
       if (filters.bundleCode) {
-        query = query.where(eq(bundlePricingRules.bundleCode, filters.bundleCode));
+        conditions.push(eq(bundlePricingRules.bundleCode, filters.bundleCode));
       }
 
       if (filters.ruleCode) {
-        query = query.where(eq(bundlePricingRules.ruleCode, filters.ruleCode));
+        conditions.push(eq(bundlePricingRules.ruleCode, filters.ruleCode));
+      }
+
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
       }
 
       const results = await query.orderBy(bundlePricingRules.priority, bundlePricingRules.createdAt);
@@ -773,10 +779,10 @@ export class DatabaseStorage implements IStorage {
       return results || [];
     } catch (error) {
       console.error("Storage: Error in getBundlePricingRules:", error);
-      console.error("Storage: Error details:", error);
+      console.error("Storage: Error stack:", error.stack);
 
-      // Return empty array instead of throwing to prevent UI breaking
-      return [];
+      // Re-throw the error so the API can handle it properly
+      throw error;
     }
   }
 

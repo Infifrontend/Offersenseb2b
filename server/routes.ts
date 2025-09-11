@@ -848,16 +848,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // If no rules found and no specific filters, create sample data
       if (rules.length === 0 && Object.keys(filters).length === 0) {
         console.log("No bundle pricing rules found, creating sample data...");
-
-        // First check if bundles exist, if not create sample bundles
-        let existingBundles = await storage.getBundles({});
-        if (!Array.isArray(existingBundles)) {
-          existingBundles = [];
-        }
+        
+        try {
+          // First check if bundles exist, if not create sample bundles
+          let existingBundles = await storage.getBundles({});
+          if (!Array.isArray(existingBundles)) {
+            existingBundles = [];
+          }
 
           if (!existingBundles || existingBundles.length === 0) {
-          console.log("Creating sample bundles first...");
-          const sampleBundles = [
+            console.log("Creating sample bundles first...");
+            const sampleBundles = [
               {
                 bundleCode: "TRAVEL_PLUS",
                 bundleName: "Travel Plus Package",
@@ -885,17 +886,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
             ];
 
             for (const bundleData of sampleBundles) {
-            try {
-              await storage.insertBundle(bundleData);
-              console.log(`Created bundle: ${bundleData.bundleCode}`);
-            } catch (bundleError) {
-              console.error(`Error creating bundle ${bundleData.bundleCode}:`, bundleError);
+              try {
+                await storage.insertBundle(bundleData);
+                console.log(`Created bundle: ${bundleData.bundleCode}`);
+              } catch (bundleError) {
+                console.error(`Error creating bundle ${bundleData.bundleCode}:`, bundleError);
+              }
             }
           }
-        }
 
           // Create sample bundle pricing rules
-        const sampleRules = [
+          const sampleRules = [
             {
               ruleCode: "BPR001",
               bundleCode: "TRAVEL_PLUS",
@@ -919,25 +920,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ];
 
           for (const ruleData of sampleRules) {
-          try {
-            await storage.insertBundlePricingRule(ruleData);
-            console.log(`Created pricing rule: ${ruleData.ruleCode}`);
-          } catch (ruleError) {
-            console.error(`Error creating pricing rule ${ruleData.ruleCode}:`, ruleError);
+            try {
+              await storage.insertBundlePricingRule(ruleData);
+              console.log(`Created pricing rule: ${ruleData.ruleCode}`);
+            } catch (ruleError) {
+              console.error(`Error creating pricing rule ${ruleData.ruleCode}:`, ruleError);
+            }
           }
-        }
 
-        // Fetch the newly created rules
-        try {
-          rules = await storage.getBundlePricingRules(filters);
-          console.log(`After sample creation: ${rules?.length || 0} bundle pricing rules`);
-        } catch (refetchError) {
-          console.error("Error refetching after sample creation:", refetchError);
-          rules = [];
+          // Fetch the newly created rules
+          try {
+            rules = await storage.getBundlePricingRules(filters);
+            console.log(`After sample creation: ${rules?.length || 0} bundle pricing rules`);
+          } catch (refetchError) {
+            console.error("Error refetching after sample creation:", refetchError);
+            rules = [];
+          }
+        } catch (createError: any) {
+          console.error("Error creating sample data:", createError);
+          console.error("Sample creation error stack:", createError.stack);
         }
-      } catch (createError: any) {
-        console.error("Error creating sample data:", createError);
-        console.error("Sample creation error stack:", createError.stack);
       }
 
       // Always return an array

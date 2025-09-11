@@ -843,6 +843,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (rules.length === 0 && Object.keys(filters).length === 0) {
         console.log("No bundle pricing rules found, creating sample data...");
         try {
+          // First check if bundles exist, if not create sample bundles
+          const existingBundles = await storage.getBundles({});
+          if (existingBundles.length === 0) {
+            console.log("Creating sample bundles first...");
+            const sampleBundles = [
+              {
+                bundleCode: "TRAVEL_PLUS",
+                bundleName: "Travel Plus Package",
+                components: ["BAG20", "SEAT_STD", "MEAL_STD"],
+                bundleType: "AIR_NONAIR",
+                pos: ["IN", "AE", "US"],
+                agentTier: ["PLATINUM", "GOLD"],
+                channel: "PORTAL",
+                validFrom: "2024-01-01",
+                validTo: "2024-12-31",
+                status: "ACTIVE"
+              },
+              {
+                bundleCode: "PREMIUM_PACK",
+                bundleName: "Premium Travel Package",
+                components: ["BAG30", "SEAT_PREMIUM", "LOUNGE_PASS"],
+                bundleType: "AIR_NONAIR",
+                pos: ["IN", "AE", "US"],
+                agentTier: ["PLATINUM"],
+                channel: "PORTAL",
+                validFrom: "2024-01-01",
+                validTo: "2024-12-31",
+                status: "ACTIVE"
+              }
+            ];
+
+            for (const bundleData of sampleBundles) {
+              await storage.insertBundle(bundleData);
+            }
+          }
+
           // Create sample bundle pricing rules
           const sampleRules = [
             {
@@ -877,10 +913,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.json(newRules);
         } catch (createError: any) {
           console.error("Error creating sample data:", createError);
+          // Continue and return empty array instead of failing
         }
       }
 
-      res.json(rules);
+      res.json(rules || []);
     } catch (error: any) {
       console.error("Error fetching bundle pricing rules:", error);
       res.status(500).json({ message: "Failed to fetch bundle pricing rules", error: error.message });

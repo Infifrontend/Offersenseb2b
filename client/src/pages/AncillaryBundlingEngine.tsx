@@ -34,15 +34,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
   Plus,
-  Search,
-  Filter,
-  Eye,
+  Package,
   Edit,
   Trash2,
-  Package,
+  Eye,
+  Filter,
   DollarSign,
   Calculator,
   Settings,
+  Play,
 } from "lucide-react";
 import {
   Form as AntForm,
@@ -173,18 +173,14 @@ const getBundleTypeLabel = (type: string) => {
   return bundle?.label || type;
 };
 
+const formatDate = (dateString: string) => {
+  return dayjs(dateString).format("MMM DD, YYYY");
+};
+
 export default function AncillaryBundlingEngine() {
   const [activeTab, setActiveTab] = useState("bundles");
   const [filters, setFilters] = useState({});
   const [pricingFilters, setPricingFilters] = useState({});
-  const [isCreateBundleModalOpen, setIsCreateBundleModalOpen] = useState(false);
-  const [isCreatePricingModalOpen, setIsCreatePricingModalOpen] =
-    useState(false);
-  const [isViewBundleModalOpen, setIsViewBundleModalOpen] = useState(false);
-  const [isViewPricingModalOpen, setIsViewPricingModalOpen] = useState(false);
-  const [isEditBundleModalOpen, setIsEditBundleModalOpen] = useState(false);
-  const [isEditPricingModalOpen, setIsEditPricingModalOpen] = useState(false);
-  const [isSimulateModalOpen, setIsSimulateModalOpen] = useState(false);
   const [selectedBundle, setSelectedBundle] = useState<Bundle | null>(null);
   const [selectedPricingRule, setSelectedPricingRule] =
     useState<BundlePricingRule | null>(null);
@@ -196,6 +192,20 @@ export default function AncillaryBundlingEngine() {
   const [editPricingForm] = AntForm.useForm();
   const [simulateForm] = AntForm.useForm();
   const { toast } = useToast();
+
+  // State for bundle pricing rules
+  const [selectedBundlePricingRule, setSelectedBundlePricingRule] = useState<BundlePricingRule | null>(null);
+  const [isCreateBundleModalOpen, setIsCreateBundleModalOpen] = useState(false);
+  const [isCreatePricingModalOpen, setIsCreatePricingModalOpen] = useState(false);
+  const [isViewBundleModalOpen, setIsViewBundleModalOpen] = useState(false);
+  const [isViewPricingModalOpen, setIsViewPricingModalOpen] = useState(false);
+  const [isEditBundleModalOpen, setIsEditBundleModalOpen] = useState(false);
+  const [isEditPricingModalOpen, setIsEditPricingModalOpen] = useState(false);
+  const [isSimulateModalOpen, setIsSimulateModalOpen] = useState(false);
+  const [isCreateBundlePricingModalOpen, setIsCreateBundlePricingModalOpen] = useState(false);
+  const [isEditBundlePricingModalOpen, setIsEditBundlePricingModalOpen] = useState(false);
+  const [isSimulateBundlePricingModalOpen, setIsSimulateBundlePricingModalOpen] = useState(false);
+
 
   // Form instances
   const bundleForm = useForm<BundleFormData>({
@@ -424,6 +434,19 @@ export default function AncillaryBundlingEngine() {
         description: error.message,
         variant: "destructive",
       });
+    },
+  });
+
+  // Delete bundle pricing rule mutation
+  const deleteBundlePricingMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/bundles/pricing/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to delete bundle pricing rule");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["bundle-pricing-rules"] });
     },
   });
 
@@ -668,6 +691,21 @@ export default function AncillaryBundlingEngine() {
     },
   ];
 
+  // Handler functions for bundle pricing rules
+  const handleSimulateBundlePricing = (rule: BundlePricingRule) => {
+    setSelectedBundlePricingRule(rule);
+    setIsSimulateBundlePricingModalOpen(true);
+  };
+
+  const handleEditBundlePricingRule = (rule: BundlePricingRule) => {
+    setSelectedBundlePricingRule(rule);
+    setIsEditBundlePricingModalOpen(true);
+  };
+
+  const handleDeleteBundlePricingRule = (id: string) => {
+    deleteBundlePricingMutation.mutate(id);
+  };
+
   return (
     <div className="space-y-6">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -712,36 +750,104 @@ export default function AncillaryBundlingEngine() {
         <TabsContent value="pricing" className="space-y-4">
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-2xl font-bold">Pricing Rules</h2>
-              <p className="text-muted-foreground">
-                Configure bundle pricing and discounts
-              </p>
+              <h2 className="text-2xl font-bold">Bundle Pricing Rules</h2>
+              <p className="text-muted-foreground">Manage bundle pricing and discount rules</p>
             </div>
             <Button onClick={() => setIsCreatePricingModalOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
-              Create Pricing Rule
+              Add Bundle Pricing Rule
             </Button>
           </div>
 
           <Card>
             <CardContent className="p-6">
-              <Table
-                columns={pricingColumns}
-                dataSource={pricingRules}
-                loading={pricingLoading}
-                rowKey="id"
-                pagination={{ pageSize: 10 }}
-                locale={{
-                  emptyText: pricingLoading
-                    ? "Loading..."
-                    : "No pricing rules found. Create your first pricing rule to get started.",
-                }}
-              />
-              {!pricingLoading && pricingRules.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  <p>No pricing rules configured yet.</p>
-                  <p>Click "Create Pricing Rule" to add your first rule.</p>
+              {pricingLoading ? (
+                <div className="flex items-center justify-center p-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                 </div>
+              ) : pricingRules.length === 0 ? (
+                <div className="text-center py-12">
+                  <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    No Bundle Pricing Rules Found
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Create your first bundle pricing rule to get started
+                  </p>
+                  <Button onClick={() => setIsCreatePricingModalOpen(true)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Bundle Pricing Rule
+                  </Button>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Rule Code</TableHead>
+                      <TableHead>Bundle Code</TableHead>
+                      <TableHead>Discount Type</TableHead>
+                      <TableHead>Discount Value</TableHead>
+                      <TableHead>Priority</TableHead>
+                      <TableHead>Valid Period</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pricingRules.map((rule: BundlePricingRule) => (
+                      <TableRow key={rule.id}>
+                        <TableCell className="font-medium">{rule.ruleCode}</TableCell>
+                        <TableCell>{rule.bundleCode}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="capitalize">
+                            {rule.discountType.toLowerCase()}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {rule.discountType === "PERCENT"
+                            ? `${rule.discountValue}%`
+                            : `$${rule.discountValue}`}
+                        </TableCell>
+                        <TableCell>{rule.priority}</TableCell>
+                        <TableCell className="text-sm">
+                          <div>{formatDate(rule.validFrom)}</div>
+                          <div className="text-gray-500">to {formatDate(rule.validTo)}</div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={rule.status === "ACTIVE" ? "default" : "secondary"}>
+                            {rule.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleSimulateBundlePricing(rule)}
+                            >
+                              <Play className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditBundlePricingRule(rule)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteBundlePricingRule(rule.id)}
+                              disabled={deleteBundlePricingMutation.isPending}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               )}
             </CardContent>
           </Card>
@@ -1558,6 +1664,225 @@ export default function AncillaryBundlingEngine() {
             <AntButton
               onClick={() => {
                 setIsSimulateModalOpen(false);
+                setSimulationResult(null);
+              }}
+            >
+              Cancel
+            </AntButton>
+            <AntButton
+              type="primary"
+              htmlType="submit"
+              loading={simulatePricingMutation.isPending}
+            >
+              Simulate
+            </AntButton>
+          </div>
+        </AntForm>
+
+        {simulationResult && (
+          <Card className="mt-4">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Calculator className="h-5 w-5" />
+                Simulation Result
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span>Base Price:</span>
+                  <span>
+                    {simulationResult.currency} {simulationResult.basePrice}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Discount:</span>
+                  <span className="text-green-600">
+                    -{simulationResult.currency} {simulationResult.discount}
+                  </span>
+                </div>
+                <div className="flex justify-between font-semibold text-lg border-t pt-2">
+                  <span>Final Price:</span>
+                  <span>
+                    {simulationResult.currency} {simulationResult.adjustedPrice}
+                  </span>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Rule Applied: {simulationResult.ruleApplied}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Bundle: {simulationResult.bundleCode}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </Modal>
+
+      {/* Edit Pricing Rule Modal */}
+      <Modal
+        title="Edit Pricing Rule"
+        open={isEditBundlePricingModalOpen}
+        onCancel={() => setIsEditBundlePricingModalOpen(false)}
+        footer={null}
+        width={600}
+      >
+        <AntForm
+          form={editPricingForm}
+          onFinish={handleEditPricing}
+          layout="vertical"
+          className="space-y-4"
+        >
+          <div className="grid grid-cols-2 gap-4">
+            <AntForm.Item
+              label="Rule Code"
+              name="ruleCode"
+              rules={[{ required: true, message: "Rule code is required" }]}
+            >
+              <AntInput placeholder="e.g., BUNDLE_DISC_TIERED" />
+            </AntForm.Item>
+
+            <AntForm.Item
+              label="Bundle Code"
+              name="bundleCode"
+              rules={[{ required: true, message: "Bundle code is required" }]}
+            >
+              <AntSelect placeholder="Select bundle">
+                {bundles.map((bundle) => (
+                  <AntSelect.Option
+                    key={bundle.bundleCode}
+                    value={bundle.bundleCode}
+                  >
+                    {bundle.bundleCode} - {bundle.bundleName}
+                  </AntSelect.Option>
+                ))}
+              </AntSelect>
+            </AntForm.Item>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <AntForm.Item
+              label="Discount Type"
+              name="discountType"
+              rules={[{ required: true, message: "Discount type is required" }]}
+            >
+              <AntSelect>
+                {discountTypes.map((type) => (
+                  <AntSelect.Option key={type} value={type}>
+                    {type}
+                  </AntSelect.Option>
+                ))}
+              </AntSelect>
+            </AntForm.Item>
+
+            <AntForm.Item
+              label="Discount Value"
+              name="discountValue"
+              rules={[
+                { required: true, message: "Discount value is required" },
+              ]}
+            >
+              <AntInputNumber placeholder="15" style={{ width: "100%" }} />
+            </AntForm.Item>
+
+            <AntForm.Item
+              label="Priority"
+              name="priority"
+              rules={[{ required: true, message: "Priority is required" }]}
+            >
+              <AntInputNumber
+                min={1}
+                placeholder="1"
+                style={{ width: "100%" }}
+              />
+            </AntForm.Item>
+          </div>
+
+          <AntForm.Item
+            label="Valid Period"
+            name="validDates"
+            rules={[{ required: true, message: "Valid period is required" }]}
+          >
+            <RangePicker style={{ width: "100%" }} />
+          </AntForm.Item>
+
+          <div className="flex justify-end gap-2">
+            <AntButton onClick={() => setIsEditBundlePricingModalOpen(false)}>
+              Cancel
+            </AntButton>
+            <AntButton
+              type="primary"
+              htmlType="submit"
+              loading={updatePricingMutation.isPending}
+            >
+              Update Rule
+            </AntButton>
+          </div>
+        </AntForm>
+      </Modal>
+
+      {/* Simulate Pricing Modal */}
+      <Modal
+        title="Simulate Bundle Pricing"
+        open={isSimulateBundlePricingModalOpen}
+        onCancel={() => {
+          setIsSimulateBundlePricingModalOpen(false);
+          setSimulationResult(null);
+        }}
+        footer={null}
+        width={500}
+      >
+        <AntForm
+          form={simulateForm}
+          onFinish={handleSimulate}
+          layout="vertical"
+          className="space-y-4"
+        >
+          <AntForm.Item
+            label="Rule ID"
+            name="ruleId"
+            rules={[{ required: true, message: "Rule ID is required" }]}
+          >
+            <AntSelect placeholder="Select pricing rule">
+              {pricingRules.map((rule) => (
+                <AntSelect.Option key={rule.id} value={rule.id}>
+                  {rule.ruleCode} - {rule.bundleCode}
+                </AntSelect.Option>
+              ))}
+            </AntSelect>
+          </AntForm.Item>
+
+          <div className="grid grid-cols-2 gap-4">
+            <AntForm.Item
+              label="Base Price"
+              name="basePrice"
+              rules={[{ required: true, message: "Base price is required" }]}
+            >
+              <AntInputNumber
+                placeholder="100.00"
+                style={{ width: "100%" }}
+                precision={2}
+              />
+            </AntForm.Item>
+
+            <AntForm.Item
+              label="Currency"
+              name="currency"
+              rules={[{ required: true, message: "Currency is required" }]}
+            >
+              <AntSelect placeholder="Select currency">
+                <AntSelect.Option value="USD">USD</AntSelect.Option>
+                <AntSelect.Option value="EUR">EUR</AntSelect.Option>
+                <AntSelect.Option value="INR">INR</AntSelect.Option>
+                <AntSelect.Option value="AED">AED</AntSelect.Option>
+              </AntSelect>
+            </AntForm.Item>
+          </div>
+
+          <div className="flex justify-end gap-2">
+            <AntButton
+              onClick={() => {
+                setIsSimulateBundlePricingModalOpen(false);
                 setSimulationResult(null);
               }}
             >

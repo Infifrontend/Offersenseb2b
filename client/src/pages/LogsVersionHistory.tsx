@@ -435,100 +435,116 @@ export default function LogsVersionHistory() {
             Audit Trail
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           {isLoading ? (
             <div className="flex justify-center p-8">
               <RefreshCw className="w-6 h-6 animate-spin" />
             </div>
           ) : filteredLogs.length === 0 ? (
-            <Empty description="No audit logs found" />
+            <div className="p-6">
+              <Empty description="No audit logs found" />
+            </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Timestamp</TableHead>
-                  <TableHead>User</TableHead>
-                  <TableHead>Module</TableHead>
-                  <TableHead>Entity ID</TableHead>
-                  <TableHead>Action</TableHead>
-                  <TableHead>Justification</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredLogs.map((log: AuditLog) => (
-                  <TableRow key={log.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-muted-foreground" />
-                        {format(
-                          new Date(log.timestamp),
-                          "MMM dd, yyyy HH:mm:ss",
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <User className="w-4 h-4 text-muted-foreground" />
-                        {log.user}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{log.module}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="link"
-                        className="p-0 h-auto font-mono text-sm"
-                        onClick={() => {
-                          setSelectedEntityId(log.entityId);
-                          setEntityHistoryOpen(true);
-                        }}
-                      >
-                        {log.entityId}
-                      </Button>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={getActionVariant(log.action)}>
-                        {log.action}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="max-w-xs truncate">
-                      {log.justification || "-"}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedLog(log);
-                            setViewDetailsOpen(true);
-                          }}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        {log.beforeData &&
-                          log.action !== "CREATED" &&
-                          log.action !== "ROLLBACK" && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedLog(log);
-                                setRollbackDialogOpen(true);
-                              }}
-                              title="Rollback to this version"
-                            >
-                              <RefreshCw className="w-4 h-4" />
-                            </Button>
-                          )}
-                      </div>
-                    </TableCell>
+            <div className="overflow-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[180px] min-w-[180px]">Timestamp</TableHead>
+                    <TableHead className="w-[120px] min-w-[120px]">User</TableHead>
+                    <TableHead className="w-[130px] min-w-[130px]">Module</TableHead>
+                    <TableHead className="w-[140px] min-w-[140px]">Entity ID</TableHead>
+                    <TableHead className="w-[100px] min-w-[100px]">Action</TableHead>
+                    <TableHead className="w-[200px] min-w-[200px]">Justification</TableHead>
+                    <TableHead className="w-[100px] min-w-[100px]">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {filteredLogs.map((log: AuditLog) => (
+                    <TableRow key={log.id}>
+                      <TableCell className="w-[180px]">
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                          <span className="text-xs leading-tight">
+                            {format(
+                              new Date(log.timestamp),
+                              "MMM dd, yyyy\nHH:mm:ss",
+                            )}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="w-[120px]">
+                        <div className="flex items-center gap-1">
+                          <User className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                          <span className="text-sm truncate">{log.user}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="w-[130px]">
+                        <Badge variant="outline" className="text-xs">
+                          {log.module}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="w-[140px]">
+                        <Button
+                          variant="link"
+                          className="p-0 h-auto font-mono text-xs truncate max-w-full"
+                          onClick={() => {
+                            setSelectedEntityId(log.entityId);
+                            setEntityHistoryOpen(true);
+                          }}
+                          title={log.entityId}
+                        >
+                          {log.entityId.length > 12 
+                            ? `${log.entityId.substring(0, 12)}...` 
+                            : log.entityId}
+                        </Button>
+                      </TableCell>
+                      <TableCell className="w-[100px]">
+                        <Badge variant={getActionVariant(log.action)} className="text-xs">
+                          {log.action}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="w-[200px]">
+                        <div className="text-sm truncate" title={log.justification || "-"}>
+                          {log.justification || "-"}
+                        </div>
+                      </TableCell>
+                      <TableCell className="w-[100px]">
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            onClick={() => {
+                              setSelectedLog(log);
+                              setViewDetailsOpen(true);
+                            }}
+                            title="View details"
+                          >
+                            <Eye className="w-3 h-3" />
+                          </Button>
+                          {log.beforeData &&
+                            log.action !== "CREATED" &&
+                            log.action !== "ROLLBACK" && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0"
+                                onClick={() => {
+                                  setSelectedLog(log);
+                                  setRollbackDialogOpen(true);
+                                }}
+                                title="Rollback to this version"
+                              >
+                                <RefreshCw className="w-3 h-3" />
+                              </Button>
+                            )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>

@@ -70,6 +70,8 @@ import {
   Legend,
   ArcElement,
 } from "chart.js";
+import { SendOutlined } from "@ant-design/icons";
+
 
 // Register Chart.js components
 ChartJS.register(
@@ -168,14 +170,33 @@ interface Campaign {
 }
 
 interface CampaignMetrics {
-  sent: number;
-  delivered: number;
-  opened: number;
-  clicked: number;
-  purchased: number;
-  revenueUplift: number;
-  attachRate: number;
-  roi: number;
+  aggregated: {
+    sent: number;
+    delivered: number;
+    opened: number;
+    clicked: number;
+    purchased: number;
+    revenueUplift: number;
+    attachRate: number;
+    roi: number;
+  };
+  daily: any[];
+}
+
+interface AncillaryRule {
+  id: string;
+  ancillaryCode: string;
+  adjustmentType: "FREE" | "PERCENT" | "AMOUNT";
+  adjustmentValue: number;
+  pos?: string[];
+  agentTier?: string[];
+}
+
+interface Bundle {
+  id: string;
+  bundleCode: string;
+  bundleName: string;
+  components: string[];
 }
 
 type CampaignFormData = z.infer<typeof campaignFormSchema>;
@@ -268,6 +289,24 @@ export default function CampaignManager() {
     queryFn: async () => {
       const response = await fetch("/api/campaigns");
       if (!response.ok) throw new Error("Failed to fetch campaigns");
+      return response.json();
+    },
+  });
+
+  const { data: ancillaryRules = [] } = useQuery<AncillaryRule[]>({
+    queryKey: ["/api/ancillary-rules"],
+    queryFn: async () => {
+      const response = await fetch("/api/ancillary-rules");
+      if (!response.ok) throw new Error("Failed to fetch ancillary rules");
+      return response.json();
+    },
+  });
+
+  const { data: bundles = [] } = useQuery<Bundle[]>({
+    queryKey: ["/api/bundles"],
+    queryFn: async () => {
+      const response = await fetch("/api/bundles");
+      if (!response.ok) throw new Error("Failed to fetch bundles");
       return response.json();
     },
   });
@@ -478,7 +517,7 @@ export default function CampaignManager() {
       render: (record: Campaign) => {
         const totalProducts = (record.products.ancillaries?.length || 0) + (record.products.bundles?.length || 0);
         if (totalProducts === 0) return <span className="text-gray-400">-</span>;
-        
+
         return (
           <div className="text-sm">
             <Tag color="green" size="small">
@@ -527,9 +566,9 @@ export default function CampaignManager() {
         if (record.comms.emailTemplateId) channels.push("Email");
         if (record.comms.whatsappTemplateId) channels.push("WhatsApp");
         if (record.comms.apiPush) channels.push("API");
-        
+
         if (channels.length === 0) return <span className="text-gray-400">-</span>;
-        
+
         return (
           <div className="text-xs">
             <Tag size="small">{channels.length} channel{channels.length > 1 ? 's' : ''}</Tag>
@@ -881,11 +920,27 @@ export default function CampaignManager() {
                 <AntSelect
                   mode="multiple"
                   placeholder="Select ancillary products"
-                  options={ancillaryProducts.map((product) => ({
-                    label: product,
-                    value: product,
-                  }))}
-                />
+                  showSearch
+                  filterOption={(input, option) =>
+                    option?.label?.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  }
+                >
+                  {ancillaryRules.map((rule) => (
+                    <AntSelect.Option key={rule.id} value={rule.ancillaryCode}>
+                      <div>
+                        <div className="font-medium">{rule.ancillaryCode}</div>
+                        <div className="text-xs text-gray-500">
+                          {rule.adjustmentType === "FREE"
+                            ? "Free"
+                            : rule.adjustmentType === "PERCENT"
+                            ? `${rule.adjustmentValue}% discount`
+                            : `$${rule.adjustmentValue} discount`
+                          } • {rule.pos?.join(", ")} • {rule.agentTier?.join(", ")}
+                        </div>
+                      </div>
+                    </AntSelect.Option>
+                  ))}
+                </AntSelect>
               </AntForm.Item>
             </Col>
             <Col span={12}>
@@ -896,11 +951,23 @@ export default function CampaignManager() {
                 <AntSelect
                   mode="multiple"
                   placeholder="Select bundle products"
-                  options={bundleProducts.map((bundle) => ({
-                    label: bundle,
-                    value: bundle,
-                  }))}
-                />
+                  showSearch
+                  filterOption={(input, option) =>
+                    option?.label?.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  }
+                >
+                  {bundles.map((bundle) => (
+                    <AntSelect.Option key={bundle.id} value={bundle.bundleCode}>
+                      <div>
+                        <div className="font-medium">{bundle.bundleCode}</div>
+                        <div className="text-xs text-gray-500">
+                          {bundle.bundleName} • {bundle.components?.slice(0, 3).join(", ")}
+                          {bundle.components?.length > 3 && ` +${bundle.components.length - 3} more`}
+                        </div>
+                      </div>
+                    </AntSelect.Option>
+                  ))}
+                </AntSelect>
               </AntForm.Item>
             </Col>
           </Row>

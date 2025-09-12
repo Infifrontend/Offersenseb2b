@@ -390,123 +390,47 @@ export default function AnalyticsSimulation() {
                         )}
                       />
 
-                      <FormField
-                        control={simulationForm.control}
-                        name="scope.pos"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Point of Sale</FormLabel>
-                            <div className="space-y-3">
-                              <Select onValueChange={(value) => {
-                                const currentPos = field.value || [];
-                                if (!currentPos.includes(value)) {
-                                  field.onChange([...currentPos, value]);
-                                }
-                              }}>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select countries" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {countries.filter(country => !(field.value || []).includes(country)).map((country) => (
-                                    <SelectItem key={country} value={country}>
-                                      {country}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <div className="flex flex-wrap gap-2 mt-2">
-                                {(field.value || []).map((pos: string) => (
-                                  <div key={pos} className="bg-orange-100 text-orange-800 text-sm px-3 py-1.5 rounded-lg flex items-center gap-2 border border-orange-200">
-                                    <span className="font-medium">{pos}</span>
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        const newPos = (field.value || []).filter((p: string) => p !== pos);
-                                        field.onChange(newPos);
-                                      }}
-                                      className="text-orange-600 hover:text-orange-800 hover:bg-orange-200 rounded-full w-4 h-4 flex items-center justify-center text-xs"
-                                    >
-                                      ×
-                                    </button>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      <div className="space-y-2">
+                        <Label>Point of Sale</Label>
+                        <Select onValueChange={(value) => {
+                          const currentPos = simulationForm.getValues("scope.pos") || [];
+                          if (!currentPos.includes(value)) {
+                            simulationForm.setValue("scope.pos", [...currentPos, value]);
+                          }
+                        }}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select countries" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {countries.map((country) => (
+                              <SelectItem key={country} value={country}>
+                                {country}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-                      <FormField
-                        control={simulationForm.control}
-                        name="scope.agentTier"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Agent Tiers</FormLabel>
-                            <div className="space-y-3">
-                              <Select onValueChange={(value) => {
-                                const currentTiers = field.value || [];
-                                if (!currentTiers.includes(value)) {
-                                  field.onChange([...currentTiers, value]);
-                                }
-                              }}>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select agent tiers" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {agentTiers.filter(tier => !(field.value || []).includes(tier)).map((tier) => (
-                                    <SelectItem key={tier} value={tier}>
-                                      <div className="flex items-center gap-2">
-                                        <div className={`w-2 h-2 rounded-full ${
-                                          tier === 'PLATINUM' ? 'bg-purple-500' :
-                                          tier === 'GOLD' ? 'bg-yellow-500' :
-                                          tier === 'SILVER' ? 'bg-gray-400' :
-                                          'bg-orange-600'
-                                        }`}></div>
-                                        {tier}
-                                      </div>
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <div className="flex flex-wrap gap-2 mt-2">
-                                {(field.value || []).map((tier: string) => (
-                                  <div key={tier} className={`text-sm px-3 py-1.5 rounded-lg flex items-center gap-2 border ${
-                                    tier === 'PLATINUM' ? 'bg-purple-100 text-purple-800 border-purple-200' :
-                                    tier === 'GOLD' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
-                                    tier === 'SILVER' ? 'bg-gray-100 text-gray-800 border-gray-200' :
-                                    'bg-orange-100 text-orange-800 border-orange-200'
-                                  }`}>
-                                    <div className={`w-2 h-2 rounded-full ${
-                                      tier === 'PLATINUM' ? 'bg-purple-500' :
-                                      tier === 'GOLD' ? 'bg-yellow-500' :
-                                      tier === 'SILVER' ? 'bg-gray-400' :
-                                      'bg-orange-600'
-                                    }`}></div>
-                                    <span className="font-medium">{tier}</span>
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        const newTiers = (field.value || []).filter((t: string) => t !== tier);
-                                        field.onChange(newTiers);
-                                      }}
-                                      className={`hover:bg-opacity-50 rounded-full w-4 h-4 flex items-center justify-center text-xs ${
-                                        tier === 'PLATINUM' ? 'text-purple-600 hover:bg-purple-200' :
-                                        tier === 'GOLD' ? 'text-yellow-600 hover:bg-yellow-200' :
-                                        tier === 'SILVER' ? 'text-gray-600 hover:bg-gray-200' :
-                                        'text-orange-600 hover:bg-orange-200'
-                                      }`}
-                                    >
-                                      ×
-                                    </button>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      <div className="space-y-2">
+                        <Label>Agent Tiers</Label>
+                        <Select onValueChange={(value) => {
+                          const currentTiers = simulationForm.getValues("scope.agentTier") || [];
+                          if (!currentTiers.includes(value)) {
+                            simulationForm.setValue("scope.agentTier", [...currentTiers, value]);
+                          }
+                        }}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select tiers" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {agentTiers.map((tier) => (
+                              <SelectItem key={tier} value={tier}>
+                                {tier}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
 
                       <div className="space-y-2">
                         <Label>Channels</Label>
@@ -527,61 +451,6 @@ export default function AnalyticsSimulation() {
                             ))}
                           </SelectContent>
                         </Select>
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {(simulationForm.watch("scope.channel") || []).map((channel: string) => (
-                            <div key={channel} className="bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded-md flex items-center gap-1">
-                              {channel}
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const currentChannels = simulationForm.getValues("scope.channel") || [];
-                                  simulationForm.setValue("scope.channel", currentChannels.filter((c: string) => c !== channel));
-                                }}
-                                className="text-blue-600 hover:text-blue-800 ml-1"
-                              >
-                                ×
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>Cohorts (Optional)</Label>
-                        <Select onValueChange={(value) => {
-                          const currentCohorts = simulationForm.getValues("scope.cohorts") || [];
-                          if (!currentCohorts.includes(value)) {
-                            simulationForm.setValue("scope.cohorts", [...currentCohorts, value]);
-                          }
-                        }}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select cohorts" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {["PREMIUM_CUSTOMERS", "FREQUENT_TRAVELERS", "BUSINESS_SEGMENT", "LEISURE_SEGMENT", "HIGH_VALUE_CUSTOMERS"].map((cohort) => (
-                              <SelectItem key={cohort} value={cohort}>
-                                {cohort}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {(simulationForm.watch("scope.cohorts") || []).map((cohort: string) => (
-                            <div key={cohort} className="bg-purple-100 text-purple-800 text-sm px-2 py-1 rounded-md flex items-center gap-1">
-                              {cohort}
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const currentCohorts = simulationForm.getValues("scope.cohorts") || [];
-                                  simulationForm.setValue("scope.cohorts", currentCohorts.filter((c: string) => c !== cohort));
-                                }}
-                                className="text-purple-600 hover:text-purple-800 ml-1"
-                              >
-                                ×
-                              </button>
-                            </div>
-                          ))}
-                        </div>
                       </div>
                     </div>
 

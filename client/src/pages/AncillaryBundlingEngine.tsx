@@ -52,7 +52,6 @@ import {
   Settings,
   Play,
   Calendar,
-  Gift, // Added Gift icon
 } from "lucide-react";
 import {
   Form as AntForm,
@@ -66,8 +65,6 @@ import {
   Modal,
   Table as AntTable,
   Tag,
-  Row, // Added Row
-  Col, // Added Col
 } from "antd";
 const { RangePicker } = DatePicker;
 import dayjs from "dayjs";
@@ -120,14 +117,6 @@ const bundleFormSchema = z.object({
   seasonCode: z.string().optional(),
   validDates: z.array(z.any()).length(2),
   inventoryCap: z.number().optional(),
-  // Added for the new form structure
-  description: z.string().optional(),
-  basePrice: z.number().optional(),
-  currency: z.enum(["USD", "EUR", "GBP", "INR"]).optional(),
-  discountPercentage: z.number().optional(),
-  validFrom: z.any().optional(),
-  validTo: z.any().optional(),
-  status: z.enum(["ACTIVE", "INACTIVE", "DRAFT"]).optional(),
 });
 
 const pricingRuleFormSchema = z.object({
@@ -243,9 +232,6 @@ export default function AncillaryBundlingEngine() {
       components: [],
       bundleType: "AIR_AIR",
       channel: "API",
-      // Default values for new fields
-      status: "ACTIVE",
-      priority: 1,
     },
   });
 
@@ -314,7 +300,7 @@ export default function AncillaryBundlingEngine() {
         const params = new URLSearchParams(pricingFilters);
         const url = `/api/bundles/pricing?${params}`;
         console.log("Full URL:", url);
-
+        
         const response = await fetch(url);
         console.log("Response status:", response.status);
         console.log("Response headers:", Object.fromEntries(response.headers.entries()));
@@ -380,8 +366,7 @@ export default function AncillaryBundlingEngine() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["bundles"] });
       setIsCreateBundleModalOpen(false);
-      antForm.resetFields(); // Resetting Ant Design form
-      bundleForm.reset(); // Resetting React Hook Form
+      antForm.resetFields();
       toast({ title: "Success", description: "Bundle created successfully" });
     },
     onError: (error: any) => {
@@ -930,19 +915,19 @@ export default function AncillaryBundlingEngine() {
                 <Plus className="h-4 w-4 mr-2" />
                 Add Bundle Pricing Rule
               </Button>
-              <Button
-                variant="outline"
+              <Button 
+                variant="outline" 
                 onClick={async () => {
                   try {
                     console.log("Testing API endpoints...");
                     const testResponse = await fetch('/api/test-bundles-pricing');
                     const testResult = await testResponse.text();
                     console.log("Test endpoint result:", testResult);
-
+                    
                     const pricingResponse = await fetch('/api/bundles/pricing');
                     const pricingResult = await pricingResponse.text();
                     console.log("Pricing endpoint result:", pricingResult);
-
+                    
                     toast({
                       title: "API Test",
                       description: `Test: ${testResponse.status}, Pricing: ${pricingResponse.status}`,
@@ -1020,286 +1005,179 @@ export default function AncillaryBundlingEngine() {
 
       {/* Create Bundle Modal */}
       <Modal
-        title={
-          <div className="flex items-center space-x-3 py-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-blue-600 rounded-xl flex items-center justify-center">
-              <Plus className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">Create New Bundle</h2>
-              <p className="text-sm text-gray-500 mt-0.5">
-                Design attractive package deals with multiple ancillary products
-              </p>
-            </div>
-          </div>
-        }
+        title="Create Bundle"
         open={isCreateBundleModalOpen}
         onCancel={() => setIsCreateBundleModalOpen(false)}
         footer={null}
-        width={900}
-        destroyOnClose
-        className="trendy-modal"
-        styles={{
-          header: {
-            backgroundColor: '#fafafa',
-            borderBottom: '1px solid #f0f0f0',
-            borderRadius: '8px 8px 0 0',
-            padding: '20px 24px'
-          },
-          body: {
-            padding: '0'
-          }
-        }}
+        width={800}
       >
-        <div className="bg-gray-50 px-6 py-4 border-b">
-          <div className="flex items-center space-x-4">
-            <div className="flex-1">
-              <div className="flex items-center space-x-2 text-sm text-gray-600 mb-2">
-                <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                  <span className="text-xs font-medium text-green-600">1</span>
-                </div>
-                <span>Bundle Details</span>
-                <div className="flex-1 h-px bg-gray-200"></div>
-                <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center">
-                  <span className="text-xs font-medium text-gray-400">2</span>
-                </div>
-                <span className="text-gray-400">Products & Pricing</span>
-                <div className="flex-1 h-px bg-gray-200"></div>
-                <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center">
-                  <span className="text-xs font-medium text-gray-400">3</span>
-                </div>
-                <span className="text-gray-400">Validation</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <AntForm
-          form={antForm} // Using Ant Design's form instance for the modal
+          form={antForm}
           onFinish={handleCreateBundle}
           layout="vertical"
-          className="p-6"
+          className="space-y-4"
         >
-          {/* Bundle Basic Info Section */}
-          <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                <Package className="w-4 h-4 text-green-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Bundle Information</h3>
-                <p className="text-sm text-gray-500">Basic details and identification for your bundle</p>
-              </div>
-            </div>
-
-            <Row gutter={20}>
-              <Col span={12}>
-                <AntForm.Item
-                  label={<span className="text-sm font-medium text-gray-700">Bundle Code</span>}
-                  name="bundleCode"
-                  rules={[
-                    { required: true, message: "Please enter bundle code" },
-                  ]}
-                >
-                  <AntInput
-                    placeholder="COMFORT_PLUS"
-                    className="h-10 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                  />
-                </AntForm.Item>
-              </Col>
-              <Col span={12}>
-                <AntForm.Item
-                  label={<span className="text-sm font-medium text-gray-700">Bundle Name</span>}
-                  name="bundleName"
-                  rules={[
-                    { required: true, message: "Please enter bundle name" },
-                  ]}
-                >
-                  <AntInput
-                    placeholder="Comfort Plus Package"
-                    className="h-10 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                  />
-                </AntForm.Item>
-              </Col>
-            </Row>
-
+          <div className="grid grid-cols-2 gap-4">
             <AntForm.Item
-              label={<span className="text-sm font-medium text-gray-700">Description</span>}
-              name="description"
-              rules={[{ required: true, message: "Please enter description" }]}
+              label="Bundle Code"
+              name="bundleCode"
+              rules={[{ required: true, message: "Bundle code is required" }]}
             >
-              <AntInput.TextArea
-                rows={3}
-                placeholder="A comprehensive package including premium seat, extra baggage, and priority services"
-                className="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              />
+              <AntInput placeholder="e.g., COMFORT_PACK" />
             </AntForm.Item>
-          </div>
-
-          {/* Products & Components Section */}
-          <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Gift className="w-4 h-4 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Bundle Components</h3>
-                <p className="text-sm text-gray-500">Select ancillary products to include in this bundle</p>
-              </div>
-            </div>
 
             <AntForm.Item
-              label={<span className="text-sm font-medium text-gray-700">Components</span>}
-              name="components"
-              rules={[
-                { required: true, message: "Please select bundle components" },
-              ]}
+              label="Bundle Type"
+              name="bundleType"
+              rules={[{ required: true, message: "Bundle type is required" }]}
             >
-              <AntSelect
-                mode="multiple"
-                placeholder="Select ancillary products"
-                showSearch
-                className="rounded-lg"
-                filterOption={(input, option) =>
-                  option?.label?.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                }
-              >
-                {/* Assuming availableAncillaries is fetched elsewhere or is a global constant */}
-                {/* For now, using componentOptions as a placeholder */}
-                {Object.values(componentOptions).flat().map((component) => (
-                  <AntSelect.Option
-                    key={component}
-                    value={component}
-                    label={component}
-                  >
-                    {component}
+              <AntSelect>
+                {bundleTypes.map((type) => (
+                  <AntSelect.Option key={type.value} value={type.value}>
+                    {getBundleTypeIcon(type.value)} {type.label}
                   </AntSelect.Option>
                 ))}
               </AntSelect>
             </AntForm.Item>
           </div>
 
-          {/* Pricing & Validity Section */}
-          <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                <DollarSign className="w-4 h-4 text-purple-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Pricing & Validity</h3>
-                <p className="text-sm text-gray-500">Configure bundle pricing and validity period</p>
-              </div>
-            </div>
+          <AntForm.Item
+            label="Bundle Name"
+            name="bundleName"
+            rules={[{ required: true, message: "Bundle name is required" }]}
+          >
+            <AntInput placeholder="e.g., Seat + Bag Comfort Pack" />
+          </AntForm.Item>
 
-            <Row gutter={20}>
-              <Col span={8}>
-                <AntForm.Item
-                  label={<span className="text-sm font-medium text-gray-700">Bundle Code</span>}
-                  name="bundleCode"
-                  rules={[{ required: true, message: "Bundle code is required" }]}
-                >
-                  <AntSelect placeholder="Select bundle">
-                    {bundles.map((bundle) => (
-                      <AntSelect.Option
-                        key={bundle.bundleCode}
-                        value={bundle.bundleCode}
-                      >
-                        {bundle.bundleCode} - {bundle.bundleName}
-                      </AntSelect.Option>
-                    ))}
-                  </AntSelect>
-                </AntForm.Item>
-              </Col>
-              <Col span={8}>
-                <AntForm.Item
-                  label={<span className="text-sm font-medium text-gray-700">Discount Type</span>}
-                  name="discountType"
-                  rules={[{ required: true, message: "Discount type is required" }]}
-                >
-                  <AntSelect>
-                    {discountTypes.map((type) => (
-                      <AntSelect.Option key={type} value={type}>
-                        {type}
-                      </AntSelect.Option>
-                    ))}
-                  </AntSelect>
-                </AntForm.Item>
-              </Col>
-              <Col span={8}>
-                <AntForm.Item
-                  label={<span className="text-sm font-medium text-gray-700">Discount Value</span>}
-                  name="discountValue"
-                  rules={[{ required: true, message: "Discount value is required" }]}
-                >
-                  <AntInputNumber
-                    placeholder="15"
-                    className="h-10 rounded-lg w-full"
-                    min={0}
-                  />
-                </AntForm.Item>
-              </Col>
-            </Row>
-            <Row gutter={20}>
-              <Col span={8}>
-                <AntForm.Item
-                  label={<span className="text-sm font-medium text-gray-700">Priority</span>}
-                  name="priority"
-                  rules={[{ required: true, message: "Priority is required" }]}
-                >
-                  <AntInputNumber
-                    placeholder="1"
-                    className="h-10 rounded-lg w-full"
-                    min={1}
-                  />
-                </AntForm.Item>
-              </Col>
-              <Col span={8}>
-                <AntForm.Item
-                  label={<span className="text-sm font-medium text-gray-700">Valid From</span>}
-                  name="validDates"
-                  rules={[{ required: true, message: "Valid period is required" }]}
-                >
-                  <RangePicker className="w-full h-10 rounded-lg" />
-                </AntForm.Item>
-              </Col>
-              <Col span={8}>
-                <AntForm.Item
-                  label={<span className="text-sm font-medium text-gray-700">Status</span>}
-                  name="status"
-                  initialValue="ACTIVE"
-                >
-                  <AntSelect className="rounded-lg">
-                    <AntSelect.Option value="ACTIVE">Active</AntSelect.Option>
-                    <AntSelect.Option value="INACTIVE">Inactive</AntSelect.Option>
-                    <AntSelect.Option value="DRAFT">Draft</AntSelect.Option>
-                  </AntSelect>
-                </AntForm.Item>
-              </Col>
-            </Row>
+          <AntForm.Item
+            label="Components"
+            name="components"
+            rules={[
+              { required: true, message: "At least one component is required" },
+            ]}
+          >
+            <AntSelect mode="multiple" placeholder="Select bundle components">
+              {Object.values(componentOptions)
+                .flat()
+                .map((component) => (
+                  <AntSelect.Option key={component} value={component}>
+                    {component}
+                  </AntSelect.Option>
+                ))}
+            </AntSelect>
+          </AntForm.Item>
+
+          <div className="grid grid-cols-2 gap-4">
+            <AntForm.Item
+              label="Channel"
+              name="channel"
+              rules={[{ required: true, message: "Channel is required" }]}
+            >
+              <AntSelect>
+                {channels.map((channel) => (
+                  <AntSelect.Option key={channel} value={channel}>
+                    {channel}
+                  </AntSelect.Option>
+                ))}
+              </AntSelect>
+            </AntForm.Item>
+
+            <AntForm.Item label="Season Code" name="seasonCode">
+              <AntInput placeholder="e.g., SUMMER2025" />
+            </AntForm.Item>
           </div>
 
-          {/* Action Buttons */}
-          <div className="bg-gray-50 px-6 py-4 border-t flex justify-between items-center rounded-b-lg">
-            <div className="text-sm text-gray-500">
-              All fields are required unless marked optional
-            </div>
-            <div className="flex gap-3">
-              <AntButton
-                onClick={() => setIsCreateBundleModalOpen(false)}
-                className="h-10 px-6 rounded-lg border-gray-300 hover:border-gray-400"
-              >
-                Cancel
-              </AntButton>
-              <AntButton
-                type="primary"
-                htmlType="submit"
-                className="h-10 px-8 rounded-lg bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 border-0 shadow-md"
-                icon={<Plus className="w-4 h-4" />}
-                loading={createBundleMutation.isPending}
-              >
-                Create Bundle
-              </AntButton>
-            </div>
+          <div className="grid grid-cols-2 gap-4">
+            <AntForm.Item
+              label="Point of Sale"
+              name="pos"
+              rules={[
+                { required: true, message: "At least one POS is required" },
+              ]}
+            >
+              <AntSelect mode="multiple" placeholder="Select countries">
+                {posList.map((pos) => (
+                  <AntSelect.Option key={pos} value={pos}>
+                    {pos}
+                  </AntSelect.Option>
+                ))}
+              </AntSelect>
+            </AntForm.Item>
+
+            <AntForm.Item
+              label="Agent Tier"
+              name="agentTier"
+              rules={[
+                {
+                  required: true,
+                  message: "At least one agent tier is required",
+                },
+              ]}
+            >
+              <AntSelect mode="multiple" placeholder="Select agent tiers">
+                {agentTiers.map((tier) => (
+                  <AntSelect.Option key={tier} value={tier}>
+                    {tier}
+                  </AntSelect.Option>
+                ))}
+              </AntSelect>
+            </AntForm.Item>
+          </div>
+
+          <AntForm.Item label="Cohort Codes (Optional)" name="cohortCodes">
+            <AntSelect
+              mode="tags"
+              placeholder="Enter cohort codes"
+              style={{ width: "100%" }}
+              dropdownStyle={{ zIndex: 9999 }}
+              getPopupContainer={(trigger) => trigger.parentElement}
+              virtual={false}
+              showSearch
+              filterOption={(input, option) =>
+                option?.children?.toLowerCase().indexOf(input.toLowerCase()) >=
+                  0 ||
+                option?.value?.toLowerCase().indexOf(input.toLowerCase()) >= 0
+              }
+            >
+              {availableCohorts.map((cohort: any) => (
+                <AntSelect.Option key={cohort.id} value={cohort.cohortName}>
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    <div className="cls-cohort-dropdwon">
+                      <p>{cohort.cohortName}</p>{" "}
+                      <span className="text-gray-600">{cohort.cohortCode}</span>
+                    </div>
+                  </div>
+                </AntSelect.Option>
+              ))}
+            </AntSelect>
+          </AntForm.Item>
+
+          <AntForm.Item label="Inventory Cap" name="inventoryCap">
+            <AntInputNumber
+              placeholder="Optional inventory limit"
+              style={{ width: "100%" }}
+            />
+          </AntForm.Item>
+
+          <AntForm.Item
+            label="Valid Period"
+            name="validDates"
+            rules={[{ required: true, message: "Valid period is required" }]}
+          >
+            <RangePicker style={{ width: "100%" }} />
+          </AntForm.Item>
+
+          <div className="flex justify-end gap-2">
+            <AntButton onClick={() => setIsCreateBundleModalOpen(false)}>
+              Cancel
+            </AntButton>
+            <AntButton
+              type="primary"
+              htmlType="submit"
+              loading={createBundleMutation.isPending}
+            >
+              Create Bundle
+            </AntButton>
           </div>
         </AntForm>
       </Modal>
@@ -2490,108 +2368,6 @@ export default function AncillaryBundlingEngine() {
             </CardContent>
           </Card>
         )}
-      </Modal>
-
-      {/* Edit Pricing Rule Modal */}
-      <Modal
-        title="Edit Pricing Rule"
-        open={isEditBundlePricingModalOpen}
-        onCancel={() => setIsEditBundlePricingModalOpen(false)}
-        footer={null}
-        width={600}
-      >
-        <AntForm
-          form={editPricingForm}
-          onFinish={handleEditPricing}
-          layout="vertical"
-          className="space-y-4"
-        >
-          <div className="grid grid-cols-2 gap-4">
-            <AntForm.Item
-              label="Rule Code"
-              name="ruleCode"
-              rules={[{ required: true, message: "Rule code is required" }]}
-            >
-              <AntInput placeholder="e.g., BUNDLE_DISC_TIERED" />
-            </AntForm.Item>
-
-            <AntForm.Item
-              label="Bundle Code"
-              name="bundleCode"
-              rules={[{ required: true, message: "Bundle code is required" }]}
-            >
-              <AntSelect placeholder="Select bundle">
-                {bundles.map((bundle) => (
-                  <AntSelect.Option
-                    key={bundle.bundleCode}
-                    value={bundle.bundleCode}
-                  >
-                    {bundle.bundleCode} - {bundle.bundleName}
-                  </AntSelect.Option>
-                ))}
-              </AntSelect>
-            </AntForm.Item>
-          </div>
-
-          <div className="grid grid-cols-3 gap-4">
-            <AntForm.Item
-              label="Discount Type"
-              name="discountType"
-              rules={[{ required: true, message: "Discount type is required" }]}
-            >
-              <AntSelect>
-                {discountTypes.map((type) => (
-                  <AntSelect.Option key={type} value={type}>
-                    {type}
-                  </AntSelect.Option>
-                ))}
-              </AntSelect>
-            </AntForm.Item>
-
-            <AntForm.Item
-              label="Discount Value"
-              name="discountValue"
-              rules={[
-                { required: true, message: "Discount value is required" },
-              ]}
-            >
-              <AntInputNumber placeholder="15" style={{ width: "100%" }} />
-            </AntForm.Item>
-
-            <AntForm.Item
-              label="Priority"
-              name="priority"
-              rules={[{ required: true, message: "Priority is required" }]}
-            >
-              <AntInputNumber
-                min={1}
-                placeholder="1"
-                style={{ width: "100%" }}
-              />
-            </AntForm.Item>
-          </div>
-
-          <AntForm.Item
-            label="Valid Period"
-            name="validDates"
-            rules={[{ required: true, message: "Valid period is required" }]}
-          >
-            <RangePicker style={{ width: "100%" }} />
-          </AntForm.Item>
-
-          <div className="flex justify-end gap-2">
-            <AntButton onClick={() => setIsEditBundlePricingModalOpen(false)}>
-              Cancel
-            </AntButton>
-            <AntButton
-              type="primary"
-              htmlType="submit"
-              loading={updatePricingMutation.isPending}
-            >
-              Update Rule
-            </AntButton>
-          </div>
-        </AntForm>
       </Modal>
     </div>
   );

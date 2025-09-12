@@ -10,8 +10,6 @@ import {
   AlertCircle,
   Eye,
   Edit,
-  DollarSign,
-  Calendar,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -701,229 +699,375 @@ export default function NegotiatedFareManager() {
           onFinish={onSubmit}
           autoComplete="off"
         >
-          {/* Fare Basic Info Section */}
-          <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
-                <Handshake className="w-4 h-4 text-indigo-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Fare Information</h3>
-                <p className="text-sm text-gray-500">Basic details and identification for the negotiated fare</p>
-              </div>
-            </div>
-
-            <Row gutter={20}>
-              <Col span={8}>
-                <AntForm.Item
-                  label={<span className="text-sm font-medium text-gray-700">Airline Code</span>}
-                  name="airlineCode"
-                  rules={[
-                    { required: true, message: "Please enter airline code" },
-                    { len: 2, message: "Airline code must be 2 characters" },
-                  ]}
-                >
-                  <AntInput
-                    placeholder="AA"
-                    maxLength={2}
-                    className="h-10 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                  />
-                </AntForm.Item>
-              </Col>
-              <Col span={8}>
-                <AntForm.Item
-                  label={<span className="text-sm font-medium text-gray-700">Fare Code</span>}
-                  name="fareCode"
-                  rules={[{ required: true, message: "Please enter fare code" }]}
-                >
-                  <AntInput
-                    placeholder="NEGO001"
-                    className="h-10 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                  />
-                </AntForm.Item>
-              </Col>
-              <Col span={8}>
-                <AntForm.Item
-                  label={<span className="text-sm font-medium text-gray-700">Currency</span>}
-                  name="currency"
-                  rules={[{ required: true, message: "Please select currency" }]}
-                >
-                  <AntSelect placeholder="Select currency" className="rounded-lg">
-                    {currencies.map((currency) => (
-                      <AntSelect.Option key={currency} value={currency}>
-                        {currency}
-                      </AntSelect.Option>
-                    ))}
-                  </AntSelect>
-                </AntForm.Item>
-              </Col>
-            </Row>
-          </div>
-
-          {/* Pricing & Discount Section */}
-          <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                <DollarSign className="w-4 h-4 text-green-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Pricing & Discount</h3>
-                <p className="text-sm text-gray-500">Configure fare pricing and discount terms</p>
-              </div>
-            </div>
-
-            <Row gutter={20}>
-              <Col span={12}>
-                <AntForm.Item
-                  label={<span className="text-sm font-medium text-gray-700">Base Fare</span>}
-                  name="baseNetFare"
-                  rules={[{ required: true, message: "Please enter base fare" }]}
-                >
-                  <AntInputNumber
-                    placeholder="299.00"
-                    className="h-10 rounded-lg w-full"
-                    min={0}
-                    step={0.01}
-                    prefix="$"
-                  />
-                </AntForm.Item>
-              </Col>
-              <Col span={12}>
-                <AntForm.Item
-                  label={<span className="text-sm font-medium text-gray-700">Discount Percentage</span>}
-                  name="discountPercentage"
-                  rules={[
-                    { required: true, message: "Please enter discount percentage" },
-                  ]}
-                >
-                  <AntInputNumber
-                    placeholder="15"
-                    className="h-10 rounded-lg w-full"
-                    min={0}
-                    max={100}
-                    suffix="%"
-                  />
-                </AntForm.Item>
-              </Col>
-            </Row>
-          </div>
-
-          {/* Validity & Status Section */}
-          <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                <Calendar className="w-4 h-4 text-purple-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Validity & Status</h3>
-                <p className="text-sm text-gray-500">Set validity period and fare status</p>
-              </div>
-            </div>
-
-            <Row gutter={20}>
-              <Col span={8}>
-                <AntForm.Item
-                  label={<span className="text-sm font-medium text-gray-700">Booking Start Date</span>}
-                  name="bookingStartDate"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please select booking start date",
-                    },
-                  ]}
-                >
-                  <DatePicker className="w-full h-10 rounded-lg" />
-                </AntForm.Item>
-              </Col>
-              <Col span={8}>
-                <AntForm.Item
-                  label={<span className="text-sm font-medium text-gray-700">Booking End Date</span>}
-                  name="bookingEndDate"
-                  rules={[
-                    { required: true, message: "Please select booking end date" },
-                  ]}
-                >
-                  <DatePicker className="w-full h-10 rounded-lg" />
-                </AntForm.Item>
-              </Col>
-              <Col span={8}>
-                <AntForm.Item
-                  label={<span className="text-sm font-medium text-gray-700">Travel Start Date</span>}
-                  name="travelStartDate"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please select travel start date",
-                    },
-                  ]}
-                >
-                  <DatePicker className="w-full h-10 rounded-lg" />
-                </AntForm.Item>
-              </Col>
-            </Row>
-
-            <Row gutter={20}>
-              <Col span={12}>
-                <AntForm.Item
-                  label={<span className="text-sm font-medium text-gray-700">Travel End Date</span>}
-                  name="travelEndDate"
-                  rules={[
-                    { required: true, message: "Please select travel end date" },
-                  ]}
-                >
-                  <DatePicker className="w-full h-10 rounded-lg" />
-                </AntForm.Item>
-              </Col>
-              <Col span={12}>
-                <AntForm.Item
-                  label={<span className="text-sm font-medium text-gray-700">Status</span>}
-                  name="status"
-                  initialValue="DRAFT"
-                >
-                  <AntSelect className="rounded-lg">
-                    <AntSelect.Option value="ACTIVE">Active</AntSelect.Option>
-                    <AntSelect.Option value="INACTIVE">Inactive</AntSelect.Option>
-                    <AntSelect.Option value="DRAFT">Draft</AntSelect.Option>
-                  </AntSelect>
-                </AntForm.Item>
-              </Col>
-            </Row>
-
-            <AntForm.Item
-              label={<span className="text-sm font-medium text-gray-700">Notes</span>}
-              name="remarks"
-            >
-              <AntInput.TextArea
-                rows={4}
-                placeholder="Additional notes about this negotiated fare..."
-                className="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              />
-            </AntForm.Item>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="bg-gray-50 px-6 py-4 border-t flex justify-between items-center rounded-b-lg">
-            <div className="text-sm text-gray-500">
-              All pricing information will be validated before activation
-            </div>
-            <div className="flex gap-3">
-              <AntButton
-                onClick={() => setIsCreateModalOpen(false)}
-                className="h-10 px-6 rounded-lg border-gray-300 hover:border-gray-400"
+          <Row gutter={16}>
+            <Col span={8}>
+              <AntForm.Item
+                label="Airline Code"
+                name="airlineCode"
+                rules={[
+                  { required: true, message: "Please enter airline code" },
+                  { len: 2, message: "Airline code must be 2 characters" },
+                ]}
               >
+                <AntInput placeholder="AA" maxLength={2} />
+              </AntForm.Item>
+            </Col>
+            <Col span={8}>
+              <AntForm.Item
+                label="Fare Code"
+                name="fareCode"
+                rules={[{ required: true, message: "Please enter fare code" }]}
+              >
+                <AntInput placeholder="NEGO001" />
+              </AntForm.Item>
+            </Col>
+            <Col span={8}>
+              <AntForm.Item
+                label="Currency"
+                name="currency"
+                rules={[{ required: true, message: "Please select currency" }]}
+              >
+                <AntSelect placeholder="Select currency">
+                  {currencies.map((currency) => (
+                    <AntSelect.Option key={currency} value={currency}>
+                      {currency}
+                    </AntSelect.Option>
+                  ))}
+                </AntSelect>
+              </AntForm.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={8}>
+              <AntForm.Item
+                label="Origin"
+                name="origin"
+                rules={[
+                  { required: true, message: "Please enter origin" },
+                  { len: 3, message: "Origin must be 3 characters" },
+                ]}
+              >
+                <AntInput placeholder="NYC" maxLength={3} />
+              </AntForm.Item>
+            </Col>
+            <Col span={8}>
+              <AntForm.Item
+                label="Destination"
+                name="destination"
+                rules={[
+                  { required: true, message: "Please enter destination" },
+                  { len: 3, message: "Destination must be 3 characters" },
+                ]}
+              >
+                <AntInput placeholder="LAX" maxLength={3} />
+              </AntForm.Item>
+            </Col>
+            <Col span={8}>
+              <AntForm.Item
+                label="Base Net Fare"
+                name="baseNetFare"
+                rules={[{ required: true, message: "Please enter base fare" }]}
+              >
+                <InputNumber
+                  placeholder="299.00"
+                  min={0}
+                  step={0.01}
+                  style={{ width: "100%" }}
+                />
+              </AntForm.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <AntForm.Item
+                label="Trip Type"
+                name="tripType"
+                rules={[{ required: true, message: "Please select trip type" }]}
+              >
+                <AntSelect placeholder="Select trip type">
+                  <AntSelect.Option value="ONE_WAY">One Way</AntSelect.Option>
+                  <AntSelect.Option value="ROUND_TRIP">
+                    Round Trip
+                  </AntSelect.Option>
+                  <AntSelect.Option value="MULTI_CITY">
+                    Multi City
+                  </AntSelect.Option>
+                </AntSelect>
+              </AntForm.Item>
+            </Col>
+            <Col span={12}>
+              <AntForm.Item
+                label="Cabin Class"
+                name="cabinClass"
+                rules={[
+                  { required: true, message: "Please select cabin class" },
+                ]}
+              >
+                <AntSelect placeholder="Select cabin class">
+                  <AntSelect.Option value="ECONOMY">Economy</AntSelect.Option>
+                  <AntSelect.Option value="PREMIUM_ECONOMY">
+                    Premium Economy
+                  </AntSelect.Option>
+                  <AntSelect.Option value="BUSINESS">Business</AntSelect.Option>
+                  <AntSelect.Option value="FIRST">First</AntSelect.Option>
+                </AntSelect>
+              </AntForm.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <AntForm.Item
+                label="Booking Start Date"
+                name="bookingStartDate"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please select booking start date",
+                  },
+                ]}
+              >
+                <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
+              </AntForm.Item>
+            </Col>
+            <Col span={12}>
+              <AntForm.Item
+                label="Booking End Date"
+                name="bookingEndDate"
+                rules={[
+                  { required: true, message: "Please select booking end date" },
+                ]}
+              >
+                <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
+              </AntForm.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <AntForm.Item
+                label="Travel Start Date"
+                name="travelStartDate"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please select travel start date",
+                  },
+                ]}
+              >
+                <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
+              </AntForm.Item>
+            </Col>
+            <Col span={12}>
+              <AntForm.Item
+                label="Travel End Date"
+                name="travelEndDate"
+                rules={[
+                  { required: true, message: "Please select travel end date" },
+                ]}
+              >
+                <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
+              </AntForm.Item>
+            </Col>
+          </Row>
+
+          <AntForm.Item
+            label="Point of Sale (POS)"
+            name="pos"
+            rules={[
+              { required: true, message: "Please select at least one POS" },
+            ]}
+          >
+            <AntCheckbox.Group style={{ width: "100%" }}>
+              <Row gutter={[16, 8]}>
+                {countriesData.map((country) => (
+                  <Col span={6} key={country.code}>
+                    <AntCheckbox
+                      value={country.code}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        padding: "4px 8px",
+                        borderRadius: "4px",
+                        border: "1px solid #d9d9d9",
+                        marginBottom: "8px",
+                        fontSize: "14px",
+                      }}
+                    >
+                      <span style={{ fontWeight: "500" }}>{country.code}</span>
+                      <span
+                        style={{
+                          fontSize: "12px",
+                          color: "#666",
+                          marginLeft: "4px",
+                        }}
+                      >
+                        {country.name}
+                      </span>
+                    </AntCheckbox>
+                  </Col>
+                ))}
+              </Row>
+            </AntCheckbox.Group>
+          </AntForm.Item>
+
+          <AntForm.Item
+            label="Eligible Agent Tiers"
+            name="eligibleAgentTiers"
+            rules={[
+              { required: true, message: "Please select at least one tier" },
+            ]}
+          >
+            <AntCheckbox.Group style={{ width: "100%" }}>
+              <Row gutter={[16, 8]}>
+                {agentTiers.map((tier) => (
+                  <Col span={6} key={tier}>
+                    <AntCheckbox
+                      value={tier}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        padding: "4px 8px",
+                        borderRadius: "4px",
+                        border: "1px solid #d9d9d9",
+                        marginBottom: "8px",
+                        fontSize: "14px",
+                      }}
+                    >
+                      <span style={{ fontWeight: "500" }}>{tier}</span>
+                    </AntCheckbox>
+                  </Col>
+                ))}
+              </Row>
+            </AntCheckbox.Group>
+          </AntForm.Item>
+
+          <Row gutter={16}>
+            <Col span={8}>
+              <AntForm.Item label="Seat Allotment" name="seatAllotment">
+                <InputNumber
+                  placeholder="50"
+                  min={0}
+                  style={{ width: "100%" }}
+                />
+              </AntForm.Item>
+            </Col>
+            <Col span={8}>
+              <AntForm.Item label="Min Stay (days)" name="minStay">
+                <InputNumber
+                  placeholder="7"
+                  min={0}
+                  style={{ width: "100%" }}
+                />
+              </AntForm.Item>
+            </Col>
+            <Col span={8}>
+              <AntForm.Item label="Max Stay (days)" name="maxStay">
+                <InputNumber
+                  placeholder="30"
+                  min={0}
+                  style={{ width: "100%" }}
+                />
+              </AntForm.Item>
+            </Col>
+          </Row>
+
+          <AntForm.Item label="Blackout Dates (Optional)" name="blackoutDates">
+            <DatePicker.RangePicker
+              multiple
+              style={{ width: "100%" }}
+              placeholder={["Select blackout dates", ""]}
+              format="DD/MM/YYYY"
+            />
+          </AntForm.Item>
+
+          <AntForm.Item
+            label="Eligible Cohorts (Optional)"
+            name="eligibleCohorts"
+            tooltip="Select cohorts that are eligible for this fare. Only users matching these cohorts will see this fare."
+          >
+            <AntSelect
+              mode="multiple"
+              placeholder={
+                isCohortsLoading
+                  ? "Loading cohorts..."
+                  : availableCohorts.length === 0
+                    ? "No cohorts available"
+                    : "Select cohorts"
+              }
+              style={{ width: "100%" }}
+              dropdownStyle={{ zIndex: 9999 }}
+              getPopupContainer={(trigger) => trigger.parentElement}
+              virtual={false}
+              showSearch
+              loading={isCohortsLoading}
+              disabled={isCohortsLoading}
+              notFoundContent={
+                isCohortsLoading ? "Loading..." : "No cohorts found"
+              }
+              filterOption={(input, option) => {
+                const label =
+                  option?.children?.props?.children?.[0]?.props?.children ||
+                  option?.value ||
+                  "";
+                const code =
+                  option?.children?.props?.children?.[1]?.props?.children ||
+                  option?.value ||
+                  "";
+                return (
+                  label.toLowerCase().indexOf(input.toLowerCase()) >= 0 ||
+                  code.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                );
+              }}
+            >
+              {availableCohorts.map((cohort: any) => (
+                <AntSelect.Option key={cohort.id} value={cohort.code}>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      padding: "2px 0",
+                    }}
+                  >
+                    <div className="cls-cohort-dropdwon">
+                      <p>{cohort.cohortName}</p>{" "}
+                      <span className="text-gray-600">{cohort.cohortCode}</span>
+                    </div>
+                    {/* <span style={{ fontSize: "12px", color: "#666" }}>
+                      Code: {cohort.cohortCode} • Name: {cohort.cohortName}
+                    </span> */}
+                  </div>
+                </AntSelect.Option>
+              ))}
+            </AntSelect>
+          </AntForm.Item>
+
+          <AntForm.Item label="Remarks" name="remarks">
+            <AntInput.TextArea placeholder="Additional notes..." rows={3} />
+          </AntForm.Item>
+
+          <AntForm.Item>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "8px",
+              }}
+            >
+              <AntButton onClick={() => setIsCreateModalOpen(false)}>
                 Cancel
               </AntButton>
               <AntButton
                 type="primary"
                 htmlType="submit"
                 loading={createFareMutation.isPending}
-                className="h-10 px-8 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 border-0 shadow-md"
-                icon={<Plus className="w-4 h-4" />}
               >
                 {createFareMutation.isPending ? "Creating..." : "Create Fare"}
               </AntButton>
             </div>
-          </div>
+          </AntForm.Item>
         </AntForm>
       </Modal>
 
@@ -1305,219 +1449,366 @@ export default function NegotiatedFareManager() {
           onFinish={onEditSubmit}
           autoComplete="off"
         >
-          {/* Fare Basic Info Section */}
-          <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
-                <Handshake className="w-4 h-4 text-indigo-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Fare Information</h3>
-                <p className="text-sm text-gray-500">Basic details and identification for the negotiated fare</p>
-              </div>
-            </div>
+          <Row gutter={16}>
+            <Col span={8}>
+              <AntForm.Item
+                label="Airline Code"
+                name="airlineCode"
+                rules={[
+                  { required: true, message: "Please enter airline code" },
+                  { len: 2, message: "Airline code must be 2 characters" },
+                ]}
+              >
+                <AntInput placeholder="AA" maxLength={2} />
+              </AntForm.Item>
+            </Col>
+            <Col span={8}>
+              <AntForm.Item
+                label="Fare Code"
+                name="fareCode"
+                rules={[{ required: true, message: "Please enter fare code" }]}
+              >
+                <AntInput placeholder="NEGO001" />
+              </AntForm.Item>
+            </Col>
+            <Col span={8}>
+              <AntForm.Item
+                label="Currency"
+                name="currency"
+                rules={[{ required: true, message: "Please select currency" }]}
+              >
+                <AntSelect placeholder="Select currency">
+                  {currencies.map((currency) => (
+                    <AntSelect.Option key={currency} value={currency}>
+                      {currency}
+                    </AntSelect.Option>
+                  ))}
+                </AntSelect>
+              </AntForm.Item>
+            </Col>
+          </Row>
 
-            <Row gutter={20}>
-              <Col span={8}>
-                <AntForm.Item
-                  label={<span className="text-sm font-medium text-gray-700">Airline Code</span>}
-                  name="airlineCode"
-                  rules={[
-                    { required: true, message: "Please enter airline code" },
-                    { len: 2, message: "Airline code must be 2 characters" },
-                  ]}
-                >
-                  <AntInput
-                    placeholder="AA"
-                    maxLength={2}
-                    className="h-10 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                  />
-                </AntForm.Item>
-              </Col>
-              <Col span={8}>
-                <AntForm.Item
-                  label={<span className="text-sm font-medium text-gray-700">Fare Code</span>}
-                  name="fareCode"
-                  rules={[{ required: true, message: "Please enter fare code" }]}
-                >
-                  <AntInput
-                    placeholder="NEGO001"
-                    className="h-10 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                  />
-                </AntForm.Item>
-              </Col>
-              <Col span={8}>
-                <AntForm.Item
-                  label={<span className="text-sm font-medium text-gray-700">Currency</span>}
-                  name="currency"
-                  rules={[{ required: true, message: "Please select currency" }]}
-                >
-                  <AntSelect placeholder="Select currency" className="rounded-lg">
-                    {currencies.map((currency) => (
-                      <AntSelect.Option key={currency} value={currency}>
-                        {currency}
-                      </AntSelect.Option>
-                    ))}
-                  </AntSelect>
-                </AntForm.Item>
-              </Col>
-            </Row>
-          </div>
+          <Row gutter={16}>
+            <Col span={8}>
+              <AntForm.Item
+                label="Origin"
+                name="origin"
+                rules={[
+                  { required: true, message: "Please enter origin" },
+                  { len: 3, message: "Origin must be 3 characters" },
+                ]}
+              >
+                <AntInput placeholder="NYC" maxLength={3} />
+              </AntForm.Item>
+            </Col>
+            <Col span={8}>
+              <AntForm.Item
+                label="Destination"
+                name="destination"
+                rules={[
+                  { required: true, message: "Please enter destination" },
+                  { len: 3, message: "Destination must be 3 characters" },
+                ]}
+              >
+                <AntInput placeholder="LAX" maxLength={3} />
+              </AntForm.Item>
+            </Col>
+            <Col span={8}>
+              <AntForm.Item
+                label="Base Net Fare"
+                name="baseNetFare"
+                rules={[{ required: true, message: "Please enter base fare" }]}
+              >
+                <InputNumber
+                  placeholder="299.00"
+                  min={0}
+                  step={0.01}
+                  style={{ width: "100%" }}
+                />
+              </AntForm.Item>
+            </Col>
+          </Row>
 
-          {/* Pricing & Discount Section */}
-          <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                <DollarSign className="w-4 h-4 text-green-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Pricing & Discount</h3>
-                <p className="text-sm text-gray-500">Configure fare pricing and discount terms</p>
-              </div>
-            </div>
+          <Row gutter={16}>
+            <Col span={12}>
+              <AntForm.Item
+                label="Trip Type"
+                name="tripType"
+                rules={[{ required: true, message: "Please select trip type" }]}
+              >
+                <AntSelect placeholder="Select trip type">
+                  <AntSelect.Option value="ONE_WAY">One Way</AntSelect.Option>
+                  <AntSelect.Option value="ROUND_TRIP">
+                    Round Trip
+                  </AntSelect.Option>
+                  <AntSelect.Option value="MULTI_CITY">
+                    Multi City
+                  </AntSelect.Option>
+                </AntSelect>
+              </AntForm.Item>
+            </Col>
+            <Col span={12}>
+              <AntForm.Item
+                label="Cabin Class"
+                name="cabinClass"
+                rules={[
+                  { required: true, message: "Please select cabin class" },
+                ]}
+              >
+                <AntSelect placeholder="Select cabin class">
+                  <AntSelect.Option value="ECONOMY">Economy</AntSelect.Option>
+                  <AntSelect.Option value="PREMIUM_ECONOMY">
+                    Premium Economy
+                  </AntSelect.Option>
+                  <AntSelect.Option value="BUSINESS">Business</AntSelect.Option>
+                  <AntSelect.Option value="FIRST">First</AntSelect.Option>
+                </AntSelect>
+              </AntForm.Item>
+            </Col>
+          </Row>
 
-            <Row gutter={20}>
-              <Col span={12}>
-                <AntForm.Item
-                  label={<span className="text-sm font-medium text-gray-700">Base Net Fare</span>}
-                  name="baseNetFare"
-                  rules={[{ required: true, message: "Please enter base fare" }]}
-                >
-                  <AntInputNumber
-                    placeholder="299.00"
-                    className="h-10 rounded-lg w-full"
-                    min={0}
-                    step={0.01}
-                    prefix="$"
-                  />
-                </AntForm.Item>
-              </Col>
-              <Col span={12}>
-                <AntForm.Item
-                  label={<span className="text-sm font-medium text-gray-700">Discount Percentage</span>}
-                  name="discountPercentage"
-                  rules={[
-                    { required: true, message: "Please enter discount percentage" },
-                  ]}
-                >
-                  <AntInputNumber
-                    placeholder="15"
-                    className="h-10 rounded-lg w-full"
-                    min={0}
-                    max={100}
-                    suffix="%"
-                  />
-                </AntForm.Item>
-              </Col>
-            </Row>
-          </div>
+          <Row gutter={16}>
+            <Col span={12}>
+              <AntForm.Item
+                label="Booking Start Date"
+                name="bookingStartDate"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please select booking start date",
+                  },
+                ]}
+              >
+                <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
+              </AntForm.Item>
+            </Col>
+            <Col span={12}>
+              <AntForm.Item
+                label="Booking End Date"
+                name="bookingEndDate"
+                rules={[
+                  { required: true, message: "Please select booking end date" },
+                ]}
+              >
+                <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
+              </AntForm.Item>
+            </Col>
+          </Row>
 
-          {/* Validity & Status Section */}
-          <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                <Calendar className="w-4 h-4 text-purple-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Validity & Status</h3>
-                <p className="text-sm text-gray-500">Set validity period and fare status</p>
-              </div>
-            </div>
+          <Row gutter={16}>
+            <Col span={12}>
+              <AntForm.Item
+                label="Travel Start Date"
+                name="travelStartDate"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please select travel start date",
+                  },
+                ]}
+              >
+                <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
+              </AntForm.Item>
+            </Col>
+            <Col span={12}>
+              <AntForm.Item
+                label="Travel End Date"
+                name="travelEndDate"
+                rules={[
+                  { required: true, message: "Please select travel end date" },
+                ]}
+              >
+                <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
+              </AntForm.Item>
+            </Col>
+          </Row>
 
-            <Row gutter={20}>
-              <Col span={8}>
-                <AntForm.Item
-                  label={<span className="text-sm font-medium text-gray-700">Booking Start Date</span>}
-                  name="bookingStartDate"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please select booking start date",
-                    },
-                  ]}
-                >
-                  <DatePicker className="w-full h-10 rounded-lg" />
-                </AntForm.Item>
-              </Col>
-              <Col span={8}>
-                <AntForm.Item
-                  label={<span className="text-sm font-medium text-gray-700">Booking End Date</span>}
-                  name="bookingEndDate"
-                  rules={[
-                    { required: true, message: "Please select booking end date" },
-                  ]}
-                >
-                  <DatePicker className="w-full h-10 rounded-lg" />
-                </AntForm.Item>
-              </Col>
-              <Col span={8}>
-                <AntForm.Item
-                  label={<span className="text-sm font-medium text-gray-700">Travel Start Date</span>}
-                  name="travelStartDate"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please select travel start date",
-                    },
-                  ]}
-                >
-                  <DatePicker className="w-full h-10 rounded-lg" />
-                </AntForm.Item>
-              </Col>
-            </Row>
+          <AntForm.Item
+            label="Point of Sale (POS)"
+            name="pos"
+            rules={[
+              { required: true, message: "Please select at least one POS" },
+            ]}
+          >
+            <AntCheckbox.Group style={{ width: "100%" }}>
+              <Row gutter={[16, 8]}>
+                {countriesData.map((country) => (
+                  <Col span={6} key={country.code}>
+                    <AntCheckbox
+                      value={country.code}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        padding: "4px 8px",
+                        borderRadius: "4px",
+                        border: "1px solid #d9d9d9",
+                        marginBottom: "8px",
+                        fontSize: "14px",
+                      }}
+                    >
+                      <span style={{ fontWeight: "500" }}>{country.code}</span>
+                      <span
+                        style={{
+                          fontSize: "12px",
+                          color: "#666",
+                          marginLeft: "4px",
+                        }}
+                      >
+                        {country.name}
+                      </span>
+                    </AntCheckbox>
+                  </Col>
+                ))}
+              </Row>
+            </AntCheckbox.Group>
+          </AntForm.Item>
 
-            <Row gutter={20}>
-              <Col span={12}>
-                <AntForm.Item
-                  label={<span className="text-sm font-medium text-gray-700">Travel End Date</span>}
-                  name="travelEndDate"
-                  rules={[
-                    { required: true, message: "Please select travel end date" },
-                  ]}
-                >
-                  <DatePicker className="w-full h-10 rounded-lg" />
-                </AntForm.Item>
-              </Col>
-              <Col span={12}>
-                <AntForm.Item
-                  label={<span className="text-sm font-medium text-gray-700">Status</span>}
-                  name="status"
-                  initialValue="DRAFT"
-                >
-                  <AntSelect className="rounded-lg">
-                    <AntSelect.Option value="ACTIVE">Active</AntSelect.Option>
-                    <AntSelect.Option value="INACTIVE">Inactive</AntSelect.Option>
-                    <AntSelect.Option value="DRAFT">Draft</AntSelect.Option>
-                  </AntSelect>
-                </AntForm.Item>
-              </Col>
-            </Row>
+          <AntForm.Item
+            label="Eligible Agent Tiers"
+            name="eligibleAgentTiers"
+            rules={[
+              { required: true, message: "Please select at least one tier" },
+            ]}
+          >
+            <AntCheckbox.Group style={{ width: "100%" }}>
+              <Row gutter={[16, 8]}>
+                {agentTiers.map((tier) => (
+                  <Col span={6} key={tier}>
+                    <AntCheckbox
+                      value={tier}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        padding: "4px 8px",
+                        borderRadius: "4px",
+                        border: "1px solid #d9d9d9",
+                        marginBottom: "8px",
+                        fontSize: "14px",
+                      }}
+                    >
+                      <span style={{ fontWeight: "500" }}>{tier}</span>
+                    </AntCheckbox>
+                  </Col>
+                ))}
+              </Row>
+            </AntCheckbox.Group>
+          </AntForm.Item>
 
-            <AntForm.Item
-              label={<span className="text-sm font-medium text-gray-700">Remarks</span>}
-              name="remarks"
+          <Row gutter={16}>
+            <Col span={8}>
+              <AntForm.Item label="Seat Allotment" name="seatAllotment">
+                <InputNumber
+                  placeholder="50"
+                  min={0}
+                  style={{ width: "100%" }}
+                />
+              </AntForm.Item>
+            </Col>
+            <Col span={8}>
+              <AntForm.Item label="Min Stay (days)" name="minStay">
+                <InputNumber
+                  placeholder="7"
+                  min={0}
+                  style={{ width: "100%" }}
+                />
+              </AntForm.Item>
+            </Col>
+            <Col span={8}>
+              <AntForm.Item label="Max Stay (days)" name="maxStay">
+                <InputNumber
+                  placeholder="30"
+                  min={0}
+                  style={{ width: "100%" }}
+                />
+              </AntForm.Item>
+            </Col>
+          </Row>
+
+          <AntForm.Item label="Blackout Dates (Optional)" name="blackoutDates">
+            <DatePicker.RangePicker
+              multiple
+              style={{ width: "100%" }}
+              placeholder={["Select blackout dates", ""]}
+              format="DD/MM/YYYY"
+            />
+          </AntForm.Item>
+
+          <AntForm.Item
+            label="Eligible Cohorts (Optional)"
+            name="eligibleCohorts"
+            tooltip="Select cohorts that are eligible for this fare. Only users matching these cohorts will see this fare."
+          >
+            <AntSelect
+              mode="multiple"
+              placeholder={
+                isCohortsLoading
+                  ? "Loading cohorts..."
+                  : availableCohorts.length === 0
+                    ? "No cohorts available"
+                    : "Select cohorts"
+              }
+              style={{ width: "100%" }}
+              dropdownStyle={{ zIndex: 9999 }}
+              getPopupContainer={(trigger) => trigger.parentElement}
+              virtual={false}
+              showSearch
+              loading={isCohortsLoading}
+              disabled={isCohortsLoading}
+              notFoundContent={
+                isCohortsLoading ? "Loading..." : "No cohorts found"
+              }
+              filterOption={(input, option) => {
+                const label =
+                  option?.children?.props?.children?.[0]?.props?.children ||
+                  option?.value ||
+                  "";
+                const code =
+                  option?.children?.props?.children?.[1]?.props?.children ||
+                  option?.value ||
+                  "";
+                return (
+                  label.toLowerCase().indexOf(input.toLowerCase()) >= 0 ||
+                  code.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                );
+              }}
             >
-              <AntInput.TextArea
-                rows={4}
-                placeholder="Additional notes about this negotiated fare..."
-                className="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              />
-            </AntForm.Item>
-          </div>
+              {availableCohorts.map((cohort: any) => (
+                <AntSelect.Option key={cohort.id} value={cohort.cohortName}>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      padding: "2px 0",
+                    }}
+                  >
+                    <div className="cls-cohort-dropdwon">
+                      <p>{cohort.cohortName}</p>{" "}
+                      <span className="text-gray-600">{cohort.cohortCode}</span>
+                    </div>
+                  </div>
+                </AntSelect.Option>
+              ))}
+            </AntSelect>
+          </AntForm.Item>
 
-          {/* Action Buttons */}
-          <div className="bg-gray-50 px-6 py-4 border-t flex justify-between items-center rounded-b-lg">
-            <div className="text-sm text-gray-500">
-              All pricing information will be validated before activation
-            </div>
-            <div className="flex gap-3">
+          <AntForm.Item label="Remarks" name="remarks">
+            <AntInput.TextArea placeholder="Additional notes..." rows={3} />
+          </AntForm.Item>
+
+          <AntForm.Item>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "8px",
+              }}
+            >
               <AntButton
                 onClick={() => {
                   setIsEditModalOpen(false);
                   setSelectedFare(null);
                   editForm.resetFields();
                 }}
-                className="h-10 px-6 rounded-lg border-gray-300 hover:border-gray-400"
               >
                 Cancel
               </AntButton>
@@ -1525,12 +1816,11 @@ export default function NegotiatedFareManager() {
                 type="primary"
                 htmlType="submit"
                 loading={updateFareMutation.isPending}
-                className="h-10 px-8 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 border-0 shadow-md"
               >
                 {updateFareMutation.isPending ? "Updating..." : "Update Fare"}
               </AntButton>
             </div>
-          </div>
+          </AntForm.Item>
         </AntForm>
       </Modal>
     </div>

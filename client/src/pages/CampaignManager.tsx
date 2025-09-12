@@ -1658,98 +1658,133 @@ export default function CampaignManager() {
         width={900}
         className="email-template-modal"
       >
-        <div className="space-y-4">
-          {templateGenerationState.email.templates.map((template, index) => (
-            <AntCard
-              key={index}
-              size="small"
-              className={`border-l-4 transition-all ${
-                selectedEmailTemplate?.subject === template.subject 
-                  ? 'border-l-blue-600 bg-blue-50' 
-                  : 'border-l-blue-300 hover:border-l-blue-500'
-              }`}
+        {templateGenerationState.email.templates.length === 0 ? (
+          <div className="text-center py-12">
+            <Mail className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No Email Templates Generated</h3>
+            <p className="text-gray-500 mb-4">Generate AI-powered email templates based on your campaign details</p>
+            <AntButton
+              type="primary"
+              size="large"
+              icon={<MessageSquare className="w-4 h-4" />}
+              onClick={() => handleGenerateTemplate('email')}
+              loading={templateGenerationState.email.loading}
             >
-              <div className="space-y-4">
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Badge color="blue" text={`Template ${index + 1}`} />
-                      {selectedEmailTemplate?.subject === template.subject && (
-                        <Badge color="green" text="Selected" />
-                      )}
-                    </div>
-                    <h4 className="font-medium text-gray-900">{template.subject}</h4>
-                  </div>
-                  <AntButton
-                    type={selectedEmailTemplate?.subject === template.subject ? "default" : "primary"}
-                    size="small"
-                    onClick={() => handleSelectEmailTemplate(template)}
-                    icon={selectedEmailTemplate?.subject === template.subject ? <CheckCircle className="w-4 h-4" /> : null}
-                  >
-                    {selectedEmailTemplate?.subject === template.subject ? 'Selected' : 'Select Template'}
-                  </AntButton>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <strong className="text-sm text-gray-600">Subject Line:</strong>
-                    <div className="mt-1 p-2 bg-gray-50 rounded text-sm font-medium">
-                      {template.subject}
-                    </div>
-                  </div>
-                  <div>
-                    <strong className="text-sm text-gray-600">Template Metrics:</strong>
-                    <div className="mt-1 text-xs text-gray-500 space-y-1">
-                      <div>Tone: <span className="font-medium">{template.tone}</span></div>
-                      <div>CTA: <span className="font-medium">{template.callToAction}</span></div>
-                      <div>Estimated Reading Time: <span className="font-medium">30-45 seconds</span></div>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <strong className="text-sm text-gray-600">Email Preview:</strong>
-                  <div className="mt-2 p-4 bg-white border rounded-lg shadow-sm max-h-60 overflow-y-auto">
-                    <div className="email-preview" dangerouslySetInnerHTML={{ __html: template.htmlContent }} />
-                  </div>
-                </div>
-
-                <div className="flex justify-between items-center pt-2 border-t">
-                  <div className="flex space-x-4 text-xs text-gray-500">
-                    <span>Personalization: <strong>High</strong></span>
-                    <span>Mobile Optimized: <strong>Yes</strong></span>
-                    <span>Spam Score: <strong>Low</strong></span>
-                  </div>
-                  <div className="flex space-x-2">
-                    <AntButton size="small" ghost icon={<Eye className="w-3 h-3" />}>
-                      Full Preview
-                    </AntButton>
-                    <AntButton size="small" ghost icon={<Send className="w-3 h-3" />}>
-                      Test Send
-                    </AntButton>
-                  </div>
-                </div>
+              Generate Email Templates
+            </AntButton>
+          </div>
+        ) : (
+          <Tabs
+            defaultActiveKey="0"
+            type="card"
+            className="email-template-tabs"
+            tabBarExtraContent={
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-500">
+                  {templateGenerationState.email.templates.length} templates available
+                </span>
               </div>
-            </AntCard>
-          ))}
-          
-          {templateGenerationState.email.templates.length === 0 && (
-            <div className="text-center py-12">
-              <Mail className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Email Templates Generated</h3>
-              <p className="text-gray-500 mb-4">Generate AI-powered email templates based on your campaign details</p>
-              <AntButton
-                type="primary"
-                size="large"
-                icon={<MessageSquare className="w-4 h-4" />}
-                onClick={() => handleGenerateTemplate('email')}
-                loading={templateGenerationState.email.loading}
+            }
+          >
+            {templateGenerationState.email.templates.map((template, index) => (
+              <TabPane
+                tab={
+                  <div className="flex items-center space-x-2">
+                    <span>Template {index + 1}</span>
+                    {selectedEmailTemplate?.subject === template.subject && (
+                      <Badge color="green" text="Selected" size="small" />
+                    )}
+                  </div>
+                }
+                key={index.toString()}
               >
-                Generate Email Templates
-              </AntButton>
-            </div>
-          )}
-        </div>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <h4 className="font-medium text-gray-900 text-lg mb-2">{template.subject}</h4>
+                      <div className="flex items-center space-x-2 mb-3">
+                        <Badge color="blue" text={template.tone} />
+                        <Badge color="purple" text={`${template.estimatedOpenRate} open rate`} />
+                        <Badge color="orange" text={`${template.estimatedClickRate} click rate`} />
+                      </div>
+                    </div>
+                    <AntButton
+                      type={selectedEmailTemplate?.subject === template.subject ? "default" : "primary"}
+                      size="large"
+                      onClick={() => handleSelectEmailTemplate(template)}
+                      icon={selectedEmailTemplate?.subject === template.subject ? <CheckCircle className="w-4 h-4" /> : null}
+                    >
+                      {selectedEmailTemplate?.subject === template.subject ? 'Selected' : 'Select This Template'}
+                    </AntButton>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <strong className="text-sm text-gray-600">Subject Line:</strong>
+                      <div className="mt-2 p-3 bg-gray-50 rounded-lg text-sm font-medium">
+                        {template.subject}
+                      </div>
+                    </div>
+                    <div>
+                      <strong className="text-sm text-gray-600">Template Details:</strong>
+                      <div className="mt-2 text-sm text-gray-700 space-y-2">
+                        <div>Tone: <span className="font-medium capitalize">{template.tone}</span></div>
+                        <div>Call to Action: <span className="font-medium">{template.callToAction}</span></div>
+                        <div>Reading Time: <span className="font-medium">30-45 seconds</span></div>
+                        <div>Variables: <span className="font-medium">{template.variables?.length || 0} dynamic fields</span></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between items-center mb-3">
+                      <strong className="text-sm text-gray-600">Email Preview:</strong>
+                      <div className="flex space-x-2">
+                        <AntButton size="small" ghost icon={<Eye className="w-3 h-3" />}>
+                          Full Preview
+                        </AntButton>
+                        <AntButton size="small" ghost icon={<Send className="w-3 h-3" />}>
+                          Test Send
+                        </AntButton>
+                      </div>
+                    </div>
+                    <div className="p-4 bg-white border rounded-lg shadow-sm max-h-80 overflow-y-auto">
+                      <div className="email-preview" dangerouslySetInnerHTML={{ __html: template.htmlContent }} />
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="grid grid-cols-3 gap-4 text-center">
+                      <div>
+                        <div className="text-xs text-gray-500">Personalization Level</div>
+                        <div className="font-medium text-green-600">High</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500">Mobile Optimized</div>
+                        <div className="font-medium text-green-600">Yes</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500">Spam Score</div>
+                        <div className="font-medium text-green-600">Low</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {template.variables && template.variables.length > 0 && (
+                    <div>
+                      <strong className="text-sm text-gray-600">Dynamic Variables:</strong>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {template.variables.map((variable: string, i: number) => (
+                          <Tag key={i} color="blue">{variable}</Tag>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </TabPane>
+            ))}
+          </Tabs>
+        )}
       </Modal>
 
       {/* WhatsApp Template Preview Modal */}

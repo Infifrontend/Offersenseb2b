@@ -2889,53 +2889,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Tier Assignment Engine Routes
-
-  // Get all assignment engines
-  app.get("/api/tiers/engines", async (req, res) => {
-    try {
-      console.log("API: GET /api/tiers/engines called with query:", req.query);
-      const filters = req.query;
-      const engines = await storage.getTierAssignmentEngines(filters);
-      console.log(`API: Found ${engines?.length || 0} tier assignment engines`);
-      res.json(engines);
-    } catch (error: any) {
-      console.error("API: Error fetching assignment engines:", error);
-      res.status(500).json({ message: "Failed to fetch assignment engines", error: error.message });
-    }
-  });
-
-  // Create assignment engine
-  app.post("/api/tiers/engines", async (req, res) => {
-    try {
-      const validatedData = insertTierAssignmentEngineSchema.parse(req.body);
-      const engine = await storage.insertTierAssignmentEngine(validatedData);
-      res.status(201).json(engine);
-    } catch (error: any) {
-      res.status(400).json({ message: "Invalid engine data", error: error.message });
-    }
-  });
-
-  // Update assignment engine
-  app.put("/api/tiers/engines/:id", async (req, res) => {
-    try {
-      const validatedData = insertTierAssignmentEngineSchema.parse(req.body);
-      const engine = await storage.updateTierAssignmentEngine(req.params.id, validatedData);
-      res.json(engine);
-    } catch (error: any) {
-      res.status(400).json({ message: "Failed to update engine", error: error.message });
-    }
-  });
-
-  // Delete assignment engine
-  app.delete("/api/tiers/engines/:id", async (req, res) => {
-    try {
-      await storage.deleteTierAssignmentEngine(req.params.id);
-      res.status(204).send();
-    } catch (error: any) {
-      res.status(500).json({ message: "Failed to delete engine", error: error.message });
-    }
-  });
+  
 
   // Campaign Management Routes
 

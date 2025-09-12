@@ -495,6 +495,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!existing) {
           acc.push({
             id: rule.id,
+            ruleCode: rule.ruleCode,
             ancillaryCode: rule.ancillaryCode,
             adjustmentType: rule.adjustmentType,
             adjustmentValue: rule.adjustmentValue,

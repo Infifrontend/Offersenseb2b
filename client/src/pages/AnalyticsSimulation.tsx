@@ -182,13 +182,18 @@ export default function AnalyticsSimulation() {
     mutationFn: async (data: z.infer<typeof simulationFormSchema>) => {
       console.log("Submitting simulation data:", data);
       
+      const requestData = {
+        ...data,
+        createdBy: "analyst_user"
+      };
+      
       const response = await fetch("/api/simulations", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "x-user": "analyst_user",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(requestData),
       });
       
       if (!response.ok) {

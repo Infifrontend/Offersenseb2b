@@ -466,31 +466,32 @@ export default function AgentChannelManager() {
   // Override table columns
   const overrideColumns = [
     {
-      title: "Override Code",
+      title: "Code",
       dataIndex: "overrideCode",
       key: "overrideCode",
-      width: 140,
-      render: (text: string) => <span className="font-mono">{text}</span>,
+      ellipsis: true,
+      render: (text: string) => <span className="font-mono text-sm">{text}</span>,
     },
     {
       title: "Channel",
       dataIndex: "channel",
       key: "channel",
-      width: 100,
+      width: 90,
       render: (channel: string) => (
         <Space>
           <span>{getChannelIcon(channel)}</span>
-          <span>{channel}</span>
+          <span className="text-sm">{channel}</span>
         </Space>
       ),
     },
     {
-      title: "Product Scope",
+      title: "Scope",
       dataIndex: "productScope",
       key: "productScope",
-      width: 120,
+      width: 100,
       render: (scope: string) => (
         <Tag
+          size="small"
           color={
             scope === "FARE"
               ? "blue"
@@ -506,9 +507,9 @@ export default function AgentChannelManager() {
     {
       title: "Adjustment",
       key: "adjustment",
-      width: 140,
+      width: 110,
       render: (record: ChannelOverride) => (
-        <span>
+        <span className="text-sm">
           {record.adjustmentType === "PERCENT" ? "%" : "$"}
           {record.adjustmentValue}
         </span>
@@ -518,15 +519,15 @@ export default function AgentChannelManager() {
       title: "POS",
       dataIndex: "pos",
       key: "pos",
-      width: 120,
+      width: 100,
       render: (pos: string[]) => (
-        <Space size={4} wrap>
-          {pos.slice(0, 3).map((p) => (
+        <Space size={2} wrap>
+          {pos.slice(0, 2).map((p) => (
             <Tag key={p} size="small">
               {p}
             </Tag>
           ))}
-          {pos.length > 3 && <Tag size="small">+{pos.length - 3}</Tag>}
+          {pos.length > 2 && <Tag size="small">+{pos.length - 2}</Tag>}
         </Space>
       ),
     },
@@ -534,20 +535,20 @@ export default function AgentChannelManager() {
       title: "Priority",
       dataIndex: "priority",
       key: "priority",
-      width: 80,
-      render: (priority: number) => <Tag color="blue">{priority}</Tag>,
+      width: 70,
+      render: (priority: number) => <Tag size="small" color="blue">{priority}</Tag>,
     },
     {
       title: "Valid Period",
       key: "validPeriod",
-      width: 180,
+      width: 130,
       render: (record: ChannelOverride) => (
         <div>
           <div className="text-xs text-gray-500">
-            {dayjs(record.validFrom).format("MMM DD, YYYY")}
+            {dayjs(record.validFrom).format("MMM DD")}
           </div>
           <div className="text-xs text-gray-500">
-            {dayjs(record.validTo).format("MMM DD, YYYY")}
+            {dayjs(record.validTo).format("MMM DD")}
           </div>
         </div>
       ),
@@ -556,20 +557,21 @@ export default function AgentChannelManager() {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      width: 100,
+      width: 80,
       render: (status: string) => (
-        <Tag color={status === "ACTIVE" ? "green" : "red"}>{status}</Tag>
+        <Tag size="small" color={status === "ACTIVE" ? "green" : "red"}>{status}</Tag>
       ),
     },
     {
       title: "Actions",
       key: "actions",
-      width: 120,
+      width: 100,
       render: (_: any, record: ChannelOverride) => (
         <Space size="small">
           <Tooltip title="Edit">
             <AntButton
               type="text"
+              size="small"
               icon={<EditOutlined />}
               onClick={() => handleEditOverride(record)}
             />
@@ -580,7 +582,7 @@ export default function AgentChannelManager() {
             onConfirm={() => deleteOverrideMutation.mutate(record.id)}
           >
             <Tooltip title="Delete">
-              <AntButton type="text" icon={<DeleteOutlined />} danger />
+              <AntButton type="text" size="small" icon={<DeleteOutlined />} danger />
             </Tooltip>
           </Popconfirm>
         </Space>
@@ -652,7 +654,6 @@ export default function AgentChannelManager() {
                     showSizeChanger: true,
                     showTotal: (total) => `Total ${total} overrides`,
                   }}
-                  scroll={{ x: 1200 }}
                 />
               </AntCard>
             ),

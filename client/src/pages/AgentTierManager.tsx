@@ -483,6 +483,8 @@ export default function AgentTierManager() {
       title: "Tier",
       dataIndex: "tierCode",
       key: "tierCode",
+      width: 150,
+      fixed: 'left' as const,
       render: (tierCode: string, record: AgentTier) => (
         <Space>
           {getTierIcon(tierCode)}
@@ -494,6 +496,7 @@ export default function AgentTierManager() {
       title: "KPI Window",
       dataIndex: "kpiWindow",
       key: "kpiWindow",
+      width: 120,
       render: (window: string) => (
         <Tag color={window === "MONTHLY" ? "blue" : "purple"}>{window}</Tag>
       ),
@@ -501,24 +504,28 @@ export default function AgentTierManager() {
     {
       title: "Min Booking Value",
       key: "minBookingValue",
+      width: 150,
       render: (record: AgentTier) =>
         formatCurrency(record.kpiThresholds.totalBookingValueMin),
     },
     {
       title: "Min Bookings",
       key: "minBookings",
+      width: 120,
       render: (record: AgentTier) =>
         record.kpiThresholds.totalBookingsMin.toLocaleString(),
     },
     {
       title: "Min Conversion %",
       key: "minConversion",
+      width: 130,
       render: (record: AgentTier) =>
         `${record.kpiThresholds.conversionPctMin}%`,
     },
     {
       title: "Default Policy",
       key: "defaultPolicy",
+      width: 130,
       render: (record: AgentTier) => {
         if (!record.defaultPricingPolicy) return "-";
         const { type, value } = record.defaultPricingPolicy;
@@ -535,6 +542,7 @@ export default function AgentTierManager() {
       title: "Status",
       dataIndex: "status",
       key: "status",
+      width: 100,
       render: (status: string) => (
         <Badge
           status={status === "ACTIVE" ? "success" : "default"}
@@ -545,6 +553,8 @@ export default function AgentTierManager() {
     {
       title: "Actions",
       key: "actions",
+      width: 150,
+      fixed: 'right' as const,
       render: (record: AgentTier) => (
         <Space>
           <Tooltip title="View Details">
@@ -579,11 +589,14 @@ export default function AgentTierManager() {
       title: "Agent ID",
       dataIndex: "agentId",
       key: "agentId",
+      width: 120,
+      fixed: 'left' as const,
     },
     {
       title: "Tier",
       dataIndex: "tierCode",
       key: "tierCode",
+      width: 120,
       render: (tierCode: string) => (
         <Space>
           {getTierIcon(tierCode)}
@@ -595,6 +608,7 @@ export default function AgentTierManager() {
       title: "Assignment Type",
       dataIndex: "assignmentType",
       key: "assignmentType",
+      width: 140,
       render: (type: string) => (
         <Tag color={type === "AUTO" ? "blue" : "orange"}>
           {type === "AUTO" ? "Automatic" : "Manual Override"}
@@ -605,12 +619,14 @@ export default function AgentTierManager() {
       title: "Effective From",
       dataIndex: "effectiveFrom",
       key: "effectiveFrom",
+      width: 120,
       render: (date: string) => dayjs(date).format("MMM DD, YYYY"),
     },
     {
       title: "Effective To",
       dataIndex: "effectiveTo",
       key: "effectiveTo",
+      width: 120,
       render: (date?: string) =>
         date ? dayjs(date).format("MMM DD, YYYY") : "Current",
     },
@@ -618,11 +634,13 @@ export default function AgentTierManager() {
       title: "Assigned By",
       dataIndex: "assignedBy",
       key: "assignedBy",
+      width: 120,
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
+      width: 100,
       render: (status: string) => (
         <Badge
           status={status === "ACTIVE" ? "success" : "default"}
@@ -634,6 +652,7 @@ export default function AgentTierManager() {
       title: "Created",
       dataIndex: "createdAt",
       key: "createdAt",
+      width: 150,
       render: (date: string) => dayjs(date).format("MMM DD, YYYY HH:mm"),
     },
   ];
@@ -643,11 +662,14 @@ export default function AgentTierManager() {
       title: "Engine Code",
       dataIndex: "engineCode",
       key: "engineCode",
+      width: 150,
+      fixed: 'left' as const,
     },
     {
       title: "Schedule",
       dataIndex: "schedule",
       key: "schedule",
+      width: 120,
       render: (schedule: string) => (
         <code className="bg-gray-100 px-2 py-1 rounded text-xs">{schedule}</code>
       ),
@@ -656,6 +678,7 @@ export default function AgentTierManager() {
       title: "Mode",
       dataIndex: "reassignmentMode",
       key: "reassignmentMode",
+      width: 100,
       render: (mode: string) => (
         <Tag color={mode === "AUTO" ? "green" : "orange"}>{mode}</Tag>
       ),
@@ -664,6 +687,7 @@ export default function AgentTierManager() {
       title: "Override Allowed",
       dataIndex: "overrideAllowed",
       key: "overrideAllowed",
+      width: 130,
       render: (allowed: string) => (
         <Badge
           status={allowed === "true" ? "success" : "error"}
@@ -675,6 +699,7 @@ export default function AgentTierManager() {
       title: "Last Run",
       dataIndex: "lastRunAt",
       key: "lastRunAt",
+      width: 150,
       render: (date?: string) =>
         date ? dayjs(date).format("MMM DD, HH:mm") : "Never",
     },
@@ -682,6 +707,7 @@ export default function AgentTierManager() {
       title: "Next Run",
       dataIndex: "nextRunAt",
       key: "nextRunAt",
+      width: 150,
       render: (date?: string) =>
         date ? dayjs(date).format("MMM DD, HH:mm") : "Not Scheduled",
     },
@@ -689,6 +715,7 @@ export default function AgentTierManager() {
       title: "Status",
       dataIndex: "status",
       key: "status",
+      width: 100,
       render: (status: string) => (
         <Badge
           status={status === "ACTIVE" ? "success" : "default"}
@@ -699,6 +726,8 @@ export default function AgentTierManager() {
     {
       title: "Actions",
       key: "actions",
+      width: 120,
+      fixed: 'right' as const,
       render: (record: AssignmentEngine) => (
         <Space>
           <Tooltip title="Edit Engine">
@@ -847,7 +876,7 @@ export default function AgentTierManager() {
               loading={tiersLoading}
               rowKey="id"
               pagination={{ pageSize: 10 }}
-              scroll={{ y: 400 }}
+              scroll={{ x: 1200, y: 400 }}
               size="middle"
             />
           </div>
@@ -905,7 +934,7 @@ export default function AgentTierManager() {
               loading={assignmentsLoading}
               rowKey="id"
               pagination={{ pageSize: 15 }}
-              scroll={{ y: 400 }}
+              scroll={{ x: 1000, y: 400 }}
               size="middle"
             />
           </div>
@@ -941,7 +970,7 @@ export default function AgentTierManager() {
               loading={enginesLoading}
               rowKey="id"
               pagination={{ pageSize: 10 }}
-              scroll={{ y: 400 }}
+              scroll={{ x: 1100, y: 400 }}
               size="middle"
             />
           </div>

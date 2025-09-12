@@ -43,10 +43,12 @@ import {
   Filter,
   RefreshCw,
   Download,
-  Settings
+  Settings,
+  ArrowUpRight,
+  ArrowDownRight
 } from "lucide-react";
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
+const COLORS = ['#6366f1', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444'];
 
 export default function Dashboard() {
   const [timeRange, setTimeRange] = useState("30d");
@@ -141,45 +143,50 @@ export default function Dashboard() {
 
   const getGrowthIcon = (growth: number) => {
     return growth >= 0 ? 
-      <TrendingUp className="h-4 w-4 text-green-600" /> : 
-      <TrendingDown className="h-4 w-4 text-red-600" />;
+      <ArrowUpRight className="h-4 w-4 text-emerald-500" /> : 
+      <ArrowDownRight className="h-4 w-4 text-red-500" />;
   };
 
   const getGrowthColor = (growth: number) => {
-    return growth >= 0 ? "text-green-600" : "text-red-600";
+    return growth >= 0 ? "text-emerald-500" : "text-red-500";
   };
 
   const getTierColor = (tier: string) => {
     const colors = {
-      PLATINUM: "bg-purple-100 text-purple-800",
-      GOLD: "bg-yellow-100 text-yellow-800",
-      SILVER: "bg-gray-100 text-gray-800",
-      BRONZE: "bg-orange-100 text-orange-800"
+      PLATINUM: "bg-gradient-to-r from-purple-100 to-purple-200 text-purple-800 border-purple-300",
+      GOLD: "bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 border-yellow-300",
+      SILVER: "bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 border-gray-300",
+      BRONZE: "bg-gradient-to-r from-orange-100 to-orange-200 text-orange-800 border-orange-300"
     };
-    return colors[tier as keyof typeof colors] || "bg-gray-100 text-gray-800";
+    return colors[tier as keyof typeof colors] || "bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 border-gray-300";
   };
 
   if (metricsLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="flex items-center justify-center h-96">
+        <div className="relative">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-200"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent absolute top-0 left-0"></div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Executive Dashboard</h2>
-          <p className="text-muted-foreground">
+        <div className="space-y-1">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
+            Executive Dashboard
+          </h1>
+          <p className="text-lg text-slate-600 font-medium">
             Performance metrics across fares, agents, cohorts, and ancillaries
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-32">
+            <SelectTrigger className="w-36 bg-white/80 backdrop-blur-sm border-slate-200 shadow-sm hover:shadow-md transition-all duration-200">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -190,7 +197,7 @@ export default function Dashboard() {
             </SelectContent>
           </Select>
           <Select value={selectedRegion} onValueChange={setSelectedRegion}>
-            <SelectTrigger className="w-32">
+            <SelectTrigger className="w-36 bg-white/80 backdrop-blur-sm border-slate-200 shadow-sm hover:shadow-md transition-all duration-200">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -201,10 +208,10 @@ export default function Dashboard() {
               <SelectItem value="americas">Americas</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing}>
+          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing} className="bg-white/80 backdrop-blur-sm border-slate-200 hover:bg-white hover:shadow-md transition-all duration-200">
             <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
           </Button>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className="bg-white/80 backdrop-blur-sm border-slate-200 hover:bg-white hover:shadow-md transition-all duration-200">
             <Download className="h-4 w-4" />
           </Button>
         </div>
@@ -212,11 +219,11 @@ export default function Dashboard() {
 
       {/* Alerts */}
       {metrics?.alerts && metrics.alerts.length > 0 && (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {metrics.alerts.map((alert, index) => (
-            <Alert key={index} className={alert.type === 'warning' ? 'border-orange-200 bg-orange-50' : ''}>
+            <Alert key={index} className={`${alert.type === 'warning' ? 'border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50' : 'border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50'} shadow-sm hover:shadow-md transition-all duration-200`}>
               <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>{alert.message}</AlertDescription>
+              <AlertDescription className="font-medium">{alert.message}</AlertDescription>
             </Alert>
           ))}
         </div>
@@ -224,64 +231,72 @@ export default function Dashboard() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+        <Card className="group overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-sm font-semibold opacity-90">Total Revenue</CardTitle>
+            <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+              <DollarSign className="h-5 w-5" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(metrics?.summary.totalRevenue || 0)}</div>
-            <div className="flex items-center text-xs text-muted-foreground">
+            <div className="text-3xl font-bold mb-2">{formatCurrency(metrics?.summary.totalRevenue || 0)}</div>
+            <div className="flex items-center text-sm">
               {getGrowthIcon(metrics?.summary.revenueGrowth || 0)}
-              <span className={`ml-1 ${getGrowthColor(metrics?.summary.revenueGrowth || 0)}`}>
+              <span className={`ml-1 font-medium ${metrics?.summary.revenueGrowth >= 0 ? 'text-green-200' : 'text-red-200'}`}>
                 {formatPercent(metrics?.summary.revenueGrowth || 0)} from last period
               </span>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Offers</CardTitle>
-            <Gift className="h-4 w-4 text-muted-foreground" />
+        <Card className="group overflow-hidden bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-sm font-semibold opacity-90">Active Offers</CardTitle>
+            <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+              <Gift className="h-5 w-5" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics?.summary.activeOffers?.toLocaleString()}</div>
-            <div className="flex items-center text-xs text-muted-foreground">
+            <div className="text-3xl font-bold mb-2">{metrics?.summary.activeOffers?.toLocaleString()}</div>
+            <div className="flex items-center text-sm">
               {getGrowthIcon(metrics?.summary.offersGrowth || 0)}
-              <span className={`ml-1 ${getGrowthColor(metrics?.summary.offersGrowth || 0)}`}>
+              <span className={`ml-1 font-medium ${metrics?.summary.offersGrowth >= 0 ? 'text-green-200' : 'text-red-200'}`}>
                 {formatPercent(metrics?.summary.offersGrowth || 0)} from last period
               </span>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Agents</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+        <Card className="group overflow-hidden bg-gradient-to-br from-emerald-500 to-emerald-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-sm font-semibold opacity-90">Active Agents</CardTitle>
+            <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+              <Users className="h-5 w-5" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics?.summary.activeAgents}</div>
-            <div className="flex items-center text-xs text-muted-foreground">
+            <div className="text-3xl font-bold mb-2">{metrics?.summary.activeAgents}</div>
+            <div className="flex items-center text-sm">
               {getGrowthIcon(metrics?.summary.agentsGrowth || 0)}
-              <span className={`ml-1 ${getGrowthColor(metrics?.summary.agentsGrowth || 0)}`}>
+              <span className={`ml-1 font-medium ${metrics?.summary.agentsGrowth >= 0 ? 'text-green-200' : 'text-red-200'}`}>
                 {formatPercent(metrics?.summary.agentsGrowth || 0)} from last period
               </span>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg Conversion</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
+        <Card className="group overflow-hidden bg-gradient-to-br from-orange-500 to-orange-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-sm font-semibold opacity-90">Avg Conversion</CardTitle>
+            <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+              <Target className="h-5 w-5" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatPercent(metrics?.summary.avgConversion || 0)}</div>
-            <div className="flex items-center text-xs text-muted-foreground">
+            <div className="text-3xl font-bold mb-2">{formatPercent(metrics?.summary.avgConversion || 0)}</div>
+            <div className="flex items-center text-sm">
               {getGrowthIcon(metrics?.summary.conversionGrowth || 0)}
-              <span className={`ml-1 ${getGrowthColor(metrics?.summary.conversionGrowth || 0)}`}>
+              <span className={`ml-1 font-medium ${metrics?.summary.conversionGrowth >= 0 ? 'text-green-200' : 'text-red-200'}`}>
                 {formatPercent(metrics?.summary.conversionGrowth || 0)} from last period
               </span>
             </div>
@@ -290,57 +305,82 @@ export default function Dashboard() {
       </div>
 
       {/* Main Content Tabs */}
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="offers">Top Offers</TabsTrigger>
-          <TabsTrigger value="rules">Rule Impact</TabsTrigger>
-          <TabsTrigger value="ancillaries">Ancillaries</TabsTrigger>
-          <TabsTrigger value="agents">Agents & Campaigns</TabsTrigger>
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-5 bg-white/60 backdrop-blur-sm p-1 rounded-xl shadow-sm">
+          <TabsTrigger value="overview" className="rounded-lg font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">Overview</TabsTrigger>
+          <TabsTrigger value="offers" className="rounded-lg font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">Top Offers</TabsTrigger>
+          <TabsTrigger value="rules" className="rounded-lg font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">Rule Impact</TabsTrigger>
+          <TabsTrigger value="ancillaries" className="rounded-lg font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">Ancillaries</TabsTrigger>
+          <TabsTrigger value="agents" className="rounded-lg font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">Agents & Campaigns</TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
-        <TabsContent value="overview" className="space-y-4">
+        <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Revenue Trend */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Activity className="h-5 w-5" />
+            <Card className="bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-3 text-xl font-bold text-slate-800">
+                  <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg">
+                    <Activity className="h-5 w-5 text-white" />
+                  </div>
                   Revenue Trend
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={320}>
                   <AreaChart data={metrics?.trendData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis tickFormatter={(value) => formatCurrency(value)} />
-                    <Tooltip formatter={(value) => [formatCurrency(Number(value)), "Revenue"]} />
-                    <Area type="monotone" dataKey="revenue" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+                    <defs>
+                      <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0.1}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <XAxis dataKey="date" stroke="#64748b" fontSize={12} />
+                    <YAxis tickFormatter={(value) => formatCurrency(value)} stroke="#64748b" fontSize={12} />
+                    <Tooltip 
+                      formatter={(value) => [formatCurrency(Number(value)), "Revenue"]} 
+                      contentStyle={{ 
+                        backgroundColor: 'white', 
+                        border: '1px solid #e2e8f0', 
+                        borderRadius: '12px',
+                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                      }}
+                    />
+                    <Area type="monotone" dataKey="revenue" stroke="#6366f1" fill="url(#revenueGradient)" strokeWidth={3} />
                   </AreaChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
 
             {/* Conversion & Margin */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5" />
+            <Card className="bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-3 text-xl font-bold text-slate-800">
+                  <div className="p-2 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-lg">
+                    <BarChart3 className="h-5 w-5 text-white" />
+                  </div>
                   Conversion & Margin
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={320}>
                   <LineChart data={metrics?.trendData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis yAxisId="left" />
-                    <YAxis yAxisId="right" orientation="right" />
-                    <Tooltip />
-                    <Line yAxisId="left" type="monotone" dataKey="conversion" stroke="#8884d8" name="Conversion %" />
-                    <Line yAxisId="right" type="monotone" dataKey="margin" stroke="#82ca9d" name="Margin %" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <XAxis dataKey="date" stroke="#64748b" fontSize={12} />
+                    <YAxis yAxisId="left" stroke="#64748b" fontSize={12} />
+                    <YAxis yAxisId="right" orientation="right" stroke="#64748b" fontSize={12} />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'white', 
+                        border: '1px solid #e2e8f0', 
+                        borderRadius: '12px',
+                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                      }}
+                    />
+                    <Line yAxisId="left" type="monotone" dataKey="conversion" stroke="#8b5cf6" name="Conversion %" strokeWidth={3} dot={{ fill: '#8b5cf6', strokeWidth: 2, r: 4 }} />
+                    <Line yAxisId="right" type="monotone" dataKey="margin" stroke="#10b981" name="Margin %" strokeWidth={3} dot={{ fill: '#10b981', strokeWidth: 2, r: 4 }} />
                   </LineChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -349,36 +389,38 @@ export default function Dashboard() {
         </TabsContent>
 
         {/* Top Offers Tab */}
-        <TabsContent value="offers" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Award className="h-5 w-5" />
+        <TabsContent value="offers" className="space-y-6">
+          <Card className="bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300">
+            <CardHeader className="pb-6">
+              <CardTitle className="flex items-center gap-3 text-xl font-bold text-slate-800">
+                <div className="p-2 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg">
+                  <Award className="h-5 w-5 text-white" />
+                </div>
                 Top Converting Offers
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-base text-slate-600">
                 Best performing fare and ancillary combinations
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {metrics?.topOffers.map((offer, index) => (
-                  <div key={offer.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div key={offer.id} className="group flex items-center justify-between p-6 border border-slate-200 rounded-xl bg-gradient-to-r from-white to-slate-50 hover:shadow-md transition-all duration-200 hover:scale-[1.02]">
                     <div className="flex items-center gap-4">
-                      <div className="flex items-center justify-center w-8 h-8 bg-primary/10 rounded-full text-sm font-medium">
+                      <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full text-white text-sm font-bold shadow-md">
                         {index + 1}
                       </div>
                       <div>
-                        <div className="font-medium">{offer.fareCode}</div>
-                        <div className="text-sm text-muted-foreground">
-                          <Badge variant="outline" className="mr-2">{offer.type}</Badge>
-                          {offer.conversions} conversions
+                        <div className="font-bold text-lg text-slate-800">{offer.fareCode}</div>
+                        <div className="flex items-center gap-3 text-sm text-slate-600">
+                          <Badge variant="outline" className="border-indigo-200 text-indigo-700 bg-indigo-50 font-medium">{offer.type}</Badge>
+                          <span className="font-medium">{offer.conversions.toLocaleString()} conversions</span>
                         </div>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-medium">{formatCurrency(offer.revenue)}</div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="font-bold text-xl text-slate-800">{formatCurrency(offer.revenue)}</div>
+                      <div className="text-sm text-slate-600 font-medium">
                         {formatPercent(offer.attachRate)} attach rate
                       </div>
                     </div>
@@ -390,37 +432,46 @@ export default function Dashboard() {
         </TabsContent>
 
         {/* Rule Impact Tab */}
-        <TabsContent value="rules" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5" />
+        <TabsContent value="rules" className="space-y-6">
+          <Card className="bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300">
+            <CardHeader className="pb-6">
+              <CardTitle className="flex items-center gap-3 text-xl font-bold text-slate-800">
+                <div className="p-2 bg-gradient-to-r from-red-500 to-pink-500 rounded-lg">
+                  <Target className="h-5 w-5 text-white" />
+                </div>
                 Rule Impact Heatmap
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-base text-slate-600">
                 Discount/markup impact vs margin analysis
               </CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={400}>
                 <BarChart data={metrics?.ruleImpact} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="rule" angle={-45} textAnchor="end" height={80} />
-                  <YAxis yAxisId="left" />
-                  <YAxis yAxisId="right" orientation="right" />
-                  <Tooltip />
-                  <Bar yAxisId="left" dataKey="avgDiscount" fill="#8884d8" name="Avg Discount %" />
-                  <Bar yAxisId="right" dataKey="marginImpact" fill="#82ca9d" name="Margin Impact %" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                  <XAxis dataKey="rule" angle={-45} textAnchor="end" height={80} stroke="#64748b" fontSize={12} />
+                  <YAxis yAxisId="left" stroke="#64748b" fontSize={12} />
+                  <YAxis yAxisId="right" orientation="right" stroke="#64748b" fontSize={12} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'white', 
+                      border: '1px solid #e2e8f0', 
+                      borderRadius: '12px',
+                      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                    }}
+                  />
+                  <Bar yAxisId="left" dataKey="avgDiscount" fill="#6366f1" name="Avg Discount %" radius={[4, 4, 0, 0]} />
+                  <Bar yAxisId="right" dataKey="marginImpact" fill="#10b981" name="Margin Impact %" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
               
-              <div className="mt-6 space-y-3">
+              <div className="mt-8 space-y-3">
                 {metrics?.ruleImpact.map((rule) => (
-                  <div key={rule.rule} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                    <div className="font-medium">{rule.rule}</div>
-                    <div className="flex items-center gap-4 text-sm">
-                      <span>Volume: {rule.volume}</span>
-                      <span className="text-green-600">Uplift: +{formatPercent(rule.uplift)}</span>
+                  <div key={rule.rule} className="flex items-center justify-between p-4 bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl border border-slate-200 hover:shadow-md transition-all duration-200">
+                    <div className="font-bold text-slate-800">{rule.rule}</div>
+                    <div className="flex items-center gap-6 text-sm">
+                      <span className="font-medium text-slate-600">Volume: {rule.volume.toLocaleString()}</span>
+                      <span className="text-emerald-600 font-bold">Uplift: +{formatPercent(rule.uplift)}</span>
                     </div>
                   </div>
                 ))}
@@ -430,35 +481,46 @@ export default function Dashboard() {
         </TabsContent>
 
         {/* Ancillaries Tab */}
-        <TabsContent value="ancillaries" className="space-y-4">
+        <TabsContent value="ancillaries" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Attach Rates Chart */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <PieChartIcon className="h-5 w-5" />
+            <Card className="bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-3 text-xl font-bold text-slate-800">
+                  <div className="p-2 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg">
+                    <PieChartIcon className="h-5 w-5 text-white" />
+                  </div>
                   Ancillary Attach Rates
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={metrics?.ancillaryRates}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="category" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="airAttach" fill="#8884d8" name="Air Attach %" />
-                    <Bar dataKey="nonAirAttach" fill="#82ca9d" name="Non-Air Attach %" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <XAxis dataKey="category" stroke="#64748b" fontSize={12} />
+                    <YAxis stroke="#64748b" fontSize={12} />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'white', 
+                        border: '1px solid #e2e8f0', 
+                        borderRadius: '12px',
+                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                      }}
+                    />
+                    <Bar dataKey="airAttach" fill="#6366f1" name="Air Attach %" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="nonAirAttach" fill="#10b981" name="Non-Air Attach %" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
 
             {/* Revenue Breakdown */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <DollarSign className="h-5 w-5" />
+            <Card className="bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-3 text-xl font-bold text-slate-800">
+                  <div className="p-2 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg">
+                    <DollarSign className="h-5 w-5 text-white" />
+                  </div>
                   Ancillary Revenue
                 </CardTitle>
               </CardHeader>
@@ -479,7 +541,15 @@ export default function Dashboard() {
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+                    <Tooltip 
+                      formatter={(value) => formatCurrency(Number(value))} 
+                      contentStyle={{ 
+                        backgroundColor: 'white', 
+                        border: '1px solid #e2e8f0', 
+                        borderRadius: '12px',
+                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                      }}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -487,23 +557,23 @@ export default function Dashboard() {
           </div>
 
           {/* Ancillary Performance Table */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Ancillary Performance Details</CardTitle>
+          <Card className="bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300">
+            <CardHeader className="pb-6">
+              <CardTitle className="text-xl font-bold text-slate-800">Ancillary Performance Details</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {metrics?.ancillaryRates.map((ancillary) => (
-                  <div key={ancillary.category} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div key={ancillary.category} className="flex items-center justify-between p-6 border border-slate-200 rounded-xl bg-gradient-to-r from-white to-slate-50 hover:shadow-md transition-all duration-200">
                     <div>
-                      <div className="font-medium">{ancillary.category}</div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="font-bold text-lg text-slate-800">{ancillary.category}</div>
+                      <div className="text-sm text-slate-600 font-medium">
                         Air: {formatPercent(ancillary.airAttach)} | Non-Air: {formatPercent(ancillary.nonAirAttach)}
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-medium">{formatCurrency(ancillary.totalRevenue)}</div>
-                      <div className="text-sm text-muted-foreground">Total Revenue</div>
+                      <div className="font-bold text-xl text-slate-800">{formatCurrency(ancillary.totalRevenue)}</div>
+                      <div className="text-sm text-slate-600 font-medium">Total Revenue</div>
                     </div>
                   </div>
                 ))}
@@ -513,32 +583,34 @@ export default function Dashboard() {
         </TabsContent>
 
         {/* Agents & Campaigns Tab */}
-        <TabsContent value="agents" className="space-y-4">
+        <TabsContent value="agents" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Agent Tier Performance */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
+            <Card className="bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-3 text-xl font-bold text-slate-800">
+                  <div className="p-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg">
+                    <Users className="h-5 w-5 text-white" />
+                  </div>
                   Agent Tier Performance
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {metrics?.agentPerformance.map((tier) => (
-                    <div key={tier.tier} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <Badge className={getTierColor(tier.tier)}>{tier.tier}</Badge>
+                    <div key={tier.tier} className="flex items-center justify-between p-6 border border-slate-200 rounded-xl bg-gradient-to-r from-white to-slate-50 hover:shadow-md transition-all duration-200">
+                      <div className="flex items-center gap-4">
+                        <Badge className={`${getTierColor(tier.tier)} border font-bold px-3 py-1`}>{tier.tier}</Badge>
                         <div>
-                          <div className="font-medium">{tier.agents} agents</div>
-                          <div className="text-sm text-muted-foreground">
+                          <div className="font-bold text-lg text-slate-800">{tier.agents} agents</div>
+                          <div className="text-sm text-slate-600 font-medium">
                             {formatPercent(tier.conversion)} conversion
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-medium">{formatCurrency(tier.avgValue)}</div>
-                        <div className={`text-sm flex items-center gap-1 ${getGrowthColor(tier.growth)}`}>
+                        <div className="font-bold text-xl text-slate-800">{formatCurrency(tier.avgValue)}</div>
+                        <div className={`text-sm flex items-center gap-1 font-medium ${getGrowthColor(tier.growth)}`}>
                           {getGrowthIcon(tier.growth)}
                           {formatPercent(tier.growth)}
                         </div>
@@ -550,28 +622,30 @@ export default function Dashboard() {
             </Card>
 
             {/* Campaign ROI */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="h-5 w-5" />
+            <Card className="bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-3 text-xl font-bold text-slate-800">
+                  <div className="p-2 bg-gradient-to-r from-pink-500 to-rose-500 rounded-lg">
+                    <Target className="h-5 w-5 text-white" />
+                  </div>
                   Campaign ROI
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {metrics?.campaignROI.map((campaign, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div key={index} className="flex items-center justify-between p-6 border border-slate-200 rounded-xl bg-gradient-to-r from-white to-slate-50 hover:shadow-md transition-all duration-200">
                       <div>
-                        <div className="font-medium">{campaign.campaign}</div>
-                        <div className="text-sm text-muted-foreground">
-                          <Badge variant="outline" className="mr-2">{campaign.channel}</Badge>
-                          {campaign.cohort}
+                        <div className="font-bold text-lg text-slate-800">{campaign.campaign}</div>
+                        <div className="flex items-center gap-2 text-sm text-slate-600">
+                          <Badge variant="outline" className="border-blue-200 text-blue-700 bg-blue-50 font-medium">{campaign.channel}</Badge>
+                          <span className="font-medium">{campaign.cohort}</span>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-medium">{campaign.roi}x ROI</div>
-                        <div className="text-sm text-muted-foreground">
-                          {campaign.purchased}/{campaign.sent} ({formatPercent((campaign.purchased / campaign.sent) * 100)})
+                        <div className="font-bold text-xl text-slate-800">{campaign.roi}x ROI</div>
+                        <div className="text-sm text-slate-600 font-medium">
+                          {campaign.purchased.toLocaleString()}/{campaign.sent.toLocaleString()} ({formatPercent((campaign.purchased / campaign.sent) * 100)})
                         </div>
                       </div>
                     </div>
@@ -582,20 +656,27 @@ export default function Dashboard() {
           </div>
 
           {/* Agent Performance Chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Agent Value vs Conversion</CardTitle>
+          <Card className="bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300">
+            <CardHeader className="pb-6">
+              <CardTitle className="text-xl font-bold text-slate-800">Agent Value vs Conversion</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={metrics?.agentPerformance}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="tier" />
-                  <YAxis yAxisId="left" tickFormatter={(value) => formatCurrency(value)} />
-                  <YAxis yAxisId="right" orientation="right" />
-                  <Tooltip />
-                  <Bar yAxisId="left" dataKey="avgValue" fill="#8884d8" name="Avg Value" />
-                  <Bar yAxisId="right" dataKey="conversion" fill="#82ca9d" name="Conversion %" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                  <XAxis dataKey="tier" stroke="#64748b" fontSize={12} />
+                  <YAxis yAxisId="left" tickFormatter={(value) => formatCurrency(value)} stroke="#64748b" fontSize={12} />
+                  <YAxis yAxisId="right" orientation="right" stroke="#64748b" fontSize={12} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'white', 
+                      border: '1px solid #e2e8f0', 
+                      borderRadius: '12px',
+                      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                    }}
+                  />
+                  <Bar yAxisId="left" dataKey="avgValue" fill="#6366f1" name="Avg Value" radius={[4, 4, 0, 0]} />
+                  <Bar yAxisId="right" dataKey="conversion" fill="#10b981" name="Conversion %" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>

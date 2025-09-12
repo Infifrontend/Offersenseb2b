@@ -429,11 +429,11 @@ export default function OfferRuleBuilder() {
     }
   };
 
-  const onCreateSubmit = () => {
+  const onCreateSubmit = async () => {
     console.log("Create Rule button clicked");
 
     // Get all form values directly
-    const allFormValues = createForm.getFieldsValue();
+    const allFormValues = await createForm.validateFields();
     console.log("All form values:", allFormValues);
 
     // Extract and validate required fields directly from form values
@@ -452,8 +452,10 @@ export default function OfferRuleBuilder() {
       if (!ruleType) missingFields.push("Rule Type");
       if (!validFrom) missingFields.push("Valid From");
       if (!validTo) missingFields.push("Valid To");
-      
-      alert(`Please fill in the following required fields: ${missingFields.join(", ")}`);
+
+      alert(
+        `Please fill in the following required fields: ${missingFields.join(", ")}`,
+      );
       setCurrentStep(0);
       return;
     }
@@ -471,12 +473,17 @@ export default function OfferRuleBuilder() {
         if (action.valueType) formattedAction.valueType = action.valueType;
         if (action.value !== undefined && action.value !== null)
           formattedAction.value = Number(action.value);
-        if (action.ancillaryCode) formattedAction.ancillaryCode = action.ancillaryCode;
+        if (action.ancillaryCode)
+          formattedAction.ancillaryCode = action.ancillaryCode;
         if (action.bundleCode) formattedAction.bundleCode = action.bundleCode;
         if (action.bannerText) formattedAction.bannerText = action.bannerText;
 
         // Add pricing object for compatibility
-        if (action.valueType && action.value !== undefined && action.value !== null) {
+        if (
+          action.valueType &&
+          action.value !== undefined &&
+          action.value !== null
+        ) {
           formattedAction.pricing = {
             type: action.valueType,
             value: Number(action.value),
@@ -802,7 +809,12 @@ export default function OfferRuleBuilder() {
         <div className="mt-6">
           <Steps current={currentStep} items={steps} className="mb-8" />
 
-          <AntForm form={createForm} layout="vertical" autoComplete="off">
+          <AntForm
+            onFinish={onCreateSubmit}
+            form={createForm}
+            layout="vertical"
+            autoComplete="off"
+          >
             {currentStep === 0 && (
               <div className="space-y-4">
                 <Row gutter={16}>
@@ -813,7 +825,10 @@ export default function OfferRuleBuilder() {
                       rules={[
                         { required: true, message: "Rule code is required" },
                         { min: 1, message: "Rule code cannot be empty" },
-                        { whitespace: true, message: "Rule code cannot be just whitespace" }
+                        {
+                          whitespace: true,
+                          message: "Rule code cannot be just whitespace",
+                        },
                       ]}
                     >
                       <AntInput placeholder="RULE_WEEKEND_DISCOUNT" />
@@ -826,7 +841,10 @@ export default function OfferRuleBuilder() {
                       rules={[
                         { required: true, message: "Rule name is required" },
                         { min: 1, message: "Rule name cannot be empty" },
-                        { whitespace: true, message: "Rule name cannot be just whitespace" }
+                        {
+                          whitespace: true,
+                          message: "Rule name cannot be just whitespace",
+                        },
                       ]}
                     >
                       <AntInput placeholder="Weekend Discount for Gold Agents" />
@@ -858,7 +876,12 @@ export default function OfferRuleBuilder() {
                       name="priority"
                       rules={[
                         { required: true, message: "Priority is required" },
-                        { type: 'number', min: 1, max: 100, message: "Priority must be between 1 and 100" }
+                        {
+                          type: "number",
+                          min: 1,
+                          max: 100,
+                          message: "Priority must be between 1 and 100",
+                        },
                       ]}
                     >
                       <InputNumber
@@ -877,7 +900,10 @@ export default function OfferRuleBuilder() {
                       label="Valid From"
                       name="validFrom"
                       rules={[
-                        { required: true, message: "Valid from date is required" },
+                        {
+                          required: true,
+                          message: "Valid from date is required",
+                        },
                       ]}
                     >
                       <DatePicker
@@ -891,7 +917,10 @@ export default function OfferRuleBuilder() {
                       label="Valid To"
                       name="validTo"
                       rules={[
-                        { required: true, message: "Valid to date is required" },
+                        {
+                          required: true,
+                          message: "Valid to date is required",
+                        },
                       ]}
                     >
                       <DatePicker
@@ -1081,7 +1110,7 @@ export default function OfferRuleBuilder() {
                                     },
                                   ]}
                                 >
-                                  <AntSelect 
+                                  <AntSelect
                                     placeholder="Select action type"
                                     allowClear
                                   >
@@ -1283,6 +1312,7 @@ export default function OfferRuleBuilder() {
                 ) : (
                   <AntButton
                     type="primary"
+                    htmlType="submit"
                     onClick={onCreateSubmit}
                     loading={createRuleMutation.isPending}
                   >

@@ -745,25 +745,22 @@ export class DatabaseStorage implements IStorage {
     return newRule;
   }
 
-  async getBundlePricingRules(filters: any = {}): Promise<BundlePricingRule[]> {
-    try {
-      console.log("Storage: Starting getBundlePricingRules with filters:", filters);
+  async getBundlePricingRules(filters: Record<string, any> = {}): Promise<InsertBundlePricingRule[]> {
+    console.log("Storage: getBundlePricingRules called with filters:", filters);
 
+    try {
       let query = this.db.select().from(bundlePricingRules);
 
       // Apply filters
       const conditions = [];
-
       if (filters.bundleCode) {
         conditions.push(eq(bundlePricingRules.bundleCode, filters.bundleCode));
       }
-
       if (filters.status) {
         conditions.push(eq(bundlePricingRules.status, filters.status));
       }
-
-      if (filters.discountType) {
-        conditions.push(eq(bundlePricingRules.discountType, filters.discountType));
+      if (filters.ruleCode) {
+        conditions.push(eq(bundlePricingRules.ruleCode, filters.ruleCode));
       }
 
       if (conditions.length > 0) {
@@ -787,21 +784,6 @@ export class DatabaseStorage implements IStorage {
       return rulesArray;
     } catch (error: any) {
       console.error("Storage: Database error in getBundlePricingRules:", error.message);
-      console.error("Storage: Error details:", {
-        code: error.code,
-        constraint: error.constraint,
-        detail: error.detail,
-        hint: error.hint,
-        position: error.position,
-        routine: error.routine,
-        schema: error.schema,
-        table: error.table,
-        column: error.column,
-        dataType: error.dataType,
-        file: error.file,
-        line: error.line
-      });
-      console.error("Storage: Full error stack:", error.stack);
 
       // Return empty array instead of throwing to prevent complete failure
       console.error("Storage: Returning empty array due to database error");

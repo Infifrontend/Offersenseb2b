@@ -9,6 +9,8 @@ import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema, insertAirA
 const upload = multer({ storage: multer.memoryStorage() });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  console.log("Registering routes...");
+  
   // Negotiated Fares Routes
 
   // Get all negotiated fares with optional filters
@@ -860,7 +862,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all bundle pricing rules with optional filters
   app.get("/api/bundles/pricing", async (req, res) => {
     try {
-      const filters = req.query;
+      const filters = req.query || {};
       console.log("API: Fetching bundle pricing rules with filters:", filters);
 
       let rules = await storage.getBundlePricingRules(filters);
@@ -1053,6 +1055,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to delete bundle pricing rule", error: error.message });
     }
   });
+
+  console.log("Bundle pricing routes registered successfully");
 
   // Offer Rules Routes
 

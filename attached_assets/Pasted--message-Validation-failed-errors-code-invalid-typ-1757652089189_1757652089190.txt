@@ -1,0 +1,51 @@
+{
+    "message": "Validation failed",
+    "errors": [
+        {
+            "code": "invalid_type",
+            "expected": "string",
+            "received": "undefined",
+            "path": [
+                "ruleCode"
+            ],
+            "message": "Required"
+        },
+        {
+            "code": "invalid_type",
+            "expected": "string",
+            "received": "undefined",
+            "path": [
+                "ruleName"
+            ],
+            "message": "Required"
+        },
+        {
+            "code": "invalid_type",
+            "expected": "string",
+            "received": "undefined",
+            "path": [
+                "ruleType"
+            ],
+            "message": "Required"
+        },
+        {
+            "code": "invalid_type",
+            "expected": "string",
+            "received": "undefined",
+            "path": [
+                "validFrom"
+            ],
+            "message": "Required"
+        },
+        {
+            "code": "invalid_type",
+            "expected": "string",
+            "received": "undefined",
+            "path": [
+                "validTo"
+            ],
+            "message": "Required"
+        }
+    ],
+    "error": "[\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"ruleCode\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"ruleName\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"ruleType\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"validFrom\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"validTo\"\n    ],\n    \"message\": \"Required\"\n  }\n]"
+}

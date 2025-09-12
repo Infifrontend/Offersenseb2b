@@ -2326,7 +2326,105 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/tiers", async (req, res) => {
     try {
       const filters = req.query;
-      const tiers = await storage.getAgentTiers(filters);
+      let tiers = await storage.getAgentTiers(filters);
+      
+      // If no tiers exist and no specific filters, create sample data
+      if (tiers.length === 0 && Object.keys(filters).length === 0) {
+        console.log("No agent tiers found, creating sample tiers...");
+        
+        // Create sample agent tiers
+        const sampleTiers = [
+          {
+            tierCode: "PLATINUM",
+            displayName: "Platinum Elite",
+            kpiWindow: "QUARTERLY" as const,
+            kpiThresholds: {
+              totalBookingValueMin: 50000000,
+              totalBookingsMin: 1500,
+              avgBookingsPerMonthMin: 400,
+              avgSearchesPerMonthMin: 5000,
+              conversionPctMin: 8.0
+            },
+            defaultPricingPolicy: {
+              type: "PERCENT" as const,
+              value: -2.0
+            },
+            description: "Highest tier for elite agents with exceptional performance",
+            status: "ACTIVE" as const,
+            createdBy: "system"
+          },
+          {
+            tierCode: "GOLD",
+            displayName: "Gold Premium",
+            kpiWindow: "QUARTERLY" as const,
+            kpiThresholds: {
+              totalBookingValueMin: 30000000,
+              totalBookingsMin: 1000,
+              avgBookingsPerMonthMin: 250,
+              avgSearchesPerMonthMin: 3000,
+              conversionPctMin: 7.5
+            },
+            defaultPricingPolicy: {
+              type: "PERCENT" as const,
+              value: -1.0
+            },
+            description: "Premium tier for high-performing agents",
+            status: "ACTIVE" as const,
+            createdBy: "system"
+          },
+          {
+            tierCode: "SILVER",
+            displayName: "Silver Standard",
+            kpiWindow: "QUARTERLY" as const,
+            kpiThresholds: {
+              totalBookingValueMin: 15000000,
+              totalBookingsMin: 500,
+              avgBookingsPerMonthMin: 125,
+              avgSearchesPerMonthMin: 1500,
+              conversionPctMin: 7.0
+            },
+            defaultPricingPolicy: {
+              type: "PERCENT" as const,
+              value: 0.0
+            },
+            description: "Standard tier for regular agents",
+            status: "ACTIVE" as const,
+            createdBy: "system"
+          },
+          {
+            tierCode: "BRONZE",
+            displayName: "Bronze Basic",
+            kpiWindow: "QUARTERLY" as const,
+            kpiThresholds: {
+              totalBookingValueMin: 5000000,
+              totalBookingsMin: 200,
+              avgBookingsPerMonthMin: 50,
+              avgSearchesPerMonthMin: 800,
+              conversionPctMin: 6.0
+            },
+            defaultPricingPolicy: {
+              type: "PERCENT" as const,
+              value: 1.0
+            },
+            description: "Basic tier for new or low-volume agents",
+            status: "ACTIVE" as const,
+            createdBy: "system"
+          }
+        ];
+
+        try {
+          for (const tierData of sampleTiers) {
+            await storage.insertAgentTier(tierData);
+            console.log(`Created agent tier: ${tierData.tierCode}`);
+          }
+
+          // Refetch after creating samples
+          tiers = await storage.getAgentTiers(filters);
+        } catch (createError: any) {
+          console.error("Error creating sample agent tiers:", createError);
+        }
+      }
+      
       res.json(tiers);
     } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch agent tiers", error: error.message });
@@ -2409,7 +2507,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/tiers/assignments", async (req, res) => {
     try {
       const filters = req.query;
-      const assignments = await storage.getAgentTierAssignments(filters);
+      let assignments = await storage.getAgentTierAssignments(filters);
+      
+      // If no assignments exist and no specific filters, create sample data
+      if (assignments.length === 0 && Object.keys(filters).length === 0) {
+        console.log("No tier assignments found, creating sample assignments...");
+        
+        // Create sample tier assignments
+        const sampleAssignments = [
+          {
+            agentId: "AGT001",
+            tierCode: "PLATINUM",
+            assignmentType: "AUTO" as const,
+            effectiveFrom: "2024-01-01",
+            kpiData: {
+              totalBookingValue: 75000000,
+              totalBookings: 2500,
+              avgBookingsPerMonth: 625,
+              avgSearchesPerMonth: 7500,
+              conversionPct: 8.3
+            },
+            assignedBy: "system",
+            justification: "Automatic assignment based on KPI evaluation",
+            status: "ACTIVE" as const,
+          },
+          {
+            agentId: "AGT002",
+            tierCode: "GOLD",
+            assignmentType: "AUTO" as const,
+            effectiveFrom: "2024-01-01",
+            kpiData: {
+              totalBookingValue: 45000000,
+              totalBookings: 1800,
+              avgBookingsPerMonth: 450,
+              avgSearchesPerMonth: 5000,
+              conversionPct: 9.0
+            },
+            assignedBy: "system",
+            justification: "Automatic assignment based on KPI evaluation",
+            status: "ACTIVE" as const,
+          },
+          {
+            agentId: "AGT003",
+            tierCode: "SILVER",
+            assignmentType: "MANUAL_OVERRIDE" as const,
+            effectiveFrom: "2024-02-15",
+            assignedBy: "admin",
+            justification: "Manual upgrade due to exceptional performance in specific routes",
+            status: "ACTIVE" as const,
+          },
+          {
+            agentId: "AGT004",
+            tierCode: "BRONZE",
+            assignmentType: "AUTO" as const,
+            effectiveFrom: "2024-01-01",
+            kpiData: {
+              totalBookingValue: 15000000,
+              totalBookings: 800,
+              avgBookingsPerMonth: 200,
+              avgSearchesPerMonth: 2500,
+              conversionPct: 8.0
+            },
+            assignedBy: "system",
+            justification: "Automatic assignment based on KPI evaluation",
+            status: "ACTIVE" as const,
+          },
+          {
+            agentId: "AGT005",
+            tierCode: "GOLD",
+            assignmentType: "AUTO" as const,
+            effectiveFrom: "2024-03-01",
+            kpiData: {
+              totalBookingValue: 48000000,
+              totalBookings: 1950,
+              avgBookingsPerMonth: 487,
+              avgSearchesPerMonth: 5200,
+              conversionPct: 9.4
+            },
+            assignedBy: "system",
+            justification: "Automatic assignment based on KPI evaluation",
+            status: "ACTIVE" as const,
+          }
+        ];
+
+        try {
+          for (const assignmentData of sampleAssignments) {
+            await storage.insertAgentTierAssignment(assignmentData);
+            console.log(`Created tier assignment for agent: ${assignmentData.agentId}`);
+          }
+
+          // Refetch after creating samples
+          assignments = await storage.getAgentTierAssignments(filters);
+        } catch (createError: any) {
+          console.error("Error creating sample tier assignments:", createError);
+        }
+      }
+      
       res.json(assignments);
     } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch tier assignments", error: error.message });

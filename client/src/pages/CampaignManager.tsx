@@ -326,17 +326,16 @@ export default function CampaignManager() {
   );
 
   // Fetch available ancillaries for dropdown
-  const { data: availableAncillaries = [], isLoading: isAncillariesLoading } = useQuery<
-    AncillaryRule[]
-  >({
-    queryKey: ["/api/ancillary-products"],
-    queryFn: async () => {
-      const response = await fetch("/api/ancillary-products");
-      if (!response.ok) throw new Error("Failed to fetch ancillary products");
-      return response.json();
-    },
-    staleTime: 1000 * 60 * 10, // 10 minutes
-  });
+  const { data: availableAncillaries = [], isLoading: isAncillariesLoading } =
+    useQuery<AncillaryRule[]>({
+      queryKey: ["/api/ancillary-products"],
+      queryFn: async () => {
+        const response = await fetch("/api/ancillary-products");
+        if (!response.ok) throw new Error("Failed to fetch ancillary products");
+        return response.json();
+      },
+      staleTime: 1000 * 60 * 10, // 10 minutes
+    });
 
   const { data: campaignMetrics, isLoading: metricsLoading } = useQuery({
     queryKey: [
@@ -949,7 +948,7 @@ export default function CampaignManager() {
           </Row>
 
           <Divider orientation="left">Products & Offer</Divider>
-
+          <p>{JSON.stringify(availableAncillaries)}</p>
           <Row gutter={16}>
             <Col span={12}>
               <AntForm.Item

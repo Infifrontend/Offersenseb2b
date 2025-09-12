@@ -347,12 +347,11 @@ export default function AgentChannelManager() {
 
   const handleOverrideSubmit = async (values: any) => {
     try {
-      const validatedData = overrideFormSchema.parse(values);
       // Format the data with proper date strings
       const formattedData = {
-        ...validatedData,
-        validFrom: validatedData.validFrom?.format("YYYY-MM-DD"),
-        validTo: validatedData.validTo?.format("YYYY-MM-DD"),
+        ...values,
+        validFrom: values.validFrom?.format("YYYY-MM-DD"),
+        validTo: values.validTo?.format("YYYY-MM-DD"),
       };
 
       if (editingOverride) {
@@ -364,11 +363,7 @@ export default function AgentChannelManager() {
         await createOverrideMutation.mutateAsync(formattedData);
       }
     } catch (error: any) {
-      if (error.errors) {
-        error.errors.forEach((err: any) => {
-          message.error(`${err.path.join(".")}: ${err.message}`);
-        });
-      }
+      message.error(error.message || "Failed to submit channel override");
     }
   };
 

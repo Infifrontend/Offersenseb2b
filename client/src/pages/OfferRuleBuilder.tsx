@@ -433,69 +433,63 @@ export default function OfferRuleBuilder() {
     console.log("Create Rule button clicked");
 
     try {
-      // Validate and get form values
-      const allFormValues = await createForm.validateFields().catch(() => {
-        // If validation fails, still get the field values
-        return createForm.getFieldsValue();
-      });
-      
+      // Get all form values without validation to avoid empty results
+      const allFormValues = createForm.getFieldsValue(true);
       console.log("All form values:", allFormValues);
 
-      // Extract field values with proper fallbacks
+      // Extract basic field values with proper fallbacks
       const ruleCode = allFormValues.ruleCode?.trim() || `RULE_${Date.now()}`;
       const ruleName = allFormValues.ruleName?.trim() || "Unnamed Rule";
       const ruleType = allFormValues.ruleType || "FARE_DISCOUNT";
       const priority = allFormValues.priority || 1;
+      const justification = allFormValues.justification?.trim() || undefined;
       
       // Handle date fields properly
-      const validFrom = allFormValues.validFrom ? 
-        (allFormValues.validFrom.format ? allFormValues.validFrom.format("YYYY-MM-DD") : allFormValues.validFrom) :
-        dayjs().format("YYYY-MM-DD");
-      const validTo = allFormValues.validTo ? 
-        (allFormValues.validTo.format ? allFormValues.validTo.format("YYYY-MM-DD") : allFormValues.validTo) :
-        dayjs().add(1, 'year').format("YYYY-MM-DD");
+      const validFrom = allFormValues.validFrom 
+        ? dayjs(allFormValues.validFrom).format("YYYY-MM-DD")
+        : dayjs().format("YYYY-MM-DD");
+      const validTo = allFormValues.validTo 
+        ? dayjs(allFormValues.validTo).format("YYYY-MM-DD")
+        : dayjs().add(1, 'year').format("YYYY-MM-DD");
 
-      // Process conditions with proper nested field access
-      const conditions = allFormValues.conditions || {};
+      // Process conditions - handle nested structure properly
+      const conditionsData = allFormValues.conditions || {};
       const processedConditions = {
-        origin: conditions.origin || allFormValues["conditions.origin"] || undefined,
-        destination: conditions.destination || allFormValues["conditions.destination"] || undefined,
-        pos: conditions.pos || allFormValues["conditions.pos"] || [],
-        agentTier: conditions.agentTier || allFormValues["conditions.agentTier"] || [],
-        cohortCodes: conditions.cohortCodes || allFormValues["conditions.cohortCodes"] || [],
-        channel: conditions.channel || allFormValues["conditions.channel"] || [],
-        cabinClass: conditions.cabinClass || allFormValues["conditions.cabinClass"] || [],
-        tripType: conditions.tripType || allFormValues["conditions.tripType"] || [],
-        seasonCode: conditions.seasonCode || allFormValues["conditions.seasonCode"] || undefined,
+        origin: conditionsData.origin || undefined,
+        destination: conditionsData.destination || undefined,
+        pos: Array.isArray(conditionsData.pos) ? conditionsData.pos : [],
+        agentTier: Array.isArray(conditionsData.agentTier) ? conditionsData.agentTier : [],
+        cohortCodes: Array.isArray(conditionsData.cohortCodes) ? conditionsData.cohortCodes : [],
+        channel: Array.isArray(conditionsData.channel) ? conditionsData.channel : [],
+        cabinClass: Array.isArray(conditionsData.cabinClass) ? conditionsData.cabinClass : [],
+        tripType: Array.isArray(conditionsData.tripType) ? conditionsData.tripType : [],
+        seasonCode: conditionsData.seasonCode || undefined,
       };
 
-      // Process actions
-      const actions = allFormValues.actions || [];
-      const processedActions = actions
+      // Process actions - ensure proper structure
+      const actionsData = Array.isArray(allFormValues.actions) ? allFormValues.actions : [];
+      const processedActions = actionsData
         .filter((action: any) => action && action.type)
         .map((action: any) => {
           const formattedAction: any = {
             type: action.type,
           };
 
+          // Add optional fields if they exist
           if (action.scope) formattedAction.scope = action.scope;
           if (action.valueType) formattedAction.valueType = action.valueType;
-          if (action.value !== undefined && action.value !== null)
+          if (action.value !== undefined && action.value !== null && action.value !== '') {
             formattedAction.value = Number(action.value);
-          if (action.ancillaryCode)
-            formattedAction.ancillaryCode = action.ancillaryCode;
-          if (action.bundleCode) formattedAction.bundleCode = action.bundleCode;
-          if (action.bannerText) formattedAction.bannerText = action.bannerText;
+          }
+          if (action.ancillaryCode?.trim()) formattedAction.ancillaryCode = action.ancillaryCode.trim();
+          if (action.bundleCode?.trim()) formattedAction.bundleCode = action.bundleCode.trim();
+          if (action.bannerText?.trim()) formattedAction.bannerText = action.bannerText.trim();
 
           // Add pricing object for compatibility
-          if (
-            action.valueType &&
-            action.value !== undefined &&
-            action.value !== null
-          ) {
+          if (action.valueType && formattedAction.value !== undefined) {
             formattedAction.pricing = {
               type: action.valueType,
-              value: Number(action.value),
+              value: formattedAction.value,
             };
           }
 
@@ -512,23 +506,33 @@ export default function OfferRuleBuilder() {
         priority,
         validFrom,
         validTo,
-        justification: allFormValues.justification || undefined,
-        createdBy: "admin", // This would come from auth context in a real app
+        justification,
+        createdBy: "admin",
         status: "DRAFT",
       };
 
       console.log("Final formatted data:", formattedData);
 
       // Submit the data
-      createRuleMutation.mutate(formattedData);
+      await createRuleMutation.mutateAsync(formattedData);
+      
     } catch (error) {
       console.error("Form submission error:", error);
-      // Fallback submission with minimal data
+      
+      // Create fallback data with current timestamp
+      const timestamp = Date.now();
       const basicData = {
-        ruleCode: `RULE_${Date.now()}`,
+        ruleCode: `RULE_${timestamp}`,
         ruleName: "Unnamed Rule",
         ruleType: "FARE_DISCOUNT",
-        conditions: {},
+        conditions: {
+          pos: [],
+          agentTier: [],
+          cohortCodes: [],
+          channel: [],
+          cabinClass: [],
+          tripType: []
+        },
         actions: [],
         priority: 1,
         validFrom: dayjs().format("YYYY-MM-DD"),
@@ -536,6 +540,7 @@ export default function OfferRuleBuilder() {
         createdBy: "admin",
         status: "DRAFT",
       };
+      
       console.log("Using fallback data:", basicData);
       createRuleMutation.mutate(basicData);
     }

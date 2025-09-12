@@ -1690,6 +1690,15 @@ export class DatabaseStorage implements IStorage {
     return conflicts;
   }
 
+  async getAgentTierByCode(tierCode: string): Promise<AgentTier | null> {
+    const [tier] = await this.db
+      .select()
+      .from(agentTiers)
+      .where(eq(agentTiers.tierCode, tierCode))
+      .limit(1);
+    return tier || null;
+  }
+
   // Campaign Management operations
   async getCampaigns(filters: any = {}): Promise<Campaign[]> {
     let query = this.db.select().from(campaigns);

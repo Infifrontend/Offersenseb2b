@@ -1352,28 +1352,26 @@ export default function OfferRuleBuilder() {
                                     loading={isAncillariesLoading}
                                     showSearch
                                     allowClear
+                                    optionFilterProp="label"
+                                    style={{ width: "100%" }}
+                                    dropdownStyle={{ maxHeight: 300, overflow: 'auto' }}
                                     filterOption={(input, option) => {
-                                      const children = option?.children;
-                                      if (typeof children === 'string') {
-                                        return children.toLowerCase().includes(input.toLowerCase());
-                                      }
-                                      if (React.isValidElement(children)) {
-                                        const ancillaryCode = children.props?.children?.[0]?.props?.children || '';
-                                        const ruleCode = children.props?.children?.[1]?.props?.children || '';
-                                        return ancillaryCode.toLowerCase().includes(input.toLowerCase()) ||
-                                               ruleCode.toLowerCase().includes(input.toLowerCase());
-                                      }
-                                      return false;
+                                      const label = option?.label || '';
+                                      return label.toLowerCase().includes(input.toLowerCase());
                                     }}
                                   >
                                     {availableAncillaries.map((ancillary: any) => (
-                                      <AntSelect.Option key={ancillary.id} value={ancillary.ancillaryCode}>
-                                        <div style={{ display: "flex", flexDirection: "column" }}>
-                                          <div className="cls-ancillary-dropdown">
-                                            <p className="font-medium text-sm">{ancillary.ancillaryCode}</p>
-                                            <span className="text-gray-600 text-xs">{ancillary.ruleCode}</span>
+                                      <AntSelect.Option 
+                                        key={ancillary.id} 
+                                        value={ancillary.ancillaryCode}
+                                        label={`${ancillary.ancillaryCode} ${ancillary.ruleCode}`}
+                                      >
+                                        <div className="cls-ancillary-dropdown">
+                                          <div>
+                                            <div className="font-medium">{ancillary.ancillaryCode}</div>
+                                            <div className="text-gray-600">{ancillary.ruleCode}</div>
                                           </div>
-                                          <div className="text-xs text-gray-500">
+                                          <div className="text-xs text-gray-500 mt-1">
                                             {ancillary.adjustmentType === "FREE" 
                                               ? "Free" 
                                               : ancillary.adjustmentType === "PERCENT"
@@ -1413,28 +1411,26 @@ export default function OfferRuleBuilder() {
                                     loading={isBundlesLoading}
                                     showSearch
                                     allowClear
+                                    optionFilterProp="label"
+                                    style={{ width: "100%" }}
+                                    dropdownStyle={{ maxHeight: 300, overflow: 'auto' }}
                                     filterOption={(input, option) => {
-                                      const children = option?.children;
-                                      if (typeof children === 'string') {
-                                        return children.toLowerCase().includes(input.toLowerCase());
-                                      }
-                                      if (React.isValidElement(children)) {
-                                        const bundleCode = children.props?.children?.[0]?.props?.children || '';
-                                        const bundleName = children.props?.children?.[1]?.props?.children || '';
-                                        return bundleCode.toLowerCase().includes(input.toLowerCase()) ||
-                                               bundleName.toLowerCase().includes(input.toLowerCase());
-                                      }
-                                      return false;
+                                      const label = option?.label || '';
+                                      return label.toLowerCase().includes(input.toLowerCase());
                                     }}
                                   >
                                     {availableBundles.map((bundle: any) => (
-                                      <AntSelect.Option key={bundle.id} value={bundle.bundleCode}>
-                                        <div style={{ display: "flex", flexDirection: "column" }}>
-                                          <div className="cls-bundle-dropdown">
-                                            <p className="font-medium text-sm">{bundle.bundleCode}</p>
-                                            <span className="text-gray-600 text-xs">{bundle.bundleName}</span>
+                                      <AntSelect.Option 
+                                        key={bundle.id} 
+                                        value={bundle.bundleCode}
+                                        label={`${bundle.bundleCode} ${bundle.bundleName}`}
+                                      >
+                                        <div className="cls-bundle-dropdown">
+                                          <div>
+                                            <div className="font-medium">{bundle.bundleCode}</div>
+                                            <div className="text-gray-600">{bundle.bundleName}</div>
                                           </div>
-                                          <div className="text-xs text-gray-500">
+                                          <div className="text-xs text-gray-500 mt-1">
                                             Type: {bundle.bundleType?.replace('_', ' ')} | Components: {bundle.components?.length || 0}
                                           </div>
                                         </div>

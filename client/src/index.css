@@ -32,14 +32,65 @@
 
 .cls-ancillary-dropdown {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cls-ancillary-dropdown .font-medium {
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.2;
+  color: #1f2937;
+  word-break: break-word;
+}
+
+.cls-ancillary-dropdown .text-gray-600 {
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.1;
 }
 
 .cls-bundle-dropdown {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cls-bundle-dropdown .font-medium {
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.2;
+  color: #1f2937;
+  word-break: break-word;
+}
+
+.cls-bundle-dropdown .text-gray-600 {
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.1;
+}
+
+/* Fix for Ant Design Select dropdown option spacing */
+.ant-select-dropdown .ant-select-item-option-content {
+  padding: 8px 12px !important;
+}
+
+.ant-select-dropdown .ant-select-item {
+  padding: 0 !important;
+}
+
+.ant-select-dropdown .ant-select-item-option {
+  min-height: auto !important;
+  padding: 4px 0 !important;
+}
+
+/* Ensure proper text wrapping in select options */
+.ant-select-selection-item {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 :root {

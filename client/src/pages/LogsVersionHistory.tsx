@@ -47,6 +47,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "../components/ui/sheet";
 import { Label } from "../components/ui/label";
 import { useToast } from "../hooks/use-toast";
 import { format } from "date-fns";
@@ -94,6 +104,7 @@ export default function LogsVersionHistory() {
   const [selectedEntityId, setSelectedEntityId] = useState<string>("");
   const [rollbackDialogOpen, setRollbackDialogOpen] = useState(false);
   const [rollbackJustification, setRollbackJustification] = useState("");
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -337,95 +348,127 @@ export default function LogsVersionHistory() {
         </Col>
       </Row>
 
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="w-4 h-4" />
-            Filters
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <div>
-              <Label htmlFor="search">Search</Label>
-              <Input
-                id="search"
-                placeholder="Search logs..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+      {/* Sticky Filter Icon */}
+      <div className="fixed top-5 right-0 z-50 cls-filter-sticky cls-filter-sticky button">
+        <Sheet open={isFilterDrawerOpen} onOpenChange={setIsFilterDrawerOpen}>
+          <SheetTrigger asChild>
+            <Button
+              size="lg"
+              className="h-14 w-14 rounded-full shadow-lg clr-bg-clr hover:bg-blue-700 text-white"
+            >
+              <Filter className="" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="right" className="w-96 overflow-y-auto">
+            <SheetHeader>
+              <SheetTitle>Filters</SheetTitle>
+              <SheetDescription>
+                Filter audit logs by various criteria
+              </SheetDescription>
+            </SheetHeader>
+            <div className="py-4 space-y-4">
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <Label htmlFor="search">Search</Label>
+                  <Input
+                    id="search"
+                    placeholder="Search logs..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="module">Module</Label>
+                  <Select value={moduleFilter || "all"} onValueChange={(value) => setModuleFilter(value === "all" ? "" : value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="All modules" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All modules</SelectItem>
+                      <SelectItem value="NegotiatedFare">
+                        Negotiated Fares
+                      </SelectItem>
+                      <SelectItem value="DynamicDiscountRule">
+                        Dynamic Discounts
+                      </SelectItem>
+                      <SelectItem value="AirAncillaryRule">
+                        Air Ancillaries
+                      </SelectItem>
+                      <SelectItem value="NonAirRate">Non-Air Rates</SelectItem>
+                      <SelectItem value="Bundle">Bundles</SelectItem>
+                      <SelectItem value="OfferRule">Offer Rules</SelectItem>
+                      <SelectItem value="Agent">Agents</SelectItem>
+                      <SelectItem value="Cohort">Cohorts</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="action">Action</Label>
+                  <Select value={actionFilter || "all"} onValueChange={(value) => setActionFilter(value === "all" ? "" : value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="All actions" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All actions</SelectItem>
+                      <SelectItem value="CREATED">Created</SelectItem>
+                      <SelectItem value="UPDATED">Updated</SelectItem>
+                      <SelectItem value="DELETED">Deleted</SelectItem>
+                      <SelectItem value="STATUS_CHANGED">Status Changed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="user">User</Label>
+                  <Input
+                    id="user"
+                    placeholder="Filter by user..."
+                    value={userFilter}
+                    onChange={(e) => setUserFilter(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="daterange">Date Range</Label>
+                  <Space direction="vertical" style={{ width: "100%" }}>
+                    <RangePicker
+                      style={{ width: "100%" }}
+                      onChange={(dates) => {
+                        if (dates && dates[0] && dates[1]) {
+                          setDateRange([
+                            dates[0].toISOString(),
+                            dates[1].toISOString(),
+                          ]);
+                        } else {
+                          setDateRange(null);
+                        }
+                      }}
+                    />
+                  </Space>
+                </div>
+              </div>
             </div>
-            <div>
-              <Label htmlFor="module">Module</Label>
-              <Select value={moduleFilter} onValueChange={setModuleFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All modules" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All modules</SelectItem>
-                  <SelectItem value="NegotiatedFare">
-                    Negotiated Fares
-                  </SelectItem>
-                  <SelectItem value="DynamicDiscountRule">
-                    Dynamic Discounts
-                  </SelectItem>
-                  <SelectItem value="AirAncillaryRule">
-                    Air Ancillaries
-                  </SelectItem>
-                  <SelectItem value="NonAirRate">Non-Air Rates</SelectItem>
-                  <SelectItem value="Bundle">Bundles</SelectItem>
-                  <SelectItem value="OfferRule">Offer Rules</SelectItem>
-                  <SelectItem value="Agent">Agents</SelectItem>
-                  <SelectItem value="Cohort">Cohorts</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="action">Action</Label>
-              <Select value={actionFilter} onValueChange={setActionFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All actions" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All actions</SelectItem>
-                  <SelectItem value="CREATED">Created</SelectItem>
-                  <SelectItem value="UPDATED">Updated</SelectItem>
-                  <SelectItem value="DELETED">Deleted</SelectItem>
-                  <SelectItem value="STATUS_CHANGED">Status Changed</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="user">User</Label>
-              <Input
-                id="user"
-                placeholder="Filter by user..."
-                value={userFilter}
-                onChange={(e) => setUserFilter(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="daterange">Date Range</Label>
-              <Space direction="vertical" style={{ width: "100%" }}>
-                <RangePicker
-                  style={{ width: "100%" }}
-                  onChange={(dates) => {
-                    if (dates && dates[0] && dates[1]) {
-                      setDateRange([
-                        dates[0].toISOString(),
-                        dates[1].toISOString(),
-                      ]);
-                    } else {
-                      setDateRange(null);
-                    }
+            <SheetFooter className="pt-4">
+              <div className="flex gap-2 w-full">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setSearchTerm("");
+                    setModuleFilter("");
+                    setActionFilter("");
+                    setUserFilter("");
+                    setDateRange(null);
                   }}
-                />
-              </Space>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+                  className="flex-1"
+                >
+                  Reset All
+                </Button>
+                <SheetClose asChild>
+                  <Button className="flex-1">Apply Filters</Button>
+                </SheetClose>
+              </div>
+            </SheetFooter>
+          </SheetContent>
+        </Sheet>
+      </div>
 
       {/* Audit Logs Table */}
       <Card>

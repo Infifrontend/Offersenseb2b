@@ -9,12 +9,12 @@ import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema, insertAirA
 // Enhanced AI template generation function
 async function generateAITemplates(type: string, context: any): Promise<any[]> {
   console.log(`Generating ${type} templates with context:`, context);
-  
+
   // Extract campaign details for template generation
   const {
     campaignName = 'Special Campaign',
     offerType = 'PERCENT',
-    offerValue = 10,
+    offerValue,
     specialPrice,
     products = { ancillaries: [], bundles: [] },
     target = { agentTiers: [], cohorts: [] },
@@ -52,33 +52,33 @@ async function generateAITemplates(type: string, context: any): Promise<any[]> {
               <h1 style="margin: 0; font-size: 24px;">${campaignName}</h1>
               <p style="margin: 10px 0 0; font-size: 16px;">Exclusive offer just for you!</p>
             </div>
-            
+
             <div style="padding: 30px 20px;">
               <h2 style="color: #333; margin-bottom: 20px;">Don't miss out on this amazing deal!</h2>
-              
+
               <div style="background: #f8f9ff; border-left: 4px solid #667eea; padding: 20px; margin: 20px 0;">
                 <h3 style="color: #667eea; margin: 0 0 10px;">🎉 Special Offer</h3>
                 <p style="font-size: 18px; font-weight: bold; color: #333; margin: 0;">
                   Get ${getOfferText()} on ${getProductMentions()}
                 </p>
               </div>
-              
+
               <p style="color: #666; line-height: 1.6;">
                 We're excited to offer you this exclusive deal on our premium travel services. 
                 This limited-time offer is specially curated for valued customers like you.
               </p>
-              
+
               <div style="text-align: center; margin: 30px 0;">
                 <a href="#" style="background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
                   Claim Your Offer Now →
                 </a>
               </div>
-              
+
               <p style="color: #888; font-size: 14px; margin-top: 30px;">
                 This offer is valid for a limited time. Terms and conditions apply.
               </p>
             </div>
-            
+
             <div style="background: #f5f5f5; padding: 20px; text-align: center; color: #666; font-size: 14px;">
               <p>Best regards,<br>The ${companyName} Team</p>
             </div>
@@ -100,10 +100,10 @@ async function generateAITemplates(type: string, context: any): Promise<any[]> {
               <h1 style="margin: 0; font-size: 22px;">⏰ Last Chance!</h1>
               <p style="margin: 10px 0 0; font-size: 16px;">Your exclusive offer expires soon</p>
             </div>
-            
+
             <div style="padding: 30px 20px;">
               <h2 style="color: #333; margin-bottom: 20px;">Don't let this opportunity slip away!</h2>
-              
+
               <div style="background: #fff5f5; border: 2px dashed #ff6b6b; padding: 20px; margin: 20px 0; text-align: center;">
                 <h3 style="color: #ff6b6b; margin: 0 0 10px;">🔥 Limited Time Offer</h3>
                 <p style="font-size: 20px; font-weight: bold; color: #333; margin: 0;">
@@ -111,25 +111,25 @@ async function generateAITemplates(type: string, context: any): Promise<any[]> {
                 </p>
                 <p style="color: #ff6b6b; font-weight: bold; margin: 10px 0 0;">EXPIRES IN 24 HOURS!</p>
               </div>
-              
+
               <p style="color: #666; line-height: 1.6;">
                 This is your final reminder about our exclusive ${campaignName.toLowerCase()}. 
                 Secure your savings before this amazing deal disappears forever.
               </p>
-              
+
               <div style="text-align: center; margin: 30px 0;">
                 <a href="#" style="background: #ff6b6b; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);">
                   SECURE MY DISCOUNT NOW →
                 </a>
               </div>
-              
+
               <div style="background: #fffacd; border-left: 4px solid #ffd700; padding: 15px; margin: 20px 0;">
                 <p style="margin: 0; color: #b8860b; font-weight: bold;">
                   💡 Pro Tip: Customers who book within the next 6 hours get an additional surprise bonus!
                 </p>
               </div>
             </div>
-            
+
             <div style="background: #f5f5f5; padding: 20px; text-align: center; color: #666; font-size: 14px;">
               <p>Don't wait - book now!<br>The ${companyName} Team</p>
             </div>
@@ -151,17 +151,17 @@ async function generateAITemplates(type: string, context: any): Promise<any[]> {
               <h1 style="margin: 0; font-size: 24px;">✈️ Recommended Just For You</h1>
               <p style="margin: 10px 0 0; font-size: 16px;">Based on your travel preferences</p>
             </div>
-            
+
             <div style="padding: 30px 20px;">
               <p style="color: #666; line-height: 1.6; font-size: 16px;">
                 Hi there! 👋
               </p>
-              
+
               <p style="color: #666; line-height: 1.6;">
                 We noticed you're planning your next adventure, and we have something special that caught our attention. 
                 Our ${campaignName.toLowerCase()} is perfectly tailored for travelers like you.
               </p>
-              
+
               <div style="background: #f0f7ff; border-radius: 10px; padding: 25px; margin: 25px 0;">
                 <h3 style="color: #0984e3; margin: 0 0 15px; display: flex; align-items: center;">
                   🎯 Your Personalized Offer
@@ -173,7 +173,7 @@ async function generateAITemplates(type: string, context: any): Promise<any[]> {
                   <p style="color: #666; margin: 0;">Perfect for enhancing your travel experience</p>
                 </div>
               </div>
-              
+
               <div style="background: #fff9e6; border-left: 4px solid #ffa500; padding: 20px; margin: 20px 0;">
                 <h4 style="color: #ff8c00; margin: 0 0 10px;">Why this offer is perfect for you:</h4>
                 <ul style="color: #666; margin: 0; padding-left: 20px;">
@@ -183,18 +183,18 @@ async function generateAITemplates(type: string, context: any): Promise<any[]> {
                   <li>24/7 customer support included</li>
                 </ul>
               </div>
-              
+
               <div style="text-align: center; margin: 30px 0;">
                 <a href="#" style="background: #0984e3; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
                   Explore This Offer →
                 </a>
               </div>
-              
+
               <p style="color: #888; font-size: 14px; text-align: center;">
                 Have questions? Reply to this email - we're here to help! 💬
               </p>
             </div>
-            
+
             <div style="background: #f5f5f5; padding: 20px; text-align: center; color: #666; font-size: 14px;">
               <p>Happy travels!<br>Your friends at ${companyName}</p>
             </div>
@@ -208,7 +208,7 @@ async function generateAITemplates(type: string, context: any): Promise<any[]> {
       }
     ];
   } 
-  
+
   else if (type === 'whatsapp') {
     return [
       {
@@ -249,7 +249,7 @@ async function generateAITemplates(type: string, context: any): Promise<any[]> {
       }
     ];
   }
-  
+
   return [];
 }
 

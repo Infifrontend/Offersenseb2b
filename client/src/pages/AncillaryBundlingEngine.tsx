@@ -529,6 +529,13 @@ export default function AncillaryBundlingEngine() {
 
       if (!response.ok) {
         const errorData = await response.json();
+        if (response.status === 409 && errorData.conflicts) {
+          // Handle conflict by showing detailed error
+          const conflictDetails = errorData.conflicts.map((conflict: any) => 
+            `Rule "${conflict.ruleCode}" already exists for bundle "${conflict.bundleCode}"`
+          ).join(", ");
+          throw new Error(`Rule conflict: ${conflictDetails}. Please use a different rule code.`);
+        }
         throw new Error(errorData.message || "Failed to create bundle pricing rule");
       }
 
@@ -2158,6 +2165,7 @@ export default function AncillaryBundlingEngine() {
               label="Rule Code"
               name="ruleCode"
               rules={[{ required: true, message: "Rule code is required" }]}
+              help="Must be unique across all bundle pricing rules"
             >
               <AntInput placeholder="e.g., BUNDLE_DISC_15" />
             </AntForm.Item>

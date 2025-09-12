@@ -418,12 +418,12 @@ export default function AgentChannelManager() {
       width: 120,
       render: (pos: string[]) => (
         <Space size={4} wrap>
-          {pos.slice(0, 3).map((p) => (
+          {(pos || []).slice(0, 3).map((p) => (
             <Tag key={p} size="small">
               {p}
             </Tag>
           ))}
-          {pos.length > 3 && <Tag size="small">+{pos.length - 3}</Tag>}
+          {(pos || []).length > 3 && <Tag size="small">+{(pos || []).length - 3}</Tag>}
         </Space>
       ),
     },

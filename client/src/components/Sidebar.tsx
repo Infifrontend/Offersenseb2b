@@ -224,10 +224,10 @@ export default function Sidebar({
             }`}
           >
             <h1 className="text-lg font-bold text-primary-foreground">
-              OffersenseB2B
+              Offersense B2B
             </h1>
             <p className="text-xs text-white text-opacity-80">
-              Travel Management
+              Online Travel Agency
             </p>
           </div>
         </div>

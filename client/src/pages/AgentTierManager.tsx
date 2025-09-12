@@ -238,18 +238,10 @@ export default function AgentTierManager() {
     },
   });
 
-  const {
-    data: assignments = [],
-    isLoading: assignmentsLoading,
-    refetch: refetchAssignments,
-  } = useQuery({
-    queryKey: ["/api/tiers/assignments"],
-    queryFn: async () => {
-      const response = await fetch("/api/tiers/assignments");
-      if (!response.ok) throw new Error("Failed to fetch assignments");
-      return response.json();
-    },
-  });
+  // Mock assignments data since API is removed
+  const assignments: TierAssignment[] = [];
+  const assignmentsLoading = false;
+  const refetchAssignments = () => {};
 
   const {
     data: engines = [],
@@ -387,7 +379,6 @@ export default function AgentTierManager() {
       message.success("Tier override applied successfully");
       setIsOverrideModalVisible(false);
       overrideForm.resetFields();
-      refetchAssignments();
     },
     onError: (error: Error) => {
       message.error(error.message);
@@ -410,7 +401,6 @@ export default function AgentTierManager() {
       );
       setIsAssignmentModalVisible(false);
       assignmentForm.resetFields();
-      refetchAssignments();
     },
     onError: (error: Error) => {
       message.error(error.message);
@@ -770,16 +760,8 @@ export default function AgentTierManager() {
     return acc;
   }, {});
 
-  const activeAssignments = assignments.filter(
-    (a: TierAssignment) => a.status === "ACTIVE",
-  );
-  const assignmentStats = activeAssignments.reduce(
-    (acc: any, assignment: TierAssignment) => {
-      acc[assignment.tierCode] = (acc[assignment.tierCode] || 0) + 1;
-      return acc;
-    },
-    {},
-  );
+  const activeAssignments: TierAssignment[] = [];
+  const assignmentStats: Record<string, number> = {};
 
   return (
     <div className="space-y-6">

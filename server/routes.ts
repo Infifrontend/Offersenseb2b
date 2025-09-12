@@ -841,27 +841,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         rules = await storage.getBundlePricingRules(filters);
         console.log(`API: Found ${rules?.length || 0} bundle pricing rules`);
-        
+
         // Log the bundle codes being referenced
         if (rules && rules.length > 0) {
           const bundleCodes = rules.map(rule => rule.bundleCode).filter(Boolean);
           console.log("API: Bundle codes referenced in pricing rules:", bundleCodes);
-          
+
           // Check if the referenced bundles actually exist
           for (const bundleCode of bundleCodes) {
             const bundleExists = await storage.getBundles({ bundleCode });
             console.log(`API: Bundle ${bundleCode} exists:`, bundleExists.length > 0);
           }
         }
-        
+
         // If no pricing rules exist and no specific filters, create sample data
         if ((!rules || rules.length === 0) && Object.keys(filters).length === 0) {
           console.log("API: No bundle pricing rules found, creating sample rules...");
-          
+
           // First ensure we have sample bundles
           const existingBundles = await storage.getBundles({ status: "ACTIVE" });
           const bundleCodes = existingBundles.map(b => b.bundleCode);
-          
+
           if (bundleCodes.length > 0) {
             try {
               const samplePricingRules = [
@@ -905,7 +905,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   console.error(`API: Error creating pricing rule ${ruleData.ruleCode}:`, ruleError);
                 }
               }
-              
+
               // Refetch after creating samples
               rules = await storage.getBundlePricingRules(filters);
               console.log(`API: After sample creation: ${rules?.length || 0} bundle pricing rules`);
@@ -1784,11 +1784,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Fetching cohorts for dropdown list...");
       let cohorts = await storage.getCohorts({ status: "ACTIVE" });
       console.log(`Found ${cohorts?.length || 0} active cohorts`);
-      
+
       // If no cohorts exist, create some sample ones
       if (!cohorts || cohorts.length === 0) {
         console.log("No active cohorts found, creating sample cohorts...");
-        
+
         const sampleCohorts = [
           {
             cohortCode: "FESTIVE_2025",
@@ -1835,14 +1835,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             await storage.insertCohort(cohortData);
             console.log(`Created sample cohort: ${cohortData.cohortCode}`);
           }
-          
+
           // Refetch after creating samples
           cohorts = await storage.getCohorts({ status: "ACTIVE" });
         } catch (createError) {
           console.error("Error creating sample cohorts:", createError);
         }
       }
-      
+
       // Always return an array, even if empty
       if (!cohorts || cohorts.length === 0) {
         console.log("Still no cohorts found, returning empty array");

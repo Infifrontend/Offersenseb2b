@@ -311,6 +311,19 @@ export default function CampaignManager() {
     },
   });
 
+  // Fetch available cohorts for dropdowns
+  const { data: availableCohorts = [], isLoading: isCohortsLoading } = useQuery({
+    queryKey: ["cohorts"],
+    queryFn: async () => {
+      const response = await fetch("/api/cohorts");
+      if (!response.ok) throw new Error("Failed to fetch cohorts");
+      const data = await response.json();
+      console.log("Available cohorts for dropdown:", data);
+      return data;
+    },
+    staleTime: 1000 * 60 * 10, // 10 minutes
+  });
+
   const { data: campaignMetrics, isLoading: metricsLoading } = useQuery({
     queryKey: [
       "/api/campaigns/metrics",
@@ -876,20 +889,11 @@ export default function CampaignManager() {
                 <AntSelect
                   mode="multiple"
                   placeholder="Select cohorts"
-                  options={[
-                    {
-                      label: "POST_BOOKING_WINDOW",
-                      value: "POST_BOOKING_WINDOW",
-                    },
-                    {
-                      label: "FREQUENT_TRAVELERS",
-                      value: "FREQUENT_TRAVELERS",
-                    },
-                    {
-                      label: "BUSINESS_TRAVELERS",
-                      value: "BUSINESS_TRAVELERS",
-                    },
-                  ]}
+                  loading={isCohortsLoading}
+                  options={availableCohorts.map((cohort: { id: string; name: string }) => ({
+                    label: cohort.name,
+                    value: cohort.id,
+                  }))}
                 />
               </AntForm.Item>
             </Col>

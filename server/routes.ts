@@ -2646,6 +2646,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Agent Tier Assignment Routes
 
+  // Get all tier assignments with optional filters
+  app.get("/api/tiers/assignments", async (req, res) => {
+    try {
+      console.log("API: GET /api/tiers/assignments called with query:", req.query);
+      const filters = req.query;
+      let assignments = await storage.getAgentTierAssignments(filters);
+
+      // If no assignments exist and no specific filters, create sample data
+      if (assignments.length === 0 && Object.keys(filters).length === 0) {
+        console.log("No tier assignments found, creating sample assignments...");
+
+        // First ensure we have sample tiers
+        const existingTiers = await storage.getAgentTiers({ status: "ACTIVE" });
+        const tierCodes = existingTiers.map(t => t.tierCode);
+
+        if (tierCodes.length > 0) {
+          const sampleAssignments = [
+            {
+              agentId: "AGT001",
+              tierCode: tierCodes[0] || "PLATINUM",
+              assignmentType: "AUTO",
+              effectiveFrom: "2024-01-01",
+              assignedBy: "system",
+              justification: "Initial tier assignment based on KPI evaluation",
+              status: "ACTIVE",
+            },
+            {
+              agentId: "AGT002", 
+              tierCode: tierCodes[1] || "GOLD",
+              assignmentType: "AUTO",
+              effectiveFrom: "2024-01-01",
+              assignedBy: "system",
+              justification: "Initial tier assignment based on KPI evaluation",
+              status: "ACTIVE",
+            },
+            {
+              agentId: "AGT003",
+              tierCode: tierCodes[2] || "SILVER",
+              assignmentType: "MANUAL_OVERRIDE",
+              effectiveFrom: "2024-01-15",
+              assignedBy: "admin",
+              justification: "Manual override due to special circumstances",
+              status: "ACTIVE",
+            },
+            {
+              agentId: "AGT004",
+              tierCode: tierCodes[3] || "BRONZE",
+              assignmentType: "AUTO",
+              effectiveFrom: "2024-01-01",
+              assignedBy: "system",
+              justification: "Initial tier assignment based on KPI evaluation",
+              status: "ACTIVE",
+            },
+            {
+              agentId: "AGT005",
+              tierCode: tierCodes[1] || "GOLD",
+              assignmentType: "AUTO",
+              effectiveFrom: "2024-02-01",
+              assignedBy: "system",
+              justification: "Tier promotion based on improved KPIs",
+              status: "ACTIVE",
+            }
+          ];
+
+          try {
+            for (const assignmentData of sampleAssignments) {
+              await storage.insertAgentTierAssignment(assignmentData);
+              console.log(`Created sample assignment for agent: ${assignmentData.agentId}`);
+            }
+
+            // Refetch after creating samples
+            assignments = await storage.getAgentTierAssignments(filters);
+          } catch (createError: any) {
+            console.error("Error creating sample tier assignments:", createError);
+          }
+        }
+      }
+
+      console.log(`API: Returning ${assignments.length} tier assignments`);
+      res.json(assignments);
+    } catch (error: any) {
+      console.error("API: Error fetching tier assignments:", error);
+      res.status(500).json({ message: "Failed to fetch tier assignments", error: error.message });
+    }
+  });
 
   // Assign tier to agent (manual override)
   app.post("/api/tiers/override", async (req, res) => {

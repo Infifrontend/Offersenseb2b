@@ -432,17 +432,43 @@ export default function OfferRuleBuilder() {
   const onCreateSubmit = () => {
     console.log("Create Rule button clicked");
 
-    // First check if actions exist before validating form
-    const actions = createForm.getFieldValue("actions") || [];
+    // Get all form values first for debugging
+    const allFormValues = createForm.getFieldsValue();
+    console.log("All form values:", allFormValues);
+
+    // Check if actions exist before validating form
+    const actions = allFormValues.actions || [];
     if (actions.length === 0) {
       alert("At least one action is required");
       setCurrentStep(2);
       return;
     }
 
-    // Get all form values first
-    const allFormValues = createForm.getFieldsValue();
-    console.log("All form values:", allFormValues);
+    // Validate all required fields first
+    const requiredFields = ["ruleCode", "ruleName", "ruleType", "validFrom", "validTo"];
+    const missingFields = [];
+    
+    requiredFields.forEach(field => {
+      const value = allFormValues[field];
+      if (!value || (typeof value === 'string' && !value.trim())) {
+        missingFields.push(field);
+      }
+    });
+
+    if (missingFields.length > 0) {
+      const fieldLabels = {
+        ruleCode: "Rule Code",
+        ruleName: "Rule Name", 
+        ruleType: "Rule Type",
+        validFrom: "Valid From",
+        validTo: "Valid To"
+      };
+      
+      const missingLabels = missingFields.map(field => fieldLabels[field] || field);
+      alert(`Please fill in the following required fields: ${missingLabels.join(", ")}`);
+      setCurrentStep(0);
+      return;
+    }
 
     // Validate all form fields
     createForm
@@ -451,13 +477,13 @@ export default function OfferRuleBuilder() {
         try {
           console.log("Validated values:", validatedValues);
           
-          // Extract basic info from validated values
-          const ruleCode = validatedValues.ruleCode?.trim();
-          const ruleName = validatedValues.ruleName?.trim();
-          const ruleType = validatedValues.ruleType;
-          const priority = validatedValues.priority || 1;
-          const validFrom = validatedValues.validFrom;
-          const validTo = validatedValues.validTo;
+          // Extract basic info from validated values with proper fallbacks
+          const ruleCode = (validatedValues.ruleCode || allFormValues.ruleCode || "").trim();
+          const ruleName = (validatedValues.ruleName || allFormValues.ruleName || "").trim();
+          const ruleType = validatedValues.ruleType || allFormValues.ruleType;
+          const priority = validatedValues.priority || allFormValues.priority || 1;
+          const validFrom = validatedValues.validFrom || allFormValues.validFrom;
+          const validTo = validatedValues.validTo || allFormValues.validTo;
 
           console.log("Extracted basic info:", {
             ruleCode,
@@ -468,22 +494,15 @@ export default function OfferRuleBuilder() {
             validTo,
           });
 
-          // Ensure we have all required fields
+          // Final check for required fields
           if (!ruleCode || !ruleName || !ruleType || !validFrom || !validTo) {
-            const missingFields = [];
-            if (!ruleCode) missingFields.push("Rule Code");
-            if (!ruleName) missingFields.push("Rule Name");
-            if (!ruleType) missingFields.push("Rule Type");
-            if (!validFrom) missingFields.push("Valid From");
-            if (!validTo) missingFields.push("Valid To");
-            
-            alert(`Please fill in the following required fields: ${missingFields.join(", ")}`);
-            setCurrentStep(0); // Go back to basic info step
+            alert("Some required fields are missing. Please check all required fields are filled.");
+            setCurrentStep(0);
             return;
           }
 
-          // Actions validation already done above
-          const actions = validatedValues.actions || [];
+          // Get actions from validated values or fallback
+          const actions = validatedValues.actions || allFormValues.actions || [];
 
           const formattedData = {
             ruleCode,
@@ -889,7 +908,9 @@ export default function OfferRuleBuilder() {
                       label="Rule Code"
                       name="ruleCode"
                       rules={[
-                        { required: true, message: "Please enter rule code" },
+                        { required: true, message: "Rule code is required" },
+                        { min: 1, message: "Rule code cannot be empty" },
+                        { whitespace: true, message: "Rule code cannot be just whitespace" }
                       ]}
                     >
                       <AntInput placeholder="RULE_WEEKEND_DISCOUNT" />
@@ -900,7 +921,9 @@ export default function OfferRuleBuilder() {
                       label="Rule Name"
                       name="ruleName"
                       rules={[
-                        { required: true, message: "Please enter rule name" },
+                        { required: true, message: "Rule name is required" },
+                        { min: 1, message: "Rule name cannot be empty" },
+                        { whitespace: true, message: "Rule name cannot be just whitespace" }
                       ]}
                     >
                       <AntInput placeholder="Weekend Discount for Gold Agents" />
@@ -914,7 +937,7 @@ export default function OfferRuleBuilder() {
                       label="Rule Type"
                       name="ruleType"
                       rules={[
-                        { required: true, message: "Please select rule type" },
+                        { required: true, message: "Rule type is required" },
                       ]}
                     >
                       <AntSelect placeholder="Select rule type">
@@ -931,7 +954,8 @@ export default function OfferRuleBuilder() {
                       label="Priority"
                       name="priority"
                       rules={[
-                        { required: true, message: "Please enter priority" },
+                        { required: true, message: "Priority is required" },
+                        { type: 'number', min: 1, max: 100, message: "Priority must be between 1 and 100" }
                       ]}
                     >
                       <InputNumber
@@ -950,7 +974,7 @@ export default function OfferRuleBuilder() {
                       label="Valid From"
                       name="validFrom"
                       rules={[
-                        { required: true, message: "Please select start date" },
+                        { required: true, message: "Valid from date is required" },
                       ]}
                     >
                       <DatePicker
@@ -964,7 +988,7 @@ export default function OfferRuleBuilder() {
                       label="Valid To"
                       name="validTo"
                       rules={[
-                        { required: true, message: "Please select end date" },
+                        { required: true, message: "Valid to date is required" },
                       ]}
                     >
                       <DatePicker

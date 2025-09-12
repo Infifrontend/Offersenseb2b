@@ -271,7 +271,7 @@ export default function AncillaryBundlingEngine() {
   });
 
   // Fetch bundles
-  const { data: bundles = [], isLoading: bundlesLoading } = useQuery({
+  const { data: bundles = [], isLoading: bundlesLoading, refetch: refetchBundles } = useQuery({
     queryKey: ["bundles", filters],
     queryFn: async () => {
       const params = new URLSearchParams(filters);
@@ -281,25 +281,32 @@ export default function AncillaryBundlingEngine() {
     },
   });
 
-  // Fetch bundle pricing rules
+  // Query hooks for bundle pricing rules
   const {
     data: pricingRules = [],
-    isLoading: pricingRulesLoading,
-    refetch: refetchPricingRules,
+    isLoading: isPricingRulesLoading,
     error: pricingRulesError,
+    refetch: refetchPricingRules,
   } = useQuery({
     queryKey: ["bundle-pricing-rules", pricingFilters],
     queryFn: async () => {
-      const params = new URLSearchParams(pricingFilters);
-      const response = await fetch(`/api/bundles/pricing?${params}`);
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Failed to fetch bundle pricing rules:", response.status, errorText);
-        throw new Error(`Failed to fetch bundle pricing rules: ${response.status} ${response.statusText}`);
+      try {
+        console.log("Fetching bundle pricing rules from /api/bundles/pricing");
+        const response = await fetch("/api/bundles/pricing");
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("Received bundle pricing rules:", data);
+
+        // Ensure we always return an array
+        return Array.isArray(data) ? data : [];
+      } catch (error) {
+        console.error("Error fetching bundle pricing rules:", error);
+        return [];
       }
-      const data = await response.json();
-      // Ensure we always return an array
-      return Array.isArray(data) ? data : [];
     },
     retry: 1,
     onError: (error: any) => {
@@ -510,6 +517,47 @@ export default function AncillaryBundlingEngine() {
     },
   });
 
+  // Mutation for creating bundle pricing rules
+  const createBundlePricingMutation = useMutation({
+    mutationFn: async (data: any) => {
+      console.log("Creating bundle pricing rule:", data);
+      const response = await fetch("/api/bundles/pricing", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to create bundle pricing rule");
+      }
+
+      const result = await response.json();
+      console.log("Created bundle pricing rule:", result);
+      return result;
+    },
+    onSuccess: (data) => {
+      console.log("Bundle pricing rule created successfully:", data);
+      toast({
+        title: "Success",
+        description: "Bundle pricing rule created successfully",
+      });
+      setIsCreateBundlePricingModalOpen(false);
+      // Refetch both pricing rules and bundles to ensure consistency
+      refetchPricingRules();
+      refetchBundles();
+      pricingRuleForm.reset();
+    },
+    onError: (error: any) => {
+      console.error("Error creating bundle pricing rule:", error);
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   // Handle create bundle form submit
   const handleCreateBundle = (values: any) => {
     createBundleMutation.mutate(values);
@@ -656,7 +704,7 @@ export default function AncillaryBundlingEngine() {
       title: "Rule Code",
       dataIndex: "ruleCode",
       key: "ruleCode",
-      render: (text: string) => (
+      render: (text: string, record: BundlePricingRule) => (
         <span className="font-medium">{text || "N/A"}</span>
       ),
     },
@@ -664,12 +712,12 @@ export default function AncillaryBundlingEngine() {
       title: "Bundle Code",
       dataIndex: "bundleCode",
       key: "bundleCode",
-      render: (text: string) => <span>{text || "N/A"}</span>,
+      render: (text: string, record: BundlePricingRule) => <span>{text || "N/A"}</span>,
     },
     {
       title: "Discount",
       key: "discount",
-      render: (_: any, record: any) => (
+      render: (_: any, record: BundlePricingRule) => (
         <div className="flex items-center gap-1">
           <DollarSign className="h-4 w-4" />
           <span>
@@ -684,24 +732,24 @@ export default function AncillaryBundlingEngine() {
       title: "Priority",
       dataIndex: "priority",
       key: "priority",
-      render: (priority: number) => (
-        <Badge variant="outline">P{priority || 1}</Badge>
+      render: (priority: number, record: BundlePricingRule) => (
+        <Badge variant="outline">P{priority || record.priority || 1}</Badge>
       ),
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      render: (status: string) => (
+      render: (status: string, record: BundlePricingRule) => (
         <Badge variant={status === "ACTIVE" ? "default" : "secondary"}>
-          {status || "INACTIVE"}
+          {status || record.status || "INACTIVE"}
         </Badge>
       ),
     },
     {
       title: "Valid Period",
       key: "validPeriod",
-      render: (_: any, record: any) => (
+      render: (_: any, record: BundlePricingRule) => (
         <span className="text-sm">
           {record.validFrom && record.validTo ? (
             <>
@@ -717,7 +765,7 @@ export default function AncillaryBundlingEngine() {
     {
       title: "Actions",
       key: "actions",
-      render: (_: any, record: any) => (
+      render: (_: any, record: BundlePricingRule) => (
         <Space size="small">
           <Button
             size="sm"
@@ -823,94 +871,124 @@ export default function AncillaryBundlingEngine() {
 
           <Card>
             <CardContent className="p-6">
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Rule Code</TableHead>
-                      <TableHead>Bundle Code</TableHead>
-                      <TableHead>Discount Type</TableHead>
-                      <TableHead>Discount Value</TableHead>
-                      <TableHead>Priority</TableHead>
-                      <TableHead>Valid Period</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {pricingRules.map((rule: BundlePricingRule) => (
-                      <TableRow key={rule.id}>
-                        <TableCell className="font-medium">
-                          {rule.ruleCode || "N/A"}
-                        </TableCell>
-                        <TableCell>{rule.bundleCode || "N/A"}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="capitalize">
-                            {rule.discountType
-                              ? rule.discountType.toLowerCase()
-                              : "N/A"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {rule.discountType === "PERCENT"
-                            ? `${rule.discountValue || 0}%`
-                            : `$${rule.discountValue || 0}`}
-                        </TableCell>
-                        <TableCell>{rule.priority || 1}</TableCell>
-                        <TableCell className="text-sm">
-                          {rule.validFrom && rule.validTo ? (
-                            <>
-                              <div>{formatDate(rule.validFrom)}</div>
-                              <div className="text-gray-500">
-                                to {formatDate(rule.validTo)}
-                              </div>
-                            </>
-                          ) : (
-                            "N/A"
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              rule.status === "ACTIVE" ? "default" : "secondary"
-                            }
-                          >
-                            {rule.status || "INACTIVE"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleSimulateBundlePricing(rule)}
-                            >
-                              <Play className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEditBundlePricingRule(rule)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() =>
-                                handleDeleteBundlePricingRule(rule.id)
-                              }
-                              disabled={deleteBundlePricingMutation.isPending}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
+              {isPricingRulesLoading ? (
+                <div className="flex items-center justify-center p-8">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                    <p className="text-muted-foreground">Loading bundle pricing rules...</p>
+                  </div>
+                </div>
+              ) : pricingRulesError ? (
+                <div className="flex items-center justify-center p-8">
+                  <div className="text-center">
+                    <p className="text-red-500 mb-2">Failed to load bundle pricing rules</p>
+                    <Button onClick={() => refetchPricingRules()} variant="outline" size="sm">
+                      Retry
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Rule Code</TableHead>
+                        <TableHead>Bundle Code</TableHead>
+                        <TableHead>Discount Type</TableHead>
+                        <TableHead>Discount Value</TableHead>
+                        <TableHead>Priority</TableHead>
+                        <TableHead>Valid Period</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                    </TableHeader>
+                    <TableBody>
+                      {pricingRules.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={8} className="text-center p-8">
+                            <div className="text-muted-foreground">
+                              <Package className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                              <p className="mb-2">No bundle pricing rules found</p>
+                              <Button
+                                onClick={() => setIsCreateBundlePricingModalOpen(true)}
+                                size="sm"
+                              >
+                                Create First Rule
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        pricingRules.map((rule: BundlePricingRule) => (
+                          <TableRow key={rule.id}>
+                            <TableCell className="font-medium">
+                              {rule.ruleCode || "N/A"}
+                            </TableCell>
+                            <TableCell>{rule.bundleCode || "N/A"}</TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className="capitalize">
+                                {rule.discountType
+                                  ? rule.discountType.toLowerCase()
+                                  : "N/A"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {rule.discountType === "PERCENT" 
+                                ? `${rule.discountValue}%`
+                                : rule.discountType === "AMOUNT"
+                                ? `$${rule.discountValue}`
+                                : rule.discountValue || "N/A"}
+                            </TableCell>
+                            <TableCell>{rule.priority || "N/A"}</TableCell>
+                            <TableCell className="text-sm">
+                              {rule.validFrom && rule.validTo
+                                ? `${dayjs(rule.validFrom).format("MMM DD")} to ${dayjs(rule.validTo).format("MMM DD, YYYY")}`
+                                : "N/A"}
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                variant={
+                                  rule.status === "ACTIVE" ? "default" : "secondary"
+                                }
+                              >
+                                {rule.status || "UNKNOWN"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center space-x-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleSimulateBundlePricing(rule)}
+                                >
+                                  <Play className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleEditBundlePricingRule(rule)}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() =>
+                                    handleDeleteBundlePricingRule(rule.id)
+                                  }
+                                  disabled={deleteBundlePricingMutation.isPending}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

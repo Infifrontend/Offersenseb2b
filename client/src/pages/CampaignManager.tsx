@@ -1348,11 +1348,11 @@ export default function CampaignManager() {
                   </div>
                   <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded font-mono">
                     🎯 *Special Offer for You!*<br/>
-                    Hi {"{"}{"{"} customerName {"}"}{"}"},<br/><br/>
-                    ✈️ Add comfort to your {"{"}{"{"} destination {"}"}{""} trip!<br/>
-                    💺 Extra legroom seats from ${"{"}{"{"} price {"}"}{"}}<br/>
-                    🎒 Additional baggage starting ${"{"}{"{"} bagPrice {"}"}{"}}<br/><br/>
-                    Book now: {"{"}{"{"} bookingLink {"}"}{"}"}
+                    Hi {"{{customerName}}"},<br/><br/>
+                    ✈️ Add comfort to your {"{{destination}}"} trip!<br/>
+                    💺 Extra legroom seats from ${"{{price}}"}<br/>
+                    🎒 Additional baggage starting ${"{{bagPrice}}"}<br/><br/>
+                    Book now: {"{{bookingLink}}"}
                   </div>
                   <div className="flex justify-end mt-3">
                     <AntButton 
@@ -1377,11 +1377,11 @@ export default function CampaignManager() {
                   </div>
                   <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded font-mono">
                     📢 *Travel Update*<br/>
-                    Hello {"{"}{"{"} customerName {"}"}{"}"},<br/><br/>
-                    Your booking {"{"}{"{"} pnr {"}"}{""} has new add-on options available.<br/><br/>
-                    🍽️ Meals: ${"{"}{"{"} mealPrice {"}"}{"}}<br/>
-                    📶 Wi-Fi: ${"{"}{"{"} wifiPrice {"}"}{"}}<br/><br/>
-                    Upgrade now: {"{"}{"{"} upgradeLink {"}"}{"}"}
+                    Hello {"{{customerName}}"},<br/><br/>
+                    Your booking {"{{pnr}}"} has new add-on options available.<br/><br/>
+                    🍽️ Meals: ${"{{mealPrice}}"}<br/>
+                    📶 Wi-Fi: ${"{{wifiPrice}}"}<br/><br/>
+                    Upgrade now: {"{{upgradeLink}}"}
                   </div>
                   <div className="flex justify-end mt-3">
                     <AntButton 
@@ -1406,11 +1406,11 @@ export default function CampaignManager() {
                   </div>
                   <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded font-mono">
                     🚨 *Limited Time Offer*<br/>
-                    {"{"}{"{"} customerName {"}"}{"}"},<br/><br/>
+                    {"{{customerName}}"},<br/><br/>
                     ⏰ Only 24 hours left!<br/>
                     🎒 FREE seat selection with baggage upgrade<br/>
                     💺 Premium seats 50% OFF<br/><br/>
-                    Don't miss out: {"{"}{"{"} urgentLink {"}"}{"}"}
+                    Don't miss out: {"{{urgentLink}}"}
                   </div>
                   <div className="flex justify-end mt-3">
                     <AntButton 

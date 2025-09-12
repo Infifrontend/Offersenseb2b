@@ -259,6 +259,35 @@ const upload = multer({ storage: multer.memoryStorage() });
 export async function registerRoutes(app: Express): Promise<Server> {
   console.log("Registering routes...");
 
+  // Test endpoint to verify database connectivity
+  app.get("/api/test/db", async (req, res) => {
+    try {
+      console.log("API: Testing database connectivity...");
+      
+      // Test basic database connection
+      const testQuery = await storage.db.select().from(storage.db.select().from(agentTiers).limit(1));
+      console.log("API: Database connection test successful");
+      
+      // Test tier assignments table specifically
+      const assignmentsCount = await storage.db.select().from(agentTierAssignments).limit(1);
+      console.log("API: Tier assignments table accessible");
+      
+      res.json({
+        success: true,
+        message: "Database connectivity verified",
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("API: Database connectivity test failed:", error);
+      res.status(500).json({
+        success: false,
+        message: "Database connectivity failed",
+        error: error.message,
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
+
   // AI Template Generation endpoint
   app.post("/api/ai/generate-templates", async (req, res) => {
     try {
@@ -2620,11 +2649,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all tier assignments with optional filters
   app.get("/api/tiers/assignments", async (req, res) => {
     try {
-      console.log("API: GET /api/tiers/assignments called with query:", req.query);
+      console.log("API: GET /api/tiers/assignments endpoint called");
+      console.log("API: Request query params:", req.query);
+      console.log("API: Request method:", req.method);
+      console.log("API: Request path:", req.path);
+
       const filters = req.query || {};
 
-      console.log("API: Calling storage.getAgentTierAssignments...");
+      console.log("API: Calling storage.getAgentTierAssignments with filters:", filters);
       let assignments = await storage.getAgentTierAssignments(filters);
+      console.log(`API: Storage method returned:`, assignments);
       console.log(`API: Storage returned ${assignments?.length || 0} tier assignments`);
 
       // Ensure we always have an array
@@ -2639,7 +2673,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // First ensure we have tiers to assign
         const existingTiers = await storage.getAgentTiers({ status: "ACTIVE" });
-        console.log(`API: Found ${existingTiers.length} existing tiers`);
+        console.log(`API: Found ${existingTiers.length} existing tiers for sample creation`);
 
         if (existingTiers.length > 0) {
           // Create sample tier assignments
@@ -2689,8 +2723,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           try {
             for (const assignmentData of sampleAssignments) {
-              await storage.insertAgentTierAssignment(assignmentData);
-              console.log(`API: Created tier assignment for agent: ${assignmentData.agentId}`);
+              const created = await storage.insertAgentTierAssignment(assignmentData);
+              console.log(`API: Created tier assignment for agent: ${assignmentData.agentId}`, created);
             }
 
             // Refetch after creating samples
@@ -2698,21 +2732,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log(`API: After sample creation: ${assignments?.length || 0} assignments`);
           } catch (createError: any) {
             console.error("API: Error creating sample tier assignments:", createError);
+            console.error("API: Create error details:", createError.message);
+            console.error("API: Create error stack:", createError.stack);
           }
         } else {
           console.log("API: No tiers found, cannot create sample assignments");
         }
       }
 
-      console.log(`API: Returning ${assignments.length} tier assignments`);
-      res.json(assignments);
+      console.log(`API: Final response - returning ${assignments.length} tier assignments`);
+      res.status(200).json(assignments);
     } catch (error: any) {
-      console.error("API: Error in /api/tiers/assignments:", error);
+      console.error("API: Critical error in /api/tiers/assignments endpoint:", error);
+      console.error("API: Error message:", error.message);
       console.error("API: Error stack:", error.stack);
       res.status(500).json({ 
         message: "Failed to fetch tier assignments", 
         error: error.message,
-        details: "Check server logs for more information"
+        endpoint: "/api/tiers/assignments",
+        timestamp: new Date().toISOString()
       });
     }
   });

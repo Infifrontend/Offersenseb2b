@@ -21,7 +21,7 @@ import {
   Popconfirm,
   Progress,
   Statistic,
-  Badge,
+  Badge as AntBadge, // Renamed to avoid conflict with shadcn/ui Badge
   Alert,
   Descriptions,
   Timeline,
@@ -71,6 +71,10 @@ import {
   ArcElement,
 } from "chart.js";
 import { SendOutlined } from "@ant-design/icons";
+
+// Import shadcn/ui components
+import { Badge } from '@/components/ui/badge';
+import { Tabs as ShadcnTabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // Register Chart.js components
 ChartJS.register(
@@ -274,7 +278,7 @@ export default function CampaignManager() {
   const [metricsDateRange, setMetricsDateRange] = useState<
     [dayjs.Dayjs, dayjs.Dayjs] | null
   >(null);
-  
+
   // Template generation states
   const [templateGenerationState, setTemplateGenerationState] = useState({
     email: { loading: false, templates: [] as any[] },
@@ -517,7 +521,7 @@ export default function CampaignManager() {
     try {
       // Get current form values to use as context
       const formValues = campaignForm.getFieldsValue();
-      
+
       // Build comprehensive context for AI generation
       const context = {
         campaignName: formValues.campaignName || 'New Campaign',
@@ -552,16 +556,16 @@ export default function CampaignManager() {
       });
 
       if (!response.ok) throw new Error('Failed to generate templates');
-      
+
       const generatedTemplates = await response.json();
-      
+
       setTemplateGenerationState(prev => ({
         ...prev,
         [type]: { loading: false, templates: generatedTemplates }
       }));
 
       message.success(`Generated ${generatedTemplates.length} ${type} templates`);
-      
+
       // Auto-open preview modal if templates were generated
       if (generatedTemplates.length > 0) {
         if (type === 'email') {
@@ -734,7 +738,7 @@ export default function CampaignManager() {
       key: "status",
       width: 90,
       render: (status: string) => (
-        <Badge status={getStatusColor(status) as any} text={status} />
+        <AntBadge status={getStatusColor(status) as any} text={status} />
       ),
     },
     {
@@ -918,7 +922,7 @@ export default function CampaignManager() {
                       <div className="space-y-2">
                         <div className="flex justify-between">
                           <span>Status:</span>
-                          <Badge status="success" text={campaign.status} />
+                          <AntBadge status="success" text={campaign.status} />
                         </div>
                         <div className="flex justify-between">
                           <span>Duration:</span>
@@ -1067,12 +1071,10 @@ export default function CampaignManager() {
                   loading={isAncillariesLoading}
                   showSearch
                   filterOption={(input, option) =>
-                    option?.children?.props?.children?.[0]?.props?.children
-                      ?.toLowerCase()
-                      .indexOf(input.toLowerCase()) >= 0 ||
-                    option?.children?.props?.children?.[1]?.props?.children
-                      ?.toLowerCase()
-                      .indexOf(input.toLowerCase()) >= 0
+                    option?.children?.props?.children?.[0]?.props?.children?.[0]?.toLowerCase()
+                      .includes(input.toLowerCase()) ||
+                    option?.children?.props?.children?.[1]?.props?.children?.[0]?.toLowerCase()
+                      .includes(input.toLowerCase())
                   }
                 >
                   {availableAncillaries.map((rule: any) => (
@@ -1251,8 +1253,8 @@ export default function CampaignManager() {
             <Col span={24}>
               <div className="space-y-6">
                 {/* Email Template Section */}
-                <AntCard 
-                  size="small" 
+                <AntCard
+                  size="small"
                   title={
                     <div className="flex items-center space-x-2">
                       <Mail className="w-4 h-4 text-blue-600" />
@@ -1269,9 +1271,9 @@ export default function CampaignManager() {
                           label="Selected Template"
                           className="mb-0"
                         >
-                          <Input 
-                            placeholder={selectedEmailTemplate ? selectedEmailTemplate.subject : "No template selected"} 
-                            disabled 
+                          <Input
+                            placeholder={selectedEmailTemplate ? selectedEmailTemplate.subject : "No template selected"}
+                            disabled
                             suffix={selectedEmailTemplate && <CheckCircle className="w-4 h-4 text-green-500" />}
                           />
                         </AntForm.Item>
@@ -1311,7 +1313,7 @@ export default function CampaignManager() {
                         </div>
                       </Col>
                     </Row>
-                    
+
                     {templateGenerationState.email.templates.length > 0 && (
                       <Alert
                         message={`${templateGenerationState.email.templates.length} AI-generated email templates ready for preview`}
@@ -1320,7 +1322,7 @@ export default function CampaignManager() {
                         className="text-xs"
                       />
                     )}
-                    
+
                     <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
                       <strong>AI will generate templates based on:</strong> Campaign name, offer details, target audience, and selected products
                     </div>
@@ -1328,8 +1330,8 @@ export default function CampaignManager() {
                 </AntCard>
 
                 {/* WhatsApp Template Section */}
-                <AntCard 
-                  size="small" 
+                <AntCard
+                  size="small"
                   title={
                     <div className="flex items-center space-x-2">
                       <Smartphone className="w-4 h-4 text-green-600" />
@@ -1346,9 +1348,9 @@ export default function CampaignManager() {
                           label="Selected Template"
                           className="mb-0"
                         >
-                          <Input 
-                            placeholder={selectedWhatsappTemplate ? "WhatsApp template selected" : "No template selected"} 
-                            disabled 
+                          <Input
+                            placeholder={selectedWhatsappTemplate ? "WhatsApp template selected" : "No template selected"}
+                            disabled
                             suffix={selectedWhatsappTemplate && <CheckCircle className="w-4 h-4 text-green-500" />}
                           />
                         </AntForm.Item>
@@ -1388,7 +1390,7 @@ export default function CampaignManager() {
                         </div>
                       </Col>
                     </Row>
-                    
+
                     {templateGenerationState.whatsapp.templates.length > 0 && (
                       <Alert
                         message={`${templateGenerationState.whatsapp.templates.length} AI-generated WhatsApp templates ready for preview`}
@@ -1397,7 +1399,7 @@ export default function CampaignManager() {
                         className="text-xs"
                       />
                     )}
-                    
+
                     <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
                       <strong>AI will generate templates optimized for:</strong> WhatsApp format (160 chars), personalization, and mobile engagement
                     </div>
@@ -1674,116 +1676,114 @@ export default function CampaignManager() {
             </AntButton>
           </div>
         ) : (
-          <Tabs
-            defaultActiveKey="0"
-            type="card"
-            className="email-template-tabs"
-            tabBarExtraContent={
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-500">
-                  {templateGenerationState.email.templates.length} templates available
-                </span>
-              </div>
-            }
-          >
-            {templateGenerationState.email.templates.map((template, index) => (
-              <TabPane
-                tab={
-                  <div className="flex items-center space-x-2">
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-500">
+                {templateGenerationState.email.templates.length} templates available
+              </span>
+            </div>
+
+            <ShadcnTabs defaultValue="0" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                {templateGenerationState.email.templates.map((template, index) => (
+                  <TabsTrigger key={index} value={index.toString()} className="flex items-center space-x-2">
                     <span>Template {index + 1}</span>
                     {selectedEmailTemplate?.subject === template.subject && (
-                      <Badge color="green" text="Selected" size="small" />
+                      <CheckCircle className="w-3 h-3 text-green-600" />
                     )}
-                  </div>
-                }
-                key={index.toString()}
-              >
-                <div className="space-y-4">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-900 text-lg mb-2">{template.subject}</h4>
-                      <div className="flex items-center space-x-2 mb-3">
-                        <Badge color="blue" text={template.tone} />
-                        <Badge color="purple" text={`${template.estimatedOpenRate} open rate`} />
-                        <Badge color="orange" text={`${template.estimatedClickRate} click rate`} />
-                      </div>
-                    </div>
-                    <AntButton
-                      type={selectedEmailTemplate?.subject === template.subject ? "default" : "primary"}
-                      size="large"
-                      onClick={() => handleSelectEmailTemplate(template)}
-                      icon={selectedEmailTemplate?.subject === template.subject ? <CheckCircle className="w-4 h-4" /> : null}
-                    >
-                      {selectedEmailTemplate?.subject === template.subject ? 'Selected' : 'Select This Template'}
-                    </AntButton>
-                  </div>
+                  </TabsTrigger>
+                ))}
+              </TabsList>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <strong className="text-sm text-gray-600">Subject Line:</strong>
-                      <div className="mt-2 p-3 bg-gray-50 rounded-lg text-sm font-medium">
-                        {template.subject}
+              {templateGenerationState.email.templates.map((template, index) => (
+                <TabsContent key={index} value={index.toString()} className="mt-6">
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900 text-lg mb-2">{template.subject}</h4>
+                        <div className="flex items-center space-x-2 mb-3">
+                          <Badge variant="outline" className="text-blue-600 border-blue-600">{template.tone}</Badge>
+                          <Badge variant="outline" className="text-purple-600 border-purple-600">{template.estimatedOpenRate} open rate</Badge>
+                          <Badge variant="outline" className="text-orange-600 border-orange-600">{template.estimatedClickRate} click rate</Badge>
+                        </div>
                       </div>
+                      <AntButton
+                        type={selectedEmailTemplate?.subject === template.subject ? "default" : "primary"}
+                        size="large"
+                        onClick={() => handleSelectEmailTemplate(template)}
+                        icon={selectedEmailTemplate?.subject === template.subject ? <CheckCircle className="w-4 h-4" /> : null}
+                      >
+                        {selectedEmailTemplate?.subject === template.subject ? 'Selected' : 'Select This Template'}
+                      </AntButton>
                     </div>
-                    <div>
-                      <strong className="text-sm text-gray-600">Template Details:</strong>
-                      <div className="mt-2 text-sm text-gray-700 space-y-2">
-                        <div>Tone: <span className="font-medium capitalize">{template.tone}</span></div>
-                        <div>Call to Action: <span className="font-medium">{template.callToAction}</span></div>
-                        <div>Reading Time: <span className="font-medium">30-45 seconds</span></div>
-                        <div>Variables: <span className="font-medium">{template.variables?.length || 0} dynamic fields</span></div>
-                      </div>
-                    </div>
-                  </div>
 
-                  <div>
-                    <div className="flex justify-between items-center mb-3">
-                      <strong className="text-sm text-gray-600">Email Preview:</strong>
-                      <div className="flex space-x-2">
-                        <AntButton size="small" ghost icon={<Eye className="w-3 h-3" />}>
-                          Full Preview
-                        </AntButton>
-                        <AntButton size="small" ghost icon={<Send className="w-3 h-3" />}>
-                          Test Send
-                        </AntButton>
-                      </div>
-                    </div>
-                    <div className="p-4 bg-white border rounded-lg shadow-sm max-h-80 overflow-y-auto">
-                      <div className="email-preview" dangerouslySetInnerHTML={{ __html: template.htmlContent }} />
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <div className="grid grid-cols-3 gap-4 text-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <div className="text-xs text-gray-500">Personalization Level</div>
-                        <div className="font-medium text-green-600">High</div>
+                        <strong className="text-sm text-gray-600">Subject Line:</strong>
+                        <div className="mt-2 p-3 bg-gray-50 rounded-lg text-sm font-medium">
+                          {template.subject}
+                        </div>
                       </div>
                       <div>
-                        <div className="text-xs text-gray-500">Mobile Optimized</div>
-                        <div className="font-medium text-green-600">Yes</div>
+                        <strong className="text-sm text-gray-600">Template Details:</strong>
+                        <div className="mt-2 text-sm text-gray-700 space-y-2">
+                          <div>Tone: <span className="font-medium capitalize">{template.tone}</span></div>
+                          <div>Call to Action: <span className="font-medium">{template.callToAction}</span></div>
+                          <div>Reading Time: <span className="font-medium">30-45 seconds</span></div>
+                          <div>Variables: <span className="font-medium">{template.variables?.length || 0} dynamic fields</span></div>
+                        </div>
                       </div>
+                    </div>
+
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <div className="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                          <div className="text-xs text-gray-500">Personalization Level</div>
+                          <div className="font-medium text-green-600">High</div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-gray-500">Mobile Optimized</div>
+                          <div className="font-medium text-green-600">Yes</div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-gray-500">Spam Score</div>
+                          <div className="font-medium text-green-600">Low</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {template.variables && template.variables.length > 0 && (
                       <div>
-                        <div className="text-xs text-gray-500">Spam Score</div>
-                        <div className="font-medium text-green-600">Low</div>
+                        <strong className="text-sm text-gray-600">Dynamic Variables:</strong>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {template.variables.map((variable: string, i: number) => (
+                            <Badge key={i} variant="outline" className="text-blue-600 border-blue-600">{variable}</Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <div>
+                      <div className="flex justify-between items-center mb-3">
+                        <strong className="text-sm text-gray-600">Email Preview:</strong>
+                        <div className="flex space-x-2">
+                          <AntButton size="small" ghost icon={<Eye className="w-3 h-3" />}>
+                            Full Preview
+                          </AntButton>
+                          <AntButton size="small" ghost icon={<Send className="w-3 h-3" />}>
+                            Test Send
+                          </AntButton>
+                        </div>
+                      </div>
+                      <div className="p-4 bg-white border rounded-lg shadow-sm max-h-80 overflow-y-auto">
+                        <div className="email-preview" dangerouslySetInnerHTML={{ __html: template.htmlContent }} />
                       </div>
                     </div>
                   </div>
-
-                  {template.variables && template.variables.length > 0 && (
-                    <div>
-                      <strong className="text-sm text-gray-600">Dynamic Variables:</strong>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {template.variables.map((variable: string, i: number) => (
-                          <Tag key={i} color="blue">{variable}</Tag>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </TabPane>
-            ))}
-          </Tabs>
+                </TabsContent>
+              ))}
+            </ShadcnTabs>
+          </div>
         )}
       </Modal>
 
@@ -1819,17 +1819,17 @@ export default function CampaignManager() {
               key={index}
               size="small"
               className={`border-l-4 transition-all ${
-                selectedWhatsappTemplate?.message === template.message 
-                  ? 'border-l-green-600 bg-green-50' 
+                selectedWhatsappTemplate?.message === template.message
+                  ? 'border-l-green-600 bg-green-50'
                   : 'border-l-green-300 hover:border-l-green-500'
               }`}
             >
               <div className="space-y-4">
                 <div className="flex justify-between items-start">
                   <div className="flex items-center space-x-2">
-                    <Badge color="green" text={`Template ${index + 1}`} />
+                    <AntBadge color="green" text={`Template ${index + 1}`} />
                     {selectedWhatsappTemplate?.message === template.message && (
-                      <Badge color="green" text="Selected" />
+                      <AntBadge color="green" text="Selected" />
                     )}
                   </div>
                   <AntButton
@@ -1856,7 +1856,7 @@ export default function CampaignManager() {
                           <div className="text-xs opacity-90">Online</div>
                         </div>
                       </div>
-                      
+
                       {/* Message Bubble */}
                       <div className="p-3">
                         <div className="bg-green-100 p-3 rounded-lg max-w-full">
@@ -1864,9 +1864,9 @@ export default function CampaignManager() {
                             {template.message}
                           </div>
                           <div className="text-xs text-gray-500 mt-2 text-right">
-                            {new Date().toLocaleTimeString('en-US', { 
-                              hour: '2-digit', 
-                              minute: '2-digit' 
+                            {new Date().toLocaleTimeString('en-US', {
+                              hour: '2-digit',
+                              minute: '2-digit'
                             })} ✓✓
                           </div>
                         </div>
@@ -1920,7 +1920,7 @@ export default function CampaignManager() {
               </div>
             </AntCard>
           ))}
-          
+
           {templateGenerationState.whatsapp.templates.length === 0 && (
             <div className="text-center py-12">
               <Smartphone className="w-16 h-16 text-gray-300 mx-auto mb-4" />

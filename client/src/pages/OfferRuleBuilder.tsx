@@ -433,17 +433,41 @@ export default function OfferRuleBuilder() {
     console.log("Create Rule button clicked");
 
     try {
-      // Get all form values without strict validation
-      const allFormValues = createForm.getFieldsValue();
+      // Validate and get form values
+      const allFormValues = await createForm.validateFields().catch(() => {
+        // If validation fails, still get the field values
+        return createForm.getFieldsValue();
+      });
+      
       console.log("All form values:", allFormValues);
 
-      // Extract field values with defaults
+      // Extract field values with proper fallbacks
       const ruleCode = allFormValues.ruleCode?.trim() || `RULE_${Date.now()}`;
       const ruleName = allFormValues.ruleName?.trim() || "Unnamed Rule";
       const ruleType = allFormValues.ruleType || "FARE_DISCOUNT";
       const priority = allFormValues.priority || 1;
-      const validFrom = allFormValues.validFrom || dayjs();
-      const validTo = allFormValues.validTo || dayjs().add(1, 'year');
+      
+      // Handle date fields properly
+      const validFrom = allFormValues.validFrom ? 
+        (allFormValues.validFrom.format ? allFormValues.validFrom.format("YYYY-MM-DD") : allFormValues.validFrom) :
+        dayjs().format("YYYY-MM-DD");
+      const validTo = allFormValues.validTo ? 
+        (allFormValues.validTo.format ? allFormValues.validTo.format("YYYY-MM-DD") : allFormValues.validTo) :
+        dayjs().add(1, 'year').format("YYYY-MM-DD");
+
+      // Process conditions with proper nested field access
+      const conditions = allFormValues.conditions || {};
+      const processedConditions = {
+        origin: conditions.origin || allFormValues["conditions.origin"] || undefined,
+        destination: conditions.destination || allFormValues["conditions.destination"] || undefined,
+        pos: conditions.pos || allFormValues["conditions.pos"] || [],
+        agentTier: conditions.agentTier || allFormValues["conditions.agentTier"] || [],
+        cohortCodes: conditions.cohortCodes || allFormValues["conditions.cohortCodes"] || [],
+        channel: conditions.channel || allFormValues["conditions.channel"] || [],
+        cabinClass: conditions.cabinClass || allFormValues["conditions.cabinClass"] || [],
+        tripType: conditions.tripType || allFormValues["conditions.tripType"] || [],
+        seasonCode: conditions.seasonCode || allFormValues["conditions.seasonCode"] || undefined,
+      };
 
       // Process actions
       const actions = allFormValues.actions || [];
@@ -483,37 +507,11 @@ export default function OfferRuleBuilder() {
         ruleCode,
         ruleName,
         ruleType,
-        conditions: {
-          origin: allFormValues["conditions.origin"] || undefined,
-          destination: allFormValues["conditions.destination"] || undefined,
-          pos: allFormValues["conditions.pos"] || [],
-          agentTier: allFormValues["conditions.agentTier"] || [],
-          cohortCodes: allFormValues["conditions.cohortCodes"] || [],
-          channel: allFormValues["conditions.channel"] || [],
-          cabinClass: allFormValues["conditions.cabinClass"] || [],
-          tripType: allFormValues["conditions.tripType"] || [],
-          seasonCode: allFormValues["conditions.seasonCode"] || undefined,
-          bookingWindow:
-            allFormValues["conditions.bookingWindowMin"] &&
-            allFormValues["conditions.bookingWindowMax"]
-              ? {
-                  min: allFormValues["conditions.bookingWindowMin"],
-                  max: allFormValues["conditions.bookingWindowMax"],
-                }
-              : undefined,
-          travelWindow:
-            allFormValues["conditions.travelWindowMin"] &&
-            allFormValues["conditions.travelWindowMax"]
-              ? {
-                  min: allFormValues["conditions.travelWindowMin"],
-                  max: allFormValues["conditions.travelWindowMax"],
-                }
-              : undefined,
-        },
+        conditions: processedConditions,
         actions: processedActions,
         priority,
-        validFrom: validFrom?.format ? validFrom.format("YYYY-MM-DD") : validFrom,
-        validTo: validTo?.format ? validTo.format("YYYY-MM-DD") : validTo,
+        validFrom,
+        validTo,
         justification: allFormValues.justification || undefined,
         createdBy: "admin", // This would come from auth context in a real app
         status: "DRAFT",
@@ -525,7 +523,7 @@ export default function OfferRuleBuilder() {
       createRuleMutation.mutate(formattedData);
     } catch (error) {
       console.error("Form submission error:", error);
-      // Still try to submit even if there are validation errors
+      // Fallback submission with minimal data
       const basicData = {
         ruleCode: `RULE_${Date.now()}`,
         ruleName: "Unnamed Rule",
@@ -538,6 +536,7 @@ export default function OfferRuleBuilder() {
         createdBy: "admin",
         status: "DRAFT",
       };
+      console.log("Using fallback data:", basicData);
       createRuleMutation.mutate(basicData);
     }
   };
@@ -817,6 +816,12 @@ export default function OfferRuleBuilder() {
             form={createForm}
             layout="vertical"
             autoComplete="off"
+            initialValues={{
+              priority: 1,
+              ruleType: "FARE_DISCOUNT",
+              conditions: {},
+              actions: []
+            }}
           >
             {currentStep === 0 && (
               <div className="space-y-4">
@@ -902,23 +907,24 @@ export default function OfferRuleBuilder() {
                 <AntCard title="🌍 Geographic Conditions" size="small">
                   <Row gutter={16}>
                     <Col span={8}>
-                      <AntForm.Item label="Origin" name="conditions.origin">
+                      <AntForm.Item label="Origin" name={["conditions", "origin"]}>
                         <AntInput placeholder="NYC" maxLength={3} />
                       </AntForm.Item>
                     </Col>
                     <Col span={8}>
                       <AntForm.Item
                         label="Destination"
-                        name="conditions.destination"
+                        name={["conditions", "destination"]}
                       >
                         <AntInput placeholder="LAX" maxLength={3} />
                       </AntForm.Item>
                     </Col>
                     <Col span={8}>
-                      <AntForm.Item label="Point of Sale" name="conditions.pos">
+                      <AntForm.Item label="Point of Sale" name={["conditions", "pos"]}>
                         <AntSelect
                           mode="multiple"
                           placeholder="Select countries"
+                          allowClear
                         >
                           {countries.map((country) => (
                             <AntSelect.Option key={country} value={country}>
@@ -936,11 +942,12 @@ export default function OfferRuleBuilder() {
                     <Col span={12}>
                       <AntForm.Item
                         label="Agent Tiers"
-                        name="conditions.agentTier"
+                        name={["conditions", "agentTier"]}
                       >
                         <AntSelect
                           mode="multiple"
                           placeholder="Select agent tiers"
+                          allowClear
                         >
                           {agentTiers.map((tier) => (
                             <AntSelect.Option key={tier} value={tier}>
@@ -951,10 +958,11 @@ export default function OfferRuleBuilder() {
                       </AntForm.Item>
                     </Col>
                     <Col span={12}>
-                      <AntForm.Item label="Channels" name="conditions.channel">
+                      <AntForm.Item label="Channels" name={["conditions", "channel"]}>
                         <AntSelect
                           mode="multiple"
                           placeholder="Select channels"
+                          allowClear
                         >
                           {channels.map((channel) => (
                             <AntSelect.Option key={channel} value={channel}>
@@ -967,12 +975,13 @@ export default function OfferRuleBuilder() {
                   </Row>
                   <AntForm.Item
                     label="Cohort Codes (Optional)"
-                    name="conditions.cohortCodes"
+                    name={["conditions", "cohortCodes"]}
                   >
                     <AntSelect
                       mode="tags"
                       placeholder="Enter cohort codes (e.g., FESTIVE_2025, VIP_CORP)"
                       style={{ width: "100%" }}
+                      allowClear
                     >
                       {availableCohorts?.map((cohort: any) => (
                         <AntSelect.Option
@@ -1000,11 +1009,12 @@ export default function OfferRuleBuilder() {
                     <Col span={12}>
                       <AntForm.Item
                         label="Cabin Classes"
-                        name="conditions.cabinClass"
+                        name={["conditions", "cabinClass"]}
                       >
                         <AntSelect
                           mode="multiple"
                           placeholder="Select cabin classes"
+                          allowClear
                         >
                           {cabinClasses.map((cabin) => (
                             <AntSelect.Option key={cabin} value={cabin}>
@@ -1017,11 +1027,12 @@ export default function OfferRuleBuilder() {
                     <Col span={12}>
                       <AntForm.Item
                         label="Trip Types"
-                        name="conditions.tripType"
+                        name={["conditions", "tripType"]}
                       >
                         <AntSelect
                           mode="multiple"
                           placeholder="Select trip types"
+                          allowClear
                         >
                           {tripTypes.map((type) => (
                             <AntSelect.Option key={type} value={type}>
@@ -1034,7 +1045,7 @@ export default function OfferRuleBuilder() {
                   </Row>
                   <AntForm.Item
                     label="Season Code (Optional)"
-                    name="conditions.seasonCode"
+                    name={["conditions", "seasonCode"]}
                   >
                     <AntInput placeholder="PEAK_SUMMER, WEEKEND, HOLIDAY" />
                   </AntForm.Item>

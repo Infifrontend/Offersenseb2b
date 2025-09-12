@@ -325,6 +325,19 @@ export default function CampaignManager() {
     },
   );
 
+  // Fetch available ancillaries for dropdown
+  const { data: availableAncillaries = [], isLoading: isAncillariesLoading } = useQuery<
+    AncillaryRule[]
+  >({
+    queryKey: ["/api/ancillary-products"],
+    queryFn: async () => {
+      const response = await fetch("/api/ancillary-products");
+      if (!response.ok) throw new Error("Failed to fetch ancillary products");
+      return response.json();
+    },
+    staleTime: 1000 * 60 * 10, // 10 minutes
+  });
+
   const { data: campaignMetrics, isLoading: metricsLoading } = useQuery({
     queryKey: [
       "/api/campaigns/metrics",
@@ -946,6 +959,7 @@ export default function CampaignManager() {
                 <AntSelect
                   mode="multiple"
                   placeholder="Select ancillary products"
+                  loading={isAncillariesLoading}
                   showSearch
                   filterOption={(input, option) =>
                     option?.children?.props?.children?.[0]?.props?.children
@@ -956,8 +970,8 @@ export default function CampaignManager() {
                       .indexOf(input.toLowerCase()) >= 0
                   }
                 >
-                  {ancillaryRules.map((rule) => (
-                    <AntSelect.Option key={rule.id} value={rule.ancillaryCode}> 
+                  {availableAncillaries.map((rule: any) => (
+                    <AntSelect.Option key={rule.id} value={rule.ancillaryCode}>
                       <div>
                         <div className="font-medium">{rule.ancillaryCode}</div>
                         <div className="text-xs text-gray-500">

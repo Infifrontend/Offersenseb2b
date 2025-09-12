@@ -1813,131 +1813,163 @@ export default function CampaignManager() {
         width={700}
         className="whatsapp-template-modal"
       >
-        <div className="space-y-4">
-          {templateGenerationState.whatsapp.templates.map((template, index) => (
-            <AntCard
-              key={index}
-              size="small"
-              className={`border-l-4 transition-all ${
-                selectedWhatsappTemplate?.message === template.message
-                  ? 'border-l-green-600 bg-green-50'
-                  : 'border-l-green-300 hover:border-l-green-500'
-              }`}
+        {templateGenerationState.whatsapp.templates.length === 0 ? (
+          <div className="text-center py-12">
+            <Smartphone className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No WhatsApp Templates Generated</h3>
+            <p className="text-gray-500 mb-4">Generate AI-powered WhatsApp templates optimized for mobile engagement</p>
+            <AntButton
+              type="primary"
+              size="large"
+              icon={<Smartphone className="w-4 h-4" />}
+              onClick={() => handleGenerateTemplate('whatsapp')}
+              loading={templateGenerationState.whatsapp.loading}
             >
-              <div className="space-y-4">
-                <div className="flex justify-between items-start">
-                  <div className="flex items-center space-x-2">
-                    <AntBadge color="green" text={`Template ${index + 1}`} />
-                    {selectedWhatsappTemplate?.message === template.message && (
-                      <AntBadge color="green" text="Selected" />
-                    )}
-                  </div>
-                  <AntButton
-                    type={selectedWhatsappTemplate?.message === template.message ? "default" : "primary"}
-                    size="small"
-                    onClick={() => handleSelectWhatsappTemplate(template)}
-                    icon={selectedWhatsappTemplate?.message === template.message ? <CheckCircle className="w-4 h-4" /> : null}
-                  >
-                    {selectedWhatsappTemplate?.message === template.message ? 'Selected' : 'Select Template'}
-                  </AntButton>
-                </div>
+              Generate WhatsApp Templates
+            </AntButton>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-500">
+                {templateGenerationState.whatsapp.templates.length} templates available
+              </span>
+            </div>
 
-                {/* Mobile WhatsApp Preview */}
-                <div className="flex justify-center">
-                  <div className="bg-gray-100 p-4 rounded-lg max-w-sm w-full">
-                    <div className="bg-white rounded-lg shadow-sm">
-                      {/* WhatsApp Header */}
-                      <div className="bg-green-600 text-white p-2 rounded-t-lg flex items-center space-x-2">
-                        <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                          <span className="text-xs font-bold">OS</span>
+            <ShadcnTabs defaultValue="0" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                {templateGenerationState.whatsapp.templates.map((template, index) => (
+                  <TabsTrigger key={index} value={index.toString()} className="flex items-center space-x-2">
+                    <span>Template {index + 1}</span>
+                    {selectedWhatsappTemplate?.message === template.message && (
+                      <CheckCircle className="w-3 h-3 text-green-600" />
+                    )}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+
+              {templateGenerationState.whatsapp.templates.map((template, index) => (
+                <TabsContent key={index} value={index.toString()} className="mt-6">
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900 text-lg mb-2">{template.name}</h4>
+                        <div className="flex items-center space-x-2 mb-3">
+                          <Badge variant="outline" className="text-green-600 border-green-600">{template.style}</Badge>
+                          <Badge variant="outline" className="text-purple-600 border-purple-600">{template.estimatedDeliveryRate} delivery</Badge>
+                          <Badge variant="outline" className="text-orange-600 border-orange-600">{template.estimatedReadRate} read rate</Badge>
+                        </div>
+                      </div>
+                      <AntButton
+                        type={selectedWhatsappTemplate?.message === template.message ? "default" : "primary"}
+                        size="large"
+                        onClick={() => handleSelectWhatsappTemplate(template)}
+                        icon={selectedWhatsappTemplate?.message === template.message ? <CheckCircle className="w-4 h-4" /> : null}
+                      >
+                        {selectedWhatsappTemplate?.message === template.message ? 'Selected' : 'Select This Template'}
+                      </AntButton>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <strong className="text-sm text-gray-600">Message Length:</strong>
+                        <div className={`mt-2 p-3 bg-gray-50 rounded-lg text-sm ${template.message.length > 160 ? 'border-l-4 border-orange-500' : 'border-l-4 border-green-500'}`}>
+                          {template.message.length} characters
+                          {template.message.length > 160 && <div className="text-orange-600 mt-1">(May be split into multiple messages)</div>}
+                        </div>
+                      </div>
+                      <div>
+                        <strong className="text-sm text-gray-600">Template Details:</strong>
+                        <div className="mt-2 text-sm text-gray-700 space-y-2">
+                          <div>Style: <span className="font-medium capitalize">{template.style}</span></div>
+                          <div>Delivery Rate: <span className="font-medium">{template.estimatedDeliveryRate}</span></div>
+                          <div>Read Rate: <span className="font-medium">{template.estimatedReadRate}</span></div>
+                          <div>Variables: <span className="font-medium">{template.variables?.length || 0} dynamic fields</span></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <div className="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                          <div className="text-xs text-gray-500">Mobile Optimized</div>
+                          <div className="font-medium text-green-600">Yes</div>
                         </div>
                         <div>
-                          <div className="text-sm font-medium">OfferSense</div>
-                          <div className="text-xs opacity-90">Online</div>
+                          <div className="text-xs text-gray-500">Character Limit</div>
+                          <div className={`font-medium ${template.message.length > 160 ? 'text-orange-600' : 'text-green-600'}`}>
+                            {template.message.length <= 160 ? 'Within Limit' : 'Over Limit'}
+                          </div>
                         </div>
-                      </div>
-
-                      {/* Message Bubble */}
-                      <div className="p-3">
-                        <div className="bg-green-100 p-3 rounded-lg max-w-full">
-                          <div className="text-sm whitespace-pre-wrap text-gray-800">
-                            {template.message}
-                          </div>
-                          <div className="text-xs text-gray-500 mt-2 text-right">
-                            {new Date().toLocaleTimeString('en-US', {
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })} ✓✓
-                          </div>
+                        <div>
+                          <div className="text-xs text-gray-500">Engagement Score</div>
+                          <div className="font-medium text-green-600">High</div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
 
-                {/* Template Details */}
-                <div className="grid grid-cols-2 gap-4 text-xs">
-                  <div>
-                    <strong className="text-gray-600">Message Length:</strong>
-                    <div className={`mt-1 ${template.message.length > 160 ? 'text-orange-600' : 'text-green-600'}`}>
-                      {template.message.length} characters
-                      {template.message.length > 160 && <span className="block text-orange-500">(May be split into multiple messages)</span>}
+                    {template.variables && template.variables.length > 0 && (
+                      <div>
+                        <strong className="text-sm text-gray-600">Dynamic Variables:</strong>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {template.variables.map((variable: string, i: number) => (
+                            <Badge key={i} variant="outline" className="text-blue-600 border-blue-600">{variable}</Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <div>
+                      <div className="flex justify-between items-center mb-3">
+                        <strong className="text-sm text-gray-600">WhatsApp Preview:</strong>
+                        <div className="flex space-x-2">
+                          <AntButton size="small" ghost icon={<Eye className="w-3 h-3" />}>
+                            Full Preview
+                          </AntButton>
+                          <AntButton size="small" ghost icon={<Send className="w-3 h-3" />}>
+                            Test Send
+                          </AntButton>
+                        </div>
+                      </div>
+                      {/* Mobile WhatsApp Preview */}
+                      <div className="flex justify-center">
+                        <div className="bg-gray-100 p-4 rounded-lg max-w-sm w-full">
+                          <div className="bg-white rounded-lg shadow-sm">
+                            {/* WhatsApp Header */}
+                            <div className="bg-green-600 text-white p-2 rounded-t-lg flex items-center space-x-2">
+                              <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                                <span className="text-xs font-bold">OS</span>
+                              </div>
+                              <div>
+                                <div className="text-sm font-medium">OfferSense</div>
+                                <div className="text-xs opacity-90">Online</div>
+                              </div>
+                            </div>
+
+                            {/* Message Bubble */}
+                            <div className="p-3">
+                              <div className="bg-green-100 p-3 rounded-lg max-w-full">
+                                <div className="text-sm whitespace-pre-wrap text-gray-800">
+                                  {template.message}
+                                </div>
+                                <div className="text-xs text-gray-500 mt-2 text-right">
+                                  {new Date().toLocaleTimeString('en-US', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })} ✓✓
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div>
-                    <strong className="text-gray-600">Style & Tone:</strong>
-                    <div className="mt-1 text-gray-700">
-                      {template.style || 'Conversational'}
-                    </div>
-                  </div>
-                </div>
-
-                {template.variables && template.variables.length > 0 && (
-                  <div>
-                    <strong className="text-xs text-gray-600">Dynamic Variables:</strong>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {template.variables.map((variable: string, i: number) => (
-                        <Tag key={i} size="small" color="blue">{variable}</Tag>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex justify-between items-center pt-2 border-t">
-                  <div className="flex space-x-4 text-xs text-gray-500">
-                    <span>Delivery Rate: <strong>98%</strong></span>
-                    <span>Read Rate: <strong>85%</strong></span>
-                  </div>
-                  <div className="flex space-x-2">
-                    <AntButton size="small" ghost icon={<Eye className="w-3 h-3" />}>
-                      Full Preview
-                    </AntButton>
-                    <AntButton size="small" ghost icon={<Send className="w-3 h-3" />}>
-                      Test Send
-                    </AntButton>
-                  </div>
-                </div>
-              </div>
-            </AntCard>
-          ))}
-
-          {templateGenerationState.whatsapp.templates.length === 0 && (
-            <div className="text-center py-12">
-              <Smartphone className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No WhatsApp Templates Generated</h3>
-              <p className="text-gray-500 mb-4">Generate AI-powered WhatsApp templates optimized for mobile engagement</p>
-              <AntButton
-                type="primary"
-                size="large"
-                icon={<Smartphone className="w-4 h-4" />}
-                onClick={() => handleGenerateTemplate('whatsapp')}
-                loading={templateGenerationState.whatsapp.loading}
-              >
-                Generate WhatsApp Templates
-              </AntButton>
-            </div>
-          )}
-        </div>
+                </TabsContent>
+              ))}
+            </ShadcnTabs>
+          </div>
+        )}
       </Modal>
     </div>
   );

@@ -1354,7 +1354,12 @@ export default function OfferRuleBuilder() {
                                     allowClear
                                     optionFilterProp="label"
                                     style={{ width: "100%" }}
-                                    dropdownStyle={{ maxHeight: 300, overflow: 'auto' }}
+                                    dropdownStyle={{ 
+                                      maxHeight: 280, 
+                                      overflow: 'auto',
+                                      zIndex: 99999
+                                    }}
+                                    getPopupContainer={(triggerNode) => triggerNode.parentElement || document.body}
                                     filterOption={(input, option) => {
                                       const label = option?.label || '';
                                       return label.toLowerCase().includes(input.toLowerCase());
@@ -1364,14 +1369,16 @@ export default function OfferRuleBuilder() {
                                       <AntSelect.Option 
                                         key={ancillary.id} 
                                         value={ancillary.ancillaryCode}
-                                        label={`${ancillary.ancillaryCode} ${ancillary.ruleCode}`}
+                                        label={`${ancillary.ancillaryCode} - ${ancillary.ruleCode}`}
                                       >
                                         <div className="cls-ancillary-dropdown">
-                                          <div>
-                                            <div className="font-medium">{ancillary.ancillaryCode}</div>
-                                            <div className="text-gray-600">{ancillary.ruleCode}</div>
+                                          <div className="font-medium" title={ancillary.ancillaryCode}>
+                                            {ancillary.ancillaryCode}
                                           </div>
-                                          <div className="text-xs text-gray-500 mt-1">
+                                          <div className="text-gray-600" title={ancillary.ruleCode}>
+                                            {ancillary.ruleCode}
+                                          </div>
+                                          <div className="text-xs text-gray-500">
                                             {ancillary.adjustmentType === "FREE" 
                                               ? "Free" 
                                               : ancillary.adjustmentType === "PERCENT"
@@ -1413,7 +1420,12 @@ export default function OfferRuleBuilder() {
                                     allowClear
                                     optionFilterProp="label"
                                     style={{ width: "100%" }}
-                                    dropdownStyle={{ maxHeight: 300, overflow: 'auto' }}
+                                    dropdownStyle={{ 
+                                      maxHeight: 280, 
+                                      overflow: 'auto',
+                                      zIndex: 99999
+                                    }}
+                                    getPopupContainer={(triggerNode) => triggerNode.parentElement || document.body}
                                     filterOption={(input, option) => {
                                       const label = option?.label || '';
                                       return label.toLowerCase().includes(input.toLowerCase());
@@ -1423,14 +1435,16 @@ export default function OfferRuleBuilder() {
                                       <AntSelect.Option 
                                         key={bundle.id} 
                                         value={bundle.bundleCode}
-                                        label={`${bundle.bundleCode} ${bundle.bundleName}`}
+                                        label={`${bundle.bundleCode} - ${bundle.bundleName}`}
                                       >
                                         <div className="cls-bundle-dropdown">
-                                          <div>
-                                            <div className="font-medium">{bundle.bundleCode}</div>
-                                            <div className="text-gray-600">{bundle.bundleName}</div>
+                                          <div className="font-medium" title={bundle.bundleCode}>
+                                            {bundle.bundleCode}
                                           </div>
-                                          <div className="text-xs text-gray-500 mt-1">
+                                          <div className="text-gray-600" title={bundle.bundleName}>
+                                            {bundle.bundleName}
+                                          </div>
+                                          <div className="text-xs text-gray-500">
                                             Type: {bundle.bundleType?.replace('_', ' ')} | Components: {bundle.components?.length || 0}
                                           </div>
                                         </div>

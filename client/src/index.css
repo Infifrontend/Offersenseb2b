@@ -35,6 +35,7 @@
   flex-direction: column;
   gap: 2px;
   min-width: 0;
+  padding: 4px 8px;
 }
 
 .cls-ancillary-dropdown .font-medium {
@@ -43,12 +44,18 @@
   line-height: 1.2;
   color: #1f2937;
   word-break: break-word;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .cls-ancillary-dropdown .text-gray-600 {
   font-size: 12px;
   color: #6b7280;
   line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .cls-bundle-dropdown {
@@ -56,6 +63,7 @@
   flex-direction: column;
   gap: 2px;
   min-width: 0;
+  padding: 4px 8px;
 }
 
 .cls-bundle-dropdown .font-medium {
@@ -64,12 +72,18 @@
   line-height: 1.2;
   color: #1f2937;
   word-break: break-word;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .cls-bundle-dropdown .text-gray-600 {
   font-size: 12px;
   color: #6b7280;
   line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Fix for Ant Design Select dropdown option spacing */
@@ -79,11 +93,12 @@
 
 .ant-select-dropdown .ant-select-item {
   padding: 0 !important;
+  min-height: 36px !important;
 }
 
 .ant-select-dropdown .ant-select-item-option {
-  min-height: auto !important;
-  padding: 4px 0 !important;
+  min-height: 36px !important;
+  padding: 2px 0 !important;
 }
 
 /* Ensure proper text wrapping in select options */
@@ -91,6 +106,37 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Fix for Select container overflow */
+.ant-select {
+  width: 100% !important;
+}
+
+.ant-select-selector {
+  min-height: 32px !important;
+  padding: 4px 11px !important;
+}
+
+.ant-select-selection-search {
+  margin-inline-start: 0 !important;
+}
+
+.ant-select-selection-placeholder {
+  padding-inline-start: 0 !important;
+}
+
+/* Prevent dropdown from being cut off */
+.ant-select-dropdown {
+  z-index: 9999 !important;
+  max-height: 300px !important;
+  overflow-y: auto !important;
+}
+
+/* Fix for modal z-index conflicts */
+.ant-modal .ant-select-dropdown {
+  z-index: 99999 !important;
 }
 
 :root {

@@ -9,7 +9,7 @@ import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema, insertAirA
 // Enhanced AI template generation function
 async function generateAITemplates(type: string, context: any): Promise<any[]> {
   console.log(`Generating ${type} templates with context:`, context);
-  
+
   // Extract campaign details for template generation
   const {
     campaignName = 'Special Campaign',
@@ -52,33 +52,33 @@ async function generateAITemplates(type: string, context: any): Promise<any[]> {
               <h1 style="margin: 0; font-size: 24px;">${campaignName}</h1>
               <p style="margin: 10px 0 0; font-size: 16px;">Exclusive offer just for you!</p>
             </div>
-            
+
             <div style="padding: 30px 20px;">
               <h2 style="color: #333; margin-bottom: 20px;">Don't miss out on this amazing deal!</h2>
-              
+
               <div style="background: #f8f9ff; border-left: 4px solid #667eea; padding: 20px; margin: 20px 0;">
                 <h3 style="color: #667eea; margin: 0 0 10px;">🎉 Special Offer</h3>
                 <p style="font-size: 18px; font-weight: bold; color: #333; margin: 0;">
                   Get ${getOfferText()} on ${getProductMentions()}
                 </p>
               </div>
-              
+
               <p style="color: #666; line-height: 1.6;">
                 We're excited to offer you this exclusive deal on our premium travel services. 
                 This limited-time offer is specially curated for valued customers like you.
               </p>
-              
+
               <div style="text-align: center; margin: 30px 0;">
                 <a href="#" style="background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
                   Claim Your Offer Now →
                 </a>
               </div>
-              
+
               <p style="color: #888; font-size: 14px; margin-top: 30px;">
                 This offer is valid for a limited time. Terms and conditions apply.
               </p>
             </div>
-            
+
             <div style="background: #f5f5f5; padding: 20px; text-align: center; color: #666; font-size: 14px;">
               <p>Best regards,<br>The ${companyName} Team</p>
             </div>
@@ -100,10 +100,10 @@ async function generateAITemplates(type: string, context: any): Promise<any[]> {
               <h1 style="margin: 0; font-size: 22px;">⏰ Last Chance!</h1>
               <p style="margin: 10px 0 0; font-size: 16px;">Your exclusive offer expires soon</p>
             </div>
-            
+
             <div style="padding: 30px 20px;">
               <h2 style="color: #333; margin-bottom: 20px;">Don't let this opportunity slip away!</h2>
-              
+
               <div style="background: #fff5f5; border: 2px dashed #ff6b6b; padding: 20px; margin: 20px 0; text-align: center;">
                 <h3 style="color: #ff6b6b; margin: 0 0 10px;">🔥 Limited Time Offer</h3>
                 <p style="font-size: 20px; font-weight: bold; color: #333; margin: 0;">
@@ -111,25 +111,25 @@ async function generateAITemplates(type: string, context: any): Promise<any[]> {
                 </p>
                 <p style="color: #ff6b6b; font-weight: bold; margin: 10px 0 0;">EXPIRES IN 24 HOURS!</p>
               </div>
-              
+
               <p style="color: #666; line-height: 1.6;">
-                This is your final reminder about our exclusive ${campaignName.toLowerCase()}. 
+                This is your final reminder about our ${campaignName.toLowerCase()}. 
                 Secure your savings before this amazing deal disappears forever.
               </p>
-              
+
               <div style="text-align: center; margin: 30px 0;">
                 <a href="#" style="background: #ff6b6b; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);">
                   SECURE MY DISCOUNT NOW →
                 </a>
               </div>
-              
+
               <div style="background: #fffacd; border-left: 4px solid #ffd700; padding: 15px; margin: 20px 0;">
                 <p style="margin: 0; color: #b8860b; font-weight: bold;">
                   💡 Pro Tip: Customers who book within the next 6 hours get an additional surprise bonus!
                 </p>
               </div>
             </div>
-            
+
             <div style="background: #f5f5f5; padding: 20px; text-align: center; color: #666; font-size: 14px;">
               <p>Don't wait - book now!<br>The ${companyName} Team</p>
             </div>
@@ -151,17 +151,17 @@ async function generateAITemplates(type: string, context: any): Promise<any[]> {
               <h1 style="margin: 0; font-size: 24px;">✈️ Recommended Just For You</h1>
               <p style="margin: 10px 0 0; font-size: 16px;">Based on your travel preferences</p>
             </div>
-            
+
             <div style="padding: 30px 20px;">
               <p style="color: #666; line-height: 1.6; font-size: 16px;">
                 Hi there! 👋
               </p>
-              
+
               <p style="color: #666; line-height: 1.6;">
                 We noticed you're planning your next adventure, and we have something special that caught our attention. 
                 Our ${campaignName.toLowerCase()} is perfectly tailored for travelers like you.
               </p>
-              
+
               <div style="background: #f0f7ff; border-radius: 10px; padding: 25px; margin: 25px 0;">
                 <h3 style="color: #0984e3; margin: 0 0 15px; display: flex; align-items: center;">
                   🎯 Your Personalized Offer
@@ -173,7 +173,7 @@ async function generateAITemplates(type: string, context: any): Promise<any[]> {
                   <p style="color: #666; margin: 0;">Perfect for enhancing your travel experience</p>
                 </div>
               </div>
-              
+
               <div style="background: #fff9e6; border-left: 4px solid #ffa500; padding: 20px; margin: 20px 0;">
                 <h4 style="color: #ff8c00; margin: 0 0 10px;">Why this offer is perfect for you:</h4>
                 <ul style="color: #666; margin: 0; padding-left: 20px;">
@@ -183,18 +183,18 @@ async function generateAITemplates(type: string, context: any): Promise<any[]> {
                   <li>24/7 customer support included</li>
                 </ul>
               </div>
-              
+
               <div style="text-align: center; margin: 30px 0;">
                 <a href="#" style="background: #0984e3; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
                   Explore This Offer →
                 </a>
               </div>
-              
+
               <p style="color: #888; font-size: 14px; text-align: center;">
                 Have questions? Reply to this email - we're here to help! 💬
               </p>
             </div>
-            
+
             <div style="background: #f5f5f5; padding: 20px; text-align: center; color: #666; font-size: 14px;">
               <p>Happy travels!<br>Your friends at ${companyName}</p>
             </div>
@@ -208,7 +208,7 @@ async function generateAITemplates(type: string, context: any): Promise<any[]> {
       }
     ];
   } 
-  
+
   else if (type === 'whatsapp') {
     return [
       {
@@ -249,7 +249,7 @@ async function generateAITemplates(type: string, context: any): Promise<any[]> {
       }
     ];
   }
-  
+
   return [];
 }
 
@@ -1710,14 +1710,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Agent Routes
 
-  // Get all agents with optional filters
+  // Get all agents
   app.get("/api/agents", async (req, res) => {
     try {
-      const filters = req.query;
-      const agents = await storage.getAgents(filters);
+      console.log("API: Fetching agents list");
+
+      // Get unique agent IDs from tier assignments
+      const assignments = await storage.getAgentTierAssignments({});
+      const uniqueAgentIds = [...new Set(assignments.map((a: any) => a.agentId))];
+
+      // If no assignments exist, create sample data
+      if (uniqueAgentIds.length === 0) {
+        const sampleAgents = [
+          { id: "AGT001", name: "John Smith", email: "john.smith@company.com", status: "ACTIVE" },
+          { id: "AGT002", name: "Sarah Johnson", email: "sarah.johnson@company.com", status: "ACTIVE" },
+          { id: "AGT003", name: "Michael Brown", email: "michael.brown@company.com", status: "ACTIVE" },
+          { id: "AGT004", name: "Emily Davis", email: "emily.davis@company.com", status: "ACTIVE" },
+          { id: "AGT005", name: "David Wilson", email: "david.wilson@company.com", status: "ACTIVE" },
+        ];
+        console.log(`API: Returning ${sampleAgents.length} sample agents`);
+        return res.json(sampleAgents);
+      }
+
+      // Transform agent IDs to agent objects (in a real system, this would come from a user/agent database)
+      const agents = uniqueAgentIds.map((agentId: string) => ({
+        id: agentId,
+        name: agentId.replace("AGT", "Agent "), // Simple name generation
+        email: `${agentId.toLowerCase()}@company.com`,
+        status: "ACTIVE"
+      }));
+
+      console.log(`API: Returning ${agents.length} agents from assignments`);
       res.json(agents);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch agents", error: error.message });
+      console.error("API: Error fetching agents:", error);
+      res.status(500).json({ 
+        message: "Failed to fetch agents", 
+        error: error.message 
+      });
     }
   });
 
@@ -2327,11 +2357,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const filters = req.query;
       let tiers = await storage.getAgentTiers(filters);
-      
+
       // If no tiers exist and no specific filters, create sample data
       if (tiers.length === 0 && Object.keys(filters).length === 0) {
         console.log("No agent tiers found, creating sample tiers...");
-        
+
         // Create sample agent tiers
         const sampleTiers = [
           {
@@ -2424,7 +2454,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.error("Error creating sample agent tiers:", createError);
         }
       }
-      
+
       res.json(tiers);
     } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch agent tiers", error: error.message });
@@ -2509,11 +2539,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("API: GET /api/tiers/engines called with query:", req.query);
       const filters = req.query;
       let engines = await storage.getTierAssignmentEngines(filters);
-      
+
       // If no engines exist and no specific filters, create sample data
       if (engines.length === 0 && Object.keys(filters).length === 0) {
         console.log("No assignment engines found, creating sample engine...");
-        
+
         const sampleEngine = {
           engineCode: "AUTO_TIER_EVAL",
           schedule: "0 0 1 * *", // Monthly on 1st day
@@ -2526,14 +2556,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           await storage.insertTierAssignmentEngine(sampleEngine);
           console.log("Created sample assignment engine");
-          
+
           // Refetch after creating sample
           engines = await storage.getTierAssignmentEngines(filters);
         } catch (createError: any) {
           console.error("Error creating sample assignment engine:", createError);
         }
       }
-      
+
       console.log(`API: Returning ${engines.length} assignment engines`);
       res.json(engines);
     } catch (error: any) {
@@ -2594,25 +2624,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("API: GET /api/tiers/assignments called with query:", req.query);
       const filters = req.query || {};
-      
+
       console.log("API: Calling storage.getAgentTierAssignments...");
       let assignments = await storage.getAgentTierAssignments(filters);
       console.log(`API: Storage returned ${assignments?.length || 0} tier assignments`);
-      
+
       // Ensure we always have an array
       if (!Array.isArray(assignments)) {
         console.log("API: Converting non-array result to empty array");
         assignments = [];
       }
-      
+
       // If no assignments exist and no specific filters, create sample data
       if (assignments.length === 0 && Object.keys(filters).length === 0) {
         console.log("API: No tier assignments found, creating sample assignments...");
-        
+
         // First ensure we have tiers to assign
         const existingTiers = await storage.getAgentTiers({ status: "ACTIVE" });
         console.log(`API: Found ${existingTiers.length} existing tiers`);
-        
+
         if (existingTiers.length > 0) {
           // Create sample tier assignments
           const sampleAssignments = [
@@ -2675,311 +2705,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log("API: No tiers found, cannot create sample assignments");
         }
       }
-      
-      console.log(`API: Returning ${assignments.length} tier assignments`);
-      res.json(assignments);
-    } catch (error: any) {
-      console.error("API: Error in /api/tiers/assignments:", error);
-      console.error("API: Error stack:", error.stack);
-      res.status(500).json({ 
-        message: "Failed to fetch tier assignments", 
-        error: error.message,
-        details: "Check server logs for more information"
-      });
-    }
-  });
 
-  // Assign tier to agent (manual override)
-  app.post("/api/tiers/override", async (req, res) => {
-    try {
-      const { agentId, tierCode, effectiveFrom, justification, assignedBy } = req.body;
-
-      if (!agentId || !tierCode || !effectiveFrom || !justification || !assignedBy) {
-        return res.status(400).json({ 
-          message: "agentId, tierCode, effectiveFrom, justification, and assignedBy are required" 
-        });
-      }
-
-      // Supersede previous assignments
-      await storage.supersedePreviousAssignments(agentId, effectiveFrom);
-
-      // Create new manual assignment
-      const assignmentData = {
-        agentId,
-        tierCode,
-        assignmentType: "MANUAL_OVERRIDE" as const,
-        effectiveFrom,
-        justification,
-        assignedBy,
-        status: "ACTIVE" as const,
-      };
-
-      const assignment = await storage.insertAgentTierAssignment(assignmentData);
-
-      // Create audit log
-      const auditData = {
-        user: assignedBy,
-        module: "AgentTierAssignment",
-        entityId: assignment.id,
-        action: "MANUAL_OVERRIDE",
-        afterData: assignment,
-        justification,
-        ipAddress: req.ip,
-        userAgent: req.get("User-Agent"),
-        sessionId: req.sessionID || "unknown",
-      };
-      await storage.createAuditLog(auditData);
-
-      res.status(201).json(assignment);
-    } catch (error: any) {
-      res.status(400).json({ message: "Failed to override tier assignment", error: error.message });
-    }
-  });
-
-  // Auto-assign tiers based on KPIs
-  app.post("/api/tiers/assign", async (req, res) => {
-    try {
-      const { agentIds, effectiveFrom, assignedBy } = req.body;
-
-      if (!agentIds || !Array.isArray(agentIds) || !effectiveFrom || !assignedBy) {
-        return res.status(400).json({ 
-          message: "agentIds (array), effectiveFrom, and assignedBy are required" 
-        });
-      }
-
-      const assignments = [];
-      const errors = [];
-
-      for (const agentId of agentIds) {
-        try {
-          // Calculate KPIs for agent
-          const kpiData = await storage.calculateAgentKPIs(agentId, 'QUARTERLY');
-
-          // Evaluate tier based on KPIs
-          const recommendedTier = await storage.evaluateAgentTier(agentId, kpiData);
-
-          // Check if tier has changed
-          const currentAssignment = await storage.getCurrentAgentTierAssignment(agentId);
-          if (currentAssignment?.tierCode === recommendedTier) {
-            continue; // No change needed
-          }
-
-          // Supersede previous assignments
-          await storage.supersedePreviousAssignments(agentId, effectiveFrom);
-
-          // Create new auto assignment
-          const assignmentData = {
-            agentId,
-            tierCode: recommendedTier,
-            assignmentType: "AUTO" as const,
-            effectiveFrom,
-            kpiData,
-            assignedBy,
-            justification: "Automatic tier assignment based on KPI evaluation",
-            status: "ACTIVE" as const,
-          };
-
-          const assignment = await storage.insertAgentTierAssignment(assignmentData);
-          assignments.push(assignment);
-
-          // Create audit log
-          const auditData = {
-            user: assignedBy,
-            module: "AgentTierAssignment",
-            entityId: assignment.id,
-            action: "AUTO_ASSIGNED",
-            afterData: assignment,
-            justification: "Automatic tier assignment based on KPI evaluation",
-            ipAddress: req.ip,
-            userAgent: req.get("User-Agent"),
-            sessionId: req.sessionID || "unknown",
-          };
-          await storage.createAuditLog(auditData);
-        } catch (error: any) {
-          errors.push({ agentId, error: error.message });
-        }
-      }
-
-      res.json({
-        success: true,
-        processed: agentIds.length,
-        assignments: assignments.length,
-        errors: errors.length,
-        data: {
-          assignments,
-          errors,
-        },
-      });
-    } catch (error: any) {
-      res.status(500).json({ message: "Failed to assign tiers", error: error.message });
-    }
-  });
-
-  // Get current tier for specific agent
-  app.get("/api/agents/:agentId/tier", async (req, res) => {
-    try {
-      const assignment = await storage.getCurrentAgentTierAssignment(req.params.agentId);
-      if (!assignment) {
-        return res.status(404).json({ message: "No active tier assignment found" });
-      }
-      res.json(assignment);
-    } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch agent tier", error: error.message });
-    }
-  });
-
-  // Evaluate agent for tier (simulation)
-  app.post("/api/tiers/evaluate", async (req, res) => {
-    try {
-      const { agentId, window } = req.body;
-
-      if (!agentId || !window) {
-        return res.status(400).json({ message: "agentId and window are required" });
-      }
-
-      // Calculate KPIs
-      const kpiData = await storage.calculateAgentKPIs(agentId, window);
-
-      // Evaluate tier
-      const recommendedTier = await storage.evaluateAgentTier(agentId, kpiData);
-
-      // Get current assignment
-      const currentAssignment = await storage.getCurrentAgentTierAssignment(agentId);
-
-      res.json({
-        agentId,
-        window,
-        kpiData,
-        recommendedTier,
-        currentTier: currentAssignment?.tierCode || null,
-        tierChangeRequired: currentAssignment?.tierCode !== recommendedTier,
-      });
-    } catch (error: any) {
-      res.status(500).json({ message: "Failed to evaluate agent tier", error: error.message });
-    }
-  });
-
-  // Agent Tier Assignment Routes
-
-  // Get all tier assignments with optional filters
-  app.get("/api/tiers/assignments", async (req, res) => {
-    try {
-      console.log("API: GET /api/tiers/assignments called with query:", req.query);
-      const filters = req.query || {};
-      
-      console.log("API: Calling storage.getAgentTierAssignments...");
-      let assignments = await storage.getAgentTierAssignments(filters);
-      console.log(`API: Storage returned ${assignments?.length || 0} tier assignments`);
-      
-      // Ensure we always have an array
-      if (!Array.isArray(assignments)) {
-        console.log("API: Converting non-array result to empty array");
-        assignments = [];
-      }
-      
-      // If no assignments exist and no specific filters, create sample data
-      if (assignments.length === 0 && Object.keys(filters).length === 0) {
-        console.log("API: No tier assignments found, creating sample assignments...");
-        
-        // First ensure we have tiers to assign
-        const existingTiers = await storage.getAgentTiers({ status: "ACTIVE" });
-        console.log(`API: Found ${existingTiers.length} existing tiers`);
-        
-        if (existingTiers.length > 0) {
-          // Create sample tier assignments
-          const sampleAssignments = [
-            {
-              agentId: "AGT001",
-              tierCode: "PLATINUM",
-              assignmentType: "AUTO" as const,
-              effectiveFrom: "2024-01-01",
-              kpiData: {
-                totalBookingValue: 75000000,
-                totalBookings: 2500,
-                avgBookingsPerMonth: 625,
-                avgSearchesPerMonth: 7500,
-                conversionPct: 8.3
-              },
-              assignedBy: "system",
-              justification: "Automatic assignment based on KPI evaluation",
-              status: "ACTIVE" as const,
-            },
-            {
-              agentId: "AGT002",
-              tierCode: "GOLD",
-              assignmentType: "AUTO" as const,
-              effectiveFrom: "2024-01-01",
-              kpiData: {
-                totalBookingValue: 45000000,
-                totalBookings: 1800,
-                avgBookingsPerMonth: 450,
-                avgSearchesPerMonth: 5000,
-                conversionPct: 9.0
-              },
-              assignedBy: "system",
-              justification: "Automatic assignment based on KPI evaluation",
-              status: "ACTIVE" as const,
-            },
-            {
-              agentId: "AGT003",
-              tierCode: "SILVER",
-              assignmentType: "MANUAL_OVERRIDE" as const,
-              effectiveFrom: "2024-02-15",
-              assignedBy: "admin",
-              justification: "Manual upgrade due to exceptional performance in specific routes",
-              status: "ACTIVE" as const,
-            },
-            {
-              agentId: "AGT004",
-              tierCode: "BRONZE",
-              assignmentType: "AUTO" as const,
-              effectiveFrom: "2024-01-01",
-              kpiData: {
-                totalBookingValue: 15000000,
-                totalBookings: 800,
-                avgBookingsPerMonth: 200,
-                avgSearchesPerMonth: 2500,
-                conversionPct: 8.0
-              },
-              assignedBy: "system",
-              justification: "Automatic assignment based on KPI evaluation",
-              status: "ACTIVE" as const,
-            },
-            {
-              agentId: "AGT005",
-              tierCode: "GOLD",
-              assignmentType: "AUTO" as const,
-              effectiveFrom: "2024-03-01",
-              kpiData: {
-                totalBookingValue: 48000000,
-                totalBookings: 1950,
-                avgBookingsPerMonth: 487,
-                avgSearchesPerMonth: 5200,
-                conversionPct: 9.4
-              },
-              assignedBy: "system",
-              justification: "Automatic assignment based on KPI evaluation",
-              status: "ACTIVE" as const,
-            }
-          ];
-
-          try {
-            for (const assignmentData of sampleAssignments) {
-              await storage.insertAgentTierAssignment(assignmentData);
-              console.log(`API: Created tier assignment for agent: ${assignmentData.agentId}`);
-            }
-
-            // Refetch after creating samples
-            assignments = await storage.getAgentTierAssignments(filters);
-            console.log(`API: After sample creation: ${assignments?.length || 0} assignments`);
-          } catch (createError: any) {
-            console.error("API: Error creating sample tier assignments:", createError);
-          }
-        } else {
-          console.log("API: No tiers found, cannot create sample assignments");
-        }
-      }
-      
       console.log(`API: Returning ${assignments.length} tier assignments`);
       res.json(assignments);
     } catch (error: any) {

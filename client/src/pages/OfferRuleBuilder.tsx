@@ -429,108 +429,30 @@ export default function OfferRuleBuilder() {
     }
   };
 
-  const validateFormData = (values: any) => {
-    const errors: string[] = [];
-
-    // Basic Info Validation
-    if (!values.ruleCode?.trim()) {
-      errors.push("Rule Code is required");
-    } else if (values.ruleCode.trim().length < 3) {
-      errors.push("Rule Code must be at least 3 characters long");
-    }
-
-    if (!values.ruleName?.trim()) {
-      errors.push("Rule Name is required");
-    } else if (values.ruleName.trim().length < 3) {
-      errors.push("Rule Name must be at least 3 characters long");
-    }
-
-    if (!values.ruleType) {
-      errors.push("Rule Type is required");
-    }
-
-    if (!values.priority || values.priority < 1 || values.priority > 100) {
-      errors.push("Priority must be between 1 and 100");
-    }
-
-    if (!values.validFrom) {
-      errors.push("Valid From date is required");
-    }
-
-    if (!values.validTo) {
-      errors.push("Valid To date is required");
-    }
-
-    if (values.validFrom && values.validTo && dayjs(values.validFrom).isAfter(dayjs(values.validTo))) {
-      errors.push("Valid From date must be before Valid To date");
-    }
-
-    // Conditions Validation
-    const conditions = values.conditions || {};
-    if (conditions.origin && conditions.origin.length !== 3) {
-      errors.push("Origin must be a valid 3-letter airport code");
-    }
-
-    if (conditions.destination && conditions.destination.length !== 3) {
-      errors.push("Destination must be a valid 3-letter airport code");
-    }
-
-    // Actions Validation
-    const actions = values.actions || [];
-    if (actions.length === 0) {
-      errors.push("At least one action is required");
-    }
-
-    actions.forEach((action: any, index: number) => {
-      if (!action.type) {
-        errors.push(`Action ${index + 1}: Action type is required`);
+  const validateCurrentStep = async () => {
+    try {
+      // Use Ant Design's built-in validation for the current step fields
+      const fieldsToValidate = getFieldsForStep(currentStep);
+      if (fieldsToValidate.length > 0) {
+        await createForm.validateFields(fieldsToValidate);
       }
-
-      if (action.valueType && action.valueType !== 'FREE' && (!action.value && action.value !== 0)) {
-        errors.push(`Action ${index + 1}: Value is required when value type is specified`);
-      }
-
-      if (action.value && (action.value < 0 || action.value > 100)) {
-        errors.push(`Action ${index + 1}: Value must be between 0 and 100`);
-      }
-
-      if (action.type === 'ADD_ANCILLARY' && !action.ancillaryCode?.trim()) {
-        errors.push(`Action ${index + 1}: Ancillary code is required for ADD_ANCILLARY actions`);
-      }
-
-      if (action.type === 'ACTIVATE_BUNDLE' && !action.bundleCode?.trim()) {
-        errors.push(`Action ${index + 1}: Bundle code is required for ACTIVATE_BUNDLE actions`);
-      }
-
-      if (action.type === 'ADD_BANNER' && !action.bannerText?.trim()) {
-        errors.push(`Action ${index + 1}: Banner text is required for ADD_BANNER actions`);
-      }
-    });
-
-    // Review Step Validation (only for final submission)
-    if (currentStep === 3 && !values.justification?.trim()) {
-      errors.push("Justification is required for rule approval");
+      return true;
+    } catch (error) {
+      console.log("Validation errors:", error);
+      return false;
     }
-
-    return errors;
   };
 
   const onCreateSubmit = async () => {
     console.log("Create Rule button clicked");
 
     try {
+      // Validate all form fields
+      await createForm.validateFields();
+      
       // Get all form values
       const allFormValues = createForm.getFieldsValue(true);
       console.log("All form values:", allFormValues);
-
-      // Validate form data
-      const validationErrors = validateFormData(allFormValues);
-      if (validationErrors.length > 0) {
-        console.error("Validation errors:", validationErrors);
-        // You can display these errors to the user using a notification system
-        alert("Please fix the following errors:\n" + validationErrors.join("\n"));
-        return;
-      }
 
       // Extract and validate basic field values
       const ruleCode = allFormValues.ruleCode.trim();
@@ -658,7 +580,7 @@ export default function OfferRuleBuilder() {
       
     } catch (error: any) {
       console.error("Form submission error:", error);
-      alert(`Error creating rule: ${error.message}`);
+      // Form validation errors will be displayed inline
     }
   };
 
@@ -1034,8 +956,21 @@ export default function OfferRuleBuilder() {
                     <AntForm.Item
                       label="Valid To"
                       name="validTo"
+                      dependencies={['validFrom']}
                       rules={[
-                        { required: true, message: "Valid To date is required" }
+                        { required: true, message: "Valid To date is required" },
+                        ({ getFieldValue }) => ({
+                          validator(_, value) {
+                            const validFrom = getFieldValue('validFrom');
+                            if (!value || !validFrom) {
+                              return Promise.resolve();
+                            }
+                            if (dayjs(validFrom).isAfter(dayjs(value))) {
+                              return Promise.reject('Valid To date must be after Valid From date');
+                            }
+                            return Promise.resolve();
+                          },
+                        })
                       ]}
                     >
                       <DatePicker
@@ -1058,14 +993,27 @@ export default function OfferRuleBuilder() {
                         label="Origin" 
                         name={["conditions", "origin"]}
                         rules={[
-                          { len: 3, message: "Origin must be exactly 3 characters" },
-                          { pattern: /^[A-Z]{3}$/, message: "Origin must be 3 uppercase letters" }
+                          {
+                            validator: (_, value) => {
+                              if (!value) return Promise.resolve();
+                              if (value.length !== 3) {
+                                return Promise.reject("Origin must be exactly 3 characters");
+                              }
+                              if (!/^[A-Z]{3}$/.test(value)) {
+                                return Promise.reject("Origin must be 3 uppercase letters");
+                              }
+                              return Promise.resolve();
+                            }
+                          }
                         ]}
                       >
                         <AntInput 
                           placeholder="NYC" 
                           maxLength={3} 
                           style={{ textTransform: 'uppercase' }}
+                          onChange={(e) => {
+                            e.target.value = e.target.value.toUpperCase();
+                          }}
                         />
                       </AntForm.Item>
                     </Col>
@@ -1074,14 +1022,27 @@ export default function OfferRuleBuilder() {
                         label="Destination"
                         name={["conditions", "destination"]}
                         rules={[
-                          { len: 3, message: "Destination must be exactly 3 characters" },
-                          { pattern: /^[A-Z]{3}$/, message: "Destination must be 3 uppercase letters" }
+                          {
+                            validator: (_, value) => {
+                              if (!value) return Promise.resolve();
+                              if (value.length !== 3) {
+                                return Promise.reject("Destination must be exactly 3 characters");
+                              }
+                              if (!/^[A-Z]{3}$/.test(value)) {
+                                return Promise.reject("Destination must be 3 uppercase letters");
+                              }
+                              return Promise.resolve();
+                            }
+                          }
                         ]}
                       >
                         <AntInput 
                           placeholder="LAX" 
                           maxLength={3}
                           style={{ textTransform: 'uppercase' }}
+                          onChange={(e) => {
+                            e.target.value = e.target.value.toUpperCase();
+                          }}
                         />
                       </AntForm.Item>
                     </Col>
@@ -1440,6 +1401,24 @@ export default function OfferRuleBuilder() {
                         >
                           Add Action
                         </AntButton>
+                        
+                        {fields.length === 0 && (
+                          <AntForm.Item
+                            name="actionsRequired"
+                            rules={[
+                              {
+                                validator: () => {
+                                  if (fields.length === 0) {
+                                    return Promise.reject('At least one action is required');
+                                  }
+                                  return Promise.resolve();
+                                }
+                              }
+                            ]}
+                          >
+                            <div style={{ display: 'none' }} />
+                          </AntForm.Item>
+                        )}
                       </>
                     )}
                   </AntForm.List>
@@ -1492,7 +1471,12 @@ export default function OfferRuleBuilder() {
                 {currentStep < steps.length - 1 ? (
                   <AntButton
                     type="primary"
-                    onClick={() => setCurrentStep(currentStep + 1)}
+                    onClick={async () => {
+                      const isValid = await validateCurrentStep();
+                      if (isValid) {
+                        setCurrentStep(currentStep + 1);
+                      }
+                    }}
                   >
                     Next
                   </AntButton>

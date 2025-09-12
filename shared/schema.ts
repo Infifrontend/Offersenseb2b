@@ -1,16 +1,29 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, decimal, date, timestamp, integer, json } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  varchar,
+  decimal,
+  date,
+  timestamp,
+  integer,
+  json,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
 });
 
 export const negotiatedFares = pgTable("negotiated_fares", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   airlineCode: varchar("airline_code", { length: 2 }).notNull(),
   fareCode: varchar("fare_code", { length: 50 }).notNull(),
   origin: varchar("origin", { length: 3 }).notNull(),
@@ -54,7 +67,9 @@ export const insertNegotiatedFareSchema = createInsertSchema(negotiatedFares, {
 });
 
 export const dynamicDiscountRules = pgTable("dynamic_discount_rules", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   ruleCode: varchar("rule_code", { length: 50 }).notNull().unique(),
   fareSource: varchar("fare_source", { length: 20 }).notNull(), // API_GDS_NDC
   origin: varchar("origin", { length: 3 }).notNull(),
@@ -72,7 +87,10 @@ export const dynamicDiscountRules = pgTable("dynamic_discount_rules", {
   travelWindowMax: integer("travel_window_max"),
   seasonCode: varchar("season_code", { length: 50 }),
   adjustmentType: varchar("adjustment_type", { length: 20 }).notNull(), // PERCENT | AMOUNT
-  adjustmentValue: decimal("adjustment_value", { precision: 10, scale: 2 }).notNull(),
+  adjustmentValue: decimal("adjustment_value", {
+    precision: 10,
+    scale: 2,
+  }).notNull(),
   stackable: varchar("stackable", { length: 5 }).default("false"), // true/false
   priority: integer("priority").notNull().default(1),
   status: varchar("status", { length: 20 }).default("ACTIVE"), // ACTIVE | INACTIVE
@@ -82,19 +100,24 @@ export const dynamicDiscountRules = pgTable("dynamic_discount_rules", {
   updatedAt: timestamp("updated_at").default(sql`now()`),
 });
 
-export const insertDynamicDiscountRuleSchema = createInsertSchema(dynamicDiscountRules, {
-  adjustmentValue: z.string().transform((val) => parseFloat(val)),
-  pos: z.array(z.string()),
-  agentTier: z.array(z.enum(["PLATINUM", "GOLD", "SILVER", "BRONZE"])),
-  cohortCodes: z.array(z.string()).optional(),
-}).omit({
+export const insertDynamicDiscountRuleSchema = createInsertSchema(
+  dynamicDiscountRules,
+  {
+    adjustmentValue: z.string().transform((val) => parseFloat(val)),
+    pos: z.array(z.string()),
+    agentTier: z.array(z.enum(["PLATINUM", "GOLD", "SILVER", "BRONZE"])),
+    cohortCodes: z.array(z.string()).optional(),
+  },
+).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
 
 export const airAncillaryRules = pgTable("air_ancillary_rules", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   ruleCode: varchar("rule_code", { length: 50 }).notNull().unique(),
   ancillaryCode: varchar("ancillary_code", { length: 50 }).notNull(), // BAG20, SEAT_STD, MEAL_STD, WIFI_STD, LOUNGE_PASS
   airlineCode: varchar("airline_code", { length: 2 }), // Optional for carrier-specific
@@ -115,12 +138,18 @@ export const airAncillaryRules = pgTable("air_ancillary_rules", {
   updatedAt: timestamp("updated_at").default(sql`now()`),
 });
 
-export const insertAirAncillaryRuleSchema = createInsertSchema(airAncillaryRules, {
-  adjustmentValue: z.string().transform((val) => parseFloat(val)).optional(),
-  pos: z.array(z.string()),
-  agentTier: z.array(z.enum(["PLATINUM", "GOLD", "SILVER", "BRONZE"])),
-  cohortCodes: z.array(z.string()).optional(),
-}).omit({
+export const insertAirAncillaryRuleSchema = createInsertSchema(
+  airAncillaryRules,
+  {
+    adjustmentValue: z
+      .string()
+      .transform((val) => parseFloat(val))
+      .optional(),
+    pos: z.array(z.string()),
+    agentTier: z.array(z.enum(["PLATINUM", "GOLD", "SILVER", "BRONZE"])),
+    cohortCodes: z.array(z.string()).optional(),
+  },
+).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -131,12 +160,18 @@ export type User = typeof users.$inferSelect;
 export type NegotiatedFare = typeof negotiatedFares.$inferSelect;
 export type InsertNegotiatedFare = z.infer<typeof insertNegotiatedFareSchema>;
 export type DynamicDiscountRule = typeof dynamicDiscountRules.$inferSelect;
-export type InsertDynamicDiscountRule = z.infer<typeof insertDynamicDiscountRuleSchema>;
+export type InsertDynamicDiscountRule = z.infer<
+  typeof insertDynamicDiscountRuleSchema
+>;
 export type AirAncillaryRule = typeof airAncillaryRules.$inferSelect;
-export type InsertAirAncillaryRule = z.infer<typeof insertAirAncillaryRuleSchema>;
+export type InsertAirAncillaryRule = z.infer<
+  typeof insertAirAncillaryRuleSchema
+>;
 
 export const nonAirRates = pgTable("non_air_rates", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   supplierCode: varchar("supplier_code", { length: 50 }).notNull(),
   productCode: varchar("product_code", { length: 50 }).notNull(), // INS_STD, HOTEL_STD, TRANSFER_STD, VISA_STD, FOREX_STD
   productName: varchar("product_name", { length: 200 }).notNull(),
@@ -152,7 +187,9 @@ export const nonAirRates = pgTable("non_air_rates", {
 });
 
 export const nonAirMarkupRules = pgTable("non_air_markup_rules", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   ruleCode: varchar("rule_code", { length: 50 }).notNull().unique(),
   supplierCode: varchar("supplier_code", { length: 50 }), // optional, wildcards allowed
   productCode: varchar("product_code", { length: 50 }).notNull(), // wildcards allowed
@@ -161,7 +198,10 @@ export const nonAirMarkupRules = pgTable("non_air_markup_rules", {
   cohortCodes: json("cohort_codes"), // array of cohort codes
   channel: varchar("channel", { length: 20 }).notNull(), // API | PORTAL | MOBILE
   adjustmentType: varchar("adjustment_type", { length: 20 }).notNull(), // PERCENT | AMOUNT
-  adjustmentValue: decimal("adjustment_value", { precision: 10, scale: 2 }).notNull(),
+  adjustmentValue: decimal("adjustment_value", {
+    precision: 10,
+    scale: 2,
+  }).notNull(),
   tieredCommission: json("tiered_commission"), // optional table structure
   priority: integer("priority").notNull().default(1),
   status: varchar("status", { length: 20 }).default("ACTIVE"), // ACTIVE | INACTIVE
@@ -180,16 +220,23 @@ export const insertNonAirRateSchema = createInsertSchema(nonAirRates, {
   updatedAt: true,
 });
 
-export const insertNonAirMarkupRuleSchema = createInsertSchema(nonAirMarkupRules, {
-  adjustmentValue: z.string().transform((val) => parseFloat(val)),
-  pos: z.array(z.string()),
-  agentTier: z.array(z.enum(["PLATINUM", "GOLD", "SILVER", "BRONZE"])),
-  cohortCodes: z.array(z.string()).optional(),
-  tieredCommission: z.array(z.object({
-    tier: z.string(),
-    commission: z.number(),
-  })).optional(),
-}).omit({
+export const insertNonAirMarkupRuleSchema = createInsertSchema(
+  nonAirMarkupRules,
+  {
+    adjustmentValue: z.string().transform((val) => parseFloat(val)),
+    pos: z.array(z.string()),
+    agentTier: z.array(z.enum(["PLATINUM", "GOLD", "SILVER", "BRONZE"])),
+    cohortCodes: z.array(z.string()).optional(),
+    tieredCommission: z
+      .array(
+        z.object({
+          tier: z.string(),
+          commission: z.number(),
+        }),
+      )
+      .optional(),
+  },
+).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -198,10 +245,14 @@ export const insertNonAirMarkupRuleSchema = createInsertSchema(nonAirMarkupRules
 export type NonAirRate = typeof nonAirRates.$inferSelect;
 export type InsertNonAirRate = z.infer<typeof insertNonAirRateSchema>;
 export type NonAirMarkupRule = typeof nonAirMarkupRules.$inferSelect;
-export type InsertNonAirMarkupRule = z.infer<typeof insertNonAirMarkupRuleSchema>;
+export type InsertNonAirMarkupRule = z.infer<
+  typeof insertNonAirMarkupRuleSchema
+>;
 
 export const bundles = pgTable("bundles", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   bundleCode: varchar("bundle_code", { length: 50 }).notNull().unique(),
   bundleName: varchar("bundle_name", { length: 200 }).notNull(),
   components: json("components").notNull(), // array of SKUs: air/non-air product codes
@@ -220,11 +271,16 @@ export const bundles = pgTable("bundles", {
 });
 
 export const bundlePricingRules = pgTable("bundle_pricing_rules", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   ruleCode: varchar("rule_code", { length: 50 }).notNull().unique(),
   bundleCode: varchar("bundle_code", { length: 50 }).notNull(),
   discountType: varchar("discount_type", { length: 20 }).notNull(), // PERCENT | AMOUNT
-  discountValue: decimal("discount_value", { precision: 10, scale: 2 }).notNull(),
+  discountValue: decimal("discount_value", {
+    precision: 10,
+    scale: 2,
+  }).notNull(),
   tieredPromo: json("tiered_promo"), // optional table: [{qty: number, discount: number}]
   priority: integer("priority").notNull().default(1),
   status: varchar("status", { length: 20 }).default("ACTIVE"), // ACTIVE | INACTIVE
@@ -245,13 +301,20 @@ export const insertBundleSchema = createInsertSchema(bundles, {
   updatedAt: true,
 });
 
-export const insertBundlePricingRuleSchema = createInsertSchema(bundlePricingRules, {
-  discountValue: z.string().transform((val) => parseFloat(val)),
-  tieredPromo: z.array(z.object({
-    qty: z.number(),
-    discount: z.number(),
-  })).optional(),
-}).omit({
+export const insertBundlePricingRuleSchema = createInsertSchema(
+  bundlePricingRules,
+  {
+    discountValue: z.string().transform((val) => parseFloat(val)),
+    tieredPromo: z
+      .array(
+        z.object({
+          qty: z.number(),
+          discount: z.number(),
+        }),
+      )
+      .optional(),
+  },
+).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -260,10 +323,14 @@ export const insertBundlePricingRuleSchema = createInsertSchema(bundlePricingRul
 export type Bundle = typeof bundles.$inferSelect;
 export type InsertBundle = z.infer<typeof insertBundleSchema>;
 export type BundlePricingRule = typeof bundlePricingRules.$inferSelect;
-export type InsertBundlePricingRule = z.infer<typeof insertBundlePricingRuleSchema>;
+export type InsertBundlePricingRule = z.infer<
+  typeof insertBundlePricingRuleSchema
+>;
 
 export const offerRules = pgTable("offer_rules", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   ruleCode: varchar("rule_code", { length: 50 }).notNull().unique(),
   ruleName: varchar("rule_name", { length: 200 }).notNull(),
   ruleType: varchar("rule_type", { length: 30 }).notNull(), // FARE_DISCOUNT | ANCILLARY_DISCOUNT | BUNDLE_OFFER | MARKUP
@@ -286,35 +353,56 @@ export const insertOfferRuleSchema = createInsertSchema(offerRules, {
     origin: z.string().optional(),
     destination: z.string().optional(),
     pos: z.array(z.string()).optional(),
-    agentTier: z.array(z.enum(["PLATINUM", "GOLD", "SILVER", "BRONZE"])).optional(),
+    agentTier: z
+      .array(z.enum(["PLATINUM", "GOLD", "SILVER", "BRONZE"]))
+      .optional(),
     cohortCodes: z.array(z.string()).optional(),
     channel: z.array(z.enum(["API", "PORTAL", "MOBILE"])).optional(),
     seasonCode: z.string().optional(),
-    bookingWindow: z.object({
-      min: z.number(),
-      max: z.number()
-    }).optional(),
-    travelWindow: z.object({
-      min: z.number(),
-      max: z.number()
-    }).optional(),
-    cabinClass: z.array(z.enum(["ECONOMY", "PREMIUM_ECONOMY", "BUSINESS", "FIRST"])).optional(),
-    tripType: z.array(z.enum(["ONE_WAY", "ROUND_TRIP", "MULTI_CITY"])).optional(),
+    bookingWindow: z
+      .object({
+        min: z.number(),
+        max: z.number(),
+      })
+      .optional(),
+    travelWindow: z
+      .object({
+        min: z.number(),
+        max: z.number(),
+      })
+      .optional(),
+    cabinClass: z
+      .array(z.enum(["ECONOMY", "PREMIUM_ECONOMY", "BUSINESS", "FIRST"]))
+      .optional(),
+    tripType: z
+      .array(z.enum(["ONE_WAY", "ROUND_TRIP", "MULTI_CITY"]))
+      .optional(),
   }),
-  actions: z.array(z.object({
-    type: z.enum(["DISCOUNT", "MARKUP", "ADD_ANCILLARY", "ACTIVATE_BUNDLE", "SUPPRESS_PRODUCT", "ADD_BANNER"]),
-    scope: z.enum(["NEGOTIATED", "API", "ANCILLARY", "BUNDLE"]).optional(),
-    valueType: z.enum(["PERCENT", "AMOUNT", "FREE"]).optional(),
-    value: z.number().optional(),
-    ancillaryCode: z.string().optional(),
-    bundleCode: z.string().optional(),
-    productCode: z.string().optional(),
-    bannerText: z.string().optional(),
-    pricing: z.object({
-      type: z.enum(["PERCENT", "AMOUNT", "FREE"]),
-      value: z.number().optional()
-    }).optional(),
-  })),
+  actions: z.array(
+    z.object({
+      type: z.enum([
+        "DISCOUNT",
+        "MARKUP",
+        "ADD_ANCILLARY",
+        "ACTIVATE_BUNDLE",
+        "SUPPRESS_PRODUCT",
+        "ADD_BANNER",
+      ]),
+      scope: z.enum(["NEGOTIATED", "API", "ANCILLARY", "BUNDLE"]).optional(),
+      valueType: z.enum(["PERCENT", "AMOUNT", "FREE"]).optional(),
+      value: z.number().optional(),
+      ancillaryCode: z.string().optional(),
+      bundleCode: z.string().optional(),
+      productCode: z.string().optional(),
+      bannerText: z.string().optional(),
+      pricing: z
+        .object({
+          type: z.enum(["PERCENT", "AMOUNT", "FREE"]),
+          value: z.number().optional(),
+        })
+        .optional(),
+    }),
+  ),
 }).omit({
   id: true,
   createdAt: true,
@@ -326,7 +414,9 @@ export type OfferRule = typeof offerRules.$inferSelect;
 export type InsertOfferRule = z.infer<typeof insertOfferRuleSchema>;
 
 export const offerTraces = pgTable("offer_traces", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   traceId: varchar("trace_id", { length: 50 }).notNull().unique(),
   agentId: varchar("agent_id", { length: 50 }).notNull(),
   searchParams: json("search_params").notNull(), // origin, destination, dates, pax, etc.
@@ -337,7 +427,10 @@ export const offerTraces = pgTable("offer_traces", {
   adjustments: json("adjustments"), // array of rule adjustments applied
   ancillaries: json("ancillaries"), // array of ancillary offers
   bundles: json("bundles"), // array of bundle offers
-  finalOfferPrice: decimal("final_offer_price", { precision: 10, scale: 2 }).notNull(),
+  finalOfferPrice: decimal("final_offer_price", {
+    precision: 10,
+    scale: 2,
+  }).notNull(),
   commission: decimal("commission", { precision: 10, scale: 2 }).notNull(),
   auditTraceId: varchar("audit_trace_id", { length: 50 }),
   status: varchar("status", { length: 20 }).default("ACTIVE"), // ACTIVE | EXPIRED
@@ -353,34 +446,48 @@ export const insertOfferTraceSchema = createInsertSchema(offerTraces, {
     origin: z.string(),
     destination: z.string(),
     tripType: z.enum(["ONE_WAY", "ROUND_TRIP", "MULTI_CITY"]),
-    pax: z.array(z.object({
-      type: z.string(),
-      count: z.number()
-    })),
+    pax: z.array(
+      z.object({
+        type: z.string(),
+        count: z.number(),
+      }),
+    ),
     cabinClass: z.enum(["ECONOMY", "PREMIUM_ECONOMY", "BUSINESS", "FIRST"]),
     dates: z.object({
       depart: z.string(),
-      return: z.string().optional()
+      return: z.string().optional(),
     }),
     channel: z.enum(["API", "PORTAL", "MOBILE"]),
   }),
   cohorts: z.array(z.string()).optional(),
-  adjustments: z.array(z.object({
-    rule: z.string(),
-    type: z.string(),
-    value: z.number()
-  })).optional(),
-  ancillaries: z.array(z.object({
-    code: z.string(),
-    base: z.number(),
-    discount: z.number().optional(),
-    sell: z.number()
-  })).optional(),
-  bundles: z.array(z.object({
-    code: z.string(),
-    sell: z.number(),
-    saveVsIndiv: z.number().optional()
-  })).optional(),
+  adjustments: z
+    .array(
+      z.object({
+        rule: z.string(),
+        type: z.string(),
+        value: z.number(),
+      }),
+    )
+    .optional(),
+  ancillaries: z
+    .array(
+      z.object({
+        code: z.string(),
+        base: z.number(),
+        discount: z.number().optional(),
+        sell: z.number(),
+      }),
+    )
+    .optional(),
+  bundles: z
+    .array(
+      z.object({
+        code: z.string(),
+        sell: z.number(),
+        saveVsIndiv: z.number().optional(),
+      }),
+    )
+    .optional(),
 }).omit({
   id: true,
   createdAt: true,
@@ -391,7 +498,9 @@ export type OfferTrace = typeof offerTraces.$inferSelect;
 export type InsertOfferTrace = z.infer<typeof insertOfferTraceSchema>;
 
 export const agents = pgTable("agents", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   agentId: varchar("agent_id", { length: 50 }).notNull().unique(),
   agencyName: varchar("agency_name", { length: 200 }).notNull(),
   iataCode: varchar("iata_code", { length: 10 }),
@@ -405,13 +514,18 @@ export const agents = pgTable("agents", {
 });
 
 export const channelPricingOverrides = pgTable("channel_pricing_overrides", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   overrideCode: varchar("override_code", { length: 50 }).notNull().unique(),
   channel: varchar("channel", { length: 20 }).notNull(), // API | PORTAL | MOBILE
   pos: json("pos").notNull(), // array of ISO country codes
   productScope: varchar("product_scope", { length: 20 }).notNull(), // FARE | ANCILLARY | BUNDLE
   adjustmentType: varchar("adjustment_type", { length: 20 }).notNull(), // PERCENT | AMOUNT
-  adjustmentValue: decimal("adjustment_value", { precision: 10, scale: 2 }).notNull(),
+  adjustmentValue: decimal("adjustment_value", {
+    precision: 10,
+    scale: 2,
+  }).notNull(),
   priority: integer("priority").notNull().default(1),
   status: varchar("status", { length: 20 }).default("ACTIVE"), // ACTIVE | INACTIVE
   validFrom: date("valid_from").notNull(),
@@ -429,23 +543,33 @@ export const insertAgentSchema = createInsertSchema(agents, {
   updatedAt: true,
 });
 
-export const insertChannelPricingOverrideSchema = createInsertSchema(channelPricingOverrides, {
-  adjustmentValue: z.string().transform((val) => parseFloat(val)),
-  pos: z.array(z.string()),
-}).omit({
+export const insertChannelPricingOverrideSchema = createInsertSchema(
+  channelPricingOverrides,
+  {
+    adjustmentValue: z.string().transform((val) => parseFloat(val)),
+    pos: z.array(z.string()),
+  },
+).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
 
-export type InsertChannelPricingOverride = z.infer<typeof insertChannelPricingOverrideSchema>;
+export type InsertChannelPricingOverride = z.infer<
+  typeof insertChannelPricingOverrideSchema
+>;
 export type Agent = typeof agents.$inferSelect;
 export type InsertAgent = z.infer<typeof insertAgentSchema>;
-export type ChannelPricingOverride = typeof channelPricingOverrides.$inferSelect;
-export type InsertChannelPricingOverride = z.infer<typeof insertChannelPricingOverrideSchema>;
+export type ChannelPricingOverride =
+  typeof channelPricingOverrides.$inferSelect;
+export type InsertChannelPricingOverride = z.infer<
+  typeof insertChannelPricingOverrideSchema
+>;
 
 export const cohorts = pgTable("cohorts", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   cohortCode: varchar("cohort_code", { length: 50 }).notNull().unique(),
   cohortName: varchar("cohort_name", { length: 200 }).notNull(),
   type: varchar("type", { length: 20 }).notNull(), // MARKET | CHANNEL | SEASON | BEHAVIOR
@@ -462,19 +586,27 @@ export const insertCohortSchema = createInsertSchema(cohorts, {
     pos: z.array(z.string()).optional(),
     channel: z.enum(["API", "PORTAL", "MOBILE"]).optional(),
     device: z.enum(["DESKTOP", "MOBILE", "TABLET"]).optional(),
-    bookingWindow: z.object({
-      min: z.number(),
-      max: z.number()
-    }).optional(),
-    season: z.string().optional(),
-    behavior: z.object({
-      bookingFrequency: z.enum(["HIGH", "MEDIUM", "LOW"]).optional(),
-      averageBookingValue: z.object({
+    bookingWindow: z
+      .object({
         min: z.number(),
-        max: z.number()
-      }).optional(),
-      preferredCabinClass: z.array(z.enum(["ECONOMY", "PREMIUM_ECONOMY", "BUSINESS", "FIRST"])).optional(),
-    }).optional(),
+        max: z.number(),
+      })
+      .optional(),
+    season: z.string().optional(),
+    behavior: z
+      .object({
+        bookingFrequency: z.enum(["HIGH", "MEDIUM", "LOW"]).optional(),
+        averageBookingValue: z
+          .object({
+            min: z.number(),
+            max: z.number(),
+          })
+          .optional(),
+        preferredCabinClass: z
+          .array(z.enum(["ECONOMY", "PREMIUM_ECONOMY", "BUSINESS", "FIRST"]))
+          .optional(),
+      })
+      .optional(),
   }),
 }).omit({
   id: true,
@@ -486,8 +618,12 @@ export type Cohort = typeof cohorts.$inferSelect;
 export type InsertCohort = z.infer<typeof insertCohortSchema>;
 
 export const auditLogs = pgTable("audit_logs", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  timestamp: timestamp("timestamp").default(sql`now()`).notNull(),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  timestamp: timestamp("timestamp")
+    .default(sql`now()`)
+    .notNull(),
   user: varchar("user", { length: 100 }).notNull(),
   module: varchar("module", { length: 50 }).notNull(), // NegotiatedFare, DynamicDiscountRule, etc.
   entityId: varchar("entity_id", { length: 100 }).notNull(),
@@ -505,10 +641,14 @@ export const auditLogs = pgTable("audit_logs", {
 export const insertAuditLogSchema = createInsertSchema(auditLogs, {
   beforeData: z.any().optional(),
   afterData: z.any().optional(),
-  diff: z.record(z.object({
-    from: z.any(),
-    to: z.any()
-  })).optional(),
+  diff: z
+    .record(
+      z.object({
+        from: z.any(),
+        to: z.any(),
+      }),
+    )
+    .optional(),
 }).omit({
   id: true,
   createdAt: true,
@@ -519,7 +659,9 @@ export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
 
 // Agent Tier Management Tables
 export const agentTiers = pgTable("agent_tiers", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   tierCode: varchar("tier_code", { length: 20 }).notNull().unique(), // PLATINUM | GOLD | SILVER | BRONZE
   displayName: varchar("display_name", { length: 100 }).notNull(),
   kpiWindow: varchar("kpi_window", { length: 20 }).notNull(), // MONTHLY | QUARTERLY
@@ -533,7 +675,9 @@ export const agentTiers = pgTable("agent_tiers", {
 });
 
 export const agentTierAssignments = pgTable("agent_tier_assignments", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   agentId: varchar("agent_id", { length: 50 }).notNull(),
   tierCode: varchar("tier_code", { length: 20 }).notNull(),
   assignmentType: varchar("assignment_type", { length: 20 }).notNull(), // AUTO | MANUAL_OVERRIDE
@@ -548,7 +692,9 @@ export const agentTierAssignments = pgTable("agent_tier_assignments", {
 });
 
 export const tierAssignmentEngine = pgTable("tier_assignment_engine", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   engineCode: varchar("engine_code", { length: 50 }).notNull().unique(),
   schedule: varchar("schedule", { length: 100 }).notNull(), // cron expression
   reassignmentMode: varchar("reassignment_mode", { length: 20 }).notNull(), // AUTO | REVIEW
@@ -569,31 +715,40 @@ export const insertAgentTierSchema = createInsertSchema(agentTiers, {
     avgSearchesPerMonthMin: z.number().min(0),
     conversionPctMin: z.number().min(0).max(100),
   }),
-  defaultPricingPolicy: z.object({
-    type: z.enum(["PERCENT", "AMOUNT"]),
-    value: z.number(),
-  }).optional(),
+  defaultPricingPolicy: z
+    .object({
+      type: z.enum(["PERCENT", "AMOUNT"]),
+      value: z.number(),
+    })
+    .optional(),
 }).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
 
-export const insertAgentTierAssignmentSchema = createInsertSchema(agentTierAssignments, {
-  kpiData: z.object({
-    totalBookingValue: z.number().optional(),
-    totalBookings: z.number().optional(),
-    avgBookingsPerMonth: z.number().optional(),
-    avgSearchesPerMonth: z.number().optional(),
-    conversionPct: z.number().optional(),
-  }).optional(),
-}).omit({
+export const insertAgentTierAssignmentSchema = createInsertSchema(
+  agentTierAssignments,
+  {
+    kpiData: z
+      .object({
+        totalBookingValue: z.number().optional(),
+        totalBookings: z.number().optional(),
+        avgBookingsPerMonth: z.number().optional(),
+        avgSearchesPerMonth: z.number().optional(),
+        conversionPct: z.number().optional(),
+      })
+      .optional(),
+  },
+).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
 
-export const insertTierAssignmentEngineSchema = createInsertSchema(tierAssignmentEngine).omit({
+export const insertTierAssignmentEngineSchema = createInsertSchema(
+  tierAssignmentEngine,
+).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -604,13 +759,19 @@ export const insertTierAssignmentEngineSchema = createInsertSchema(tierAssignmen
 export type AgentTier = typeof agentTiers.$inferSelect;
 export type InsertAgentTier = z.infer<typeof insertAgentTierSchema>;
 export type AgentTierAssignment = typeof agentTierAssignments.$inferSelect;
-export type InsertAgentTierAssignment = z.infer<typeof insertAgentTierAssignmentSchema>;
+export type InsertAgentTierAssignment = z.infer<
+  typeof insertAgentTierAssignmentSchema
+>;
 export type TierAssignmentEngine = typeof tierAssignmentEngine.$inferSelect;
-export type InsertTierAssignmentEngine = z.infer<typeof insertTierAssignmentEngineSchema>;
+export type InsertTierAssignmentEngine = z.infer<
+  typeof insertTierAssignmentEngineSchema
+>;
 
 // Campaign Management Tables
 export const campaigns = pgTable("campaigns", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   campaignCode: varchar("campaign_code", { length: 50 }).notNull().unique(),
   campaignName: varchar("campaign_name", { length: 200 }).notNull(),
   target: json("target").notNull(), // cohorts, agentTiers, pos, channel
@@ -625,7 +786,9 @@ export const campaigns = pgTable("campaigns", {
 });
 
 export const campaignMetrics = pgTable("campaign_metrics", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   campaignCode: varchar("campaign_code", { length: 50 }).notNull(),
   date: date("date").notNull(),
   sent: integer("sent").default(0),
@@ -633,7 +796,9 @@ export const campaignMetrics = pgTable("campaign_metrics", {
   opened: integer("opened").default(0),
   clicked: integer("clicked").default(0),
   purchased: integer("purchased").default(0),
-  revenueUplift: decimal("revenue_uplift", { precision: 10, scale: 2 }).default("0"),
+  revenueUplift: decimal("revenue_uplift", { precision: 10, scale: 2 }).default(
+    "0",
+  ),
   attachRate: decimal("attach_rate", { precision: 5, scale: 2 }).default("0"),
   roi: decimal("roi", { precision: 5, scale: 2 }).default("0"),
   breakdown: json("breakdown"), // breakdown by cohort/tier/agent/pos/channel
@@ -641,7 +806,9 @@ export const campaignMetrics = pgTable("campaign_metrics", {
 });
 
 export const campaignDeliveries = pgTable("campaign_deliveries", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   campaignCode: varchar("campaign_code", { length: 50 }).notNull(),
   bookingReference: varchar("booking_reference", { length: 50 }).notNull(),
   agentId: varchar("agent_id", { length: 50 }).notNull(),
@@ -659,7 +826,9 @@ export const campaignDeliveries = pgTable("campaign_deliveries", {
 export const insertCampaignSchema = createInsertSchema(campaigns, {
   target: z.object({
     cohorts: z.array(z.string()).optional(),
-    agentTiers: z.array(z.enum(["PLATINUM", "GOLD", "SILVER", "BRONZE"])).optional(),
+    agentTiers: z
+      .array(z.enum(["PLATINUM", "GOLD", "SILVER", "BRONZE"]))
+      .optional(),
     pos: z.array(z.string()).optional(),
     channel: z.array(z.enum(["PORTAL", "API", "MOBILE"])).optional(),
   }),
@@ -701,9 +870,15 @@ export const insertCampaignMetricsSchema = createInsertSchema(campaignMetrics, {
   createdAt: true,
 });
 
-export const insertCampaignDeliverySchema = createInsertSchema(campaignDeliveries, {
-  purchaseAmount: z.string().transform((val) => parseFloat(val)).optional(),
-}).omit({
+export const insertCampaignDeliverySchema = createInsertSchema(
+  campaignDeliveries,
+  {
+    purchaseAmount: z
+      .string()
+      .transform((val) => parseFloat(val))
+      .optional(),
+  },
+).omit({
   id: true,
   createdAt: true,
 });
@@ -713,11 +888,15 @@ export type InsertCampaign = z.infer<typeof insertCampaignSchema>;
 export type CampaignMetrics = typeof campaignMetrics.$inferSelect;
 export type InsertCampaignMetrics = z.infer<typeof insertCampaignMetricsSchema>;
 export type CampaignDelivery = typeof campaignDeliveries.$inferSelect;
-export type InsertCampaignDelivery = z.infer<typeof insertCampaignDeliverySchema>;
+export type InsertCampaignDelivery = z.infer<
+  typeof insertCampaignDeliverySchema
+>;
 
 // Analytics & Simulation Tables
 export const simulations = pgTable("simulations", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   scenarioName: varchar("scenario_name", { length: 200 }).notNull(),
   scope: json("scope").notNull(), // target scope: OD, pos, tiers, cohorts, channel
   change: json("change").notNull(), // proposed rule changes
@@ -730,7 +909,9 @@ export const simulations = pgTable("simulations", {
 });
 
 export const insightQueries = pgTable("insight_queries", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   queryText: text("query_text").notNull(),
   filters: json("filters"), // time range, pos, tiers/cohorts filters
   response: json("response"), // NLP processing result and answer
@@ -745,7 +926,9 @@ export const insertSimulationSchema = createInsertSchema(simulations, {
     origin: z.string().optional(),
     destination: z.string().optional(),
     pos: z.array(z.string()).optional(),
-    agentTier: z.array(z.enum(["PLATINUM", "GOLD", "SILVER", "BRONZE"])).optional(),
+    agentTier: z
+      .array(z.enum(["PLATINUM", "GOLD", "SILVER", "BRONZE"]))
+      .optional(),
     cohorts: z.array(z.string()).optional(),
     channel: z.array(z.enum(["API", "PORTAL", "MOBILE"])).optional(),
   }),
@@ -765,12 +948,14 @@ export const insertSimulationSchema = createInsertSchema(simulations, {
     attachRateChangePct: z.string().optional(),
     customerSatisfactionImpact: z.string().optional(),
   }),
-  actualResults: z.object({
-    revenueChangePct: z.string(),
-    conversionChangePct: z.string(),
-    marginImpactPct: z.string(),
-    attachRateChangePct: z.string().optional(),
-  }).optional(),
+  actualResults: z
+    .object({
+      revenueChangePct: z.string(),
+      conversionChangePct: z.string(),
+      marginImpactPct: z.string(),
+      attachRateChangePct: z.string().optional(),
+    })
+    .optional(),
 }).omit({
   id: true,
   createdAt: true,
@@ -778,22 +963,30 @@ export const insertSimulationSchema = createInsertSchema(simulations, {
 });
 
 export const insertInsightQuerySchema = createInsertSchema(insightQueries, {
-  filters: z.object({
-    timeRange: z.object({
-      start: z.string(),
-      end: z.string(),
-    }).optional(),
-    pos: z.array(z.string()).optional(),
-    agentTier: z.array(z.enum(["PLATINUM", "GOLD", "SILVER", "BRONZE"])).optional(),
-    cohorts: z.array(z.string()).optional(),
-    channel: z.array(z.enum(["API", "PORTAL", "MOBILE"])).optional(),
-  }).optional(),
-  response: z.object({
-    answer: z.string(),
-    data: z.any().optional(),
-    confidence: z.number().optional(),
-    sources: z.array(z.string()).optional(),
-  }).optional(),
+  filters: z
+    .object({
+      timeRange: z
+        .object({
+          start: z.string(),
+          end: z.string(),
+        })
+        .optional(),
+      pos: z.array(z.string()).optional(),
+      agentTier: z
+        .array(z.enum(["PLATINUM", "GOLD", "SILVER", "BRONZE"]))
+        .optional(),
+      cohorts: z.array(z.string()).optional(),
+      channel: z.array(z.enum(["API", "PORTAL", "MOBILE"])).optional(),
+    })
+    .optional(),
+  response: z
+    .object({
+      answer: z.string(),
+      data: z.any().optional(),
+      confidence: z.number().optional(),
+      sources: z.array(z.string()).optional(),
+    })
+    .optional(),
 }).omit({
   id: true,
   createdAt: true,

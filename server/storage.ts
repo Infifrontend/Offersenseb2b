@@ -1,4 +1,27 @@
-import { users, negotiatedFares, dynamicDiscountRules, airAncillaryRules, nonAirRates, nonAirMarkupRules, bundles, bundlePricingRules, offerRules, offerTraces, agents, channelPricingOverrides, cohorts, auditLogs, agentTiers, agentTierAssignments, tierAssignmentEngine, campaigns, campaignMetrics, campaignDeliveries, simulations, insightQueries } from "../shared/schema";
+import {
+  users,
+  negotiatedFares,
+  dynamicDiscountRules,
+  airAncillaryRules,
+  nonAirRates,
+  nonAirMarkupRules,
+  bundles,
+  bundlePricingRules,
+  offerRules,
+  offerTraces,
+  agents,
+  channelPricingOverrides,
+  cohorts,
+  auditLogs,
+  agentTiers,
+  agentTierAssignments,
+  tierAssignmentEngine,
+  campaigns,
+  campaignMetrics,
+  campaignDeliveries,
+  simulations,
+  insightQueries,
+} from "../shared/schema";
 import type {
   User,
   NegotiatedFare,
@@ -23,9 +46,19 @@ import type {
   InsightQuery,
 } from "../shared/schema";
 import { db } from "./db";
-import { eq, desc, and, gte, lte, sql, like, inArray, or, ilike } from "drizzle-orm";
-import * as crypto from 'crypto';
-
+import {
+  eq,
+  desc,
+  and,
+  gte,
+  lte,
+  sql,
+  like,
+  inArray,
+  or,
+  ilike,
+} from "drizzle-orm";
+import * as crypto from "crypto";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -34,69 +67,133 @@ export interface IStorage {
   insertNegotiatedFare(fare: InsertNegotiatedFare): Promise<NegotiatedFare>;
   getNegotiatedFares(filters?: any): Promise<NegotiatedFare[]>;
   getNegotiatedFareById(id: string): Promise<NegotiatedFare | undefined>;
-  updateNegotiatedFare(id: string, updates: Partial<InsertNegotiatedFare>): Promise<NegotiatedFare>;
-  updateNegotiatedFareStatus(id: string, status: string): Promise<NegotiatedFare>;
+  updateNegotiatedFare(
+    id: string,
+    updates: Partial<InsertNegotiatedFare>,
+  ): Promise<NegotiatedFare>;
+  updateNegotiatedFareStatus(
+    id: string,
+    status: string,
+  ): Promise<NegotiatedFare>;
   deleteNegotiatedFare(id: string): Promise<void>;
   checkFareConflicts(fare: InsertNegotiatedFare): Promise<NegotiatedFare[]>;
 
   // Dynamic Discount Rules
   getDynamicDiscountRules(filters?: any): Promise<InsertDynamicDiscountRule[]>;
-  getDynamicDiscountRuleById(id: string): Promise<InsertDynamicDiscountRule | undefined>;
-  insertDynamicDiscountRule(rule: InsertDynamicDiscountRule): Promise<InsertDynamicDiscountRule>;
-  updateDynamicDiscountRule(id: string, rule: Partial<InsertDynamicDiscountRule>): Promise<InsertDynamicDiscountRule>;
-  updateDynamicDiscountRuleStatus(id: string, status: string): Promise<InsertDynamicDiscountRule>;
+  getDynamicDiscountRuleById(
+    id: string,
+  ): Promise<InsertDynamicDiscountRule | undefined>;
+  insertDynamicDiscountRule(
+    rule: InsertDynamicDiscountRule,
+  ): Promise<InsertDynamicDiscountRule>;
+  updateDynamicDiscountRule(
+    id: string,
+    rule: Partial<InsertDynamicDiscountRule>,
+  ): Promise<InsertDynamicDiscountRule>;
+  updateDynamicDiscountRuleStatus(
+    id: string,
+    status: string,
+  ): Promise<InsertDynamicDiscountRule>;
   deleteDynamicDiscountRule(id: string): Promise<void>;
-  checkDiscountRuleConflicts(rule: InsertDynamicDiscountRule): Promise<InsertDynamicDiscountRule[]>;
+  checkDiscountRuleConflicts(
+    rule: InsertDynamicDiscountRule,
+  ): Promise<InsertDynamicDiscountRule[]>;
 
   // Air Ancillary Rules
   getAirAncillaryRules(filters?: any): Promise<InsertAirAncillaryRule[]>;
-  getAirAncillaryRuleById(id: string): Promise<InsertAirAncillaryRule | undefined>;
-  insertAirAncillaryRule(rule: InsertAirAncillaryRule): Promise<InsertAirAncillaryRule>;
-  updateAirAncillaryRule(id: string, rule: Partial<InsertAirAncillaryRule>): Promise<InsertAirAncillaryRule>;
-  updateAirAncillaryRuleStatus(id: string, status: string): Promise<InsertAirAncillaryRule>;
+  getAirAncillaryRuleById(
+    id: string,
+  ): Promise<InsertAirAncillaryRule | undefined>;
+  insertAirAncillaryRule(
+    rule: InsertAirAncillaryRule,
+  ): Promise<InsertAirAncillaryRule>;
+  updateAirAncillaryRule(
+    id: string,
+    rule: Partial<InsertAirAncillaryRule>,
+  ): Promise<InsertAirAncillaryRule>;
+  updateAirAncillaryRuleStatus(
+    id: string,
+    status: string,
+  ): Promise<InsertAirAncillaryRule>;
   deleteAirAncillaryRule(id: string): Promise<void>;
-  checkAirAncillaryRuleConflicts(rule: InsertAirAncillaryRule): Promise<InsertAirAncillaryRule[]>;
+  checkAirAncillaryRuleConflicts(
+    rule: InsertAirAncillaryRule,
+  ): Promise<InsertAirAncillaryRule[]>;
 
   // Non-Air Ancillary Rates
   insertNonAirRate(rate: InsertNonAirRate): Promise<InsertNonAirRate>;
   getNonAirRates(filters?: any): Promise<InsertNonAirRate[]>;
   getNonAirRateById(id: string): Promise<InsertNonAirRate | undefined>;
-  updateNonAirRate(id: string, rate: Partial<InsertNonAirRate>): Promise<InsertNonAirRate>;
+  updateNonAirRate(
+    id: string,
+    rate: Partial<InsertNonAirRate>,
+  ): Promise<InsertNonAirRate>;
   deleteNonAirRate(id: string): Promise<void>;
 
   // Non-Air Markup Rules
-  insertNonAirMarkupRule(rule: InsertNonAirMarkupRule): Promise<InsertNonAirMarkupRule>;
+  insertNonAirMarkupRule(
+    rule: InsertNonAirMarkupRule,
+  ): Promise<InsertNonAirMarkupRule>;
   getNonAirMarkupRules(filters?: any): Promise<InsertNonAirMarkupRule[]>;
-  getNonAirMarkupRuleById(id: string): Promise<InsertNonAirMarkupRule | undefined>;
-  updateNonAirMarkupRule(id: string, rule: Partial<InsertNonAirMarkupRule>): Promise<InsertNonAirMarkupRule>;
-  updateNonAirMarkupRuleStatus(id: string, status: string): Promise<InsertNonAirMarkupRule>;
+  getNonAirMarkupRuleById(
+    id: string,
+  ): Promise<InsertNonAirMarkupRule | undefined>;
+  updateNonAirMarkupRule(
+    id: string,
+    rule: Partial<InsertNonAirMarkupRule>,
+  ): Promise<InsertNonAirMarkupRule>;
+  updateNonAirMarkupRuleStatus(
+    id: string,
+    status: string,
+  ): Promise<InsertNonAirMarkupRule>;
   deleteNonAirMarkupRule(id: string): Promise<void>;
-  checkNonAirMarkupRuleConflicts(rule: InsertNonAirMarkupRule): Promise<InsertNonAirMarkupRule[]>;
+  checkNonAirMarkupRuleConflicts(
+    rule: InsertNonAirMarkupRule,
+  ): Promise<InsertNonAirMarkupRule[]>;
 
   // Bundles
   insertBundle(bundle: InsertBundle): Promise<InsertBundle>;
   getBundles(filters?: any): Promise<InsertBundle[]>;
   getBundleById(id: string): Promise<InsertBundle | undefined>;
-  updateBundle(id: string, bundle: Partial<InsertBundle>): Promise<InsertBundle>;
+  updateBundle(
+    id: string,
+    bundle: Partial<InsertBundle>,
+  ): Promise<InsertBundle>;
   updateBundleStatus(id: string, status: string): Promise<InsertBundle>;
   deleteBundle(id: string): Promise<void>;
   checkBundleConflicts(bundle: InsertBundle): Promise<InsertBundle[]>;
 
   // Bundle Pricing Rules
-  insertBundlePricingRule(rule: InsertBundlePricingRule): Promise<BundlePricingRule>;
+  insertBundlePricingRule(
+    rule: InsertBundlePricingRule,
+  ): Promise<BundlePricingRule>;
   getBundlePricingRules(filters?: any): Promise<BundlePricingRule[]>;
-  getBundlePricingRuleById(id: string): Promise<InsertBundlePricingRule | undefined>;
-  updateBundlePricingRule(id: string, rule: Partial<InsertBundlePricingRule>): Promise<InsertBundlePricingRule>;
-  updateBundlePricingRuleStatus(id: string, status: string): Promise<InsertBundlePricingRule>;
+  getBundlePricingRuleById(
+    id: string,
+  ): Promise<InsertBundlePricingRule | undefined>;
+  updateBundlePricingRule(
+    id: string,
+    rule: Partial<InsertBundlePricingRule>,
+  ): Promise<InsertBundlePricingRule>;
+  updateBundlePricingRuleStatus(
+    id: string,
+    status: string,
+  ): Promise<InsertBundlePricingRule>;
   deleteBundlePricingRule(id: string): Promise<void>;
-  checkBundlePricingRuleConflicts(rule: InsertBundlePricingRule): Promise<InsertBundlePricingRule[]>;
+  checkBundlePricingRuleConflicts(
+    rule: InsertBundlePricingRule,
+  ): Promise<InsertBundlePricingRule[]>;
 
   // Offer Rules
   getOfferRules(filters?: any): Promise<OfferRule[]>;
   getOfferRuleById(id: string): Promise<OfferRule | null>;
   insertOfferRule(rule: InsertOfferRule): Promise<OfferRule>;
   updateOfferRule(id: string, rule: InsertOfferRule): Promise<OfferRule>;
-  updateOfferRuleStatus(id: string, status: string, approver?: string): Promise<OfferRule>;
+  updateOfferRuleStatus(
+    id: string,
+    status: string,
+    approver?: string,
+  ): Promise<OfferRule>;
   deleteOfferRule(id: string): Promise<void>;
   checkOfferRuleConflicts(rule: InsertOfferRule): Promise<OfferRule[]>;
 
@@ -105,7 +202,10 @@ export interface IStorage {
   getOfferTraces(filters?: any): Promise<OfferTrace[]>;
   getOfferTraceById(id: string): Promise<OfferTrace | undefined>;
   getOfferTraceByTraceId(traceId: string): Promise<OfferTrace | undefined>;
-  updateOfferTrace(id: string, updates: Partial<InsertOfferTrace>): Promise<OfferTrace>;
+  updateOfferTrace(
+    id: string,
+    updates: Partial<InsertOfferTrace>,
+  ): Promise<OfferTrace>;
   deleteOfferTrace(id: string): Promise<void>;
 
   // Agent operations
@@ -120,12 +220,24 @@ export interface IStorage {
 
   // Channel Pricing Override operations
   getChannelPricingOverrides(filters?: any): Promise<ChannelPricingOverride[]>;
-  insertChannelPricingOverride(overrideData: InsertChannelPricingOverride): Promise<ChannelPricingOverride>;
-  getChannelPricingOverrideById(id: string): Promise<ChannelPricingOverride | null>;
-  updateChannelPricingOverride(id: string, overrideData: InsertChannelPricingOverride): Promise<ChannelPricingOverride>;
-  updateChannelPricingOverrideStatus(id: string, status: string): Promise<ChannelPricingOverride>;
+  insertChannelPricingOverride(
+    overrideData: InsertChannelPricingOverride,
+  ): Promise<ChannelPricingOverride>;
+  getChannelPricingOverrideById(
+    id: string,
+  ): Promise<ChannelPricingOverride | null>;
+  updateChannelPricingOverride(
+    id: string,
+    overrideData: InsertChannelPricingOverride,
+  ): Promise<ChannelPricingOverride>;
+  updateChannelPricingOverrideStatus(
+    id: string,
+    status: string,
+  ): Promise<ChannelPricingOverride>;
   deleteChannelPricingOverride(id: string): Promise<void>;
-  checkChannelPricingOverrideConflicts(overrideData: InsertChannelPricingOverride): Promise<any[]>;
+  checkChannelPricingOverrideConflicts(
+    overrideData: InsertChannelPricingOverride,
+  ): Promise<any[]>;
 
   // Cohort operations
   getCohorts(filters?: any): Promise<Cohort[]>;
@@ -140,7 +252,10 @@ export interface IStorage {
   // Audit Log Methods
   getAuditLogs(filters?: any): Promise<InsertAuditLog[]>;
   getAuditLogById(id: string): Promise<InsertAuditLog | null>;
-  getAuditLogsByEntity(entityId: string, module?: string): Promise<InsertAuditLog[]>;
+  getAuditLogsByEntity(
+    entityId: string,
+    module?: string,
+  ): Promise<InsertAuditLog[]>;
   insertAuditLog(data: InsertAuditLog): Promise<InsertAuditLog>;
   deleteAuditLog(id: string): Promise<void>;
   createAuditLog(params: {
@@ -167,11 +282,10 @@ export interface IStorage {
       userAgent?: string;
       sessionId?: string;
     },
-    getBeforeData?: () => Promise<any>
+    getBeforeData?: () => Promise<any>,
   ): Promise<T>;
 
   // Agent Tier Management operations
-  getAgentTiers(filters?: any): Promise<AgentTier[]>;
   insertAgentTier(tierData: InsertAgentTier): Promise<AgentTier>;
   getAgentTierByCode(tierCode: string): Promise<AgentTier | null>;
   getAgentTierById(id: string): Promise<AgentTier | null>;
@@ -180,21 +294,22 @@ export interface IStorage {
   deleteAgentTier(id: string): Promise<void>;
 
   // Agent Tier Assignment operations
-  getAgentTierAssignments(filters?: any): Promise<AgentTierAssignment[]>;
-  insertAgentTierAssignment(assignmentData: InsertAgentTierAssignment): Promise<AgentTierAssignment>;
-  getCurrentAgentTierAssignment(agentId: string): Promise<AgentTierAssignment | null>;
-  supersedePreviousAssignments(agentId: string, newEffectiveFrom: string): Promise<void>;
-  updateAgentTierAssignment(id: string, assignmentData: Partial<InsertAgentTierAssignment>): Promise<AgentTierAssignment>;
-  deleteAgentTierAssignment(id: string): Promise<void>;
-  calculateAgentKPIs(agentId: string, window: string): Promise<any>;
-  evaluateAgentTier(agentId: string, kpiData: any): Promise<string>;
 
   // Tier Assignment Engine operations
-  getTierAssignmentEngines(filters?: any): Promise<TierAssignmentEngine[]>;
-  insertTierAssignmentEngine(engineData: InsertTierAssignmentEngine): Promise<TierAssignmentEngine>;
+  getTierAssignmentEngines(): Promise<TierAssignmentEngine[]>;
+  insertTierAssignmentEngine(
+    engineData: InsertTierAssignmentEngine,
+  ): Promise<TierAssignmentEngine>;
   getTierAssignmentEngineById(id: string): Promise<TierAssignmentEngine | null>;
-  updateTierAssignmentEngine(id: string, engineData: Partial<InsertTierAssignmentEngine>): Promise<TierAssignmentEngine>;
-  updateEngineRunTimestamps(id: string, lastRunAt: Date, nextRunAt: Date): Promise<void>;
+  updateTierAssignmentEngine(
+    id: string,
+    engineData: Partial<InsertTierAssignmentEngine>,
+  ): Promise<TierAssignmentEngine>;
+  updateEngineRunTimestamps(
+    id: string,
+    lastRunAt: Date,
+    nextRunAt: Date,
+  ): Promise<void>;
   deleteTierAssignmentEngine(id: string): Promise<void>;
 
   // Campaign Management operations
@@ -202,21 +317,46 @@ export interface IStorage {
   insertCampaign(campaignData: InsertCampaign): Promise<Campaign>;
   getCampaignById(id: string): Promise<Campaign | null>;
   getCampaignByCode(campaignCode: string): Promise<Campaign | null>;
-  updateCampaign(id: string, campaignData: Partial<InsertCampaign>): Promise<Campaign>;
+  updateCampaign(
+    id: string,
+    campaignData: Partial<InsertCampaign>,
+  ): Promise<Campaign>;
   updateCampaignStatus(id: string, status: string): Promise<Campaign>;
   deleteCampaign(id: string): Promise<void>;
   checkCampaignConflicts(campaignData: InsertCampaign): Promise<any[]>;
 
   // Campaign Metrics operations
-  getCampaignMetrics(campaignCode: string, filters?: any): Promise<CampaignMetrics[]>;
-  insertCampaignMetrics(metricsData: InsertCampaignMetrics): Promise<CampaignMetrics>;
-  updateCampaignMetrics(campaignCode: string, date: string, metricsData: Partial<InsertCampaignMetrics>): Promise<CampaignMetrics>;
+  getCampaignMetrics(
+    campaignCode: string,
+    filters?: any,
+  ): Promise<CampaignMetrics[]>;
+  insertCampaignMetrics(
+    metricsData: InsertCampaignMetrics,
+  ): Promise<CampaignMetrics>;
+  updateCampaignMetrics(
+    campaignCode: string,
+    date: string,
+    metricsData: Partial<InsertCampaignMetrics>,
+  ): Promise<CampaignMetrics>;
 
   // Campaign Delivery operations
-  getCampaignDeliveries(campaignCode: string, filters?: any): Promise<CampaignDelivery[]>;
-  insertCampaignDelivery(deliveryData: InsertCampaignDelivery): Promise<CampaignDelivery>;
-  updateDeliveryStatus(id: string, status: string, timestamp?: Date): Promise<CampaignDelivery>;
-  recordDeliveryEvent(deliveryId: string, event: string, data?: any): Promise<void>;
+  getCampaignDeliveries(
+    campaignCode: string,
+    filters?: any,
+  ): Promise<CampaignDelivery[]>;
+  insertCampaignDelivery(
+    deliveryData: InsertCampaignDelivery,
+  ): Promise<CampaignDelivery>;
+  updateDeliveryStatus(
+    id: string,
+    status: string,
+    timestamp?: Date,
+  ): Promise<CampaignDelivery>;
+  recordDeliveryEvent(
+    deliveryId: string,
+    event: string,
+    data?: any,
+  ): Promise<void>;
 
   // Simulation methods
   getSimulations(filters?: any): Promise<Simulation[]>;
@@ -243,26 +383,31 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await this.db.select().from(users).where(eq(users.username, username));
+    const [user] = await this.db
+      .select()
+      .from(users)
+      .where(eq(users.username, username));
     return user || undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await this.db
-      .insert(users)
-      .values(insertUser)
-      .returning();
+    const [user] = await this.db.insert(users).values(insertUser).returning();
     return user;
   }
 
-  async insertNegotiatedFare(fare: InsertNegotiatedFare): Promise<NegotiatedFare> {
+  async insertNegotiatedFare(
+    fare: InsertNegotiatedFare,
+  ): Promise<NegotiatedFare> {
     // Convert number baseNetFare to string for PostgreSQL decimal type
     const processedFare = { ...fare };
-    if (typeof processedFare.baseNetFare === 'number') {
+    if (typeof processedFare.baseNetFare === "number") {
       processedFare.baseNetFare = processedFare.baseNetFare.toString() as any;
     }
 
-    const [newFare] = await this.db.insert(negotiatedFares).values(processedFare).returning();
+    const [newFare] = await this.db
+      .insert(negotiatedFares)
+      .values(processedFare)
+      .returning();
     return newFare;
   }
 
@@ -299,15 +444,22 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getNegotiatedFareById(id: string): Promise<NegotiatedFare | undefined> {
-    const [fare] = await this.db.select().from(negotiatedFares).where(eq(negotiatedFares.id, id));
+    const [fare] = await this.db
+      .select()
+      .from(negotiatedFares)
+      .where(eq(negotiatedFares.id, id));
     return fare || undefined;
   }
 
-  async updateNegotiatedFare(id: string, updates: Partial<InsertNegotiatedFare>): Promise<NegotiatedFare> {
+  async updateNegotiatedFare(
+    id: string,
+    updates: Partial<InsertNegotiatedFare>,
+  ): Promise<NegotiatedFare> {
     // Convert number baseNetFare to string for PostgreSQL decimal type
     const processedUpdates = { ...updates };
     if (processedUpdates.baseNetFare !== undefined) {
-      processedUpdates.baseNetFare = processedUpdates.baseNetFare.toString() as any;
+      processedUpdates.baseNetFare =
+        processedUpdates.baseNetFare.toString() as any;
     }
 
     const [updatedFare] = await this.db
@@ -318,7 +470,10 @@ export class DatabaseStorage implements IStorage {
     return updatedFare;
   }
 
-  async updateNegotiatedFareStatus(id: string, status: string): Promise<NegotiatedFare> {
+  async updateNegotiatedFareStatus(
+    id: string,
+    status: string,
+  ): Promise<NegotiatedFare> {
     const [updatedFare] = await this.db
       .update(negotiatedFares)
       .set({ status, updatedAt: sql`now()` })
@@ -331,7 +486,9 @@ export class DatabaseStorage implements IStorage {
     await this.db.delete(negotiatedFares).where(eq(negotiatedFares.id, id));
   }
 
-  async checkFareConflicts(fare: InsertNegotiatedFare): Promise<NegotiatedFare[]> {
+  async checkFareConflicts(
+    fare: InsertNegotiatedFare,
+  ): Promise<NegotiatedFare[]> {
     // Check for overlapping fares with same origin/destination/cabin class
     const conflicts = await this.db
       .select()
@@ -346,28 +503,32 @@ export class DatabaseStorage implements IStorage {
             // Booking date overlaps
             and(
               sql`${negotiatedFares.bookingStartDate} <= ${fare.bookingEndDate}`,
-              sql`${negotiatedFares.bookingEndDate} >= ${fare.bookingStartDate}`
+              sql`${negotiatedFares.bookingEndDate} >= ${fare.bookingStartDate}`,
             ),
             // Travel date overlaps
             and(
               sql`${negotiatedFares.travelStartDate} <= ${fare.travelEndDate}`,
-              sql`${negotiatedFares.travelEndDate} >= ${fare.travelStartDate}`
-            )
-          )
-        )
+              sql`${negotiatedFares.travelEndDate} >= ${fare.travelStartDate}`,
+            ),
+          ),
+        ),
       );
 
     return conflicts;
   }
 
   // Dynamic Discount Rules methods
-  async getDynamicDiscountRules(filters: any = {}): Promise<InsertDynamicDiscountRule[]> {
+  async getDynamicDiscountRules(
+    filters: any = {},
+  ): Promise<InsertDynamicDiscountRule[]> {
     let query = this.db.select().from(dynamicDiscountRules);
 
     const conditions: any[] = [];
 
     if (filters.ruleCode) {
-      conditions.push(ilike(dynamicDiscountRules.ruleCode, `%${filters.ruleCode}%`));
+      conditions.push(
+        ilike(dynamicDiscountRules.ruleCode, `%${filters.ruleCode}%`),
+      );
     }
     if (filters.fareSource) {
       conditions.push(eq(dynamicDiscountRules.fareSource, filters.fareSource));
@@ -376,7 +537,9 @@ export class DatabaseStorage implements IStorage {
       conditions.push(eq(dynamicDiscountRules.origin, filters.origin));
     }
     if (filters.destination) {
-      conditions.push(eq(dynamicDiscountRules.destination, filters.destination));
+      conditions.push(
+        eq(dynamicDiscountRules.destination, filters.destination),
+      );
     }
     if (filters.status) {
       conditions.push(eq(dynamicDiscountRules.status, filters.status));
@@ -389,15 +552,25 @@ export class DatabaseStorage implements IStorage {
       query = query.where(and(...conditions));
     }
 
-    return await query.orderBy(dynamicDiscountRules.priority, dynamicDiscountRules.createdAt);
+    return await query.orderBy(
+      dynamicDiscountRules.priority,
+      dynamicDiscountRules.createdAt,
+    );
   }
 
-  async getDynamicDiscountRuleById(id: string): Promise<InsertDynamicDiscountRule | undefined> {
-    const result = await this.db.select().from(dynamicDiscountRules).where(eq(dynamicDiscountRules.id, id));
+  async getDynamicDiscountRuleById(
+    id: string,
+  ): Promise<InsertDynamicDiscountRule | undefined> {
+    const result = await this.db
+      .select()
+      .from(dynamicDiscountRules)
+      .where(eq(dynamicDiscountRules.id, id));
     return result[0] || undefined;
   }
 
-  async insertDynamicDiscountRule(data: any): Promise<InsertDynamicDiscountRule> {
+  async insertDynamicDiscountRule(
+    data: any,
+  ): Promise<InsertDynamicDiscountRule> {
     try {
       console.log("Inserting rule into database:", data);
 
@@ -407,10 +580,13 @@ export class DatabaseStorage implements IStorage {
         adjustmentValue: data.adjustmentValue.toString(),
         stackable: data.stackable || "false",
         priority: data.priority || 1,
-        status: data.status || "ACTIVE"
+        status: data.status || "ACTIVE",
       };
 
-      const [rule] = await this.db.insert(dynamicDiscountRules).values(ruleData).returning();
+      const [rule] = await this.db
+        .insert(dynamicDiscountRules)
+        .values(ruleData)
+        .returning();
       console.log("Successfully inserted rule:", rule);
 
       return rule;
@@ -420,16 +596,24 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async updateDynamicDiscountRule(id: string, rule: Partial<InsertDynamicDiscountRule>): Promise<InsertDynamicDiscountRule> {
-    const result = await this.db.update(dynamicDiscountRules)
+  async updateDynamicDiscountRule(
+    id: string,
+    rule: Partial<InsertDynamicDiscountRule>,
+  ): Promise<InsertDynamicDiscountRule> {
+    const result = await this.db
+      .update(dynamicDiscountRules)
       .set({ ...rule, updatedAt: new Date() })
       .where(eq(dynamicDiscountRules.id, id))
       .returning();
     return result[0];
   }
 
-  async updateDynamicDiscountRuleStatus(id: string, status: string): Promise<InsertDynamicDiscountRule> {
-    const result = await this.db.update(dynamicDiscountRules)
+  async updateDynamicDiscountRuleStatus(
+    id: string,
+    status: string,
+  ): Promise<InsertDynamicDiscountRule> {
+    const result = await this.db
+      .update(dynamicDiscountRules)
       .set({ status, updatedAt: new Date() })
       .where(eq(dynamicDiscountRules.id, id))
       .returning();
@@ -437,33 +621,44 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteDynamicDiscountRule(id: string): Promise<void> {
-    return await this.db.delete(dynamicDiscountRules).where(eq(dynamicDiscountRules.id, id));
+    return await this.db
+      .delete(dynamicDiscountRules)
+      .where(eq(dynamicDiscountRules.id, id));
   }
 
-  async checkDiscountRuleConflicts(rule: InsertDynamicDiscountRule): Promise<InsertDynamicDiscountRule[]> {
-    const conflicts = await this.db.select()
+  async checkDiscountRuleConflicts(
+    rule: InsertDynamicDiscountRule,
+  ): Promise<InsertDynamicDiscountRule[]> {
+    const conflicts = await this.db
+      .select()
       .from(dynamicDiscountRules)
       .where(
         and(
           eq(dynamicDiscountRules.ruleCode, rule.ruleCode),
-          eq(dynamicDiscountRules.status, "ACTIVE")
-        )
+          eq(dynamicDiscountRules.status, "ACTIVE"),
+        ),
       );
 
     return conflicts;
   }
 
   // Air Ancillary Rules methods
-  async getAirAncillaryRules(filters: any = {}): Promise<InsertAirAncillaryRule[]> {
+  async getAirAncillaryRules(
+    filters: any = {},
+  ): Promise<InsertAirAncillaryRule[]> {
     let query = this.db.select().from(airAncillaryRules);
 
     const conditions: any[] = [];
 
     if (filters.ruleCode) {
-      conditions.push(ilike(airAncillaryRules.ruleCode, `%${filters.ruleCode}%`));
+      conditions.push(
+        ilike(airAncillaryRules.ruleCode, `%${filters.ruleCode}%`),
+      );
     }
     if (filters.ancillaryCode) {
-      conditions.push(eq(airAncillaryRules.ancillaryCode, filters.ancillaryCode));
+      conditions.push(
+        eq(airAncillaryRules.ancillaryCode, filters.ancillaryCode),
+      );
     }
     if (filters.airlineCode) {
       conditions.push(eq(airAncillaryRules.airlineCode, filters.airlineCode));
@@ -485,29 +680,50 @@ export class DatabaseStorage implements IStorage {
       query = query.where(and(...conditions));
     }
 
-    return await query.orderBy(airAncillaryRules.priority, airAncillaryRules.createdAt);
+    return await query.orderBy(
+      airAncillaryRules.priority,
+      airAncillaryRules.createdAt,
+    );
   }
 
-  async getAirAncillaryRuleById(id: string): Promise<InsertAirAncillaryRule | undefined> {
-    const result = await this.db.select().from(airAncillaryRules).where(eq(airAncillaryRules.id, id));
+  async getAirAncillaryRuleById(
+    id: string,
+  ): Promise<InsertAirAncillaryRule | undefined> {
+    const result = await this.db
+      .select()
+      .from(airAncillaryRules)
+      .where(eq(airAncillaryRules.id, id));
     return result[0] || undefined;
   }
 
-  async insertAirAncillaryRule(rule: InsertAirAncillaryRule): Promise<InsertAirAncillaryRule> {
-    const result = await this.db.insert(airAncillaryRules).values(rule).returning();
+  async insertAirAncillaryRule(
+    rule: InsertAirAncillaryRule,
+  ): Promise<InsertAirAncillaryRule> {
+    const result = await this.db
+      .insert(airAncillaryRules)
+      .values(rule)
+      .returning();
     return result[0];
   }
 
-  async updateAirAncillaryRule(id: string, rule: Partial<InsertAirAncillaryRule>): Promise<InsertAirAncillaryRule> {
-    const result = await this.db.update(airAncillaryRules)
+  async updateAirAncillaryRule(
+    id: string,
+    rule: Partial<InsertAirAncillaryRule>,
+  ): Promise<InsertAirAncillaryRule> {
+    const result = await this.db
+      .update(airAncillaryRules)
       .set({ ...rule, updatedAt: new Date() })
       .where(eq(airAncillaryRules.id, id))
       .returning();
     return result[0];
   }
 
-  async updateAirAncillaryRuleStatus(id: string, status: string): Promise<InsertAirAncillaryRule> {
-    const result = await this.db.update(airAncillaryRules)
+  async updateAirAncillaryRuleStatus(
+    id: string,
+    status: string,
+  ): Promise<InsertAirAncillaryRule> {
+    const result = await this.db
+      .update(airAncillaryRules)
       .set({ status, updatedAt: new Date() })
       .where(eq(airAncillaryRules.id, id))
       .returning();
@@ -515,17 +731,22 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteAirAncillaryRule(id: string): Promise<void> {
-    return await this.db.delete(airAncillaryRules).where(eq(airAncillaryRules.id, id));
+    return await this.db
+      .delete(airAncillaryRules)
+      .where(eq(airAncillaryRules.id, id));
   }
 
-  async checkAirAncillaryRuleConflicts(rule: InsertAirAncillaryRule): Promise<InsertAirAncillaryRule[]> {
-    const conflicts = await this.db.select()
+  async checkAirAncillaryRuleConflicts(
+    rule: InsertAirAncillaryRule,
+  ): Promise<InsertAirAncillaryRule[]> {
+    const conflicts = await this.db
+      .select()
       .from(airAncillaryRules)
       .where(
         and(
           eq(airAncillaryRules.ruleCode, rule.ruleCode),
-          eq(airAncillaryRules.status, "ACTIVE")
-        )
+          eq(airAncillaryRules.status, "ACTIVE"),
+        ),
       );
 
     return conflicts;
@@ -533,7 +754,10 @@ export class DatabaseStorage implements IStorage {
 
   // Non-Air Ancillary Rate methods
   async insertNonAirRate(rate: InsertNonAirRate): Promise<InsertNonAirRate> {
-    const [insertedRate] = await this.db.insert(nonAirRates).values(rate).returning();
+    const [insertedRate] = await this.db
+      .insert(nonAirRates)
+      .values(rate)
+      .returning();
     return insertedRate;
   }
 
@@ -565,11 +789,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getNonAirRateById(id: string): Promise<InsertNonAirRate | undefined> {
-    const [rate] = await this.db.select().from(nonAirRates).where(eq(nonAirRates.id, id));
+    const [rate] = await this.db
+      .select()
+      .from(nonAirRates)
+      .where(eq(nonAirRates.id, id));
     return rate;
   }
 
-  async updateNonAirRate(id: string, rate: Partial<InsertNonAirRate>): Promise<InsertNonAirRate> {
+  async updateNonAirRate(
+    id: string,
+    rate: Partial<InsertNonAirRate>,
+  ): Promise<InsertNonAirRate> {
     const [updatedRate] = await this.db
       .update(nonAirRates)
       .set({ ...rate, updatedAt: sql`now()` })
@@ -583,12 +813,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Non-Air Markup Rule methods
-  async insertNonAirMarkupRule(rule: InsertNonAirMarkupRule): Promise<InsertNonAirMarkupRule> {
-    const [insertedRule] = await this.db.insert(nonAirMarkupRules).values(rule).returning();
+  async insertNonAirMarkupRule(
+    rule: InsertNonAirMarkupRule,
+  ): Promise<InsertNonAirMarkupRule> {
+    const [insertedRule] = await this.db
+      .insert(nonAirMarkupRules)
+      .values(rule)
+      .returning();
     return insertedRule;
   }
 
-  async getNonAirMarkupRules(filters: any = {}): Promise<InsertNonAirMarkupRule[]> {
+  async getNonAirMarkupRules(
+    filters: any = {},
+  ): Promise<InsertNonAirMarkupRule[]> {
     let query = this.db.select().from(nonAirMarkupRules);
     const conditions: any[] = [];
 
@@ -624,15 +861,26 @@ export class DatabaseStorage implements IStorage {
       query = query.where(and(...conditions));
     }
 
-    return await query.orderBy(nonAirMarkupRules.priority, nonAirMarkupRules.createdAt);
+    return await query.orderBy(
+      nonAirMarkupRules.priority,
+      nonAirMarkupRules.createdAt,
+    );
   }
 
-  async getNonAirMarkupRuleById(id: string): Promise<InsertNonAirMarkupRule | undefined> {
-    const [rule] = await this.db.select().from(nonAirMarkupRules).where(eq(nonAirMarkupRules.id, id));
+  async getNonAirMarkupRuleById(
+    id: string,
+  ): Promise<InsertNonAirMarkupRule | undefined> {
+    const [rule] = await this.db
+      .select()
+      .from(nonAirMarkupRules)
+      .where(eq(nonAirMarkupRules.id, id));
     return rule;
   }
 
-  async updateNonAirMarkupRule(id: string, rule: Partial<InsertNonAirMarkupRule>): Promise<InsertNonAirMarkupRule> {
+  async updateNonAirMarkupRule(
+    id: string,
+    rule: Partial<InsertNonAirMarkupRule>,
+  ): Promise<InsertNonAirMarkupRule> {
     const [updatedRule] = await this.db
       .update(nonAirMarkupRules)
       .set({ ...rule, updatedAt: sql`now()` })
@@ -641,7 +889,10 @@ export class DatabaseStorage implements IStorage {
     return updatedRule;
   }
 
-  async updateNonAirMarkupRuleStatus(id: string, status: string): Promise<InsertNonAirMarkupRule> {
+  async updateNonAirMarkupRuleStatus(
+    id: string,
+    status: string,
+  ): Promise<InsertNonAirMarkupRule> {
     const [updatedRule] = await this.db
       .update(nonAirMarkupRules)
       .set({ status, updatedAt: sql`now()` })
@@ -654,21 +905,27 @@ export class DatabaseStorage implements IStorage {
     await this.db.delete(nonAirMarkupRules).where(eq(nonAirMarkupRules.id, id));
   }
 
-  async checkNonAirMarkupRuleConflicts(rule: InsertNonAirMarkupRule): Promise<InsertNonAirMarkupRule[]> {
-    const conflicts = await this.db.select()
+  async checkNonAirMarkupRuleConflicts(
+    rule: InsertNonAirMarkupRule,
+  ): Promise<InsertNonAirMarkupRule[]> {
+    const conflicts = await this.db
+      .select()
       .from(nonAirMarkupRules)
       .where(
         and(
           eq(nonAirMarkupRules.ruleCode, rule.ruleCode),
-          eq(nonAirMarkupRules.status, "ACTIVE")
-        )
+          eq(nonAirMarkupRules.status, "ACTIVE"),
+        ),
       );
     return conflicts;
   }
 
   // Bundle methods
   async insertBundle(bundle: InsertBundle): Promise<InsertBundle> {
-    const [insertedBundle] = await this.db.insert(bundles).values(bundle).returning();
+    const [insertedBundle] = await this.db
+      .insert(bundles)
+      .values(bundle)
+      .returning();
     return insertedBundle;
   }
 
@@ -703,11 +960,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getBundleById(id: string): Promise<InsertBundle | undefined> {
-    const [bundle] = await this.db.select().from(bundles).where(eq(bundles.id, id));
+    const [bundle] = await this.db
+      .select()
+      .from(bundles)
+      .where(eq(bundles.id, id));
     return bundle;
   }
 
-  async updateBundle(id: string, bundle: Partial<InsertBundle>): Promise<InsertBundle> {
+  async updateBundle(
+    id: string,
+    bundle: Partial<InsertBundle>,
+  ): Promise<InsertBundle> {
     const [updatedBundle] = await this.db
       .update(bundles)
       .set({ ...bundle, updatedAt: sql`now()` })
@@ -730,24 +993,32 @@ export class DatabaseStorage implements IStorage {
   }
 
   async checkBundleConflicts(bundle: InsertBundle): Promise<InsertBundle[]> {
-    const conflicts = await this.db.select()
+    const conflicts = await this.db
+      .select()
       .from(bundles)
       .where(
         and(
           eq(bundles.bundleCode, bundle.bundleCode),
-          eq(bundles.status, "ACTIVE")
-        )
+          eq(bundles.status, "ACTIVE"),
+        ),
       );
     return conflicts;
   }
 
   // Bundle Pricing Rule methods
-  async insertBundlePricingRule(rule: InsertBundlePricingRule): Promise<BundlePricingRule> {
-    const [newRule] = await this.db.insert(bundlePricingRules).values(rule).returning();
+  async insertBundlePricingRule(
+    rule: InsertBundlePricingRule,
+  ): Promise<BundlePricingRule> {
+    const [newRule] = await this.db
+      .insert(bundlePricingRules)
+      .values(rule)
+      .returning();
     return newRule;
   }
 
-  async getBundlePricingRules(filters: Record<string, any> = {}): Promise<InsertBundlePricingRule[]> {
+  async getBundlePricingRules(
+    filters: Record<string, any> = {},
+  ): Promise<InsertBundlePricingRule[]> {
     console.log("Storage: getBundlePricingRules called with filters:", filters);
 
     try {
@@ -770,22 +1041,33 @@ export class DatabaseStorage implements IStorage {
       }
 
       console.log("Storage: Executing query for bundle pricing rules");
-      const results = await query.orderBy(bundlePricingRules.priority, bundlePricingRules.createdAt);
-      console.log(`Storage: Found ${results?.length || 0} bundle pricing rules`);
+      const results = await query.orderBy(
+        bundlePricingRules.priority,
+        bundlePricingRules.createdAt,
+      );
+      console.log(
+        `Storage: Found ${results?.length || 0} bundle pricing rules`,
+      );
 
       // Ensure we always return an array
       const rulesArray = Array.isArray(results) ? results : [];
 
       // Log a sample record if any exist
       if (rulesArray.length > 0) {
-        console.log("Storage: Sample pricing rule:", JSON.stringify(rulesArray[0], null, 2));
+        console.log(
+          "Storage: Sample pricing rule:",
+          JSON.stringify(rulesArray[0], null, 2),
+        );
       } else {
         console.log("Storage: No bundle pricing rules found in database");
       }
 
       return rulesArray;
     } catch (error: any) {
-      console.error("Storage: Database error in getBundlePricingRules:", error.message);
+      console.error(
+        "Storage: Database error in getBundlePricingRules:",
+        error.message,
+      );
 
       // Return empty array instead of throwing to prevent complete failure
       console.error("Storage: Returning empty array due to database error");
@@ -793,12 +1075,20 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getBundlePricingRuleById(id: string): Promise<InsertBundlePricingRule | undefined> {
-    const [rule] = await this.db.select().from(bundlePricingRules).where(eq(bundlePricingRules.id, id));
+  async getBundlePricingRuleById(
+    id: string,
+  ): Promise<InsertBundlePricingRule | undefined> {
+    const [rule] = await this.db
+      .select()
+      .from(bundlePricingRules)
+      .where(eq(bundlePricingRules.id, id));
     return rule;
   }
 
-  async updateBundlePricingRule(id: string, rule: Partial<InsertBundlePricingRule>): Promise<InsertBundlePricingRule> {
+  async updateBundlePricingRule(
+    id: string,
+    rule: Partial<InsertBundlePricingRule>,
+  ): Promise<InsertBundlePricingRule> {
     const [updatedRule] = await this.db
       .update(bundlePricingRules)
       .set({ ...rule, updatedAt: sql`now()` })
@@ -807,7 +1097,10 @@ export class DatabaseStorage implements IStorage {
     return updatedRule;
   }
 
-  async updateBundlePricingRuleStatus(id: string, status: string): Promise<InsertBundlePricingRule> {
+  async updateBundlePricingRuleStatus(
+    id: string,
+    status: string,
+  ): Promise<InsertBundlePricingRule> {
     const [updatedRule] = await this.db
       .update(bundlePricingRules)
       .set({ status, updatedAt: sql`now()` })
@@ -817,17 +1110,22 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteBundlePricingRule(id: string): Promise<void> {
-    await this.db.delete(bundlePricingRules).where(eq(bundlePricingRules.id, id));
+    await this.db
+      .delete(bundlePricingRules)
+      .where(eq(bundlePricingRules.id, id));
   }
 
-  async checkBundlePricingRuleConflicts(rule: InsertBundlePricingRule): Promise<InsertBundlePricingRule[]> {
-    const conflicts = await this.db.select()
+  async checkBundlePricingRuleConflicts(
+    rule: InsertBundlePricingRule,
+  ): Promise<InsertBundlePricingRule[]> {
+    const conflicts = await this.db
+      .select()
       .from(bundlePricingRules)
       .where(
         and(
           eq(bundlePricingRules.ruleCode, rule.ruleCode),
-          eq(bundlePricingRules.status, "ACTIVE")
-        )
+          eq(bundlePricingRules.status, "ACTIVE"),
+        ),
       );
     return conflicts;
   }
@@ -867,7 +1165,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getOfferRuleById(id: string): Promise<OfferRule | null> {
-    const result = await this.db.select().from(offerRules).where(eq(offerRules.id, id));
+    const result = await this.db
+      .select()
+      .from(offerRules)
+      .where(eq(offerRules.id, id));
     return result[0] || null;
   }
 
@@ -881,12 +1182,15 @@ export class DatabaseStorage implements IStorage {
         status: rule.status || "DRAFT",
         priority: rule.priority || 1,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       console.log("Storage: Rule data to insert:", ruleData);
 
-      const result = await this.db.insert(offerRules).values(ruleData).returning();
+      const result = await this.db
+        .insert(offerRules)
+        .values(ruleData)
+        .returning();
       console.log("Storage: Successfully inserted offer rule:", result[0]);
 
       if (!result || result.length === 0) {
@@ -903,14 +1207,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateOfferRule(id: string, rule: InsertOfferRule): Promise<OfferRule> {
-    const result = await this.db.update(offerRules)
+    const result = await this.db
+      .update(offerRules)
       .set({ ...rule, updatedAt: new Date() })
       .where(eq(offerRules.id, id))
       .returning();
     return result[0];
   }
 
-  async updateOfferRuleStatus(id: string, status: string, approver?: string): Promise<OfferRule> {
+  async updateOfferRuleStatus(
+    id: string,
+    status: string,
+    approver?: string,
+  ): Promise<OfferRule> {
     const updateData: any = { status, updatedAt: new Date() };
 
     if (status === "ACTIVE" && approver) {
@@ -918,7 +1227,8 @@ export class DatabaseStorage implements IStorage {
       updateData.approvedAt = new Date();
     }
 
-    const result = await this.db.update(offerRules)
+    const result = await this.db
+      .update(offerRules)
       .set(updateData)
       .where(eq(offerRules.id, id))
       .returning();
@@ -931,47 +1241,51 @@ export class DatabaseStorage implements IStorage {
 
   async checkOfferRuleConflicts(rule: InsertOfferRule): Promise<OfferRule[]> {
     // Check for overlapping rules with same conditions and actions
-    const existingRules = await this.db.select().from(offerRules)
-      .where(and(
-        eq(offerRules.ruleType, rule.ruleType),
-        eq(offerRules.status, "ACTIVE"),
-        gte(offerRules.validTo, rule.validFrom),
-        lte(offerRules.validFrom, rule.validTo)
-      ));
+    const existingRules = await this.db
+      .select()
+      .from(offerRules)
+      .where(
+        and(
+          eq(offerRules.ruleType, rule.ruleType),
+          eq(offerRules.status, "ACTIVE"),
+          gte(offerRules.validTo, rule.validFrom),
+          lte(offerRules.validFrom, rule.validTo),
+        ),
+      );
 
     // Basic conflict detection - can be enhanced with more sophisticated logic
-    const conflicts = existingRules.filter(existing => {
-        const existingConditions = existing.conditions as any;
-        const newConditions = rule.conditions as any;
+    const conflicts = existingRules.filter((existing) => {
+      const existingConditions = existing.conditions as any;
+      const newConditions = rule.conditions as any;
 
-        // Check for overlapping conditions
-        let hasOverlap = false;
+      // Check for overlapping conditions
+      let hasOverlap = false;
 
-        // Check POS overlap
-        if (existingConditions.pos && newConditions.pos) {
-          const posOverlap = existingConditions.pos.some((pos: string) => 
-            newConditions.pos.includes(pos)
-          );
-          if (posOverlap) hasOverlap = true;
-        }
+      // Check POS overlap
+      if (existingConditions.pos && newConditions.pos) {
+        const posOverlap = existingConditions.pos.some((pos: string) =>
+          newConditions.pos.includes(pos),
+        );
+        if (posOverlap) hasOverlap = true;
+      }
 
-        // Check agent tier overlap
-        if (existingConditions.agentTier && newConditions.agentTier) {
-          const tierOverlap = existingConditions.agentTier.some((tier: string) => 
-            newConditions.agentTier.includes(tier)
-          );
-          if (tierOverlap) hasOverlap = true;
-        }
+      // Check agent tier overlap
+      if (existingConditions.agentTier && newConditions.agentTier) {
+        const tierOverlap = existingConditions.agentTier.some((tier: string) =>
+          newConditions.agentTier.includes(tier),
+        );
+        if (tierOverlap) hasOverlap = true;
+      }
 
-        // Check channel overlap
-        if (existingConditions.channel && newConditions.channel) {
-          const channelOverlap = existingConditions.channel.some((channel: string) => 
-            newConditions.channel.includes(channel)
-          );
-          if (channelOverlap) hasOverlap = true;
-        }
+      // Check channel overlap
+      if (existingConditions.channel && newConditions.channel) {
+        const channelOverlap = existingConditions.channel.some(
+          (channel: string) => newConditions.channel.includes(channel),
+        );
+        if (channelOverlap) hasOverlap = true;
+      }
 
-        return hasOverlap;
+      return hasOverlap;
     });
 
     return conflicts;
@@ -979,7 +1293,10 @@ export class DatabaseStorage implements IStorage {
 
   // Offer Composition Methods
   async insertOfferTrace(trace: InsertOfferTrace): Promise<OfferTrace> {
-    const [result] = await this.db.insert(offerTraces).values(trace).returning();
+    const [result] = await this.db
+      .insert(offerTraces)
+      .values(trace)
+      .returning();
     return result;
   }
 
@@ -1020,16 +1337,27 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getOfferTraceById(id: string): Promise<OfferTrace | undefined> {
-    const [result] = await this.db.select().from(offerTraces).where(eq(offerTraces.id, id));
+    const [result] = await this.db
+      .select()
+      .from(offerTraces)
+      .where(eq(offerTraces.id, id));
     return result;
   }
 
-  async getOfferTraceByTraceId(traceId: string): Promise<OfferTrace | undefined> {
-    const [result] = await this.db.select().from(offerTraces).where(eq(offerTraces.traceId, traceId));
+  async getOfferTraceByTraceId(
+    traceId: string,
+  ): Promise<OfferTrace | undefined> {
+    const [result] = await this.db
+      .select()
+      .from(offerTraces)
+      .where(eq(offerTraces.traceId, traceId));
     return result;
   }
 
-  async updateOfferTrace(id: string, updates: Partial<InsertOfferTrace>): Promise<OfferTrace> {
+  async updateOfferTrace(
+    id: string,
+    updates: Partial<InsertOfferTrace>,
+  ): Promise<OfferTrace> {
     const [result] = await this.db
       .update(offerTraces)
       .set({ ...updates, updatedAt: sql`now()` })
@@ -1070,12 +1398,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAgentById(id: string): Promise<Agent | null> {
-    const [agent] = await this.db.select().from(agents).where(eq(agents.id, id));
+    const [agent] = await this.db
+      .select()
+      .from(agents)
+      .where(eq(agents.id, id));
     return agent || null;
   }
 
   async getAgentByAgentId(agentId: string): Promise<Agent | null> {
-    const [agent] = await this.db.select().from(agents).where(eq(agents.agentId, agentId));
+    const [agent] = await this.db
+      .select()
+      .from(agents)
+      .where(eq(agents.agentId, agentId));
     return agent || null;
   }
 
@@ -1108,9 +1442,9 @@ export class DatabaseStorage implements IStorage {
 
     if (existingAgent) {
       conflicts.push({
-        type: 'DUPLICATE_AGENT_ID',
+        type: "DUPLICATE_AGENT_ID",
         message: `Agent with ID ${agentData.agentId} already exists`,
-        conflictingAgent: existingAgent
+        conflictingAgent: existingAgent,
       });
     }
 
@@ -1118,7 +1452,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Channel Pricing Override operations
-  async getChannelPricingOverrides(filters: any = {}): Promise<ChannelPricingOverride[]> {
+  async getChannelPricingOverrides(
+    filters: any = {},
+  ): Promise<ChannelPricingOverride[]> {
     let query = this.db.select().from(channelPricingOverrides);
     const conditions = [];
 
@@ -1126,7 +1462,9 @@ export class DatabaseStorage implements IStorage {
       conditions.push(eq(channelPricingOverrides.channel, filters.channel));
     }
     if (filters.productScope) {
-      conditions.push(eq(channelPricingOverrides.productScope, filters.productScope));
+      conditions.push(
+        eq(channelPricingOverrides.productScope, filters.productScope),
+      );
     }
     if (filters.status) {
       conditions.push(eq(channelPricingOverrides.status, filters.status));
@@ -1139,17 +1477,30 @@ export class DatabaseStorage implements IStorage {
     return await query.orderBy(desc(channelPricingOverrides.priority));
   }
 
-  async insertChannelPricingOverride(overrideData: InsertChannelPricingOverride): Promise<ChannelPricingOverride> {
-    const [override] = await this.db.insert(channelPricingOverrides).values(overrideData).returning();
+  async insertChannelPricingOverride(
+    overrideData: InsertChannelPricingOverride,
+  ): Promise<ChannelPricingOverride> {
+    const [override] = await this.db
+      .insert(channelPricingOverrides)
+      .values(overrideData)
+      .returning();
     return override;
   }
 
-  async getChannelPricingOverrideById(id: string): Promise<ChannelPricingOverride | null> {
-    const [override] = await this.db.select().from(channelPricingOverrides).where(eq(channelPricingOverrides.id, id));
+  async getChannelPricingOverrideById(
+    id: string,
+  ): Promise<ChannelPricingOverride | null> {
+    const [override] = await this.db
+      .select()
+      .from(channelPricingOverrides)
+      .where(eq(channelPricingOverrides.id, id));
     return override || null;
   }
 
-  async updateChannelPricingOverride(id: string, overrideData: InsertChannelPricingOverride): Promise<ChannelPricingOverride> {
+  async updateChannelPricingOverride(
+    id: string,
+    overrideData: InsertChannelPricingOverride,
+  ): Promise<ChannelPricingOverride> {
     const [override] = await this.db
       .update(channelPricingOverrides)
       .set({ ...overrideData, updatedAt: new Date() })
@@ -1158,7 +1509,10 @@ export class DatabaseStorage implements IStorage {
     return override;
   }
 
-  async updateChannelPricingOverrideStatus(id: string, status: string): Promise<ChannelPricingOverride> {
+  async updateChannelPricingOverrideStatus(
+    id: string,
+    status: string,
+  ): Promise<ChannelPricingOverride> {
     const [override] = await this.db
       .update(channelPricingOverrides)
       .set({ status, updatedAt: new Date() })
@@ -1168,10 +1522,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteChannelPricingOverride(id: string): Promise<void> {
-    await this.db.delete(channelPricingOverrides).where(eq(channelPricingOverrides.id, id));
+    await this.db
+      .delete(channelPricingOverrides)
+      .where(eq(channelPricingOverrides.id, id));
   }
 
-  async checkChannelPricingOverrideConflicts(overrideData: InsertChannelPricingOverride): Promise<any[]> {
+  async checkChannelPricingOverrideConflicts(
+    overrideData: InsertChannelPricingOverride,
+  ): Promise<any[]> {
     // Check for overlapping overrides
     const existingOverrides = await this.db
       .select()
@@ -1180,8 +1538,8 @@ export class DatabaseStorage implements IStorage {
         and(
           eq(channelPricingOverrides.channel, overrideData.channel),
           eq(channelPricingOverrides.productScope, overrideData.productScope),
-          eq(channelPricingOverrides.status, "ACTIVE")
-        )
+          eq(channelPricingOverrides.status, "ACTIVE"),
+        ),
       );
 
     const conflicts = [];
@@ -1194,9 +1552,9 @@ export class DatabaseStorage implements IStorage {
 
       if (newStart <= existingEnd && newEnd >= existingStart) {
         conflicts.push({
-          type: 'DATE_OVERLAP',
+          type: "DATE_OVERLAP",
           message: `Override conflicts with existing override ${existing.overrideCode}`,
-          conflictingOverride: existing
+          conflictingOverride: existing,
         });
       }
     }
@@ -1236,17 +1594,26 @@ export class DatabaseStorage implements IStorage {
   }
 
   async insertCohort(cohortData: InsertCohort): Promise<Cohort> {
-    const [cohort] = await this.db.insert(cohorts).values(cohortData).returning();
+    const [cohort] = await this.db
+      .insert(cohorts)
+      .values(cohortData)
+      .returning();
     return cohort;
   }
 
   async getCohortById(id: string): Promise<Cohort | null> {
-    const [cohort] = await this.db.select().from(cohorts).where(eq(cohorts.id, id));
+    const [cohort] = await this.db
+      .select()
+      .from(cohorts)
+      .where(eq(cohorts.id, id));
     return cohort || null;
   }
 
   async getCohortByCode(cohortCode: string): Promise<Cohort | null> {
-    const [cohort] = await this.db.select().from(cohorts).where(eq(cohorts.cohortCode, cohortCode));
+    const [cohort] = await this.db
+      .select()
+      .from(cohorts)
+      .where(eq(cohorts.cohortCode, cohortCode));
     return cohort || null;
   }
 
@@ -1279,9 +1646,9 @@ export class DatabaseStorage implements IStorage {
 
     if (existingCohort) {
       conflicts.push({
-        type: 'DUPLICATE_COHORT_CODE',
+        type: "DUPLICATE_COHORT_CODE",
         message: `Cohort with code ${cohortData.cohortCode} already exists`,
-        conflictingCohort: existingCohort
+        conflictingCohort: existingCohort,
       });
     }
 
@@ -1320,18 +1687,27 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAuditLogById(id: string): Promise<InsertAuditLog | null> {
-    const result = await this.db.select().from(auditLogs).where(eq(auditLogs.id, id));
+    const result = await this.db
+      .select()
+      .from(auditLogs)
+      .where(eq(auditLogs.id, id));
     return result[0] || null;
   }
 
-  async getAuditLogsByEntity(entityId: string, module?: string): Promise<InsertAuditLog[]> {
+  async getAuditLogsByEntity(
+    entityId: string,
+    module?: string,
+  ): Promise<InsertAuditLog[]> {
     const conditions: any[] = [eq(auditLogs.entityId, entityId)];
 
     if (module) {
       conditions.push(eq(auditLogs.module, module));
     }
 
-    const query = this.db.select().from(auditLogs).where(and(...conditions));
+    const query = this.db
+      .select()
+      .from(auditLogs)
+      .where(and(...conditions));
 
     return await query.orderBy(desc(auditLogs.timestamp));
   }
@@ -1381,18 +1757,24 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Helper method to calculate differences between two objects
-  private calculateDiff(before: any, after: any): Record<string, { from: any; to: any }> {
+  private calculateDiff(
+    before: any,
+    after: any,
+  ): Record<string, { from: any; to: any }> {
     const diff: Record<string, { from: any; to: any }> = {};
 
     // Get all keys from both objects
-    const allKeys = new Set([...Object.keys(before || {}), ...Object.keys(after || {})]);
+    const allKeys = new Set([
+      ...Object.keys(before || {}),
+      ...Object.keys(after || {}),
+    ]);
 
     for (const key of allKeys) {
       const beforeValue = before?.[key];
       const afterValue = after?.[key];
 
       // Skip timestamps and IDs that are expected to change
-      if (['createdAt', 'updatedAt', 'id'].includes(key)) {
+      if (["createdAt", "updatedAt", "id"].includes(key)) {
         continue;
       }
 
@@ -1400,7 +1782,7 @@ export class DatabaseStorage implements IStorage {
       if (JSON.stringify(beforeValue) !== JSON.stringify(afterValue)) {
         diff[key] = {
           from: beforeValue,
-          to: afterValue
+          to: afterValue,
         };
       }
     }
@@ -1421,7 +1803,7 @@ export class DatabaseStorage implements IStorage {
       userAgent?: string;
       sessionId?: string;
     },
-    getBeforeData?: () => Promise<any>
+    getBeforeData?: () => Promise<any>,
   ): Promise<T> {
     // Get before data if getter is provided
     const beforeData = getBeforeData ? await getBeforeData() : null;
@@ -1473,26 +1855,38 @@ export class DatabaseStorage implements IStorage {
           WHEN 'GOLD' THEN 2 
           WHEN 'SILVER' THEN 3 
           WHEN 'BRONZE' THEN 4 
-          ELSE 5 END`
+          ELSE 5 END`,
     );
   }
 
   async insertAgentTier(tierData: InsertAgentTier): Promise<AgentTier> {
-    const [tier] = await this.db.insert(agentTiers).values(tierData).returning();
+    const [tier] = await this.db
+      .insert(agentTiers)
+      .values(tierData)
+      .returning();
     return tier;
   }
 
   async getAgentTierByCode(tierCode: string): Promise<AgentTier | null> {
-    const [tier] = await this.db.select().from(agentTiers).where(eq(agentTiers.tierCode, tierCode));
+    const [tier] = await this.db
+      .select()
+      .from(agentTiers)
+      .where(eq(agentTiers.tierCode, tierCode));
     return tier || null;
   }
 
   async getAgentTierById(id: string): Promise<AgentTier | null> {
-    const [tier] = await this.db.select().from(agentTiers).where(eq(agentTiers.id, id));
+    const [tier] = await this.db
+      .select()
+      .from(agentTiers)
+      .where(eq(agentTiers.id, id));
     return tier || null;
   }
 
-  async updateAgentTier(id: string, tierData: InsertAgentTier): Promise<AgentTier> {
+  async updateAgentTier(
+    id: string,
+    tierData: InsertAgentTier,
+  ): Promise<AgentTier> {
     const [tier] = await this.db
       .update(agentTiers)
       .set({ ...tierData, updatedAt: new Date() })
@@ -1515,8 +1909,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Agent Tier Assignment operations
-  async getAgentTierAssignments(filters: any = {}): Promise<AgentTierAssignment[]> {
-    console.log("Storage: getAgentTierAssignments called with filters:", filters);
+  async getAgentTierAssignments(): Promise<AgentTierAssignment[]> {
+    console.log(
+      "Storage: getAgentTierAssignments called with filters:",
+      filters,
+    );
 
     try {
       let query = this.db.select().from(agentTierAssignments);
@@ -1532,7 +1929,9 @@ export class DatabaseStorage implements IStorage {
         conditions.push(eq(agentTierAssignments.status, filters.status));
       }
       if (filters.assignmentType) {
-        conditions.push(eq(agentTierAssignments.assignmentType, filters.assignmentType));
+        conditions.push(
+          eq(agentTierAssignments.assignmentType, filters.assignmentType),
+        );
       }
 
       if (conditions.length > 0) {
@@ -1540,24 +1939,39 @@ export class DatabaseStorage implements IStorage {
       }
 
       console.log("Storage: Executing tier assignments query...");
-      const results = await query.orderBy(desc(agentTierAssignments.effectiveFrom));
-      console.log(`Storage: Query executed successfully, found ${results?.length || 0} tier assignments`);
+      const results = await query.orderBy(
+        desc(agentTierAssignments.effectiveFrom),
+      );
+      console.log(
+        `Storage: Query executed successfully, found ${results?.length || 0} tier assignments`,
+      );
 
       // Ensure we always return an array
       return Array.isArray(results) ? results : [];
     } catch (error: any) {
-      console.error("Storage: Database error in getAgentTierAssignments:", error);
+      console.error(
+        "Storage: Database error in getAgentTierAssignments:",
+        error,
+      );
       console.error("Storage: Error details:", error.message);
       // Throw the error instead of swallowing it so the route can handle it properly
       throw new Error(`Failed to fetch tier assignments: ${error.message}`);
     }
   }
 
-  async insertAgentTierAssignment(assignmentData: InsertAgentTierAssignment): Promise<AgentTierAssignment> {
-    console.log("Storage: insertAgentTierAssignment called with:", assignmentData);
-    
+  async insertAgentTierAssignment(
+    assignmentData: InsertAgentTierAssignment,
+  ): Promise<AgentTierAssignment> {
+    console.log(
+      "Storage: insertAgentTierAssignment called with:",
+      assignmentData,
+    );
+
     try {
-      const [result] = await this.db.insert(agentTierAssignments).values(assignmentData).returning();
+      const [result] = await this.db
+        .insert(agentTierAssignments)
+        .values(assignmentData)
+        .returning();
       console.log("Storage: Created tier assignment:", result);
       return result;
     } catch (error) {
@@ -1566,9 +1980,14 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getCurrentAgentTierAssignment(agentId: string): Promise<AgentTierAssignment | null> {
-    console.log("Storage: getCurrentAgentTierAssignment called for agent:", agentId);
-    
+  async getCurrentAgentTierAssignment(
+    agentId: string,
+  ): Promise<AgentTierAssignment | null> {
+    console.log(
+      "Storage: getCurrentAgentTierAssignment called for agent:",
+      agentId,
+    );
+
     try {
       const [result] = await this.db
         .select()
@@ -1576,12 +1995,12 @@ export class DatabaseStorage implements IStorage {
         .where(
           and(
             eq(agentTierAssignments.agentId, agentId),
-            eq(agentTierAssignments.status, "ACTIVE")
-          )
+            eq(agentTierAssignments.status, "ACTIVE"),
+          ),
         )
         .orderBy(desc(agentTierAssignments.effectiveFrom))
         .limit(1);
-      
+
       console.log("Storage: Current assignment:", result || "None found");
       return result || null;
     } catch (error) {
@@ -1590,24 +2009,30 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async supersedePreviousAssignments(agentId: string, newEffectiveFrom: string): Promise<void> {
-    console.log("Storage: supersedePreviousAssignments called for agent:", agentId);
-    
+  async supersedePreviousAssignments(
+    agentId: string,
+    newEffectiveFrom: string,
+  ): Promise<void> {
+    console.log(
+      "Storage: supersedePreviousAssignments called for agent:",
+      agentId,
+    );
+
     try {
       await this.db
         .update(agentTierAssignments)
-        .set({ 
+        .set({
           status: "SUPERSEDED",
           effectiveTo: newEffectiveFrom,
-          updatedAt: new Date()
+          updatedAt: new Date(),
         })
         .where(
           and(
             eq(agentTierAssignments.agentId, agentId),
-            eq(agentTierAssignments.status, "ACTIVE")
-          )
+            eq(agentTierAssignments.status, "ACTIVE"),
+          ),
         );
-      
+
       console.log("Storage: Superseded previous assignments");
     } catch (error) {
       console.error("Storage: Error superseding assignments:", error);
@@ -1615,20 +2040,27 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async updateAgentTierAssignment(id: string, assignmentData: Partial<InsertAgentTierAssignment>): Promise<AgentTierAssignment> {
-    console.log("Storage: updateAgentTierAssignment called:", id, assignmentData);
-    
+  async updateAgentTierAssignment(
+    id: string,
+    assignmentData: Partial<InsertAgentTierAssignment>,
+  ): Promise<AgentTierAssignment> {
+    console.log(
+      "Storage: updateAgentTierAssignment called:",
+      id,
+      assignmentData,
+    );
+
     try {
       const [result] = await this.db
         .update(agentTierAssignments)
         .set({ ...assignmentData, updatedAt: new Date() })
         .where(eq(agentTierAssignments.id, id))
         .returning();
-      
+
       if (!result) {
         throw new Error("Tier assignment not found");
       }
-      
+
       console.log("Storage: Updated tier assignment:", result);
       return result;
     } catch (error) {
@@ -1639,9 +2071,11 @@ export class DatabaseStorage implements IStorage {
 
   async deleteAgentTierAssignment(id: string): Promise<void> {
     console.log("Storage: deleteAgentTierAssignment called:", id);
-    
+
     try {
-      await this.db.delete(agentTierAssignments).where(eq(agentTierAssignments.id, id));
+      await this.db
+        .delete(agentTierAssignments)
+        .where(eq(agentTierAssignments.id, id));
       console.log("Storage: Deleted tier assignment");
     } catch (error) {
       console.error("Storage: Error deleting tier assignment:", error);
@@ -1650,10 +2084,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Tier Assignment Engine operations
-  async getTierAssignmentEngines(filters: any = {}): Promise<TierAssignmentEngine[]> {
+  async getTierAssignmentEngines(): Promise<TierAssignmentEngine[]> {
     try {
-      console.log("Storage: getTierAssignmentEngines called with filters:", filters);
-
       let query = this.db.select().from(tierAssignmentEngine);
       const conditions = [];
 
@@ -1666,7 +2098,9 @@ export class DatabaseStorage implements IStorage {
       }
 
       const results = await query.orderBy(desc(tierAssignmentEngine.createdAt));
-      console.log(`Storage: Found ${results?.length || 0} tier assignment engines`);
+      console.log(
+        `Storage: Found ${results?.length || 0} tier assignment engines`,
+      );
 
       return Array.isArray(results) ? results : [];
     } catch (error: any) {
@@ -1675,17 +2109,30 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async insertTierAssignmentEngine(engineData: InsertTierAssignmentEngine): Promise<TierAssignmentEngine> {
-    const [engine] = await this.db.insert(tierAssignmentEngine).values(engineData).returning();
+  async insertTierAssignmentEngine(
+    engineData: InsertTierAssignmentEngine,
+  ): Promise<TierAssignmentEngine> {
+    const [engine] = await this.db
+      .insert(tierAssignmentEngine)
+      .values(engineData)
+      .returning();
     return engine;
   }
 
-  async getTierAssignmentEngineById(id: string): Promise<TierAssignmentEngine | null> {
-    const [engine] = await this.db.select().from(tierAssignmentEngine).where(eq(tierAssignmentEngine.id, id));
+  async getTierAssignmentEngineById(
+    id: string,
+  ): Promise<TierAssignmentEngine | null> {
+    const [engine] = await this.db
+      .select()
+      .from(tierAssignmentEngine)
+      .where(eq(tierAssignmentEngine.id, id));
     return engine || null;
   }
 
-  async updateTierAssignmentEngine(id: string, engineData: Partial<InsertTierAssignmentEngine>): Promise<TierAssignmentEngine> {
+  async updateTierAssignmentEngine(
+    id: string,
+    engineData: Partial<InsertTierAssignmentEngine>,
+  ): Promise<TierAssignmentEngine> {
     const [engine] = await this.db
       .update(tierAssignmentEngine)
       .set({ ...engineData, updatedAt: new Date() })
@@ -1694,7 +2141,11 @@ export class DatabaseStorage implements IStorage {
     return engine;
   }
 
-  async updateEngineRunTimestamps(id: string, lastRunAt: Date, nextRunAt: Date): Promise<void> {
+  async updateEngineRunTimestamps(
+    id: string,
+    lastRunAt: Date,
+    nextRunAt: Date,
+  ): Promise<void> {
     await this.db
       .update(tierAssignmentEngine)
       .set({ lastRunAt, nextRunAt, updatedAt: new Date() })
@@ -1702,7 +2153,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteTierAssignmentEngine(id: string): Promise<void> {
-    await this.db.delete(tierAssignmentEngine).where(eq(tierAssignmentEngine.id, id));
+    await this.db
+      .delete(tierAssignmentEngine)
+      .where(eq(tierAssignmentEngine.id, id));
   }
 
   async checkTierConflicts(tierData: InsertAgentTier): Promise<any[]> {
@@ -1712,9 +2165,9 @@ export class DatabaseStorage implements IStorage {
     const existingTier = await this.getAgentTierByCode(tierData.tierCode);
     if (existingTier) {
       conflicts.push({
-        type: 'DUPLICATE_TIER_CODE',
+        type: "DUPLICATE_TIER_CODE",
         message: `Tier with code ${tierData.tierCode} already exists`,
-        conflictingTier: existingTier
+        conflictingTier: existingTier,
       });
     }
 
@@ -1722,53 +2175,71 @@ export class DatabaseStorage implements IStorage {
   }
 
   // KPI calculation and tier evaluation helpers
-  async calculateAgentKPIs(agentId: string, window: 'MONTHLY' | 'QUARTERLY'): Promise<any> {
-    console.log("Storage: calculateAgentKPIs called for agent:", agentId, "window:", window);
-    
+  async calculateAgentKPIs(
+    agentId: string,
+    window: "MONTHLY" | "QUARTERLY",
+  ): Promise<any> {
+    console.log(
+      "Storage: calculateAgentKPIs called for agent:",
+      agentId,
+      "window:",
+      window,
+    );
+
     // Mock KPI calculation - in real implementation this would aggregate booking data
     const mockKPIs = {
       totalBookingValue: Math.floor(Math.random() * 100000000) + 10000000,
       totalBookings: Math.floor(Math.random() * 3000) + 500,
       avgBookingsPerMonth: Math.floor(Math.random() * 800) + 100,
       avgSearchesPerMonth: Math.floor(Math.random() * 10000) + 1000,
-      conversionPct: Math.round((Math.random() * 5 + 5) * 100) / 100 // 5-10%
+      conversionPct: Math.round((Math.random() * 5 + 5) * 100) / 100, // 5-10%
     };
-    
+
     console.log("Storage: Calculated KPIs:", mockKPIs);
     return mockKPIs;
   }
 
   async evaluateAgentTier(agentId: string, kpiData: any): Promise<string> {
-    console.log("Storage: evaluateAgentTier called for agent:", agentId, "with KPIs:", kpiData);
-    
+    console.log(
+      "Storage: evaluateAgentTier called for agent:",
+      agentId,
+      "with KPIs:",
+      kpiData,
+    );
+
     try {
       // Get all active tiers
       const tiers = await this.getAgentTiers({ status: "ACTIVE" });
-      
+
       // Sort tiers by threshold requirements (descending order)
       const sortedTiers = tiers.sort((a, b) => {
         const aThresholds = a.kpiThresholds as any;
         const bThresholds = b.kpiThresholds as any;
-        return (bThresholds.totalBookingValueMin || 0) - (aThresholds.totalBookingValueMin || 0);
+        return (
+          (bThresholds.totalBookingValueMin || 0) -
+          (aThresholds.totalBookingValueMin || 0)
+        );
       });
-      
+
       // Evaluate against each tier
       for (const tier of sortedTiers) {
         const thresholds = tier.kpiThresholds as any;
-        
-        const meetsRequirements = 
-          (kpiData.totalBookingValue >= (thresholds.totalBookingValueMin || 0)) &&
-          (kpiData.totalBookings >= (thresholds.totalBookingsMin || 0)) &&
-          (kpiData.avgBookingsPerMonth >= (thresholds.avgBookingsPerMonthMin || 0)) &&
-          (kpiData.avgSearchesPerMonth >= (thresholds.avgSearchesPerMonthMin || 0)) &&
-          (kpiData.conversionPct >= (thresholds.conversionPctMin || 0));
-        
+
+        const meetsRequirements =
+          kpiData.totalBookingValue >= (thresholds.totalBookingValueMin || 0) &&
+          kpiData.totalBookings >= (thresholds.totalBookingsMin || 0) &&
+          kpiData.avgBookingsPerMonth >=
+            (thresholds.avgBookingsPerMonthMin || 0) &&
+          kpiData.avgSearchesPerMonth >=
+            (thresholds.avgSearchesPerMonthMin || 0) &&
+          kpiData.conversionPct >= (thresholds.conversionPctMin || 0);
+
         if (meetsRequirements) {
           console.log("Storage: Agent qualifies for tier:", tier.tierCode);
           return tier.tierCode;
         }
       }
-      
+
       // Default to BRONZE if no tier matches
       console.log("Storage: Agent defaults to BRONZE tier");
       return "BRONZE";
@@ -1785,9 +2256,9 @@ export class DatabaseStorage implements IStorage {
     const existingTier = await this.getAgentTierByCode(tierData.tierCode);
     if (existingTier) {
       conflicts.push({
-        type: 'DUPLICATE_TIER_CODE',
+        type: "DUPLICATE_TIER_CODE",
         message: `Tier with code ${tierData.tierCode} already exists`,
-        conflictingTier: existingTier
+        conflictingTier: existingTier,
       });
     }
 
@@ -1803,7 +2274,9 @@ export class DatabaseStorage implements IStorage {
       conditions.push(eq(campaigns.status, filters.status));
     }
     if (filters.campaignCode) {
-      conditions.push(ilike(campaigns.campaignCode, `%${filters.campaignCode}%`));
+      conditions.push(
+        ilike(campaigns.campaignCode, `%${filters.campaignCode}%`),
+      );
     }
     if (filters.createdBy) {
       conditions.push(eq(campaigns.createdBy, filters.createdBy));
@@ -1817,21 +2290,33 @@ export class DatabaseStorage implements IStorage {
   }
 
   async insertCampaign(campaignData: InsertCampaign): Promise<Campaign> {
-    const [campaign] = await this.db.insert(campaigns).values(campaignData).returning();
+    const [campaign] = await this.db
+      .insert(campaigns)
+      .values(campaignData)
+      .returning();
     return campaign;
   }
 
   async getCampaignById(id: string): Promise<Campaign | null> {
-    const [campaign] = await this.db.select().from(campaigns).where(eq(campaigns.id, id));
+    const [campaign] = await this.db
+      .select()
+      .from(campaigns)
+      .where(eq(campaigns.id, id));
     return campaign || null;
   }
 
   async getCampaignByCode(campaignCode: string): Promise<Campaign | null> {
-    const [campaign] = await this.db.select().from(campaigns).where(eq(campaigns.campaignCode, campaignCode));
+    const [campaign] = await this.db
+      .select()
+      .from(campaigns)
+      .where(eq(campaigns.campaignCode, campaignCode));
     return campaign || null;
   }
 
-  async updateCampaign(id: string, campaignData: Partial<InsertCampaign>): Promise<Campaign> {
+  async updateCampaign(
+    id: string,
+    campaignData: Partial<InsertCampaign>,
+  ): Promise<Campaign> {
     const [campaign] = await this.db
       .update(campaigns)
       .set({ ...campaignData, updatedAt: new Date() })
@@ -1857,12 +2342,14 @@ export class DatabaseStorage implements IStorage {
     const conflicts = [];
 
     // Check for duplicate campaign code
-    const existingCampaign = await this.getCampaignByCode(campaignData.campaignCode);
+    const existingCampaign = await this.getCampaignByCode(
+      campaignData.campaignCode,
+    );
     if (existingCampaign) {
       conflicts.push({
-        type: 'DUPLICATE_CAMPAIGN_CODE',
+        type: "DUPLICATE_CAMPAIGN_CODE",
         message: `Campaign with code ${campaignData.campaignCode} already exists`,
-        conflictingCampaign: existingCampaign
+        conflictingCampaign: existingCampaign,
       });
     }
 
@@ -1870,8 +2357,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Campaign Metrics operations
-  async getCampaignMetrics(campaignCode: string, filters: any = {}): Promise<CampaignMetrics[]> {
-    let query = this.db.select().from(campaignMetrics).where(eq(campaignMetrics.campaignCode, campaignCode));
+  async getCampaignMetrics(
+    campaignCode: string,
+    filters: any = {},
+  ): Promise<CampaignMetrics[]> {
+    let query = this.db
+      .select()
+      .from(campaignMetrics)
+      .where(eq(campaignMetrics.campaignCode, campaignCode));
 
     const conditions = [];
     if (filters.startDate) {
@@ -1882,61 +2375,98 @@ export class DatabaseStorage implements IStorage {
     }
 
     if (conditions.length > 0) {
-      query = query.where(and(eq(campaignMetrics.campaignCode, campaignCode), ...conditions));
+      query = query.where(
+        and(eq(campaignMetrics.campaignCode, campaignCode), ...conditions),
+      );
     }
 
     return await query.orderBy(desc(campaignMetrics.date));
   }
 
-  async insertCampaignMetrics(metricsData: InsertCampaignMetrics): Promise<CampaignMetrics> {
-    const [metrics] = await this.db.insert(campaignMetrics).values(metricsData).returning();
+  async insertCampaignMetrics(
+    metricsData: InsertCampaignMetrics,
+  ): Promise<CampaignMetrics> {
+    const [metrics] = await this.db
+      .insert(campaignMetrics)
+      .values(metricsData)
+      .returning();
     return metrics;
   }
 
-  async updateCampaignMetrics(campaignCode: string, date: string, metricsData: Partial<InsertCampaignMetrics>): Promise<CampaignMetrics> {
+  async updateCampaignMetrics(
+    campaignCode: string,
+    date: string,
+    metricsData: Partial<InsertCampaignMetrics>,
+  ): Promise<CampaignMetrics> {
     const [metrics] = await this.db
       .update(campaignMetrics)
       .set(metricsData)
-      .where(and(eq(campaignMetrics.campaignCode, campaignCode), eq(campaignMetrics.date, date)))
+      .where(
+        and(
+          eq(campaignMetrics.campaignCode, campaignCode),
+          eq(campaignMetrics.date, date),
+        ),
+      )
       .returning();
     return metrics;
   }
 
   // Campaign Delivery operations
-  async getCampaignDeliveries(campaignCode: string, filters: any = {}): Promise<CampaignDelivery[]> {
-    let query = this.db.select().from(campaignDeliveries).where(eq(campaignDeliveries.campaignCode, campaignCode));
+  async getCampaignDeliveries(
+    campaignCode: string,
+    filters: any = {},
+  ): Promise<CampaignDelivery[]> {
+    let query = this.db
+      .select()
+      .from(campaignDeliveries)
+      .where(eq(campaignDeliveries.campaignCode, campaignCode));
 
     const conditions = [];
     if (filters.agentId) {
       conditions.push(eq(campaignDeliveries.agentId, filters.agentId));
     }
     if (filters.deliveryStatus) {
-      conditions.push(eq(campaignDeliveries.deliveryStatus, filters.deliveryStatus));
+      conditions.push(
+        eq(campaignDeliveries.deliveryStatus, filters.deliveryStatus),
+      );
     }
     if (filters.deliveryChannel) {
-      conditions.push(eq(campaignDeliveries.deliveryChannel, filters.deliveryChannel));
+      conditions.push(
+        eq(campaignDeliveries.deliveryChannel, filters.deliveryChannel),
+      );
     }
 
     if (conditions.length > 0) {
-      query = query.where(and(eq(campaignDeliveries.campaignCode, campaignCode), ...conditions));
+      query = query.where(
+        and(eq(campaignDeliveries.campaignCode, campaignCode), ...conditions),
+      );
     }
 
     return await query.orderBy(desc(campaignDeliveries.createdAt));
   }
 
-  async insertCampaignDelivery(deliveryData: InsertCampaignDelivery): Promise<CampaignDelivery> {
-    const [delivery] = await this.db.insert(campaignDeliveries).values(deliveryData).returning();
+  async insertCampaignDelivery(
+    deliveryData: InsertCampaignDelivery,
+  ): Promise<CampaignDelivery> {
+    const [delivery] = await this.db
+      .insert(campaignDeliveries)
+      .values(deliveryData)
+      .returning();
     return delivery;
   }
 
-  async updateDeliveryStatus(id: string, status: string, timestamp?: Date): Promise<CampaignDelivery> {
+  async updateDeliveryStatus(
+    id: string,
+    status: string,
+    timestamp?: Date,
+  ): Promise<CampaignDelivery> {
     const updateData: any = { deliveryStatus: status };
 
     switch (status) {
-      case 'SENT':
+      case "SENT":
         updateData.sentAt = timestamp || new Date();
         break;
-      case 'DELIVERED':
+      case "DELIVERED":
         updateData.deliveredAt = timestamp || new Date();
         break;
     }
@@ -1950,10 +2480,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async recordDeliveryEvent(deliveryId: string, event: string, data?: any) {
-    await this.db.update(campaignDeliveries)
+    await this.db
+      .update(campaignDeliveries)
       .set({
         [`${event.toLowerCase()}At`]: new Date(),
-        ...(event === "PURCHASED" && data?.amount && { purchaseAmount: data.amount.toString() })
+        ...(event === "PURCHASED" &&
+          data?.amount && { purchaseAmount: data.amount.toString() }),
       })
       .where(eq(campaignDeliveries.id, deliveryId));
   }
@@ -1974,7 +2506,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getSimulationById(id: string): Promise<Simulation | null> {
-    const result = await this.db.select().from(simulations).where(eq(simulations.id, id));
+    const result = await this.db
+      .select()
+      .from(simulations)
+      .where(eq(simulations.id, id));
     return result[0] || null;
   }
 
@@ -1983,16 +2518,24 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
 
-  async updateSimulation(id: string, data: Partial<Simulation>): Promise<Simulation> {
-    const result = await this.db.update(simulations)
+  async updateSimulation(
+    id: string,
+    data: Partial<Simulation>,
+  ): Promise<Simulation> {
+    const result = await this.db
+      .update(simulations)
       .set({ ...data, updatedAt: new Date() })
       .where(eq(simulations.id, id))
       .returning();
     return result[0];
   }
 
-  async updateSimulationStatus(id: string, status: string): Promise<Simulation> {
-    const result = await this.db.update(simulations)
+  async updateSimulationStatus(
+    id: string,
+    status: string,
+  ): Promise<Simulation> {
+    const result = await this.db
+      .update(simulations)
       .set({ status, updatedAt: new Date() })
       .where(eq(simulations.id, id))
       .returning();
@@ -2012,7 +2555,7 @@ export class DatabaseStorage implements IStorage {
     await this.updateSimulationStatus(id, "RUNNING");
 
     // Simulate processing time
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     // Generate mock results based on the forecast with some variance
     const forecast = simulation.forecast as any;
@@ -2020,21 +2563,23 @@ export class DatabaseStorage implements IStorage {
       revenueChangePct: this.addVariance(forecast.revenueChangePct),
       conversionChangePct: this.addVariance(forecast.conversionChangePct),
       marginImpactPct: this.addVariance(forecast.marginImpactPct),
-      attachRateChangePct: forecast.attachRateChangePct ? this.addVariance(forecast.attachRateChangePct) : undefined,
+      attachRateChangePct: forecast.attachRateChangePct
+        ? this.addVariance(forecast.attachRateChangePct)
+        : undefined,
     };
 
     // Update with results
     return this.updateSimulation(id, {
       status: "COMPLETED",
-      actualResults
+      actualResults,
     });
   }
 
   private addVariance(value: string): string {
-    const numValue = parseFloat(value.replace(/[+%]/g, ''));
+    const numValue = parseFloat(value.replace(/[+%]/g, ""));
     const variance = (Math.random() - 0.5) * 0.4; // ±20% variance
     const result = numValue + variance;
-    return (result >= 0 ? '+' : '') + result.toFixed(1);
+    return (result >= 0 ? "+" : "") + result.toFixed(1);
   }
 
   // Insight Query methods
@@ -2053,12 +2598,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getInsightQueryById(id: string): Promise<InsightQuery | null> {
-    const result = await this.db.select().from(insightQueries).where(eq(insightQueries.id, id));
+    const result = await this.db
+      .select()
+      .from(insightQueries)
+      .where(eq(insightQueries.id, id));
     return result[0] || null;
   }
 
   async insertInsightQuery(data: Partial<InsightQuery>): Promise<InsightQuery> {
-    const result = await this.db.insert(insightQueries).values(data).returning();
+    const result = await this.db
+      .insert(insightQueries)
+      .values(data)
+      .returning();
     return result[0];
   }
 
@@ -2067,7 +2618,8 @@ export class DatabaseStorage implements IStorage {
     if (!query) throw new Error("Query not found");
 
     // Update status to processing
-    await this.db.update(insightQueries)
+    await this.db
+      .update(insightQueries)
       .set({ status: "PROCESSING" })
       .where(eq(insightQueries.id, id));
 
@@ -2075,26 +2627,39 @@ export class DatabaseStorage implements IStorage {
 
     try {
       // Mock NLP processing - in real implementation would integrate with NLP service
-      const response = await this.mockNLPProcessor(query.queryText, query.filters);
+      const response = await this.mockNLPProcessor(
+        query.queryText,
+        query.filters,
+      );
       const executionTime = Date.now() - startTime;
 
       // Update with results
-      await this.db.update(insightQueries)
+      await this.db
+        .update(insightQueries)
         .set({
           status: "COMPLETED",
           response,
-          executionTimeMs: executionTime
+          executionTimeMs: executionTime,
         })
         .where(eq(insightQueries.id, id));
 
-      return { ...query, response, executionTimeMs: executionTime, status: "COMPLETED" };
+      return {
+        ...query,
+        response,
+        executionTimeMs: executionTime,
+        status: "COMPLETED",
+      };
     } catch (error) {
       const executionTime = Date.now() - startTime;
-      await this.db.update(insightQueries)
+      await this.db
+        .update(insightQueries)
         .set({
           status: "ERROR",
-          response: { answer: "Error processing query", error: error instanceof Error ? error.message : "Unknown error" },
-          executionTimeMs: executionTime
+          response: {
+            answer: "Error processing query",
+            error: error instanceof Error ? error.message : "Unknown error",
+          },
+          executionTimeMs: executionTime,
         })
         .where(eq(insightQueries.id, id));
 
@@ -2102,65 +2667,98 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  private async mockNLPProcessor(queryText: string, filters: any): Promise<any> {
+  private async mockNLPProcessor(
+    queryText: string,
+    filters: any,
+  ): Promise<any> {
     // Mock NLP processing with predefined responses
     const lowercaseQuery = queryText.toLowerCase();
 
-    if (lowercaseQuery.includes("revenue") || lowercaseQuery.includes("sales")) {
+    if (
+      lowercaseQuery.includes("revenue") ||
+      lowercaseQuery.includes("sales")
+    ) {
       return {
-        answer: "Based on historical data, revenue has increased by 12.3% over the past quarter, with the highest growth in the GCC region (+18.2%) and among Gold tier agents (+15.7%). Portal channel contributed 67% of total revenue.",
+        answer:
+          "Based on historical data, revenue has increased by 12.3% over the past quarter, with the highest growth in the GCC region (+18.2%) and among Gold tier agents (+15.7%). Portal channel contributed 67% of total revenue.",
         data: {
           totalRevenue: "$2.4M",
           growth: "+12.3%",
           topRegion: "GCC (+18.2%)",
           topTier: "Gold (+15.7%)",
-          channelBreakdown: { portal: "67%", api: "28%", mobile: "5%" }
+          channelBreakdown: { portal: "67%", api: "28%", mobile: "5%" },
         },
         confidence: 0.89,
-        sources: ["negotiated_fares", "offer_traces", "campaign_metrics"]
+        sources: ["negotiated_fares", "offer_traces", "campaign_metrics"],
       };
     }
 
-    if (lowercaseQuery.includes("conversion") || lowercaseQuery.includes("attach")) {
+    if (
+      lowercaseQuery.includes("conversion") ||
+      lowercaseQuery.includes("attach")
+    ) {
       return {
-        answer: "Current conversion rate is 4.2% across all channels, with ancillary attachment rate at 34%. Platinum tier agents achieve 6.8% conversion, while Bronze tier averages 2.1%. Mobile channel shows the lowest conversion at 1.9%.",
+        answer:
+          "Current conversion rate is 4.2% across all channels, with ancillary attachment rate at 34%. Platinum tier agents achieve 6.8% conversion, while Bronze tier averages 2.1%. Mobile channel shows the lowest conversion at 1.9%.",
         data: {
           overallConversion: "4.2%",
           ancillaryAttachment: "34%",
-          tierPerformance: { platinum: "6.8%", gold: "4.9%", silver: "3.2%", bronze: "2.1%" },
-          channelPerformance: { portal: "5.1%", api: "4.8%", mobile: "1.9%" }
+          tierPerformance: {
+            platinum: "6.8%",
+            gold: "4.9%",
+            silver: "3.2%",
+            bronze: "2.1%",
+          },
+          channelPerformance: { portal: "5.1%", api: "4.8%", mobile: "1.9%" },
         },
         confidence: 0.92,
-        sources: ["offer_traces", "agent_tier_assignments", "campaign_deliveries"]
+        sources: [
+          "offer_traces",
+          "agent_tier_assignments",
+          "campaign_deliveries",
+        ],
       };
     }
 
-    if (lowercaseQuery.includes("discount") || lowercaseQuery.includes("pricing")) {
+    if (
+      lowercaseQuery.includes("discount") ||
+      lowercaseQuery.includes("pricing")
+    ) {
       return {
-        answer: "Average discount applied is 8.5% across all bookings. Dynamic discount rules are triggered in 42% of searches, with highest usage in competitive routes like DXB-LHR (65% trigger rate). Margin impact averages -2.1%.",
+        answer:
+          "Average discount applied is 8.5% across all bookings. Dynamic discount rules are triggered in 42% of searches, with highest usage in competitive routes like DXB-LHR (65% trigger rate). Margin impact averages -2.1%.",
         data: {
           avgDiscount: "8.5%",
           rulesTriggerRate: "42%",
           topRoute: "DXB-LHR (65%)",
           marginImpact: "-2.1%",
-          discountDistribution: { "0-5%": "28%", "5-10%": "45%", "10-15%": "22%", "15%+": "5%" }
+          discountDistribution: {
+            "0-5%": "28%",
+            "5-10%": "45%",
+            "10-15%": "22%",
+            "15%+": "5%",
+          },
         },
         confidence: 0.86,
-        sources: ["dynamic_discount_rules", "offer_traces", "negotiated_fares"]
+        sources: ["dynamic_discount_rules", "offer_traces", "negotiated_fares"],
       };
     }
 
-    if (lowercaseQuery.includes("campaign") || lowercaseQuery.includes("marketing")) {
+    if (
+      lowercaseQuery.includes("campaign") ||
+      lowercaseQuery.includes("marketing")
+    ) {
       return {
-        answer: "Active campaigns show 2.8% average uplift in conversion. 'Pre-Travel Baggage Upsell' campaign achieved highest ROI at 4.2x with 78% delivery rate. Email channel outperforms WhatsApp by 23%.",
+        answer:
+          "Active campaigns show 2.8% average uplift in conversion. 'Pre-Travel Baggage Upsell' campaign achieved highest ROI at 4.2x with 78% delivery rate. Email channel outperforms WhatsApp by 23%.",
         data: {
           campaignUplift: "2.8%",
           topCampaign: "Pre-Travel Baggage Upsell (4.2x ROI)",
           deliveryRate: "78%",
-          channelPerformance: { email: "45%", whatsapp: "22%", portal: "33%" }
+          channelPerformance: { email: "45%", whatsapp: "22%", portal: "33%" },
         },
         confidence: 0.91,
-        sources: ["campaigns", "campaign_metrics", "campaign_deliveries"]
+        sources: ["campaigns", "campaign_metrics", "campaign_deliveries"],
       };
     }
 
@@ -2170,10 +2768,10 @@ export class DatabaseStorage implements IStorage {
       data: {
         recordsFound: Math.floor(Math.random() * 1000) + 100,
         timeRange: filters?.timeRange || "Last 30 days",
-        scope: "All markets and tiers"
+        scope: "All markets and tiers",
       },
       confidence: 0.65,
-      sources: ["multiple_tables"]
+      sources: ["multiple_tables"],
     };
   }
 }

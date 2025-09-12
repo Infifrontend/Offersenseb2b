@@ -1632,7 +1632,9 @@ export class DatabaseStorage implements IStorage {
       console.error("Storage: Error in getTierAssignmentEngines:", error);
       return [];
     }
-  }</old_str>
+  }
+
+  async insertTierAssignmentEngine(engineData: InsertTierAssignmentEngine): Promise<TierAssignmentEngine> {</old_str>
 
   async insertTierAssignmentEngine(engineData: InsertTierAssignmentEngine): Promise<TierAssignmentEngine> {
     const [engine] = await this.db.insert(tierAssignmentEngine).values(engineData).returning();

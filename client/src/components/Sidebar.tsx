@@ -29,6 +29,77 @@ interface SidebarProps {
 }
 
 const menuItems = [
+  // {
+  //   path: "/dashboard",
+  //   label: "Dashboard",
+  //   icon: BarChart3,
+  // },
+  // {
+  //   path: "/negotiated-fare-manager",
+  //   label: "Negotiated Fare Manager",
+  //   icon: Handshake,
+  // },
+  // {
+  //   path: "/dynamic-discount-engine",
+  //   label: "Dynamic Discount Engine",
+  //   icon: TrendingUp,
+  // },
+  // {
+  //   path: "/air-ancillaries-discounting",
+  //   label: "Air Ancillaries Discounting",
+  //   icon: Tags,
+  // },
+  // {
+  //   path: "/non-air-ancillaries",
+  //   label: "Non-Air Ancillaries Markup",
+  //   icon: Percent,
+  // },
+  // {
+  //   path: "/ancillary-bundling-engine",
+  //   label: "Ancillary Bundling Engine",
+  //   icon: Layers,
+  // },
+  // {
+  //   path: "/offer-rule-builder",
+  //   label: "Offer Rule Builder",
+  //   icon: GitBranch,
+  // },
+  // {
+  //   path: "/offer-composer",
+  //   label: "Offer Composer for Agents",
+  //   icon: Edit,
+  // },
+  // {
+  //   path: "/agent-channel-manager",
+  //   label: "Agent & Channel Manager",
+  //   icon: Users,
+  // },
+  // {
+  //   path: "/cohort-manager",
+  //   label: "Cohort Manager",
+  //   icon: Group,
+  // },
+  // {
+  //   path: "/agent-tier-manager",
+  //   label: "Agent Tier Manager",
+  //   icon: Trophy,
+  // },
+  // {
+  //   path: "/campaign-manager",
+  //   label: "Campaign Manager",
+  //   icon: Megaphone,
+  // },
+  // {
+  //   path: "/logs-version-history",
+  //   label: "Logs & Version History",
+  //   icon: History,
+  // },
+
+  // {
+  //   path: "/analytics-simulation",
+  //   label: "Analytics & Simulation",
+  //   icon: BarChart3,
+  // },
   {
     path: "/dashboard",
     label: "Dashboard",
@@ -46,58 +117,58 @@ const menuItems = [
   },
   {
     path: "/air-ancillaries-discounting",
-    label: "Air Ancillaries Discounting",
+    label: "Air Discounting",
     icon: Tags,
   },
+
   {
     path: "/non-air-ancillaries",
-    label: "Non-Air Ancillaries Markup",
+    label: "Non-Air Markup",
     icon: Percent,
   },
   {
     path: "/ancillary-bundling-engine",
-    label: "Ancillary Bundling Engine",
+    label: "Bundling Engine",
     icon: Layers,
   },
   {
     path: "/offer-rule-builder",
-    label: "Offer Rule Builder",
+    label: "Rule Builder",
     icon: GitBranch,
   },
   {
     path: "/offer-composer",
-    label: "Offer Composer for Agents",
+    label: "Offer Composer",
     icon: Edit,
   },
   {
     path: "/agent-channel-manager",
-    label: "Agent & Channel Manager",
+    label: "Agents & Channels",
     icon: Users,
   },
   {
     path: "/cohort-manager",
-    label: "Cohort Manager",
+    label: "Cohorts",
     icon: Group,
   },
   {
     path: "/agent-tier-manager",
-    label: "Agent Tier Manager",
+    label: "Agent Tiers",
     icon: Trophy,
   },
   {
     path: "/campaign-manager",
-    label: "Campaign Manager",
+    label: "Campaigns",
     icon: Megaphone,
   },
   {
     path: "/logs-version-history",
-    label: "Logs & Version History",
+    label: "Logs & History",
     icon: History,
   },
-
   {
     path: "/analytics-simulation",
-    label: "Analytics & Simulation",
+    label: "Analytics",
     icon: BarChart3,
   },
 ];
@@ -210,7 +281,7 @@ export default function Sidebar({
             <p className="text-sm font-medium  truncate cls-primary-clr">
               John Doe
             </p>
-            <p className="text-xs text-gray-700 capitalize">Administrator</p>
+            <p className="text-xs text-gray-500 capitalize">Administrator</p>
           </div>
         </div>
         <Button

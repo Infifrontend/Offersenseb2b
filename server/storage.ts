@@ -1610,19 +1610,29 @@ export class DatabaseStorage implements IStorage {
 
   // Tier Assignment Engine operations
   async getTierAssignmentEngines(filters: any = {}): Promise<TierAssignmentEngine[]> {
-    let query = this.db.select().from(tierAssignmentEngine);
-    const conditions = [];
+    try {
+      console.log("Storage: getTierAssignmentEngines called with filters:", filters);
+      
+      let query = this.db.select().from(tierAssignmentEngine);
+      const conditions = [];
 
-    if (filters.status) {
-      conditions.push(eq(tierAssignmentEngine.status, filters.status));
+      if (filters.status) {
+        conditions.push(eq(tierAssignmentEngine.status, filters.status));
+      }
+
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+
+      const results = await query.orderBy(desc(tierAssignmentEngine.createdAt));
+      console.log(`Storage: Found ${results?.length || 0} tier assignment engines`);
+      
+      return Array.isArray(results) ? results : [];
+    } catch (error: any) {
+      console.error("Storage: Error in getTierAssignmentEngines:", error);
+      return [];
     }
-
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions));
-    }
-
-    return await query.orderBy(desc(tierAssignmentEngine.createdAt));
-  }
+  }</old_str>
 
   async insertTierAssignmentEngine(engineData: InsertTierAssignmentEngine): Promise<TierAssignmentEngine> {
     const [engine] = await this.db.insert(tierAssignmentEngine).values(engineData).returning();

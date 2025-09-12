@@ -2810,10 +2810,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all assignment engines
   app.get("/api/tiers/engines", async (req, res) => {
     try {
+      console.log("API: GET /api/tiers/engines called with query:", req.query);
       const filters = req.query;
       const engines = await storage.getTierAssignmentEngines(filters);
+      console.log(`API: Found ${engines?.length || 0} tier assignment engines`);
       res.json(engines);
     } catch (error: any) {
+      console.error("API: Error fetching assignment engines:", error);
       res.status(500).json({ message: "Failed to fetch assignment engines", error: error.message });
     }
   });

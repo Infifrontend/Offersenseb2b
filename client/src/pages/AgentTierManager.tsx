@@ -251,9 +251,15 @@ export default function AgentTierManager() {
   } = useQuery({
     queryKey: ["/api/tiers/engines"],
     queryFn: async () => {
+      console.log("Fetching tier assignment engines...");
       const response = await fetch("/api/tiers/engines");
-      if (!response.ok) throw new Error("Failed to fetch engines");
-      return response.json();
+      if (!response.ok) {
+        console.error("Failed to fetch engines:", response.status, response.statusText);
+        throw new Error("Failed to fetch engines");
+      }
+      const data = await response.json();
+      console.log("Fetched engines:", data);
+      return data;
     },
   });
 
@@ -910,17 +916,26 @@ export default function AgentTierManager() {
                   Configure automated tier assignment schedules and policies.
                 </p>
               </div>
-              <AntButton
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={() => {
-                  setEditingEngine(null);
-                  engineForm.resetFields();
-                  setIsEngineModalVisible(true);
-                }}
-              >
-                Add Engine
-              </AntButton>
+              <Space>
+                <AntButton
+                  icon={<ReloadOutlined />}
+                  onClick={() => refetchEngines()}
+                  loading={enginesLoading}
+                >
+                  Refresh
+                </AntButton>
+                <AntButton
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={() => {
+                    setEditingEngine(null);
+                    engineForm.resetFields();
+                    setIsEngineModalVisible(true);
+                  }}
+                >
+                  Add Engine
+                </AntButton>
+              </Space>
             </div>
 
             <Table

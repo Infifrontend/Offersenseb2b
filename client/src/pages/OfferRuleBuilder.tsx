@@ -421,7 +421,7 @@ export default function OfferRuleBuilder() {
           "conditions.seasonCode",
         ];
       case 2: // Actions
-        return ["actions"];
+        return [];
       case 3: // Review
         return ["justification"];
       default:
@@ -431,6 +431,14 @@ export default function OfferRuleBuilder() {
 
   const onCreateSubmit = () => {
     console.log("Create Rule button clicked");
+
+    // First check if actions exist before validating form
+    const actions = createForm.getFieldValue("actions") || [];
+    if (actions.length === 0) {
+      alert("At least one action is required");
+      setCurrentStep(2);
+      return;
+    }
 
     // Validate all form fields
     createForm
@@ -455,13 +463,8 @@ export default function OfferRuleBuilder() {
             validTo,
           });
 
-          // Validate actions exist
+          // Actions validation already done above
           const actions = validatedValues.actions || [];
-          if (actions.length === 0) {
-            alert("At least one action is required");
-            setCurrentStep(2);
-            return;
-          }
 
           const formattedData = {
             ruleCode,
@@ -1300,6 +1303,15 @@ export default function OfferRuleBuilder() {
                   <AntButton
                     type="primary"
                     onClick={() => {
+                      // For actions step, check if at least one action exists
+                      if (currentStep === 2) {
+                        const actions = createForm.getFieldValue("actions") || [];
+                        if (actions.length === 0) {
+                          alert("Please add at least one action before proceeding");
+                          return;
+                        }
+                      }
+
                       // Validate current step fields before proceeding
                       const fieldsToValidate = getFieldsForStep(currentStep);
 
@@ -1307,17 +1319,6 @@ export default function OfferRuleBuilder() {
                         createForm
                           .validateFields(fieldsToValidate)
                           .then(() => {
-                            // For actions step, ensure at least one action exists
-                            if (currentStep === 2) {
-                              const actions =
-                                createForm.getFieldValue("actions") || [];
-                              if (actions.length === 0) {
-                                alert(
-                                  "Please add at least one action before proceeding",
-                                );
-                                return;
-                              }
-                            }
                             setCurrentStep(currentStep + 1);
                           })
                           .catch((errorInfo) => {
@@ -1333,17 +1334,6 @@ export default function OfferRuleBuilder() {
                             );
                           });
                       } else {
-                        // No validation needed for this step
-                        if (currentStep === 2) {
-                          const actions =
-                            createForm.getFieldValue("actions") || [];
-                          if (actions.length === 0) {
-                            alert(
-                              "Please add at least one action before proceeding",
-                            );
-                            return;
-                          }
-                        }
                         setCurrentStep(currentStep + 1);
                       }
                     }}

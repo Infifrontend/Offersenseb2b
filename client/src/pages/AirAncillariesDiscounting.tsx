@@ -48,6 +48,7 @@ import {
   Row,
   Col,
   message,
+  Checkbox as AntCheckbox,
 } from "antd";
 import {
   TrendingUp,
@@ -102,6 +103,32 @@ const agentTiers = ["PLATINUM", "GOLD", "SILVER", "BRONZE"];
 const channels = ["API", "PORTAL", "MOBILE"];
 const adjustmentTypes = ["PERCENT", "AMOUNT", "FREE"];
 const conditionBehaviors = ["SKIPPED_ANCILLARY", "POST_BOOKING"];
+
+// Placeholder for countries data, ideally fetched or imported
+const countriesData = [
+  { code: "AE", name: "United Arab Emirates" },
+  { code: "SA", name: "Saudi Arabia" },
+  { code: "KW", name: "Kuwait" },
+  { code: "BH", name: "Bahrain" },
+  { code: "QA", name: "Qatar" },
+  { code: "OM", name: "Oman" },
+  { code: "EG", name: "Egypt" },
+  { code: "LB", name: "Lebanon" },
+  { code: "JO", name: "Jordan" },
+  { code: "SY", name: "Syria" },
+  { code: "IQ", name: "Iraq" },
+  { code: "DZ", name: "Algeria" },
+  { code: "MA", name: "Morocco" },
+  { code: "TN", name: "Tunisia" },
+  { code: "LY", name: "Libya" },
+  { code: "SD", name: "Sudan" },
+  { code: "YE", name: "Yemen" },
+  { code: "GB", name: "United Kingdom" },
+  { code: "US", name: "United States" },
+  { code: "CA", name: "Canada" },
+  { code: "IN", name: "India" },
+];
+
 
 const getAncillaryIcon = (code: string) => {
   const ancillary = ancillaryCodes.find((a) => a.value === code);
@@ -248,6 +275,8 @@ export default function AirAncillariesDiscounting() {
         values.adjustmentType === "FREE"
           ? null
           : values.adjustmentValue?.toString(),
+      pos: values.pos || [],
+      agentTier: values.agentTier || [],
     };
     delete formattedData.validDates;
     createRuleMutation.mutate(formattedData);
@@ -263,6 +292,8 @@ export default function AirAncillariesDiscounting() {
         values.adjustmentType === "FREE"
           ? null
           : values.adjustmentValue?.toString(),
+      pos: values.pos || [],
+      agentTier: values.agentTier || [],
     };
     delete formattedData.validDates;
     updateRuleMutation.mutate({ id: selectedRule!.id, data: formattedData });
@@ -750,18 +781,52 @@ export default function AirAncillariesDiscounting() {
           </Row>
 
           <Row gutter={16}>
-            <Col span={12}>
+            <Col span={24}>
               <AntForm.Item
                 label="Point of Sale"
                 name="pos"
-                rules={[{ required: true }]}
+                rules={[
+                  { required: true, message: "Please select at least one POS" },
+                ]}
               >
-                <AntSelect
-                  mode="tags"
-                  placeholder="Enter country codes (e.g., AE, SA, KW)"
-                ></AntSelect>
+                <AntCheckbox.Group style={{ width: "100%" }}>
+                  <Row gutter={[16, 8]}>
+                    {countriesData.map((country) => (
+                      <Col span={6} key={country.code}>
+                        <AntCheckbox
+                          value={country.code}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            padding: "4px 8px",
+                            borderRadius: "4px",
+                            border: "1px solid #d9d9d9",
+                            marginBottom: "8px",
+                            fontSize: "14px",
+                          }}
+                        >
+                          <span style={{ fontWeight: "500" }}>
+                            {country.code}
+                          </span>
+                          <span
+                            style={{
+                              fontSize: "12px",
+                              color: "#666",
+                              marginLeft: "4px",
+                            }}
+                          >
+                            {country.name}
+                          </span>
+                        </AntCheckbox>
+                      </Col>
+                    ))}
+                  </Row>
+                </AntCheckbox.Group>
               </AntForm.Item>
             </Col>
+          </Row>
+
+          <Row gutter={16}>
             <Col span={12}>
               <AntForm.Item
                 label="Channel"
@@ -777,58 +842,70 @@ export default function AirAncillariesDiscounting() {
                 </AntSelect>
               </AntForm.Item>
             </Col>
-          </Row>
-
-          <Row gutter={16}>
             <Col span={12}>
               <AntForm.Item
                 label="Agent Tiers"
                 name="agentTier"
-                rules={[{ required: true }]}
+                rules={[
+                  {
+                    required: true,
+                    message: "Please select at least one agent tier",
+                  },
+                ]}
               >
-                <AntSelect mode="multiple" placeholder="Select agent tiers">
-                  {agentTiers.map((tier) => (
-                    <AntSelect.Option key={tier} value={tier}>
-                      {tier}
-                    </AntSelect.Option>
-                  ))}
-                </AntSelect>
-              </AntForm.Item>
-            </Col>
-            <Col span={12}>
-              <AntForm.Item label="Cohort Codes (Optional)" name="cohortCodes">
-                <AntSelect
-                  mode="tags"
-                  placeholder="Enter cohort codes"
-                  style={{ width: "100%" }}
-                  dropdownStyle={{ zIndex: 9999 }}
-                  getPopupContainer={(trigger) => trigger.parentElement}
-                  virtual={false}
-                  showSearch
-                  filterOption={(input, option) =>
-                    option?.children
-                      ?.toLowerCase()
-                      .indexOf(input.toLowerCase()) >= 0 ||
-                    option?.value?.toLowerCase().indexOf(input.toLowerCase()) >=
-                      0
-                  }
-                >
-                  {availableCohorts.map((cohort: any) => (
-                    <AntSelect.Option key={cohort.id} value={cohort.cohortName}>
-                      <div style={{ display: "flex", flexDirection: "column" }}>
-                        <div className="cls-cohort-dropdwon">
-                          <p>{cohort.cohortName}</p>{" "}
-                          <span className="text-gray-600">
-                            {cohort.cohortCode}
-                          </span>
-                        </div>
-                      </div>
-                    </AntSelect.Option>
-                  ))}
-                </AntSelect>
+                <AntCheckbox.Group style={{ width: "100%" }}>
+                  <Row gutter={[16, 8]}>
+                    {agentTiers.map((tier) => (
+                      <Col span={6} key={tier}>
+                        <AntCheckbox
+                          value={tier}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            padding: "4px 8px",
+                            borderRadius: "4px",
+                            border: "1px solid #d9d9d9",
+                            marginBottom: "8px",
+                            fontSize: "14px",
+                          }}
+                        >
+                          <span style={{ fontWeight: "500" }}>{tier}</span>
+                        </AntCheckbox>
+                      </Col>
+                    ))}
+                  </Row>
+                </AntCheckbox.Group>
               </AntForm.Item>
             </Col>
           </Row>
+
+          <AntForm.Item label="Eligible Cohorts (Optional)" name="cohortCodes">
+            <AntSelect
+              mode="multiple"
+              placeholder="Select cohorts"
+              style={{ width: "100%" }}
+              dropdownStyle={{ zIndex: 9999 }}
+              getPopupContainer={(trigger) => trigger.parentElement}
+              virtual={false}
+              showSearch
+              filterOption={(input, option) =>
+                option?.children?.toLowerCase().indexOf(input.toLowerCase()) >=
+                  0 ||
+                option?.value?.toLowerCase().indexOf(input.toLowerCase()) >= 0
+              }
+            >
+              {availableCohorts.map((cohort: any) => (
+                <AntSelect.Option key={cohort.id} value={cohort.cohortName}>
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    <div className="cls-cohort-dropdwon">
+                      <p>{cohort.cohortName}</p>{" "}
+                      <span className="text-gray-600">{cohort.cohortCode}</span>
+                    </div>
+                  </div>
+                </AntSelect.Option>
+              ))}
+            </AntSelect>
+          </AntForm.Item>
 
           <AntForm.Item
             label="Condition Behavior (Optional)"
@@ -981,14 +1058,83 @@ export default function AirAncillariesDiscounting() {
               <AntForm.Item
                 label="Point of Sale"
                 name="pos"
-                rules={[{ required: true }]}
+                rules={[
+                  { required: true, message: "Please select at least one POS" },
+                ]}
               >
-                <AntSelect
-                  mode="tags"
-                  placeholder="Enter country codes (e.g., AE, SA, KW)"
-                ></AntSelect>
+                <AntCheckbox.Group style={{ width: "100%" }}>
+                  <Row gutter={[16, 8]}>
+                    {countriesData.map((country) => (
+                      <Col span={6} key={country.code}>
+                        <AntCheckbox
+                          value={country.code}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            padding: "4px 8px",
+                            borderRadius: "4px",
+                            border: "1px solid #d9d9d9",
+                            marginBottom: "8px",
+                            fontSize: "14px",
+                          }}
+                        >
+                          <span style={{ fontWeight: "500" }}>
+                            {country.code}
+                          </span>
+                          <span
+                            style={{
+                              fontSize: "12px",
+                              color: "#666",
+                              marginLeft: "4px",
+                            }}
+                          >
+                            {country.name}
+                          </span>
+                        </AntCheckbox>
+                      </Col>
+                    ))}
+                  </Row>
+                </AntCheckbox.Group>
               </AntForm.Item>
             </Col>
+            <Col span={12}>
+              <AntForm.Item
+                label="Agent Tiers"
+                name="agentTier"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please select at least one agent tier",
+                  },
+                ]}
+              >
+                <AntCheckbox.Group style={{ width: "100%" }}>
+                  <Row gutter={[16, 8]}>
+                    {agentTiers.map((tier) => (
+                      <Col span={6} key={tier}>
+                        <AntCheckbox
+                          value={tier}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            padding: "4px 8px",
+                            borderRadius: "4px",
+                            border: "1px solid #d9d9d9",
+                            marginBottom: "8px",
+                            fontSize: "14px",
+                          }}
+                        >
+                          <span style={{ fontWeight: "500" }}>{tier}</span>
+                        </AntCheckbox>
+                      </Col>
+                    ))}
+                  </Row>
+                </AntCheckbox.Group>
+              </AntForm.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
             <Col span={12}>
               <AntForm.Item
                 label="Channel"
@@ -1004,29 +1150,11 @@ export default function AirAncillariesDiscounting() {
                 </AntSelect>
               </AntForm.Item>
             </Col>
-          </Row>
-
-          <Row gutter={16}>
             <Col span={12}>
-              <AntForm.Item
-                label="Agent Tiers"
-                name="agentTier"
-                rules={[{ required: true }]}
-              >
-                <AntSelect mode="multiple" placeholder="Select agent tiers">
-                  {agentTiers.map((tier) => (
-                    <AntSelect.Option key={tier} value={tier}>
-                      {tier}
-                    </AntSelect.Option>
-                  ))}
-                </AntSelect>
-              </AntForm.Item>
-            </Col>
-            <Col span={12}>
-              <AntForm.Item label="Cohort Codes (Optional)" name="cohortCodes">
+              <AntForm.Item label="Eligible Cohorts (Optional)" name="cohortCodes">
                 <AntSelect
-                  mode="tags"
-                  placeholder="Enter cohort codes"
+                  mode="multiple"
+                  placeholder="Select cohorts"
                   style={{ width: "100%" }}
                   dropdownStyle={{ zIndex: 9999 }}
                   getPopupContainer={(trigger) => trigger.parentElement}

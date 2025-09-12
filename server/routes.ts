@@ -863,90 +863,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const filters = req.query;
       console.log("API: Fetching bundle pricing rules with filters:", filters);
 
-      let rules;
-      try {
-        rules = await storage.getBundlePricingRules(filters);
-        console.log(`API: Found ${rules?.length || 0} bundle pricing rules`);
-
-        // Log the bundle codes being referenced
-        if (rules && rules.length > 0) {
-          const bundleCodes = rules.map(rule => rule.bundleCode).filter(Boolean);
-          console.log("API: Bundle codes referenced in pricing rules:", bundleCodes);
-
-          // Check if the referenced bundles actually exist
-          for (const bundleCode of bundleCodes) {
-            const bundleExists = await storage.getBundles({ bundleCode });
-            console.log(`API: Bundle ${bundleCode} exists:`, bundleExists.length > 0);
-          }
-        }
-
-        // If no pricing rules exist and no specific filters, create sample data
-        if ((!rules || rules.length === 0) && Object.keys(filters).length === 0) {
-          console.log("API: No bundle pricing rules found, creating sample rules...");
-
-          // First ensure we have sample bundles
-          const existingBundles = await storage.getBundles({ status: "ACTIVE" });
-          const bundleCodes = existingBundles.map(b => b.bundleCode);
-
-          if (bundleCodes.length > 0) {
-            try {
-              const samplePricingRules = [
-                {
-                  ruleCode: "BUNDLE_DISC_10",
-                  bundleCode: bundleCodes[0],
-                  discountType: "PERCENT",
-                  discountValue: "10.00",
-                  priority: 1,
-                  status: "ACTIVE",
-                  validFrom: "2024-01-01",
-                  validTo: "2024-12-31"
-                },
-                {
-                  ruleCode: "BUNDLE_DISC_15",
-                  bundleCode: bundleCodes[1] || bundleCodes[0],
-                  discountType: "PERCENT",
-                  discountValue: "15.00",
-                  priority: 2,
-                  status: "ACTIVE",
-                  validFrom: "2024-01-01",
-                  validTo: "2024-12-31"
-                },
-                {
-                  ruleCode: "BUNDLE_DISC_FLAT_500",
-                  bundleCode: bundleCodes[2] || bundleCodes[0],
-                  discountType: "AMOUNT",
-                  discountValue: "500.00",
-                  priority: 3,
-                  status: "ACTIVE",
-                  validFrom: "2024-01-01",
-                  validTo: "2024-12-31"
-                }
-              ];
-
-              for (const ruleData of samplePricingRules) {
-                try {
-                  await storage.insertBundlePricingRule(ruleData);
-                  console.log(`API: Created pricing rule: ${ruleData.ruleCode}`);
-                } catch (ruleError) {
-                  console.error(`API: Error creating pricing rule ${ruleData.ruleCode}:`, ruleError);
-                }
-              }
-
-              // Refetch after creating samples
-              rules = await storage.getBundlePricingRules(filters);
-              console.log(`API: After sample creation: ${rules?.length || 0} bundle pricing rules`);
-            } catch (createError: any) {
-              console.error("API: Error creating sample bundle pricing rules:", createError);
-            }
-          } else {
-            console.log("API: No bundles available to create pricing rules for");
-          }
-        }
-      } catch (dbError: any) {
-        console.error("API: Database error fetching pricing rules:", dbError.message);
-        // Return empty array if database error occurs
-        rules = [];
-      }
+      let rules = await storage.getBundlePricingRules(filters);
+      console.log(`API: Found ${rules?.length || 0} bundle pricing rules`);
 
       // Ensure we always return an array
       if (!Array.isArray(rules)) {
@@ -954,16 +872,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
         rules = [];
       }
 
+      // If no pricing rules exist and no specific filters, create sample data
+      if (rules.length === 0 && Object.keys(filters).length === 0) {
+        console.log("API: No bundle pricing rules found, creating sample rules...");
+
+        // First ensure we have sample bundles
+        const existingBundles = await storage.getBundles({ status: "ACTIVE" });
+        const bundleCodes = existingBundles.map(b => b.bundleCode);
+
+        if (bundleCodes.length > 0) {
+          try {
+            const samplePricingRules = [
+              {
+                ruleCode: "BUNDLE_DISC_10",
+                bundleCode: bundleCodes[0],
+                discountType: "PERCENT",
+                discountValue: "10.00",
+                priority: 1,
+                status: "ACTIVE",
+                validFrom: "2024-01-01",
+                validTo: "2024-12-31"
+              },
+              {
+                ruleCode: "BUNDLE_DISC_15",
+                bundleCode: bundleCodes[1] || bundleCodes[0],
+                discountType: "PERCENT", 
+                discountValue: "15.00",
+                priority: 2,
+                status: "ACTIVE",
+                validFrom: "2024-01-01",
+                validTo: "2024-12-31"
+              },
+              {
+                ruleCode: "BUNDLE_DISC_FLAT_500",
+                bundleCode: bundleCodes[2] || bundleCodes[0],
+                discountType: "AMOUNT",
+                discountValue: "500.00",
+                priority: 3,
+                status: "ACTIVE",
+                validFrom: "2024-01-01",
+                validTo: "2024-12-31"
+              }
+            ];
+
+            for (const ruleData of samplePricingRules) {
+              try {
+                await storage.insertBundlePricingRule(ruleData);
+                console.log(`API: Created pricing rule: ${ruleData.ruleCode}`);
+              } catch (ruleError) {
+                console.error(`API: Error creating pricing rule ${ruleData.ruleCode}:`, ruleError);
+              }
+            }
+
+            // Refetch after creating samples
+            rules = await storage.getBundlePricingRules(filters);
+            console.log(`API: After sample creation: ${rules?.length || 0} bundle pricing rules`);
+          } catch (createError: any) {
+            console.error("API: Error creating sample bundle pricing rules:", createError);
+          }
+        }
+      }
+
       console.log(`API: Returning ${rules.length} bundle pricing rules`);
-      // Always return an array
-      res.json(Array.isArray(rules) ? rules : []);
+      res.json(rules);
     } catch (error: any) {
       console.error("API: Error in /api/bundles/pricing endpoint:", error);
-      console.error("API: Endpoint error stack:", error.stack);
       res.status(500).json({ 
         message: "Failed to fetch bundle pricing rules", 
-        error: error.message,
-        data: []
+        error: error.message
       });
     }
   });

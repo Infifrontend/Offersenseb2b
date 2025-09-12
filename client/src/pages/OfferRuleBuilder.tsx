@@ -135,6 +135,26 @@ export default function OfferRuleBuilder() {
     },
   });
 
+  // Fetch available ancillary products
+  const { data: availableAncillaries = [], isLoading: isAncillariesLoading } = useQuery({
+    queryKey: ["/api/ancillary-products"],
+    queryFn: async () => {
+      const response = await fetch("/api/ancillary-products");
+      if (!response.ok) throw new Error("Failed to fetch ancillary products");
+      return response.json();
+    },
+  });
+
+  // Fetch available bundles
+  const { data: availableBundles = [], isLoading: isBundlesLoading } = useQuery({
+    queryKey: ["/api/bundles"],
+    queryFn: async () => {
+      const response = await fetch("/api/bundles?status=ACTIVE");
+      if (!response.ok) throw new Error("Failed to fetch bundles");
+      return response.json();
+    },
+  });
+
   // Dummy data for development
   const dummyRules = [
     {
@@ -1327,7 +1347,44 @@ export default function OfferRuleBuilder() {
                                     }),
                                   ]}
                                 >
-                                  <AntInput placeholder="e.g., BAG20, SEAT_STD" />
+                                  <AntSelect
+                                    placeholder="Select ancillary product"
+                                    loading={isAncillariesLoading}
+                                    showSearch
+                                    allowClear
+                                    filterOption={(input, option) => {
+                                      const children = option?.children;
+                                      if (typeof children === 'string') {
+                                        return children.toLowerCase().includes(input.toLowerCase());
+                                      }
+                                      if (React.isValidElement(children)) {
+                                        const ancillaryCode = children.props?.children?.[0]?.props?.children || '';
+                                        const ruleCode = children.props?.children?.[1]?.props?.children || '';
+                                        return ancillaryCode.toLowerCase().includes(input.toLowerCase()) ||
+                                               ruleCode.toLowerCase().includes(input.toLowerCase());
+                                      }
+                                      return false;
+                                    }}
+                                  >
+                                    {availableAncillaries.map((ancillary: any) => (
+                                      <AntSelect.Option key={ancillary.id} value={ancillary.ancillaryCode}>
+                                        <div style={{ display: "flex", flexDirection: "column" }}>
+                                          <div className="cls-ancillary-dropdown">
+                                            <p className="font-medium text-sm">{ancillary.ancillaryCode}</p>
+                                            <span className="text-gray-600 text-xs">{ancillary.ruleCode}</span>
+                                          </div>
+                                          <div className="text-xs text-gray-500">
+                                            {ancillary.adjustmentType === "FREE" 
+                                              ? "Free" 
+                                              : ancillary.adjustmentType === "PERCENT"
+                                                ? `${ancillary.adjustmentValue}% discount`
+                                                : `$${ancillary.adjustmentValue} off`
+                                            }
+                                          </div>
+                                        </div>
+                                      </AntSelect.Option>
+                                    ))}
+                                  </AntSelect>
                                 </AntForm.Item>
                               </Col>
                             </Row>
@@ -1351,7 +1408,39 @@ export default function OfferRuleBuilder() {
                                     }),
                                   ]}
                                 >
-                                  <AntInput placeholder="e.g., COMFORT_PACK" />
+                                  <AntSelect
+                                    placeholder="Select bundle"
+                                    loading={isBundlesLoading}
+                                    showSearch
+                                    allowClear
+                                    filterOption={(input, option) => {
+                                      const children = option?.children;
+                                      if (typeof children === 'string') {
+                                        return children.toLowerCase().includes(input.toLowerCase());
+                                      }
+                                      if (React.isValidElement(children)) {
+                                        const bundleCode = children.props?.children?.[0]?.props?.children || '';
+                                        const bundleName = children.props?.children?.[1]?.props?.children || '';
+                                        return bundleCode.toLowerCase().includes(input.toLowerCase()) ||
+                                               bundleName.toLowerCase().includes(input.toLowerCase());
+                                      }
+                                      return false;
+                                    }}
+                                  >
+                                    {availableBundles.map((bundle: any) => (
+                                      <AntSelect.Option key={bundle.id} value={bundle.bundleCode}>
+                                        <div style={{ display: "flex", flexDirection: "column" }}>
+                                          <div className="cls-bundle-dropdown">
+                                            <p className="font-medium text-sm">{bundle.bundleCode}</p>
+                                            <span className="text-gray-600 text-xs">{bundle.bundleName}</span>
+                                          </div>
+                                          <div className="text-xs text-gray-500">
+                                            Type: {bundle.bundleType?.replace('_', ' ')} | Components: {bundle.components?.length || 0}
+                                          </div>
+                                        </div>
+                                      </AntSelect.Option>
+                                    ))}
+                                  </AntSelect>
                                 </AntForm.Item>
                               </Col>
                               <Col span={12}>

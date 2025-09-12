@@ -23,12 +23,23 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 100%;
 }
 
 .cls-cohort-dropdwon p {
   margin: 0;
   font-weight: 500;
+}
+
+.cls-ancillary-dropdown {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cls-bundle-dropdown {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 :root {

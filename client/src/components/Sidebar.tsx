@@ -36,12 +36,12 @@ const menuItems = [
   },
   {
     path: "/negotiated-fare-manager",
-    label: "Negotiated Fare Manager",
+    label: "Fare Manager",
     icon: Handshake,
   },
   {
     path: "/dynamic-discount-engine",
-    label: "Dynamic Discount Engine",
+    label: "Dynamic Discount",
     icon: TrendingUp,
   },
   {

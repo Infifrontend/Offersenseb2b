@@ -271,7 +271,11 @@ export default function AncillaryBundlingEngine() {
   });
 
   // Fetch bundles
-  const { data: bundles = [], isLoading: bundlesLoading, refetch: refetchBundles } = useQuery({
+  const {
+    data: bundles = [],
+    isLoading: bundlesLoading,
+    refetch: refetchBundles,
+  } = useQuery({
     queryKey: ["bundles", filters],
     queryFn: async () => {
       const params = new URLSearchParams(filters);
@@ -533,12 +537,19 @@ export default function AncillaryBundlingEngine() {
         const errorData = await response.json();
         if (response.status === 409 && errorData.conflicts) {
           // Handle conflict by showing detailed error
-          const conflictDetails = errorData.conflicts.map((conflict: any) => 
-            `Rule "${conflict.ruleCode}" already exists for bundle "${conflict.bundleCode}"`
-          ).join(", ");
-          throw new Error(`Rule conflict: ${conflictDetails}. Please use a different rule code.`);
+          const conflictDetails = errorData.conflicts
+            .map(
+              (conflict: any) =>
+                `Rule "${conflict.ruleCode}" already exists for bundle "${conflict.bundleCode}"`,
+            )
+            .join(", ");
+          throw new Error(
+            `Rule conflict: ${conflictDetails}. Please use a different rule code.`,
+          );
         }
-        throw new Error(errorData.message || "Failed to create bundle pricing rule");
+        throw new Error(
+          errorData.message || "Failed to create bundle pricing rule",
+        );
       }
 
       const result = await response.json();
@@ -579,7 +590,7 @@ export default function AncillaryBundlingEngine() {
       validFrom: values.validDates[0].format("YYYY-MM-DD"),
       validTo: values.validDates[1].format("YYYY-MM-DD"),
       discountValue: values.discountValue.toString(),
-      status: "ACTIVE"
+      status: "ACTIVE",
     };
     delete formattedData.validDates;
     createPricingMutation.mutate(formattedData);
@@ -729,7 +740,9 @@ export default function AncillaryBundlingEngine() {
       title: "Bundle Code",
       dataIndex: "bundleCode",
       key: "bundleCode",
-      render: (text: string, record: BundlePricingRule) => <span>{text || "N/A"}</span>,
+      render: (text: string, record: BundlePricingRule) => (
+        <span>{text || "N/A"}</span>
+      ),
     },
     {
       title: "Discount",
@@ -892,14 +905,22 @@ export default function AncillaryBundlingEngine() {
                 <div className="flex items-center justify-center p-8">
                   <div className="text-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                    <p className="text-muted-foreground">Loading bundle pricing rules...</p>
+                    <p className="text-muted-foreground">
+                      Loading bundle pricing rules...
+                    </p>
                   </div>
                 </div>
               ) : pricingRulesError ? (
                 <div className="flex items-center justify-center p-8">
                   <div className="text-center">
-                    <p className="text-red-500 mb-2">Failed to load bundle pricing rules</p>
-                    <Button onClick={() => refetchPricingRules()} variant="outline" size="sm">
+                    <p className="text-red-500 mb-2">
+                      Failed to load bundle pricing rules
+                    </p>
+                    <Button
+                      onClick={() => refetchPricingRules()}
+                      variant="outline"
+                      size="sm"
+                    >
                       Retry
                     </Button>
                   </div>
@@ -925,7 +946,7 @@ export default function AncillaryBundlingEngine() {
                           </Button>
                         </div>
                       </div>
-                    )
+                    ),
                   }}
                 />
               )}
@@ -2085,7 +2106,7 @@ export default function AncillaryBundlingEngine() {
               validFrom: values.validDates[0].format("YYYY-MM-DD"),
               validTo: values.validDates[1].format("YYYY-MM-DD"),
               discountValue: values.discountValue.toString(),
-              status: "ACTIVE"
+              status: "ACTIVE",
             };
             delete formattedData.validDates;
             createBundlePricingMutation.mutate(formattedData);
@@ -2176,7 +2197,9 @@ export default function AncillaryBundlingEngine() {
               htmlType="submit"
               loading={createBundlePricingMutation.isPending}
             >
-              {createBundlePricingMutation.isPending ? "Creating..." : "Create Rule"}
+              {createBundlePricingMutation.isPending
+                ? "Creating..."
+                : "Create Rule"}
             </AntButton>
           </div>
         </AntForm>

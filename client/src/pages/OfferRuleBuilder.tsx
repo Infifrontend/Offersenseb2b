@@ -136,24 +136,28 @@ export default function OfferRuleBuilder() {
   });
 
   // Fetch available ancillary products
-  const { data: availableAncillaries = [], isLoading: isAncillariesLoading } = useQuery({
-    queryKey: ["/api/ancillary-products"],
-    queryFn: async () => {
-      const response = await fetch("/api/ancillary-products");
-      if (!response.ok) throw new Error("Failed to fetch ancillary products");
-      return response.json();
-    },
-  });
+  const { data: availableAncillaries = [], isLoading: isAncillariesLoading } =
+    useQuery({
+      queryKey: ["/api/ancillary-products"],
+      queryFn: async () => {
+        const response = await fetch("/api/ancillary-products");
+        if (!response.ok)
+          throw new Error("Failed to fAetch ancillary products");
+        return response.json();
+      },
+    });
 
   // Fetch available bundles
-  const { data: availableBundles = [], isLoading: isBundlesLoading } = useQuery({
-    queryKey: ["/api/bundles"],
-    queryFn: async () => {
-      const response = await fetch("/api/bundles?status=ACTIVE");
-      if (!response.ok) throw new Error("Failed to fetch bundles");
-      return response.json();
+  const { data: availableBundles = [], isLoading: isBundlesLoading } = useQuery(
+    {
+      queryKey: ["/api/bundles"],
+      queryFn: async () => {
+        const response = await fetch("/api/bundles?status=ACTIVE");
+        if (!response.ok) throw new Error("Failed to fetch bundles");
+        return response.json();
+      },
     },
-  });
+  );
 
   // Dummy data for development
   const dummyRules = [
@@ -469,7 +473,7 @@ export default function OfferRuleBuilder() {
     try {
       // Validate all form fields
       await createForm.validateFields();
-      
+
       // Get all form values
       const allFormValues = createForm.getFieldsValue(true);
       console.log("All form values:", allFormValues);
@@ -480,7 +484,7 @@ export default function OfferRuleBuilder() {
       const ruleType = allFormValues.ruleType;
       const priority = Number(allFormValues.priority);
       const justification = allFormValues.justification?.trim() || undefined;
-      
+
       // Handle date fields with validation
       if (!allFormValues.validFrom || !allFormValues.validTo) {
         throw new Error("Valid dates are required");
@@ -498,19 +502,32 @@ export default function OfferRuleBuilder() {
       const conditionsData = allFormValues.conditions || {};
       const processedConditions = {
         origin: conditionsData.origin?.trim().toUpperCase() || undefined,
-        destination: conditionsData.destination?.trim().toUpperCase() || undefined,
+        destination:
+          conditionsData.destination?.trim().toUpperCase() || undefined,
         pos: Array.isArray(conditionsData.pos) ? conditionsData.pos : [],
-        agentTier: Array.isArray(conditionsData.agentTier) ? conditionsData.agentTier : [],
-        cohortCodes: Array.isArray(conditionsData.cohortCodes) ? conditionsData.cohortCodes : [],
-        channel: Array.isArray(conditionsData.channel) ? conditionsData.channel : [],
-        cabinClass: Array.isArray(conditionsData.cabinClass) ? conditionsData.cabinClass : [],
-        tripType: Array.isArray(conditionsData.tripType) ? conditionsData.tripType : [],
+        agentTier: Array.isArray(conditionsData.agentTier)
+          ? conditionsData.agentTier
+          : [],
+        cohortCodes: Array.isArray(conditionsData.cohortCodes)
+          ? conditionsData.cohortCodes
+          : [],
+        channel: Array.isArray(conditionsData.channel)
+          ? conditionsData.channel
+          : [],
+        cabinClass: Array.isArray(conditionsData.cabinClass)
+          ? conditionsData.cabinClass
+          : [],
+        tripType: Array.isArray(conditionsData.tripType)
+          ? conditionsData.tripType
+          : [],
         seasonCode: conditionsData.seasonCode?.trim() || undefined,
       };
 
       // Process actions with validation
-      const actionsData = Array.isArray(allFormValues.actions) ? allFormValues.actions : [];
-      
+      const actionsData = Array.isArray(allFormValues.actions)
+        ? allFormValues.actions
+        : [];
+
       if (actionsData.length === 0) {
         throw new Error("At least one action is required");
       }
@@ -525,43 +542,59 @@ export default function OfferRuleBuilder() {
           // Validate and add optional fields
           if (action.scope) formattedAction.scope = action.scope;
           if (action.valueType) formattedAction.valueType = action.valueType;
-          
+
           // Validate value for non-FREE actions
-          if (action.valueType && action.valueType !== 'FREE') {
-            if (action.value === undefined || action.value === null || action.value === '') {
-              throw new Error(`Action ${index + 1}: Value is required when value type is specified`);
+          if (action.valueType && action.valueType !== "FREE") {
+            if (
+              action.value === undefined ||
+              action.value === null ||
+              action.value === ""
+            ) {
+              throw new Error(
+                `Action ${index + 1}: Value is required when value type is specified`,
+              );
             }
             const numValue = Number(action.value);
             if (isNaN(numValue) || numValue < 0 || numValue > 100) {
-              throw new Error(`Action ${index + 1}: Value must be a valid number between 0 and 100`);
+              throw new Error(
+                `Action ${index + 1}: Value must be a valid number between 0 and 100`,
+              );
             }
             formattedAction.value = numValue;
           }
 
           // Validate action-specific required fields
-          if (action.type === 'ADD_ANCILLARY') {
+          if (action.type === "ADD_ANCILLARY") {
             if (!action.ancillaryCode?.trim()) {
-              throw new Error(`Action ${index + 1}: Ancillary code is required for ADD_ANCILLARY actions`);
+              throw new Error(
+                `Action ${index + 1}: Ancillary code is required for ADD_ANCILLARY actions`,
+              );
             }
             formattedAction.ancillaryCode = action.ancillaryCode.trim();
           }
 
-          if (action.type === 'ACTIVATE_BUNDLE') {
+          if (action.type === "ACTIVATE_BUNDLE") {
             if (!action.bundleCode?.trim()) {
-              throw new Error(`Action ${index + 1}: Bundle code is required for ACTIVATE_BUNDLE actions`);
+              throw new Error(
+                `Action ${index + 1}: Bundle code is required for ACTIVATE_BUNDLE actions`,
+              );
             }
             formattedAction.bundleCode = action.bundleCode.trim();
           }
 
-          if (action.type === 'ADD_BANNER') {
+          if (action.type === "ADD_BANNER") {
             if (!action.bannerText?.trim()) {
-              throw new Error(`Action ${index + 1}: Banner text is required for ADD_BANNER actions`);
+              throw new Error(
+                `Action ${index + 1}: Banner text is required for ADD_BANNER actions`,
+              );
             }
             formattedAction.bannerText = action.bannerText.trim();
           }
 
-          if (action.bundleCode?.trim()) formattedAction.bundleCode = action.bundleCode.trim();
-          if (action.bannerText?.trim()) formattedAction.bannerText = action.bannerText.trim();
+          if (action.bundleCode?.trim())
+            formattedAction.bundleCode = action.bundleCode.trim();
+          if (action.bannerText?.trim())
+            formattedAction.bannerText = action.bannerText.trim();
 
           // Add pricing object for compatibility
           if (action.valueType && formattedAction.value !== undefined) {
@@ -569,9 +602,9 @@ export default function OfferRuleBuilder() {
               type: action.valueType,
               value: formattedAction.value,
             };
-          } else if (action.valueType === 'FREE') {
+          } else if (action.valueType === "FREE") {
             formattedAction.pricing = {
-              type: 'FREE',
+              type: "FREE",
             };
           }
 
@@ -597,7 +630,6 @@ export default function OfferRuleBuilder() {
 
       // Submit the data
       await createRuleMutation.mutateAsync(formattedData);
-      
     } catch (error: any) {
       console.error("Form submission error:", error);
       // Form validation errors will be displayed inline
@@ -883,7 +915,7 @@ export default function OfferRuleBuilder() {
               priority: 1,
               ruleType: "FARE_DISCOUNT",
               conditions: {},
-              actions: []
+              actions: [],
             }}
           >
             {currentStep === 0 && (
@@ -895,9 +927,19 @@ export default function OfferRuleBuilder() {
                       name="ruleCode"
                       rules={[
                         { required: true, message: "Rule Code is required" },
-                        { min: 3, message: "Rule Code must be at least 3 characters" },
-                        { max: 50, message: "Rule Code must not exceed 50 characters" },
-                        { pattern: /^[A-Z0-9_]+$/, message: "Rule Code can only contain uppercase letters, numbers, and underscores" }
+                        {
+                          min: 3,
+                          message: "Rule Code must be at least 3 characters",
+                        },
+                        {
+                          max: 50,
+                          message: "Rule Code must not exceed 50 characters",
+                        },
+                        {
+                          pattern: /^[A-Z0-9_]+$/,
+                          message:
+                            "Rule Code can only contain uppercase letters, numbers, and underscores",
+                        },
                       ]}
                     >
                       <AntInput placeholder="RULE_WEEKEND_DISCOUNT" />
@@ -909,8 +951,14 @@ export default function OfferRuleBuilder() {
                       name="ruleName"
                       rules={[
                         { required: true, message: "Rule Name is required" },
-                        { min: 3, message: "Rule Name must be at least 3 characters" },
-                        { max: 100, message: "Rule Name must not exceed 100 characters" }
+                        {
+                          min: 3,
+                          message: "Rule Name must be at least 3 characters",
+                        },
+                        {
+                          max: 100,
+                          message: "Rule Name must not exceed 100 characters",
+                        },
                       ]}
                     >
                       <AntInput placeholder="Weekend Discount for Gold Agents" />
@@ -924,7 +972,7 @@ export default function OfferRuleBuilder() {
                       label="Rule Type"
                       name="ruleType"
                       rules={[
-                        { required: true, message: "Rule Type is required" }
+                        { required: true, message: "Rule Type is required" },
                       ]}
                     >
                       <AntSelect placeholder="Select rule type">
@@ -942,7 +990,12 @@ export default function OfferRuleBuilder() {
                       name="priority"
                       rules={[
                         { required: true, message: "Priority is required" },
-                        { type: 'number', min: 1, max: 100, message: "Priority must be between 1 and 100" }
+                        {
+                          type: "number",
+                          min: 1,
+                          max: 100,
+                          message: "Priority must be between 1 and 100",
+                        },
                       ]}
                     >
                       <InputNumber
@@ -962,13 +1015,18 @@ export default function OfferRuleBuilder() {
                       label="Valid From"
                       name="validFrom"
                       rules={[
-                        { required: true, message: "Valid From date is required" }
+                        {
+                          required: true,
+                          message: "Valid From date is required",
+                        },
                       ]}
                     >
                       <DatePicker
                         style={{ width: "100%" }}
                         format="DD/MM/YYYY"
-                        disabledDate={(current) => current && current < dayjs().startOf('day')}
+                        disabledDate={(current) =>
+                          current && current < dayjs().startOf("day")
+                        }
                       />
                     </AntForm.Item>
                   </Col>
@@ -976,27 +1034,34 @@ export default function OfferRuleBuilder() {
                     <AntForm.Item
                       label="Valid To"
                       name="validTo"
-                      dependencies={['validFrom']}
+                      dependencies={["validFrom"]}
                       rules={[
-                        { required: true, message: "Valid To date is required" },
+                        {
+                          required: true,
+                          message: "Valid To date is required",
+                        },
                         ({ getFieldValue }) => ({
                           validator(_, value) {
-                            const validFrom = getFieldValue('validFrom');
+                            const validFrom = getFieldValue("validFrom");
                             if (!value || !validFrom) {
                               return Promise.resolve();
                             }
                             if (dayjs(validFrom).isAfter(dayjs(value))) {
-                              return Promise.reject('Valid To date must be after Valid From date');
+                              return Promise.reject(
+                                "Valid To date must be after Valid From date",
+                              );
                             }
                             return Promise.resolve();
                           },
-                        })
+                        }),
                       ]}
                     >
                       <DatePicker
                         style={{ width: "100%" }}
                         format="DD/MM/YYYY"
-                        disabledDate={(current) => current && current < dayjs().startOf('day')}
+                        disabledDate={(current) =>
+                          current && current < dayjs().startOf("day")
+                        }
                       />
                     </AntForm.Item>
                   </Col>
@@ -1009,28 +1074,32 @@ export default function OfferRuleBuilder() {
                 <AntCard title="🌍 Geographic Conditions" size="small">
                   <Row gutter={16}>
                     <Col span={8}>
-                      <AntForm.Item 
-                        label="Origin" 
+                      <AntForm.Item
+                        label="Origin"
                         name={["conditions", "origin"]}
                         rules={[
                           {
                             validator: (_, value) => {
                               if (!value) return Promise.resolve();
                               if (value.length !== 3) {
-                                return Promise.reject("Origin must be exactly 3 characters");
+                                return Promise.reject(
+                                  "Origin must be exactly 3 characters",
+                                );
                               }
                               if (!/^[A-Z]{3}$/.test(value)) {
-                                return Promise.reject("Origin must be 3 uppercase letters");
+                                return Promise.reject(
+                                  "Origin must be 3 uppercase letters",
+                                );
                               }
                               return Promise.resolve();
-                            }
-                          }
+                            },
+                          },
                         ]}
                       >
-                        <AntInput 
-                          placeholder="NYC" 
-                          maxLength={3} 
-                          style={{ textTransform: 'uppercase' }}
+                        <AntInput
+                          placeholder="NYC"
+                          maxLength={3}
+                          style={{ textTransform: "uppercase" }}
                           onChange={(e) => {
                             e.target.value = e.target.value.toUpperCase();
                           }}
@@ -1046,20 +1115,24 @@ export default function OfferRuleBuilder() {
                             validator: (_, value) => {
                               if (!value) return Promise.resolve();
                               if (value.length !== 3) {
-                                return Promise.reject("Destination must be exactly 3 characters");
+                                return Promise.reject(
+                                  "Destination must be exactly 3 characters",
+                                );
                               }
                               if (!/^[A-Z]{3}$/.test(value)) {
-                                return Promise.reject("Destination must be 3 uppercase letters");
+                                return Promise.reject(
+                                  "Destination must be 3 uppercase letters",
+                                );
                               }
                               return Promise.resolve();
-                            }
-                          }
+                            },
+                          },
                         ]}
                       >
-                        <AntInput 
-                          placeholder="LAX" 
+                        <AntInput
+                          placeholder="LAX"
                           maxLength={3}
-                          style={{ textTransform: 'uppercase' }}
+                          style={{ textTransform: "uppercase" }}
                           onChange={(e) => {
                             e.target.value = e.target.value.toUpperCase();
                           }}
@@ -1067,7 +1140,10 @@ export default function OfferRuleBuilder() {
                       </AntForm.Item>
                     </Col>
                     <Col span={8}>
-                      <AntForm.Item label="Point of Sale" name={["conditions", "pos"]}>
+                      <AntForm.Item
+                        label="Point of Sale"
+                        name={["conditions", "pos"]}
+                      >
                         <AntSelect
                           mode="multiple"
                           placeholder="Select countries"
@@ -1105,7 +1181,10 @@ export default function OfferRuleBuilder() {
                       </AntForm.Item>
                     </Col>
                     <Col span={12}>
-                      <AntForm.Item label="Channels" name={["conditions", "channel"]}>
+                      <AntForm.Item
+                        label="Channels"
+                        name={["conditions", "channel"]}
+                      >
                         <AntSelect
                           mode="multiple"
                           placeholder="Select channels"
@@ -1226,7 +1305,10 @@ export default function OfferRuleBuilder() {
                                   name={[name, "type"]}
                                   label="Action Type"
                                   rules={[
-                                    { required: true, message: "Action type is required" }
+                                    {
+                                      required: true,
+                                      message: "Action type is required",
+                                    },
                                   ]}
                                 >
                                   <AntSelect
@@ -1278,9 +1360,21 @@ export default function OfferRuleBuilder() {
                                   rules={[
                                     ({ getFieldValue }) => ({
                                       validator(_, value) {
-                                        const actionType = getFieldValue(["actions", name, "type"]);
-                                        if (actionType && ["DISCOUNT", "MARKUP"].includes(actionType) && !value) {
-                                          return Promise.reject("Value type is required for discount/markup actions");
+                                        const actionType = getFieldValue([
+                                          "actions",
+                                          name,
+                                          "type",
+                                        ]);
+                                        if (
+                                          actionType &&
+                                          ["DISCOUNT", "MARKUP"].includes(
+                                            actionType,
+                                          ) &&
+                                          !value
+                                        ) {
+                                          return Promise.reject(
+                                            "Value type is required for discount/markup actions",
+                                          );
                                         }
                                         return Promise.resolve();
                                       },
@@ -1309,12 +1403,28 @@ export default function OfferRuleBuilder() {
                                   rules={[
                                     ({ getFieldValue }) => ({
                                       validator(_, value) {
-                                        const valueType = getFieldValue(["actions", name, "valueType"]);
-                                        if (valueType && valueType !== "FREE" && (value === undefined || value === null)) {
-                                          return Promise.reject("Value is required when value type is specified");
+                                        const valueType = getFieldValue([
+                                          "actions",
+                                          name,
+                                          "valueType",
+                                        ]);
+                                        if (
+                                          valueType &&
+                                          valueType !== "FREE" &&
+                                          (value === undefined ||
+                                            value === null)
+                                        ) {
+                                          return Promise.reject(
+                                            "Value is required when value type is specified",
+                                          );
                                         }
-                                        if (value && (value < 0 || value > 100)) {
-                                          return Promise.reject("Value must be between 0 and 100");
+                                        if (
+                                          value &&
+                                          (value < 0 || value > 100)
+                                        ) {
+                                          return Promise.reject(
+                                            "Value must be between 0 and 100",
+                                          );
                                         }
                                         return Promise.resolve();
                                       },
@@ -1332,64 +1442,39 @@ export default function OfferRuleBuilder() {
                               <Col span={8}>
                                 <AntForm.Item
                                   {...restField}
-                                  name={[name, "ancillaryCode"]}
-                                  label="Ancillary Code"
+                                  name={[name, "bannerText"]}
+                                  label="Banner Text"
                                   dependencies={[[name, "type"]]}
                                   rules={[
                                     ({ getFieldValue }) => ({
                                       validator(_, value) {
-                                        const actionType = getFieldValue(["actions", name, "type"]);
-                                        if (actionType === "ADD_ANCILLARY" && !value?.trim()) {
-                                          return Promise.reject("Ancillary code is required for ADD_ANCILLARY actions");
+                                        const actionType = getFieldValue([
+                                          "actions",
+                                          name,
+                                          "type",
+                                        ]);
+                                        if (
+                                          actionType === "ADD_BANNER" &&
+                                          !value?.trim()
+                                        ) {
+                                          return Promise.reject(
+                                            "Banner text is required for ADD_BANNER actions",
+                                          );
+                                        }
+                                        if (value && value.length > 200) {
+                                          return Promise.reject(
+                                            "Banner text must not exceed 200 characters",
+                                          );
                                         }
                                         return Promise.resolve();
                                       },
                                     }),
                                   ]}
                                 >
-                                  <AntSelect
-                                    placeholder="Select ancillary product"
-                                    loading={isAncillariesLoading}
-                                    showSearch
-                                    allowClear
-                                    optionFilterProp="label"
-                                    style={{ width: "100%" }}
-                                    dropdownStyle={{ 
-                                      maxHeight: 280, 
-                                      overflow: 'auto',
-                                      zIndex: 99999
-                                    }}
-                                    getPopupContainer={(triggerNode) => triggerNode.parentElement || document.body}
-                                    filterOption={(input, option) => {
-                                      const label = option?.label || '';
-                                      return label.toLowerCase().includes(input.toLowerCase());
-                                    }}
-                                  >
-                                    {availableAncillaries.map((ancillary: any) => (
-                                      <AntSelect.Option 
-                                        key={ancillary.id} 
-                                        value={ancillary.ancillaryCode}
-                                        label={`${ancillary.ancillaryCode} - ${ancillary.ruleCode}`}
-                                      >
-                                        <div className="cls-ancillary-dropdown">
-                                          <div className="font-medium" title={ancillary.ancillaryCode}>
-                                            {ancillary.ancillaryCode}
-                                          </div>
-                                          <div className="text-gray-600" title={ancillary.ruleCode}>
-                                            {ancillary.ruleCode}
-                                          </div>
-                                          <div className="text-xs text-gray-500">
-                                            {ancillary.adjustmentType === "FREE" 
-                                              ? "Free" 
-                                              : ancillary.adjustmentType === "PERCENT"
-                                                ? `${ancillary.adjustmentValue}% discount`
-                                                : `$${ancillary.adjustmentValue} off`
-                                            }
-                                          </div>
-                                        </div>
-                                      </AntSelect.Option>
-                                    ))}
-                                  </AntSelect>
+                                  <AntInput
+                                    placeholder="Promotional banner text"
+                                    maxLength={200}
+                                  />
                                 </AntForm.Item>
                               </Col>
                             </Row>
@@ -1404,9 +1489,18 @@ export default function OfferRuleBuilder() {
                                   rules={[
                                     ({ getFieldValue }) => ({
                                       validator(_, value) {
-                                        const actionType = getFieldValue(["actions", name, "type"]);
-                                        if (actionType === "ACTIVATE_BUNDLE" && !value?.trim()) {
-                                          return Promise.reject("Bundle code is required for ACTIVATE_BUNDLE actions");
+                                        const actionType = getFieldValue([
+                                          "actions",
+                                          name,
+                                          "type",
+                                        ]);
+                                        if (
+                                          actionType === "ACTIVATE_BUNDLE" &&
+                                          !value?.trim()
+                                        ) {
+                                          return Promise.reject(
+                                            "Bundle code is required for ACTIVATE_BUNDLE actions",
+                                          );
                                         }
                                         return Promise.resolve();
                                       },
@@ -1420,33 +1514,38 @@ export default function OfferRuleBuilder() {
                                     allowClear
                                     optionFilterProp="label"
                                     style={{ width: "100%" }}
-                                    dropdownStyle={{ 
-                                      maxHeight: 280, 
-                                      overflow: 'auto',
-                                      zIndex: 99999
+                                    dropdownStyle={{
+                                      maxHeight: 280,
+                                      overflow: "auto",
+                                      zIndex: 99999,
                                     }}
-                                    getPopupContainer={(triggerNode) => triggerNode.parentElement || document.body}
+                                    getPopupContainer={(triggerNode) =>
+                                      triggerNode.parentElement || document.body
+                                    }
                                     filterOption={(input, option) => {
-                                      const label = option?.label || '';
-                                      return label.toLowerCase().includes(input.toLowerCase());
+                                      const label = option?.label || "";
+                                      return label
+                                        .toLowerCase()
+                                        .includes(input.toLowerCase());
                                     }}
                                   >
                                     {availableBundles.map((bundle: any) => (
-                                      <AntSelect.Option 
-                                        key={bundle.id} 
+                                      <AntSelect.Option
+                                        key={bundle.id}
                                         value={bundle.bundleCode}
-                                        label={`${bundle.bundleCode} - ${bundle.bundleName}`}
+                                        label={`${bundle.bundleCode} `}
                                       >
                                         <div className="cls-bundle-dropdown">
-                                          <div className="font-medium" title={bundle.bundleCode}>
+                                          <div
+                                            className="font-medium"
+                                            title={`${bundle.bundleCode}-${bundle.bundleName}-${bundle.bundleType}`}
+                                          >
                                             {bundle.bundleCode}
                                           </div>
-                                          <div className="text-gray-600" title={bundle.bundleName}>
-                                            {bundle.bundleName}
-                                          </div>
-                                          <div className="text-xs text-gray-500">
-                                            Type: {bundle.bundleType?.replace('_', ' ')} | Components: {bundle.components?.length || 0}
-                                          </div>
+                                          <div
+                                            className="text-gray-600"
+                                            title={bundle.bundleName}
+                                          ></div>
                                         </div>
                                       </AntSelect.Option>
                                     ))}
@@ -1456,25 +1555,89 @@ export default function OfferRuleBuilder() {
                               <Col span={12}>
                                 <AntForm.Item
                                   {...restField}
-                                  name={[name, "bannerText"]}
-                                  label="Banner Text"
+                                  name={[name, "ancillaryCode"]}
+                                  label="Ancillary Code"
                                   dependencies={[[name, "type"]]}
                                   rules={[
                                     ({ getFieldValue }) => ({
                                       validator(_, value) {
-                                        const actionType = getFieldValue(["actions", name, "type"]);
-                                        if (actionType === "ADD_BANNER" && !value?.trim()) {
-                                          return Promise.reject("Banner text is required for ADD_BANNER actions");
-                                        }
-                                        if (value && value.length > 200) {
-                                          return Promise.reject("Banner text must not exceed 200 characters");
+                                        const actionType = getFieldValue([
+                                          "actions",
+                                          name,
+                                          "type",
+                                        ]);
+                                        if (
+                                          actionType === "ADD_ANCILLARY" &&
+                                          !value?.trim()
+                                        ) {
+                                          return Promise.reject(
+                                            "Ancillary code is required for ADD_ANCILLARY actions",
+                                          );
                                         }
                                         return Promise.resolve();
                                       },
                                     }),
                                   ]}
                                 >
-                                  <AntInput placeholder="Promotional banner text" maxLength={200} />
+                                  <AntSelect
+                                    placeholder="Select ancillary product"
+                                    loading={isAncillariesLoading}
+                                    showSearch
+                                    allowClear
+                                    optionFilterProp="label"
+                                    style={{ width: "100%" }}
+                                    dropdownStyle={{
+                                      maxHeight: 280,
+                                      overflow: "auto",
+                                      zIndex: 99999,
+                                    }}
+                                    getPopupContainer={(triggerNode) =>
+                                      triggerNode.parentElement || document.body
+                                    }
+                                    filterOption={(input, option) => {
+                                      const label = option?.label || "";
+                                      return label
+                                        .toLowerCase()
+                                        .includes(input.toLowerCase());
+                                    }}
+                                  >
+                                    {availableAncillaries.map(
+                                      (ancillary: any) => (
+                                        <AntSelect.Option
+                                          key={ancillary.id}
+                                          value={ancillary.ancillaryCode}
+                                          label={`${ancillary.ancillaryCode} - ${ancillary.ruleCode}`}
+                                        >
+                                          <div className="cls-ancillary-dropdown">
+                                            <div
+                                              className="font-medium"
+                                              title={`${ancillary.ancillaryCode} - ${ancillary.ruleCode}-${
+                                                ancillary.adjustmentType ===
+                                                "FREE"
+                                                  ? "Free"
+                                                  : ancillary.adjustmentType ===
+                                                      "PERCENT"
+                                                    ? `${ancillary.adjustmentValue}% discount`
+                                                    : `$${ancillary.adjustmentValue} off`
+                                              } `}
+                                            >
+                                              {ancillary.ancillaryCode} -{" "}
+                                              {ancillary.ruleCode} /{" "}
+                                              <span className="text-xs text-gray-500">
+                                                {ancillary.adjustmentType ===
+                                                "FREE"
+                                                  ? "Free"
+                                                  : ancillary.adjustmentType ===
+                                                      "PERCENT"
+                                                    ? `${ancillary.adjustmentValue}% discount`
+                                                    : `$${ancillary.adjustmentValue} off`}
+                                              </span>
+                                            </div>
+                                          </div>
+                                        </AntSelect.Option>
+                                      ),
+                                    )}
+                                  </AntSelect>
                                 </AntForm.Item>
                               </Col>
                             </Row>
@@ -1500,7 +1663,7 @@ export default function OfferRuleBuilder() {
                         >
                           Add Action
                         </AntButton>
-                        
+
                         {fields.length === 0 && (
                           <AntForm.Item
                             name="actionsRequired"
@@ -1508,14 +1671,16 @@ export default function OfferRuleBuilder() {
                               {
                                 validator: () => {
                                   if (fields.length === 0) {
-                                    return Promise.reject('At least one action is required');
+                                    return Promise.reject(
+                                      "At least one action is required",
+                                    );
                                   }
                                   return Promise.resolve();
-                                }
-                              }
+                                },
+                              },
                             ]}
                           >
-                            <div style={{ display: 'none' }} />
+                            <div style={{ display: "none" }} />
                           </AntForm.Item>
                         )}
                       </>
@@ -1532,8 +1697,14 @@ export default function OfferRuleBuilder() {
                   name="justification"
                   rules={[
                     { required: true, message: "Justification is required" },
-                    { min: 10, message: "Justification must be at least 10 characters" },
-                    { max: 500, message: "Justification must not exceed 500 characters" }
+                    {
+                      min: 10,
+                      message: "Justification must be at least 10 characters",
+                    },
+                    {
+                      max: 500,
+                      message: "Justification must not exceed 500 characters",
+                    },
                   ]}
                 >
                   <AntInput.TextArea

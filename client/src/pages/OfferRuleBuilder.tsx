@@ -440,12 +440,17 @@ export default function OfferRuleBuilder() {
       return;
     }
 
+    // Get all form values first
+    const allFormValues = createForm.getFieldsValue();
+    console.log("All form values:", allFormValues);
+
     // Validate all form fields
     createForm
       .validateFields()
       .then((validatedValues) => {
         try {
-          debugger;
+          console.log("Validated values:", validatedValues);
+          
           // Extract basic info from validated values
           const ruleCode = validatedValues.ruleCode?.trim();
           const ruleName = validatedValues.ruleName?.trim();
@@ -462,6 +467,20 @@ export default function OfferRuleBuilder() {
             validFrom,
             validTo,
           });
+
+          // Ensure we have all required fields
+          if (!ruleCode || !ruleName || !ruleType || !validFrom || !validTo) {
+            const missingFields = [];
+            if (!ruleCode) missingFields.push("Rule Code");
+            if (!ruleName) missingFields.push("Rule Name");
+            if (!ruleType) missingFields.push("Rule Type");
+            if (!validFrom) missingFields.push("Valid From");
+            if (!validTo) missingFields.push("Valid To");
+            
+            alert(`Please fill in the following required fields: ${missingFields.join(", ")}`);
+            setCurrentStep(0); // Go back to basic info step
+            return;
+          }
 
           // Actions validation already done above
           const actions = validatedValues.actions || [];

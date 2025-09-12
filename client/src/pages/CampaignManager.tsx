@@ -290,6 +290,12 @@ export default function CampaignManager() {
   const [selectedWhatsappTemplate, setSelectedWhatsappTemplate] = useState<any>(null);
   const [customEmailPrompt, setCustomEmailPrompt] = useState('');
   const [customWhatsappPrompt, setCustomWhatsappPrompt] = useState('');
+  
+  // Mail sending modal states
+  const [mailModalVisible, setMailModalVisible] = useState(false);
+  const [selectedCampaignForMail, setSelectedCampaignForMail] = useState<Campaign | null>(null);
+  const [recipientEmail, setRecipientEmail] = useState('');
+  const [sendingMail, setSendingMail] = useState(false);
 
   const queryClient = useQueryClient();
   const [campaignForm] = AntForm.useForm<CampaignFormData>();
@@ -599,6 +605,49 @@ export default function CampaignManager() {
     message.success('Email template selected');
   };
 
+  // Mail sending handlers
+  const handleOpenMailModal = (campaign: Campaign) => {
+    setSelectedCampaignForMail(campaign);
+    setMailModalVisible(true);
+    setRecipientEmail('');
+  };
+
+  const handleSendMail = async () => {
+    if (!recipientEmail || !selectedCampaignForMail) {
+      message.error('Please enter a valid email address');
+      return;
+    }
+
+    setSendingMail(true);
+    try {
+      // In a real implementation, this would call your email API
+      const response = await fetch('/api/campaigns/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          campaignCode: selectedCampaignForMail.campaignCode,
+          recipientEmail,
+          templateId: selectedCampaignForMail.comms.emailTemplateId,
+        }),
+      });
+
+      if (response.ok) {
+        message.success(`Email sent successfully to ${recipientEmail}`);
+        setMailModalVisible(false);
+        setRecipientEmail('');
+      } else {
+        message.error('Failed to send email');
+      }
+    } catch (error) {
+      console.error('Error sending email:', error);
+      message.error('Failed to send email');
+    } finally {
+      setSendingMail(false);
+    }
+  };
+
   const handleSelectWhatsappTemplate = (template: any) => {
     setSelectedWhatsappTemplate(template);
     campaignForm.setFieldsValue({
@@ -756,6 +805,14 @@ export default function CampaignManager() {
               icon={<BarChart3 className="w-3 h-3" />}
               size="small"
               onClick={() => handleViewPerformance(record)}
+            />
+          </Tooltip>
+          <Tooltip title="Send Email">
+            <AntButton
+              icon={<Mail className="w-3 h-3" />}
+              size="small"
+              onClick={() => handleOpenMailModal(record)}
+              disabled={!record.comms.emailTemplateId}
             />
           </Tooltip>
           <Tooltip title="Edit">
@@ -1889,6 +1946,122 @@ export default function CampaignManager() {
                 </TabsContent>
               ))}
             </ShadcnTabs>
+          </div>
+        )}
+      </Modal>
+
+      {/* Mail Sending Modal */}
+      <Modal
+        title={
+          <div className="flex items-center space-x-2">
+            <Mail className="w-5 h-5 text-blue-600" />
+            <span>Send Campaign Email</span>
+          </div>
+        }
+        open={mailModalVisible}
+        onCancel={() => {
+          setMailModalVisible(false);
+          setSelectedCampaignForMail(null);
+          setRecipientEmail('');
+        }}
+        footer={[
+          <AntButton key="cancel" onClick={() => setMailModalVisible(false)}>
+            Cancel
+          </AntButton>,
+          <AntButton
+            key="send"
+            type="primary"
+            icon={<Send className="w-4 h-4" />}
+            onClick={handleSendMail}
+            loading={sendingMail}
+            disabled={!recipientEmail}
+          >
+            Send Mail
+          </AntButton>
+        ]}
+        width={600}
+      >
+        {selectedCampaignForMail && (
+          <div className="space-y-4">
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h4 className="font-medium text-blue-900 mb-2">Campaign Details</h4>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <span className="text-gray-600">Campaign:</span>
+                  <div className="font-medium">{selectedCampaignForMail.campaignName}</div>
+                </div>
+                <div>
+                  <span className="text-gray-600">Code:</span>
+                  <div className="font-medium">{selectedCampaignForMail.campaignCode}</div>
+                </div>
+                <div>
+                  <span className="text-gray-600">Offer:</span>
+                  <div className="font-medium">
+                    {selectedCampaignForMail.offer.type === "PERCENT"
+                      ? `${selectedCampaignForMail.offer.value}% Off`
+                      : selectedCampaignForMail.offer.type === "AMOUNT"
+                        ? `$${selectedCampaignForMail.offer.value} Off`
+                        : `$${selectedCampaignForMail.offer.specialPrice}`}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-gray-600">Status:</span>
+                  <AntBadge status={getStatusColor(selectedCampaignForMail.status) as any} text={selectedCampaignForMail.status} />
+                </div>
+              </div>
+            </div>
+
+            {selectedCampaignForMail.comms.emailTemplateId ? (
+              <div className="space-y-3">
+                <div>
+                  <strong className="text-sm text-gray-600">Email Template:</strong>
+                  <div className="mt-1 p-3 bg-gray-50 rounded-lg">
+                    <div className="text-sm font-medium">Template ID: {selectedCampaignForMail.comms.emailTemplateId}</div>
+                    <div className="text-xs text-gray-500 mt-1">Ready to send campaign email</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <AntButton
+                    size="small"
+                    icon={<Eye className="w-3 h-3" />}
+                    onClick={() => {
+                      setEmailPreviewVisible(true);
+                      setMailModalVisible(false);
+                    }}
+                  >
+                    Preview Template
+                  </AntButton>
+                  <span className="text-xs text-gray-500">View the email template before sending</span>
+                </div>
+              </div>
+            ) : (
+              <Alert
+                message="No Email Template"
+                description="This campaign doesn't have an email template configured. Please edit the campaign to add an email template first."
+                type="warning"
+                showIcon
+              />
+            )}
+
+            <div>
+              <AntForm.Item
+                label="Recipient Email Address"
+                className="mb-0"
+              >
+                <Input
+                  placeholder="Enter recipient email address"
+                  value={recipientEmail}
+                  onChange={(e) => setRecipientEmail(e.target.value)}
+                  type="email"
+                  size="large"
+                  prefix={<Mail className="w-4 h-4 text-gray-400" />}
+                />
+              </AntForm.Item>
+              <div className="text-xs text-gray-500 mt-1">
+                The campaign email will be sent to this address
+              </div>
+            </div>
           </div>
         )}
       </Modal>

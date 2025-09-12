@@ -3000,6 +3000,113 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Send campaign email
+  app.post("/api/campaigns/send-email", async (req, res) => {
+    try {
+      const { campaignCode, recipientEmail, templateId } = req.body;
+
+      if (!campaignCode || !recipientEmail || !templateId) {
+        return res.status(400).json({ message: "campaignCode, recipientEmail, and templateId are required" });
+      }
+
+      // Get campaign details
+      const campaigns = await storage.getCampaigns({ campaignCode });
+      if (campaigns.length === 0) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+
+      const campaign = campaigns[0];
+
+      // In a real implementation, you would:
+      // 1. Retrieve the email template from your template system
+      // 2. Populate the template with campaign data
+      // 3. Send the email using your email service (SendGrid, AWS SES, etc.)
+      // 4. Record the delivery in campaign_deliveries table
+
+      // Mock email content generation
+      const emailContent = {
+        subject: `${campaign.campaignName} - Special Offer`,
+        htmlBody: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center;">
+              <h1>${campaign.campaignName}</h1>
+            </div>
+            <div style="padding: 20px;">
+              <h2>Special Offer Just For You!</h2>
+              <p>We're excited to share this exclusive offer:</p>
+              <div style="background: #f8f9ff; border-left: 4px solid #667eea; padding: 15px; margin: 20px 0;">
+                <strong>Offer: ${
+                  campaign.offer.type === "PERCENT"
+                    ? `${campaign.offer.value}% Off`
+                    : campaign.offer.type === "AMOUNT"
+                      ? `$${campaign.offer.value} Off`
+                      : `Special Price: $${campaign.offer.specialPrice}`
+                }</strong>
+              </div>
+              <p>Valid from ${campaign.lifecycle.startDate} to ${campaign.lifecycle.endDate}</p>
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="#" style="background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px;">
+                  Claim Your Offer
+                </a>
+              </div>
+            </div>
+            <div style="background: #f5f5f5; padding: 20px; text-align: center; color: #666;">
+              <p>Best regards,<br>The OfferSense Team</p>
+            </div>
+          </div>
+        `,
+        textBody: `
+          ${campaign.campaignName}
+          
+          Special Offer Just For You!
+          
+          Offer: ${
+            campaign.offer.type === "PERCENT"
+              ? `${campaign.offer.value}% Off`
+              : campaign.offer.type === "AMOUNT"
+                ? `$${campaign.offer.value} Off`
+                : `Special Price: $${campaign.offer.specialPrice}`
+          }
+          
+          Valid from ${campaign.lifecycle.startDate} to ${campaign.lifecycle.endDate}
+          
+          Best regards,
+          The OfferSense Team
+        `
+      };
+
+      // Mock email sending (in production, use actual email service)
+      console.log(`Sending email to ${recipientEmail}:`);
+      console.log(`Subject: ${emailContent.subject}`);
+      console.log(`Campaign: ${campaignCode}`);
+
+      // Record the delivery
+      const deliveryData = {
+        campaignCode,
+        bookingReference: `DEMO-${Date.now()}`,
+        agentId: "demo-agent",
+        deliveryChannel: "EMAIL",
+        deliveryStatus: "SENT",
+        sentAt: new Date().toISOString(),
+      };
+
+      await storage.insertCampaignDelivery(deliveryData);
+
+      res.json({
+        success: true,
+        message: `Email sent successfully to ${recipientEmail}`,
+        emailContent: {
+          subject: emailContent.subject,
+          preview: emailContent.htmlBody.substring(0, 200) + "...",
+        },
+        deliveryId: deliveryData.bookingReference,
+      });
+    } catch (error: any) {
+      console.error("Email sending error:", error);
+      res.status(500).json({ message: "Failed to send email", error: error.message });
+    }
+  });
+
   // Analytics & Simulation Routes
 
   // Simulation Routes

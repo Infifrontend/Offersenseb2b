@@ -337,7 +337,7 @@ export default function CampaignManager() {
 
   // Mutations
   const createCampaignMutation = useMutation({
-    mutationFn: async (data: CampaignFormData) => {
+    mutationFn: async (data: Campaign FormData) => {
       const response = await fetch("/api/campaigns", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -942,7 +942,7 @@ export default function CampaignManager() {
                     </AntSelect.Option>
                   ))}
                 </AntSelect>
-              </AntForm.Item></old_str>
+              </AntForm.Item>
             </Col>
             <Col span={12}>
               <AntForm.Item

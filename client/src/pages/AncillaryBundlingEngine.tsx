@@ -917,7 +917,7 @@ export default function AncillaryBundlingEngine() {
                               <Package className="h-8 w-8 mx-auto mb-2 opacity-50" />
                               <p className="mb-2">No bundle pricing rules found</p>
                               <Button
-                                onClick={() => setIsCreateBundlePricingModalOpen(true)}
+                                onClick={() => setIsCreatePricingModalOpen(true)}
                                 size="sm"
                               >
                                 Create First Rule

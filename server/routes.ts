@@ -2449,8 +2449,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             },
             () => storage.getAgentTierById(auditLog.entityId)
           );
-          break;ountRuleById(auditLog.entityId)
-          );
           break;
         default:
           return res.status(400).json({ message: `Rollback not supported for module: ${auditLog.module}` });

@@ -373,39 +373,40 @@ export default function AgentChannelManager() {
       title: "Agent ID",
       dataIndex: "agentId",
       key: "agentId",
-      width: 120,
-      render: (text: string) => <span className="font-mono">{text}</span>,
+      width: "15%",
+      render: (text: string) => <span className="font-mono text-sm">{text}</span>,
     },
     {
       title: "Agency Name",
       dataIndex: "agencyName",
       key: "agencyName",
       ellipsis: true,
+      width: "25%",
     },
     {
-      title: "IATA Code",
+      title: "IATA",
       dataIndex: "iataCode",
       key: "iataCode",
-      width: 100,
-      render: (text: string) => text || "-",
+      width: "8%",
+      render: (text: string) => <span className="text-sm">{text || "-"}</span>,
     },
     {
       title: "Tier",
       dataIndex: "tier",
       key: "tier",
-      width: 100,
-      render: (tier: string) => <Tag color={getTierColor(tier)}>{tier}</Tag>,
+      width: "10%",
+      render: (tier: string) => <Tag color={getTierColor(tier)} size="small">{tier}</Tag>,
     },
     {
       title: "Channels",
       dataIndex: "allowedChannels",
       key: "allowedChannels",
-      width: 120,
+      width: "12%",
       render: (channels: string[]) => (
-        <Space size={4}>
+        <Space size={2}>
           {(channels || []).map((channel) => (
             <Tooltip key={channel} title={channel}>
-              <span>{getChannelIcon(channel)}</span>
+              <span className="text-sm">{getChannelIcon(channel)}</span>
             </Tooltip>
           ))}
         </Space>
@@ -415,15 +416,15 @@ export default function AgentChannelManager() {
       title: "POS",
       dataIndex: "pos",
       key: "pos",
-      width: 120,
+      width: "15%",
       render: (pos: string[]) => (
-        <Space size={4} wrap>
-          {pos.slice(0, 3).map((p) => (
+        <Space size={2} wrap>
+          {pos.slice(0, 2).map((p) => (
             <Tag key={p} size="small">
               {p}
             </Tag>
           ))}
-          {pos.length > 3 && <Tag size="small">+{pos.length - 3}</Tag>}
+          {pos.length > 2 && <Tag size="small">+{pos.length - 2}</Tag>}
         </Space>
       ),
     },
@@ -431,20 +432,21 @@ export default function AgentChannelManager() {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      width: 100,
+      width: "8%",
       render: (status: string) => (
-        <Tag color={status === "ACTIVE" ? "green" : "red"}>{status}</Tag>
+        <Tag color={status === "ACTIVE" ? "green" : "red"} size="small">{status}</Tag>
       ),
     },
     {
       title: "Actions",
       key: "actions",
-      width: 120,
+      width: "7%",
       render: (_: any, record: Agent) => (
         <Space size="small">
           <Tooltip title="Edit">
             <AntButton
               type="text"
+              size="small"
               icon={<EditOutlined />}
               onClick={() => handleEditAgent(record)}
             />
@@ -455,7 +457,7 @@ export default function AgentChannelManager() {
             onConfirm={() => deleteAgentMutation.mutate(record.id)}
           >
             <Tooltip title="Delete">
-              <AntButton type="text" icon={<DeleteOutlined />} danger />
+              <AntButton type="text" size="small" icon={<DeleteOutlined />} danger />
             </Tooltip>
           </Popconfirm>
         </Space>
@@ -470,15 +472,16 @@ export default function AgentChannelManager() {
       dataIndex: "overrideCode",
       key: "overrideCode",
       ellipsis: true,
+      width: "18%",
       render: (text: string) => <span className="font-mono text-sm">{text}</span>,
     },
     {
       title: "Channel",
       dataIndex: "channel",
       key: "channel",
-      width: 90,
+      width: "12%",
       render: (channel: string) => (
-        <Space>
+        <Space size={2}>
           <span>{getChannelIcon(channel)}</span>
           <span className="text-sm">{channel}</span>
         </Space>
@@ -488,7 +491,7 @@ export default function AgentChannelManager() {
       title: "Scope",
       dataIndex: "productScope",
       key: "productScope",
-      width: 100,
+      width: "10%",
       render: (scope: string) => (
         <Tag
           size="small"
@@ -507,7 +510,7 @@ export default function AgentChannelManager() {
     {
       title: "Adjustment",
       key: "adjustment",
-      width: 110,
+      width: "10%",
       render: (record: ChannelOverride) => (
         <span className="text-sm">
           {record.adjustmentType === "PERCENT" ? "%" : "$"}
@@ -519,7 +522,7 @@ export default function AgentChannelManager() {
       title: "POS",
       dataIndex: "pos",
       key: "pos",
-      width: 100,
+      width: "12%",
       render: (pos: string[]) => (
         <Space size={2} wrap>
           {pos.slice(0, 2).map((p) => (
@@ -535,13 +538,13 @@ export default function AgentChannelManager() {
       title: "Priority",
       dataIndex: "priority",
       key: "priority",
-      width: 70,
+      width: "8%",
       render: (priority: number) => <Tag size="small" color="blue">{priority}</Tag>,
     },
     {
       title: "Valid Period",
       key: "validPeriod",
-      width: 130,
+      width: "15%",
       render: (record: ChannelOverride) => (
         <div>
           <div className="text-xs text-gray-500">
@@ -557,7 +560,7 @@ export default function AgentChannelManager() {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      width: 80,
+      width: "8%",
       render: (status: string) => (
         <Tag size="small" color={status === "ACTIVE" ? "green" : "red"}>{status}</Tag>
       ),
@@ -565,7 +568,7 @@ export default function AgentChannelManager() {
     {
       title: "Actions",
       key: "actions",
-      width: 100,
+      width: "7%",
       render: (_: any, record: ChannelOverride) => (
         <Space size="small">
           <Tooltip title="Edit">
@@ -623,7 +626,6 @@ export default function AgentChannelManager() {
                     showSizeChanger: true,
                     showTotal: (total) => `Total ${total} agents`,
                   }}
-                  scroll={{ x: 1000 }}
                 />
               </AntCard>
             ),

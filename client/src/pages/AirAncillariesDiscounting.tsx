@@ -20,6 +20,24 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Form as AntForm,
   Input as AntInput,
   Select as AntSelect,
@@ -105,6 +123,7 @@ export default function AirAncillariesDiscounting() {
     null,
   );
   const [simulationResult, setSimulationResult] = useState<any>(null);
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const queryClient = useQueryClient();
   const [antForm] = AntForm.useForm();
   const [editForm] = AntForm.useForm();
@@ -358,24 +377,180 @@ export default function AirAncillariesDiscounting() {
         </Card>
       </div> */}
 
-      {/* Filter Bar */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Filters</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <Input placeholder="Rule Code" />
-            <Input placeholder="Ancillary Code" />
-            <Input placeholder="Airline Code" />
-            <Input placeholder="Channel" />
-            <Button variant="outline">
-              <Filter className="w-4 h-4 mr-2" />
-              Apply Filters
+      {/* Sticky Filter Icon */}
+      <div className="fixed top-5 right-0 z-50 cls-filter-sticky cls-filter-sticky button">
+        <Sheet open={isFilterDrawerOpen} onOpenChange={setIsFilterDrawerOpen}>
+          <SheetTrigger asChild>
+            <Button
+              size="lg"
+              className="h-14 w-14 rounded-full shadow-lg clr-bg-clr hover:bg-blue-700 text-white"
+            >
+              <Filter className="" />
             </Button>
-          </div>
-        </CardContent>
-      </Card>
+          </SheetTrigger>
+          <SheetContent side="right" className="w-96 overflow-y-auto">
+            <SheetHeader>
+              <SheetTitle>Filters</SheetTitle>
+              <SheetDescription>
+                Filter ancillary discount rules by various criteria
+              </SheetDescription>
+            </SheetHeader>
+            <div className="py-4 space-y-4">
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <Label htmlFor="rule-code">Rule Code</Label>
+                  <Input
+                    id="rule-code"
+                    placeholder="Enter rule code..."
+                    value={filters.ruleCode || ""}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        ruleCode: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="ancillary-code">Ancillary Code</Label>
+                  <Input
+                    id="ancillary-code"
+                    placeholder="Enter ancillary code..."
+                    value={filters.ancillaryCode || ""}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        ancillaryCode: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="airline-code">Airline Code</Label>
+                  <Input
+                    id="airline-code"
+                    placeholder="Enter airline code..."
+                    value={filters.airlineCode || ""}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        airlineCode: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="origin">Origin</Label>
+                  <Input
+                    id="origin"
+                    placeholder="Enter origin..."
+                    value={filters.origin || ""}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        origin: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="destination">Destination</Label>
+                  <Input
+                    id="destination"
+                    placeholder="Enter destination..."
+                    value={filters.destination || ""}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        destination: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="channel">Channel</Label>
+                  <Select
+                    value={filters.channel || "ALL"}
+                    onValueChange={(value) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        channel: value === "ALL" ? "" : value,
+                      }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select channel" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ALL">All Channels</SelectItem>
+                      <SelectItem value="API">API</SelectItem>
+                      <SelectItem value="PORTAL">PORTAL</SelectItem>
+                      <SelectItem value="MOBILE">MOBILE</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="status">Status</Label>
+                  <Select
+                    value={filters.status || "ALL"}
+                    onValueChange={(value) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        status: value === "ALL" ? "" : value,
+                      }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ALL">All Status</SelectItem>
+                      <SelectItem value="ACTIVE">Active</SelectItem>
+                      <SelectItem value="INACTIVE">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="adjustment-type">Adjustment Type</Label>
+                  <Select
+                    value={filters.adjustmentType || "ALL"}
+                    onValueChange={(value) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        adjustmentType: value === "ALL" ? "" : value,
+                      }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select adjustment type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ALL">All Types</SelectItem>
+                      <SelectItem value="PERCENT">Percent</SelectItem>
+                      <SelectItem value="AMOUNT">Amount</SelectItem>
+                      <SelectItem value="FREE">Free</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+            <SheetFooter className="pt-4">
+              <div className="flex gap-2 w-full">
+                <Button
+                  variant="outline"
+                  onClick={() => setFilters({})}
+                  className="flex-1"
+                >
+                  Reset All
+                </Button>
+                <SheetClose asChild>
+                  <Button className="flex-1">Apply Filters</Button>
+                </SheetClose>
+              </div>
+            </SheetFooter>
+          </SheetContent>
+        </Sheet>
+      </div>
 
       {/* Rules Table */}
       <Card>

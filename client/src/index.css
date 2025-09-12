@@ -25,6 +25,17 @@
   align-items: center;
 }
 
+.cls-filter-sticky {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 50;
+}
+
+.clr-bg-clr {
+  background-color: #2563eb;
+}
+
 .cls-cohort-dropdwon p {
   margin: 0;
   font-weight: 500;

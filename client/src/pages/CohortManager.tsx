@@ -50,6 +50,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "../components/ui/sheet";
 import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
 import { useToast } from "../hooks/use-toast";
@@ -109,6 +119,7 @@ export default function CohortManager() {
     type: "all",
     status: "all",
   });
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
 
   // Fetch cohorts
   const {
@@ -947,80 +958,103 @@ export default function CohortManager() {
         </Card>
       </div>
 
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Filters</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <Label htmlFor="cohortCode">Cohort Code</Label>
-              <Input
-                id="cohortCode"
-                placeholder="Search by code..."
-                value={filters.cohortCode}
-                onChange={(e) =>
-                  setFilters((prev) => ({
-                    ...prev,
-                    cohortCode: e.target.value,
-                  }))
-                }
-              />
+      {/* Sticky Filter Icon */}
+      <div className="fixed top-5 right-0 z-50 cls-filter-sticky cls-filter-sticky button">
+        <Sheet open={isFilterDrawerOpen} onOpenChange={setIsFilterDrawerOpen}>
+          <SheetTrigger asChild>
+            <Button
+              size="lg"
+              className="h-14 w-14 rounded-full shadow-lg clr-bg-clr hover:bg-blue-700 text-white"
+            >
+              <Filter className="" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="right" className="w-96 overflow-y-auto">
+            <SheetHeader>
+              <SheetTitle>Filters</SheetTitle>
+              <SheetDescription>
+                Filter cohorts by various criteria
+              </SheetDescription>
+            </SheetHeader>
+            <div className="py-4 space-y-4">
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <Label htmlFor="cohort-code">Cohort Code</Label>
+                  <Input
+                    id="cohort-code"
+                    placeholder="Search by code..."
+                    value={filters.cohortCode || ""}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        cohortCode: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="type">Type</Label>
+                  <Select
+                    value={filters.type || "all"}
+                    onValueChange={(value) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        type: value === "all" ? "all" : value,
+                      }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Types</SelectItem>
+                      <SelectItem value="MARKET">Market</SelectItem>
+                      <SelectItem value="CHANNEL">Channel</SelectItem>
+                      <SelectItem value="SEASON">Season</SelectItem>
+                      <SelectItem value="BEHAVIOR">Behavior</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="status">Status</Label>
+                  <Select
+                    value={filters.status || "all"}
+                    onValueChange={(value) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        status: value === "all" ? "all" : value,
+                      }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="ACTIVE">Active</SelectItem>
+                      <SelectItem value="INACTIVE">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
-            <div>
-              <Label htmlFor="type">Type</Label>
-              <Select
-                value={filters.type}
-                onValueChange={(value) =>
-                  setFilters((prev) => ({ ...prev, type: value }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="All types" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All types</SelectItem>
-                  {cohortTypes.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {type}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="status">Status</Label>
-              <Select
-                value={filters.status}
-                onValueChange={(value) =>
-                  setFilters((prev) => ({ ...prev, status: value }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="All statuses" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All statuses</SelectItem>
-                  <SelectItem value="ACTIVE">Active</SelectItem>
-                  <SelectItem value="INACTIVE">Inactive</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-end">
-              <Button
-                variant="outline"
-                onClick={() =>
-                  setFilters({ cohortCode: "", type: "all", status: "all" })
-                }
-                className="w-full"
-              >
-                Reset
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+            <SheetFooter className="pt-4">
+              <div className="flex gap-2 w-full">
+                <Button
+                  variant="outline"
+                  onClick={() => setFilters({ cohortCode: "", type: "all", status: "all" })}
+                  className="flex-1"
+                >
+                  Reset All
+                </Button>
+                <SheetClose asChild>
+                  <Button className="flex-1">Apply Filters</Button>
+                </SheetClose>
+              </div>
+            </SheetFooter>
+          </SheetContent>
+        </Sheet>
+      </div>
 
       {/* Cohorts Table */}
       <Card>

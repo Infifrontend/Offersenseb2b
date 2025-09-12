@@ -405,13 +405,6 @@ export default function AirAncillariesDiscounting() {
                 <TableRow key={rule.id}>
                   <TableCell>
                     <div className="font-medium">{rule.ruleCode}</div>
-                    <div className="text-sm text-gray-500">
-                      {rule.conditionBehavior && (
-                        <Badge variant="outline" className="text-xs">
-                          {rule.conditionBehavior}
-                        </Badge>
-                      )}
-                    </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
@@ -638,9 +631,11 @@ export default function AirAncillariesDiscounting() {
                   virtual={false}
                   showSearch
                   filterOption={(input, option) =>
-                    option?.children?.toLowerCase().indexOf(input.toLowerCase()) >=
-                      0 ||
-                    option?.value?.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                    option?.children
+                      ?.toLowerCase()
+                      .indexOf(input.toLowerCase()) >= 0 ||
+                    option?.value?.toLowerCase().indexOf(input.toLowerCase()) >=
+                      0
                   }
                 >
                   {availableCohorts.map((cohort: any) => (
@@ -648,7 +643,9 @@ export default function AirAncillariesDiscounting() {
                       <div style={{ display: "flex", flexDirection: "column" }}>
                         <div className="cls-cohort-dropdwon">
                           <p>{cohort.cohortName}</p>{" "}
-                          <span className="text-gray-600">{cohort.cohortCode}</span>
+                          <span className="text-gray-600">
+                            {cohort.cohortCode}
+                          </span>
                         </div>
                       </div>
                     </AntSelect.Option>
@@ -688,10 +685,7 @@ export default function AirAncillariesDiscounting() {
               </AntForm.Item>
             </Col>
             <Col span={8}>
-              <AntForm.Item
-                label="Adjustment Value"
-                name="adjustmentValue"
-              >
+              <AntForm.Item label="Adjustment Value" name="adjustmentValue">
                 <AntInputNumber placeholder="10" style={{ width: "100%" }} />
               </AntForm.Item>
             </Col>
@@ -864,9 +858,11 @@ export default function AirAncillariesDiscounting() {
                   virtual={false}
                   showSearch
                   filterOption={(input, option) =>
-                    option?.children?.toLowerCase().indexOf(input.toLowerCase()) >=
-                      0 ||
-                    option?.value?.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                    option?.children
+                      ?.toLowerCase()
+                      .indexOf(input.toLowerCase()) >= 0 ||
+                    option?.value?.toLowerCase().indexOf(input.toLowerCase()) >=
+                      0
                   }
                 >
                   {availableCohorts.map((cohort: any) => (
@@ -874,7 +870,9 @@ export default function AirAncillariesDiscounting() {
                       <div style={{ display: "flex", flexDirection: "column" }}>
                         <div className="cls-cohort-dropdwon">
                           <p>{cohort.cohortName}</p>{" "}
-                          <span className="text-gray-600">{cohort.cohortCode}</span>
+                          <span className="text-gray-600">
+                            {cohort.cohortCode}
+                          </span>
                         </div>
                       </div>
                     </AntSelect.Option>
@@ -914,10 +912,7 @@ export default function AirAncillariesDiscounting() {
               </AntForm.Item>
             </Col>
             <Col span={8}>
-              <AntForm.Item
-                label="Adjustment Value"
-                name="adjustmentValue"
-              >
+              <AntForm.Item label="Adjustment Value" name="adjustmentValue">
                 <AntInputNumber placeholder="10" style={{ width: "100%" }} />
               </AntForm.Item>
             </Col>
@@ -1192,32 +1187,42 @@ export default function AirAncillariesDiscounting() {
                         ))}
                       </div>
                     </div>
-                    {selectedRule.cohortCodes && selectedRule.cohortCodes.length > 0 && (
-                      <div>
-                        <label className="text-sm font-medium text-gray-700">
-                          Eligible Cohorts
-                        </label>
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {selectedRule.cohortCodes.map((cohortCode, index) => {
-                            const cohort = availableCohorts.find((c: any) => 
-                              c.cohortName === cohortCode || c.cohortCode === cohortCode
-                            );
-                            return (
-                              <span
-                                key={index}
-                                className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-800"
-                                title={cohort ? `${cohort.cohortName} (${cohort.cohortCode})` : cohortCode}
-                              >
-                                {cohort ? cohort.cohortCode : cohortCode}
-                              </span>
-                            );
-                          })}
+                    {selectedRule.cohortCodes &&
+                      selectedRule.cohortCodes.length > 0 && (
+                        <div>
+                          <label className="text-sm font-medium text-gray-700">
+                            Eligible Cohorts
+                          </label>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {selectedRule.cohortCodes.map(
+                              (cohortCode, index) => {
+                                const cohort = availableCohorts.find(
+                                  (c: any) =>
+                                    c.cohortName === cohortCode ||
+                                    c.cohortCode === cohortCode,
+                                );
+                                return (
+                                  <span
+                                    key={index}
+                                    className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-800"
+                                    title={
+                                      cohort
+                                        ? `${cohort.cohortName} (${cohort.cohortCode})`
+                                        : cohortCode
+                                    }
+                                  >
+                                    {cohort ? cohort.cohortCode : cohortCode}
+                                  </span>
+                                );
+                              },
+                            )}
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            This discount will only apply to users in these
+                            cohorts
+                          </div>
                         </div>
-                        <div className="text-xs text-gray-500 mt-1">
-                          This discount will only apply to users in these cohorts
-                        </div>
-                      </div>
-                    )}
+                      )}
                     <div>
                       <label className="text-sm font-medium text-gray-700">
                         Valid Period

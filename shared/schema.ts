@@ -703,6 +703,11 @@ export const insertCampaignMetricsSchema = createInsertSchema(campaignMetrics, {
 
 export const insertCampaignDeliverySchema = createInsertSchema(campaignDeliveries, {
   purchaseAmount: z.string().transform((val) => parseFloat(val)).optional(),
+  sentAt: z.string().optional(),
+  deliveredAt: z.string().optional(),
+  openedAt: z.string().optional(),
+  clickedAt: z.string().optional(),
+  purchasedAt: z.string().optional(),
 }).omit({
   id: true,
   createdAt: true,

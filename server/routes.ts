@@ -2409,9 +2409,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/tiers/assignments", async (req, res) => {
     try {
       const filters = req.query;
+      console.log("Fetching tier assignments with filters:", filters);
       const assignments = await storage.getAgentTierAssignments(filters);
-      res.json(assignments);
+      console.log(`Found ${assignments?.length || 0} tier assignments`);
+      res.json(assignments || []);
     } catch (error: any) {
+      console.error("Error fetching tier assignments:", error);
       res.status(500).json({ message: "Failed to fetch tier assignments", error: error.message });
     }
   });

@@ -1570,6 +1570,7 @@ export default function CampaignManager() {
           <AntForm.Item name="createdBy" initialValue="current-user" hidden>
             <Input />
           </AntForm.Item>
+          </div>
 
           {/* Action Buttons */}
           <div className="bg-gray-50 px-6 py-4 border-t flex justify-between items-center rounded-b-lg">

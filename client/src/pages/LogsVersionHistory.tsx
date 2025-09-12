@@ -389,16 +389,19 @@ export default function LogsVersionHistory() {
                         Negotiated Fares
                       </SelectItem>
                       <SelectItem value="DynamicDiscountRule">
-                        Dynamic Discounts
+                        Dynamic Discount
                       </SelectItem>
                       <SelectItem value="AirAncillaryRule">
-                        Air Ancillaries
+                        Air Discounting
                       </SelectItem>
-                      <SelectItem value="NonAirRate">Non-Air Rates</SelectItem>
-                      <SelectItem value="Bundle">Bundles</SelectItem>
-                      <SelectItem value="OfferRule">Offer Rules</SelectItem>
-                      <SelectItem value="Agent">Agents</SelectItem>
+                      <SelectItem value="NonAirRate">Non-Air Markup</SelectItem>
+                      <SelectItem value="Bundle">Bundling Engine</SelectItem>
+                      <SelectItem value="OfferRule">Rule Builder</SelectItem>
+                      <SelectItem value="OfferComposer">Offer Composer</SelectItem>
+                      <SelectItem value="Agent">Agents & Channels</SelectItem>
                       <SelectItem value="Cohort">Cohorts</SelectItem>
+                      <SelectItem value="Campaign">Campaigns</SelectItem>
+                      <SelectItem value="AgentTier">Agent Tiers</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

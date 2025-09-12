@@ -2306,6 +2306,152 @@ export async function registerRoutes(app: Express): Promise<Server> {
             () => storage.getDynamicDiscountRuleById(auditLog.entityId)
           );
           break;
+        case "AirAncillaryRule":
+          result = await storage.withAuditLog(
+            () => storage.updateAirAncillaryRule(auditLog.entityId, auditLog.beforeData),
+            {
+              user,
+              module: auditLog.module,
+              entityId: auditLog.entityId,
+              action: "ROLLBACK",
+              justification: `Rollback to version from ${auditLog.timestamp}: ${justification}`,
+              ipAddress: req.ip,
+              userAgent: req.get("User-Agent"),
+              sessionId: req.sessionID || "unknown",
+            },
+            () => storage.getAirAncillaryRuleById(auditLog.entityId)
+          );
+          break;
+        case "NonAirRate":
+          result = await storage.withAuditLog(
+            () => storage.updateNonAirRate(auditLog.entityId, auditLog.beforeData),
+            {
+              user,
+              module: auditLog.module,
+              entityId: auditLog.entityId,
+              action: "ROLLBACK",
+              justification: `Rollback to version from ${auditLog.timestamp}: ${justification}`,
+              ipAddress: req.ip,
+              userAgent: req.get("User-Agent"),
+              sessionId: req.sessionID || "unknown",
+            },
+            () => storage.getNonAirRateById(auditLog.entityId)
+          );
+          break;
+        case "Bundle":
+          result = await storage.withAuditLog(
+            () => storage.updateBundle(auditLog.entityId, auditLog.beforeData),
+            {
+              user,
+              module: auditLog.module,
+              entityId: auditLog.entityId,
+              action: "ROLLBACK",
+              justification: `Rollback to version from ${auditLog.timestamp}: ${justification}`,
+              ipAddress: req.ip,
+              userAgent: req.get("User-Agent"),
+              sessionId: req.sessionID || "unknown",
+            },
+            () => storage.getBundleById(auditLog.entityId)
+          );
+          break;
+        case "OfferRule":
+          result = await storage.withAuditLog(
+            () => storage.updateOfferRule(auditLog.entityId, auditLog.beforeData),
+            {
+              user,
+              module: auditLog.module,
+              entityId: auditLog.entityId,
+              action: "ROLLBACK",
+              justification: `Rollback to version from ${auditLog.timestamp}: ${justification}`,
+              ipAddress: req.ip,
+              userAgent: req.get("User-Agent"),
+              sessionId: req.sessionID || "unknown",
+            },
+            () => storage.getOfferRuleById(auditLog.entityId)
+          );
+          break;
+        case "OfferComposer":
+          result = await storage.withAuditLog(
+            () => storage.updateOfferComposer(auditLog.entityId, auditLog.beforeData),
+            {
+              user,
+              module: auditLog.module,
+              entityId: auditLog.entityId,
+              action: "ROLLBACK",
+              justification: `Rollback to version from ${auditLog.timestamp}: ${justification}`,
+              ipAddress: req.ip,
+              userAgent: req.get("User-Agent"),
+              sessionId: req.sessionID || "unknown",
+            },
+            () => storage.getOfferComposerById(auditLog.entityId)
+          );
+          break;
+        case "Agent":
+          result = await storage.withAuditLog(
+            () => storage.updateAgent(auditLog.entityId, auditLog.beforeData),
+            {
+              user,
+              module: auditLog.module,
+              entityId: auditLog.entityId,
+              action: "ROLLBACK",
+              justification: `Rollback to version from ${auditLog.timestamp}: ${justification}`,
+              ipAddress: req.ip,
+              userAgent: req.get("User-Agent"),
+              sessionId: req.sessionID || "unknown",
+            },
+            () => storage.getAgentById(auditLog.entityId)
+          );
+          break;
+        case "Cohort":
+          result = await storage.withAuditLog(
+            () => storage.updateCohort(auditLog.entityId, auditLog.beforeData),
+            {
+              user,
+              module: auditLog.module,
+              entityId: auditLog.entityId,
+              action: "ROLLBACK",
+              justification: `Rollback to version from ${auditLog.timestamp}: ${justification}`,
+              ipAddress: req.ip,
+              userAgent: req.get("User-Agent"),
+              sessionId: req.sessionID || "unknown",
+            },
+            () => storage.getCohortById(auditLog.entityId)
+          );
+          break;
+        case "Campaign":
+          result = await storage.withAuditLog(
+            () => storage.updateCampaign(auditLog.entityId, auditLog.beforeData),
+            {
+              user,
+              module: auditLog.module,
+              entityId: auditLog.entityId,
+              action: "ROLLBACK",
+              justification: `Rollback to version from ${auditLog.timestamp}: ${justification}`,
+              ipAddress: req.ip,
+              userAgent: req.get("User-Agent"),
+              sessionId: req.sessionID || "unknown",
+            },
+            () => storage.getCampaignById(auditLog.entityId)
+          );
+          break;
+        case "AgentTier":
+          result = await storage.withAuditLog(
+            () => storage.updateAgentTier(auditLog.entityId, auditLog.beforeData),
+            {
+              user,
+              module: auditLog.module,
+              entityId: auditLog.entityId,
+              action: "ROLLBACK",
+              justification: `Rollback to version from ${auditLog.timestamp}: ${justification}`,
+              ipAddress: req.ip,
+              userAgent: req.get("User-Agent"),
+              sessionId: req.sessionID || "unknown",
+            },
+            () => storage.getAgentTierById(auditLog.entityId)
+          );
+          break;ountRuleById(auditLog.entityId)
+          );
+          break;
         default:
           return res.status(400).json({ message: `Rollback not supported for module: ${auditLog.module}` });
       }

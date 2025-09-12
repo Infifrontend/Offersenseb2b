@@ -432,207 +432,103 @@ export default function OfferRuleBuilder() {
   const onCreateSubmit = () => {
     console.log("Create Rule button clicked");
 
-    // Get all form values first for debugging
+    // Get all form values directly
     const allFormValues = createForm.getFieldsValue();
     console.log("All form values:", allFormValues);
 
-    // Check if actions exist and validate them properly
-    const actions = allFormValues.actions || [];
-    console.log("Actions array:", actions);
-    
-    // Filter out empty actions (actions with no type selected)
-    const validActions = actions.filter((action: any) => action && action.type);
-    console.log("Valid actions:", validActions);
-    
-    if (validActions.length === 0) {
-      alert("At least one action is required. Please add an action in the Actions step.");
-      setCurrentStep(2);
-      return;
-    }
+    // Extract and validate required fields directly from form values
+    const ruleCode = allFormValues.ruleCode?.trim();
+    const ruleName = allFormValues.ruleName?.trim();
+    const ruleType = allFormValues.ruleType;
+    const priority = allFormValues.priority || 1;
+    const validFrom = allFormValues.validFrom;
+    const validTo = allFormValues.validTo;
 
-    // Validate all required fields first
-    const requiredFields = ["ruleCode", "ruleName", "ruleType", "validFrom", "validTo"];
-    const missingFields = [];
-    
-    requiredFields.forEach(field => {
-      const value = allFormValues[field];
-      if (!value || (typeof value === 'string' && !value.trim())) {
-        missingFields.push(field);
-      }
-    });
-
-    if (missingFields.length > 0) {
-      const fieldLabels = {
-        ruleCode: "Rule Code",
-        ruleName: "Rule Name", 
-        ruleType: "Rule Type",
-        validFrom: "Valid From",
-        validTo: "Valid To"
-      };
+    // Check required fields
+    if (!ruleCode || !ruleName || !ruleType || !validFrom || !validTo) {
+      const missingFields = [];
+      if (!ruleCode) missingFields.push("Rule Code");
+      if (!ruleName) missingFields.push("Rule Name");
+      if (!ruleType) missingFields.push("Rule Type");
+      if (!validFrom) missingFields.push("Valid From");
+      if (!validTo) missingFields.push("Valid To");
       
-      const missingLabels = missingFields.map(field => fieldLabels[field] || field);
-      alert(`Please fill in the following required fields: ${missingLabels.join(", ")}`);
+      alert(`Please fill in the following required fields: ${missingFields.join(", ")}`);
       setCurrentStep(0);
       return;
     }
 
-    // Validate all form fields
-    createForm
-      .validateFields()
-      .then((validatedValues) => {
-        try {
-          console.log("Validated values:", validatedValues);
-          
-          // Extract basic info from validated values with proper fallbacks
-          const ruleCode = (validatedValues.ruleCode || allFormValues.ruleCode || "").trim();
-          const ruleName = (validatedValues.ruleName || allFormValues.ruleName || "").trim();
-          const ruleType = validatedValues.ruleType || allFormValues.ruleType;
-          const priority = validatedValues.priority || allFormValues.priority || 1;
-          const validFrom = validatedValues.validFrom || allFormValues.validFrom;
-          const validTo = validatedValues.validTo || allFormValues.validTo;
+    // Get actions (allow empty actions array)
+    const actions = allFormValues.actions || [];
+    const processedActions = actions
+      .filter((action: any) => action && action.type)
+      .map((action: any) => {
+        const formattedAction: any = {
+          type: action.type,
+        };
 
-          console.log("Extracted basic info:", {
-            ruleCode,
-            ruleName,
-            ruleType,
-            priority,
-            validFrom,
-            validTo,
-          });
+        if (action.scope) formattedAction.scope = action.scope;
+        if (action.valueType) formattedAction.valueType = action.valueType;
+        if (action.value !== undefined && action.value !== null)
+          formattedAction.value = Number(action.value);
+        if (action.ancillaryCode) formattedAction.ancillaryCode = action.ancillaryCode;
+        if (action.bundleCode) formattedAction.bundleCode = action.bundleCode;
+        if (action.bannerText) formattedAction.bannerText = action.bannerText;
 
-          // Final check for required fields
-          if (!ruleCode || !ruleName || !ruleType || !validFrom || !validTo) {
-            alert("Some required fields are missing. Please check all required fields are filled.");
-            setCurrentStep(0);
-            return;
-          }
-
-          // Get actions from validated values or fallback, ensure we use valid actions
-          const finalActions = validatedValues.actions || allFormValues.actions || [];
-          const processedActions = finalActions.filter((action: any) => action && action.type);
-
-          const formattedData = {
-            ruleCode,
-            ruleName,
-            ruleType,
-            conditions: {
-              origin: validatedValues["conditions.origin"] || undefined,
-              destination:
-                validatedValues["conditions.destination"] || undefined,
-              pos: validatedValues["conditions.pos"] || [],
-              agentTier: validatedValues["conditions.agentTier"] || [],
-              cohortCodes: validatedValues["conditions.cohortCodes"] || [],
-              channel: validatedValues["conditions.channel"] || [],
-              cabinClass: validatedValues["conditions.cabinClass"] || [],
-              tripType: validatedValues["conditions.tripType"] || [],
-              seasonCode: validatedValues["conditions.seasonCode"] || undefined,
-              bookingWindow:
-                validatedValues["conditions.bookingWindowMin"] &&
-                validatedValues["conditions.bookingWindowMax"]
-                  ? {
-                      min: validatedValues["conditions.bookingWindowMin"],
-                      max: validatedValues["conditions.bookingWindowMax"],
-                    }
-                  : undefined,
-              travelWindow:
-                validatedValues["conditions.travelWindowMin"] &&
-                validatedValues["conditions.travelWindowMax"]
-                  ? {
-                      min: validatedValues["conditions.travelWindowMin"],
-                      max: validatedValues["conditions.travelWindowMax"],
-                    }
-                  : undefined,
-            },
-            actions: processedActions.map((action: any) => {
-              const formattedAction: any = {
-                type: action.type,
-              };
-
-              if (action.scope) formattedAction.scope = action.scope;
-              if (action.valueType)
-                formattedAction.valueType = action.valueType;
-              if (action.value !== undefined && action.value !== null)
-                formattedAction.value = Number(action.value);
-              if (action.ancillaryCode)
-                formattedAction.ancillaryCode = action.ancillaryCode;
-              if (action.bundleCode)
-                formattedAction.bundleCode = action.bundleCode;
-              if (action.bannerText)
-                formattedAction.bannerText = action.bannerText;
-
-              // Add pricing object for compatibility
-              if (
-                action.valueType &&
-                action.value !== undefined &&
-                action.value !== null
-              ) {
-                formattedAction.pricing = {
-                  type: action.valueType,
-                  value: Number(action.value),
-                };
-              }
-
-              return formattedAction;
-            }),
-            priority,
-            validFrom: validFrom?.format
-              ? validFrom.format("YYYY-MM-DD")
-              : validFrom,
-            validTo: validTo?.format ? validTo.format("YYYY-MM-DD") : validTo,
-            justification: validatedValues.justification || undefined,
-            createdBy: "admin", // This would come from auth context in a real app
-            status: "DRAFT",
+        // Add pricing object for compatibility
+        if (action.valueType && action.value !== undefined && action.value !== null) {
+          formattedAction.pricing = {
+            type: action.valueType,
+            value: Number(action.value),
           };
-
-          console.log("Final formatted data:", formattedData);
-
-          createRuleMutation.mutate(formattedData);
-        } catch (error) {
-          console.error("Error formatting offer rule data:", error);
-          alert(
-            `Error creating rule: ${error instanceof Error ? error.message : "Unknown error"}`,
-          );
         }
-      })
-      .catch((errorInfo) => {
-        console.log("Form validation failed:", errorInfo);
 
-        // Check which fields failed validation and navigate to appropriate step
-        const failedFields = errorInfo.errorFields;
-        if (failedFields && failedFields.length > 0) {
-          const firstFailedField = failedFields[0].name[0];
-          console.log("First failed field:", firstFailedField);
-
-          // Navigate to the step containing the failed field
-          if (
-            [
-              "ruleCode",
-              "ruleName",
-              "ruleType",
-              "priority",
-              "validFrom",
-              "validTo",
-            ].includes(firstFailedField)
-          ) {
-            setCurrentStep(0); // Basic Info step
-          } else if (firstFailedField.startsWith("conditions.")) {
-            setCurrentStep(1); // Conditions step
-          } else if (firstFailedField === "actions") {
-            setCurrentStep(2); // Actions step
-          } else {
-            setCurrentStep(3); // Review step
-          }
-
-          // Show specific error message
-          const fieldErrors = failedFields
-            .map(
-              (field: any) =>
-                `${field.name.join(".")}: ${field.errors.join(", ")}`,
-            )
-            .join("\n");
-          alert(`Please fill in the required fields:\n${fieldErrors}`);
-        }
+        return formattedAction;
       });
+
+    const formattedData = {
+      ruleCode,
+      ruleName,
+      ruleType,
+      conditions: {
+        origin: allFormValues["conditions.origin"] || undefined,
+        destination: allFormValues["conditions.destination"] || undefined,
+        pos: allFormValues["conditions.pos"] || [],
+        agentTier: allFormValues["conditions.agentTier"] || [],
+        cohortCodes: allFormValues["conditions.cohortCodes"] || [],
+        channel: allFormValues["conditions.channel"] || [],
+        cabinClass: allFormValues["conditions.cabinClass"] || [],
+        tripType: allFormValues["conditions.tripType"] || [],
+        seasonCode: allFormValues["conditions.seasonCode"] || undefined,
+        bookingWindow:
+          allFormValues["conditions.bookingWindowMin"] &&
+          allFormValues["conditions.bookingWindowMax"]
+            ? {
+                min: allFormValues["conditions.bookingWindowMin"],
+                max: allFormValues["conditions.bookingWindowMax"],
+              }
+            : undefined,
+        travelWindow:
+          allFormValues["conditions.travelWindowMin"] &&
+          allFormValues["conditions.travelWindowMax"]
+            ? {
+                min: allFormValues["conditions.travelWindowMin"],
+                max: allFormValues["conditions.travelWindowMax"],
+              }
+            : undefined,
+      },
+      actions: processedActions,
+      priority,
+      validFrom: validFrom?.format ? validFrom.format("YYYY-MM-DD") : validFrom,
+      validTo: validTo?.format ? validTo.format("YYYY-MM-DD") : validTo,
+      justification: allFormValues.justification || undefined,
+      createdBy: "admin", // This would come from auth context in a real app
+      status: "DRAFT",
+    };
+
+    console.log("Final formatted data:", formattedData);
+
+    createRuleMutation.mutate(formattedData);
   };
 
   const onEditSubmit = (values: any) => {
@@ -1356,40 +1252,9 @@ export default function OfferRuleBuilder() {
                   <AntButton
                     type="primary"
                     onClick={() => {
-                      // For actions step, check if at least one valid action exists
-                      if (currentStep === 2) {
-                        const actions = createForm.getFieldValue("actions") || [];
-                        const validActions = actions.filter((action: any) => action && action.type);
-                        console.log("Actions validation - all actions:", actions);
-                        console.log("Actions validation - valid actions:", validActions);
-                        
-                        if (validActions.length === 0) {
-                          alert("Please add at least one action with a valid action type before proceeding");
-                          return;
-                        }
-
-                        // Validate that each action has required fields
-                        const incompleteActions = validActions.filter((action: any) => {
-                          if (!action.type) return true;
-                          
-                          // For certain action types, check if required fields are present
-                          if ((action.type === 'DISCOUNT' || action.type === 'MARKUP') && !action.valueType) {
-                            return true;
-                          }
-                          
-                          return false;
-                        });
-
-                        if (incompleteActions.length > 0) {
-                          alert("Please complete all action configurations. Make sure each action has all required fields filled.");
-                          return;
-                        }
-                      }
-
-                      // Validate current step fields before proceeding
-                      const fieldsToValidate = getFieldsForStep(currentStep);
-
-                      if (fieldsToValidate.length > 0) {
+                      // Validate current step fields before proceeding (only for basic info step)
+                      if (currentStep === 0) {
+                        const fieldsToValidate = getFieldsForStep(currentStep);
                         createForm
                           .validateFields(fieldsToValidate)
                           .then(() => {
@@ -1408,6 +1273,7 @@ export default function OfferRuleBuilder() {
                             );
                           });
                       } else {
+                        // For other steps, just move to next step without validation
                         setCurrentStep(currentStep + 1);
                       }
                     }}

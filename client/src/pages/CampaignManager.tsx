@@ -27,7 +27,7 @@ import {
   Timeline,
   Divider,
   Radio,
-  Checkbox,
+  Checkbox as AntCheckbox,
 } from "antd";
 import {
   Megaphone,
@@ -54,6 +54,7 @@ import {
   Clock,
   AlertCircle,
   Square,
+  MessageCircle,
 } from "lucide-react";
 import dayjs from "dayjs";
 import { z } from "zod";
@@ -1232,182 +1233,205 @@ export default function CampaignManager() {
           <Divider orientation="left">Communication Channels</Divider>
 
           <Row gutter={16}>
-            <Col span={6}>
-              <AntForm.Item
-                name={["comms", "portalBanner"]}
-                label="Portal Banner"
-                valuePropName="checked"
-              >
-                <Switch />
+            <Col span={8}>
+              <AntForm.Item name={["comms", "portalBanner"]} valuePropName="checked">
+                <AntCheckbox>Portal Banner</AntCheckbox>
               </AntForm.Item>
             </Col>
-            <Col span={6}>
-              <AntForm.Item
-                name={["comms", "apiPush"]}
-                label="API Push"
-                valuePropName="checked"
-              >
-                <Switch />
+            <Col span={8}>
+              <AntForm.Item name={["comms", "apiPush"]} valuePropName="checked">
+                <AntCheckbox>API Push Notifications</AntCheckbox>
               </AntForm.Item>
-            </Col>
-            <Col span={24}>
-              <div className="space-y-6">
-                {/* Email Template Section */}
-                <AntCard
-                  size="small"
-                  title={
-                    <div className="flex items-center space-x-2">
-                      <Mail className="w-4 h-4 text-blue-600" />
-                      <span>Email Templates</span>
-                    </div>
-                  }
-                  className="border-l-4 border-l-blue-500"
-                >
-                  <div className="space-y-4">
-                    <Row gutter={16} align="middle">
-                      <Col span={10}>
-                        <AntForm.Item
-                          name={["comms", "emailTemplateId"]}
-                          label="Selected Template"
-                          className="mb-0"
-                        >
-                          <Input
-                            placeholder={selectedEmailTemplate ? selectedEmailTemplate.subject : "No template selected"}
-                            disabled
-                            suffix={selectedEmailTemplate && <CheckCircle className="w-4 h-4 text-green-500" />}
-                          />
-                        </AntForm.Item>
-                      </Col>
-                      <Col span={14}>
-                        <div className="flex flex-wrap gap-2">
-                          <AntButton
-                            type="primary"
-                            icon={<MessageSquare className="w-4 h-4" />}
-                            onClick={() => handleGenerateTemplate('email')}
-                            loading={templateGenerationState.email.loading}
-                            size="small"
-                          >
-                            {templateGenerationState.email.loading ? 'Generating...' : 'Generate AI Templates'}
-                          </AntButton>
-                          {templateGenerationState.email.templates.length > 0 && (
-                            <AntButton
-                              ghost
-                              icon={<Eye className="w-4 h-4" />}
-                              onClick={() => setEmailPreviewVisible(true)}
-                              size="small"
-                            >
-                              Preview & Select ({templateGenerationState.email.templates.length})
-                            </AntButton>
-                          )}
-                          {selectedEmailTemplate && (
-                            <AntButton
-                              ghost
-                              icon={<Eye className="w-4 h-4" />}
-                              onClick={() => setEmailPreviewVisible(true)}
-                              size="small"
-                              type="primary"
-                            >
-                              View Selected
-                            </AntButton>
-                          )}
-                        </div>
-                      </Col>
-                    </Row>
-
-                    {templateGenerationState.email.templates.length > 0 && (
-                      <Alert
-                        message={`${templateGenerationState.email.templates.length} AI-generated email templates ready for preview`}
-                        type="success"
-                        showIcon
-                        className="text-xs"
-                      />
-                    )}
-
-                    <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
-                      <strong>AI will generate templates based on:</strong> Campaign name, offer details, target audience, and selected products
-                    </div>
-                  </div>
-                </AntCard>
-
-                {/* WhatsApp Template Section */}
-                <AntCard
-                  size="small"
-                  title={
-                    <div className="flex items-center space-x-2">
-                      <Smartphone className="w-4 h-4 text-green-600" />
-                      <span>WhatsApp Templates</span>
-                    </div>
-                  }
-                  className="border-l-4 border-l-green-500"
-                >
-                  <div className="space-y-4">
-                    <Row gutter={16} align="middle">
-                      <Col span={10}>
-                        <AntForm.Item
-                          name={["comms", "whatsappTemplateId"]}
-                          label="Selected Template"
-                          className="mb-0"
-                        >
-                          <Input
-                            placeholder={selectedWhatsappTemplate ? "WhatsApp template selected" : "No template selected"}
-                            disabled
-                            suffix={selectedWhatsappTemplate && <CheckCircle className="w-4 h-4 text-green-500" />}
-                          />
-                        </AntForm.Item>
-                      </Col>
-                      <Col span={14}>
-                        <div className="flex flex-wrap gap-2">
-                          <AntButton
-                            type="primary"
-                            icon={<Smartphone className="w-4 h-4" />}
-                            onClick={() => handleGenerateTemplate('whatsapp')}
-                            loading={templateGenerationState.whatsapp.loading}
-                            size="small"
-                          >
-                            {templateGenerationState.whatsapp.loading ? 'Generating...' : 'Generate AI Templates'}
-                          </AntButton>
-                          {templateGenerationState.whatsapp.templates.length > 0 && (
-                            <AntButton
-                              ghost
-                              icon={<Eye className="w-4 h-4" />}
-                              onClick={() => setWhatsappPreviewVisible(true)}
-                              size="small"
-                            >
-                              Preview & Select ({templateGenerationState.whatsapp.templates.length})
-                            </AntButton>
-                          )}
-                          {selectedWhatsappTemplate && (
-                            <AntButton
-                              ghost
-                              icon={<Eye className="w-4 h-4" />}
-                              onClick={() => setWhatsappPreviewVisible(true)}
-                              size="small"
-                              type="primary"
-                            >
-                              View Selected
-                            </AntButton>
-                          )}
-                        </div>
-                      </Col>
-                    </Row>
-
-                    {templateGenerationState.whatsapp.templates.length > 0 && (
-                      <Alert
-                        message={`${templateGenerationState.whatsapp.templates.length} AI-generated WhatsApp templates ready for preview`}
-                        type="success"
-                        showIcon
-                        className="text-xs"
-                      />
-                    )}
-
-                    <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
-                      <strong>AI will generate templates optimized for:</strong> WhatsApp format (160 chars), personalization, and mobile engagement
-                    </div>
-                  </div>
-                </AntCard>
-              </div>
             </Col>
           </Row>
+
+          {/* Email Template Preview & Selection */}
+          <div className="space-y-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+            <h4 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <Mail className="w-5 h-5 text-blue-600" />
+              Email Template Preview & Selection
+            </h4>
+            <Tabs defaultActiveKey="1" className="email-template-tabs">
+              <TabPane tab="🎯 Promotional" key="1">
+                <div className="bg-white p-4 rounded border">
+                  <div className="border-l-4 border-blue-500 pl-3 mb-3">
+                    <h5 className="font-semibold text-gray-900">Promotional Campaign</h5>
+                    <p className="text-sm text-gray-600">Perfect for upselling and special offers</p>
+                  </div>
+                  <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded">
+                    <strong>Subject:</strong> Exclusive Offer - Add Comfort to Your Journey!<br/>
+                    <strong>Preview:</strong> Hi {"{"}{"{"} customerName {"}"}{"}"}, we have special ancillary offers waiting for you...
+                  </div>
+                  <div className="flex justify-end mt-3">
+                    <AntButton 
+                      type="primary" 
+                      size="small"
+                      onClick={() => {
+                        campaignForm.setFieldsValue({
+                          comms: { ...campaignForm.getFieldValue("comms"), emailTemplateId: "promotional_v1" }
+                        });
+                      }}
+                    >
+                      Select Template
+                    </AntButton>
+                  </div>
+                </div>
+              </TabPane>
+              <TabPane tab="📧 Welcome" key="2">
+                <div className="bg-white p-4 rounded border">
+                  <div className="border-l-4 border-green-500 pl-3 mb-3">
+                    <h5 className="font-semibold text-gray-900">Welcome Series</h5>
+                    <p className="text-sm text-gray-600">Great for onboarding new customers</p>
+                  </div>
+                  <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded">
+                    <strong>Subject:</strong> Welcome to Enhanced Travel Experience<br/>
+                    <strong>Preview:</strong> Welcome aboard! Discover amazing add-ons for your upcoming trip...
+                  </div>
+                  <div className="flex justify-end mt-3">
+                    <AntButton 
+                      type="primary" 
+                      size="small"
+                      onClick={() => {
+                        campaignForm.setFieldsValue({
+                          comms: { ...campaignForm.getFieldValue("comms"), emailTemplateId: "welcome_v1" }
+                        });
+                      }}
+                    >
+                      Select Template
+                    </AntButton>
+                  </div>
+                </div>
+              </TabPane>
+              <TabPane tab="⏰ Reminder" key="3">
+                <div className="bg-white p-4 rounded border">
+                  <div className="border-l-4 border-orange-500 pl-3 mb-3">
+                    <h5 className="font-semibold text-gray-900">Travel Reminder</h5>
+                    <p className="text-sm text-gray-600">Perfect for pre-travel communications</p>
+                  </div>
+                  <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded">
+                    <strong>Subject:</strong> Your Trip is Coming Up - Don't Miss Out!<br/>
+                    <strong>Preview:</strong> Your travel date is approaching. Add these essentials to your booking...
+                  </div>
+                  <div className="flex justify-end mt-3">
+                    <AntButton 
+                      type="primary" 
+                      size="small"
+                      onClick={() => {
+                        campaignForm.setFieldsValue({
+                          comms: { ...campaignForm.getFieldValue("comms"), emailTemplateId: "reminder_v1" }
+                        });
+                      }}
+                    >
+                      Select Template
+                    </AntButton>
+                  </div>
+                </div>
+              </TabPane>
+            </Tabs>
+            <AntForm.Item name={["comms", "emailTemplateId"]} style={{ display: 'none' }}>
+              <AntInput />
+            </AntForm.Item>
+          </div>
+
+          {/* WhatsApp Template Preview & Selection */}
+          <div className="space-y-4 p-4 bg-gradient-to-r from-green-50 to-teal-50 rounded-lg border border-green-200 mt-6">
+            <h4 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <MessageCircle className="w-5 h-5 text-green-600" />
+              WhatsApp Template Preview & Selection
+            </h4>
+            <Tabs defaultActiveKey="1" className="whatsapp-template-tabs">
+              <TabPane tab="🎁 Offer Alert" key="1">
+                <div className="bg-white p-4 rounded border">
+                  <div className="border-l-4 border-green-500 pl-3 mb-3">
+                    <h5 className="font-semibold text-gray-900">Special Offer Alert</h5>
+                    <p className="text-sm text-gray-600">Quick promotional messages</p>
+                  </div>
+                  <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded font-mono">
+                    🎯 *Special Offer for You!*<br/>
+                    Hi {"{"}{"{"} customerName {"}"}{"}"},<br/><br/>
+                    ✈️ Add comfort to your {"{"}{"{"} destination {"}"}{""} trip!<br/>
+                    💺 Extra legroom seats from ${"{"}{"{"} price {"}"}{"}}<br/>
+                    🎒 Additional baggage starting ${"{"}{"{"} bagPrice {"}"}{"}}<br/><br/>
+                    Book now: {"{"}{"{"} bookingLink {"}"}{"}"}
+                  </div>
+                  <div className="flex justify-end mt-3">
+                    <AntButton 
+                      type="primary" 
+                      size="small"
+                      onClick={() => {
+                        campaignForm.setFieldsValue({
+                          comms: { ...campaignForm.getFieldValue("comms"), whatsappTemplateId: "offer_alert_v1" }
+                        });
+                      }}
+                    >
+                      Select Template
+                    </AntButton>
+                  </div>
+                </div>
+              </TabPane>
+              <TabPane tab="📱 Quick Update" key="2">
+                <div className="bg-white p-4 rounded border">
+                  <div className="border-l-4 border-blue-500 pl-3 mb-3">
+                    <h5 className="font-semibold text-gray-900">Quick Update</h5>
+                    <p className="text-sm text-gray-600">Brief informational messages</p>
+                  </div>
+                  <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded font-mono">
+                    📢 *Travel Update*<br/>
+                    Hello {"{"}{"{"} customerName {"}"}{"}"},<br/><br/>
+                    Your booking {"{"}{"{"} pnr {"}"}{""} has new add-on options available.<br/><br/>
+                    🍽️ Meals: ${"{"}{"{"} mealPrice {"}"}{"}}<br/>
+                    📶 Wi-Fi: ${"{"}{"{"} wifiPrice {"}"}{"}}<br/><br/>
+                    Upgrade now: {"{"}{"{"} upgradeLink {"}"}{"}"}
+                  </div>
+                  <div className="flex justify-end mt-3">
+                    <AntButton 
+                      type="primary" 
+                      size="small"
+                      onClick={() => {
+                        campaignForm.setFieldsValue({
+                          comms: { ...campaignForm.getFieldValue("comms"), whatsappTemplateId: "quick_update_v1" }
+                        });
+                      }}
+                    >
+                      Select Template
+                    </AntButton>
+                  </div>
+                </div>
+              </TabPane>
+              <TabPane tab="⚡ Urgent" key="3">
+                <div className="bg-white p-4 rounded border">
+                  <div className="border-l-4 border-red-500 pl-3 mb-3">
+                    <h5 className="font-semibold text-gray-900">Urgent Notification</h5>
+                    <p className="text-sm text-gray-600">Time-sensitive offers</p>
+                  </div>
+                  <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded font-mono">
+                    🚨 *Limited Time Offer*<br/>
+                    {"{"}{"{"} customerName {"}"}{"}"},<br/><br/>
+                    ⏰ Only 24 hours left!<br/>
+                    🎒 FREE seat selection with baggage upgrade<br/>
+                    💺 Premium seats 50% OFF<br/><br/>
+                    Don't miss out: {"{"}{"{"} urgentLink {"}"}{"}"}
+                  </div>
+                  <div className="flex justify-end mt-3">
+                    <AntButton 
+                      type="primary" 
+                      size="small"
+                      onClick={() => {
+                        campaignForm.setFieldsValue({
+                          comms: { ...campaignForm.getFieldValue("comms"), whatsappTemplateId: "urgent_v1" }
+                        });
+                      }}
+                    >
+                      Select Template
+                    </AntButton>
+                  </div>
+                </div>
+              </TabPane>
+            </Tabs>
+            <AntForm.Item name={["comms", "whatsappTemplateId"]} style={{ display: 'none' }}>
+              <AntInput />
+            </AntForm.Item>
+          </div>
 
           <AntForm.Item name="status" initialValue="DRAFT" hidden>
             <Input />

@@ -1974,15 +1974,15 @@ export default function CampaignManager() {
             icon={<Send className="w-4 h-4" />}
             onClick={handleSendMail}
             loading={sendingMail}
-            disabled={!recipientEmail}
+            disabled={!recipientEmail || !selectedCampaignForMail?.comms.emailTemplateId}
           >
             Send Mail
           </AntButton>
         ]}
-        width={600}
+        width={800}
       >
         {selectedCampaignForMail && (
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div className="bg-blue-50 p-4 rounded-lg">
               <h4 className="font-medium text-blue-900 mb-2">Campaign Details</h4>
               <div className="grid grid-cols-2 gap-3 text-sm">
@@ -2012,27 +2012,70 @@ export default function CampaignManager() {
             </div>
 
             {selectedCampaignForMail.comms.emailTemplateId ? (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <div>
-                  <strong className="text-sm text-gray-600">Email Template:</strong>
-                  <div className="mt-1 p-3 bg-gray-50 rounded-lg">
-                    <div className="text-sm font-medium">Template ID: {selectedCampaignForMail.comms.emailTemplateId}</div>
-                    <div className="text-xs text-gray-500 mt-1">Ready to send campaign email</div>
+                  <strong className="text-sm text-gray-600 mb-3 block">Email Template Preview:</strong>
+                  <div className="border rounded-lg p-4 bg-white max-h-80 overflow-y-auto">
+                    <div className="mb-4 pb-3 border-b">
+                      <div className="text-sm text-gray-500 mb-1">Subject:</div>
+                      <div className="font-medium text-gray-900">
+                        🎯 Exclusive {selectedCampaignForMail.offer.type === "PERCENT"
+                          ? `${selectedCampaignForMail.offer.value}% discount`
+                          : selectedCampaignForMail.offer.type === "AMOUNT"
+                            ? `$${selectedCampaignForMail.offer.value} off`
+                            : `special price of $${selectedCampaignForMail.offer.specialPrice}`} on {
+                              [...(selectedCampaignForMail.products.ancillaries || []), ...(selectedCampaignForMail.products.bundles || [])].length > 0
+                                ? [...(selectedCampaignForMail.products.ancillaries || []), ...(selectedCampaignForMail.products.bundles || [])].slice(0, 2).join(", ")
+                                : "travel services"
+                            } - Limited Time!
+                      </div>
+                    </div>
+                    <div 
+                      className="email-preview-content"
+                      dangerouslySetInnerHTML={{
+                        __html: `
+                          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center;">
+                              <h1 style="margin: 0; font-size: 24px;">${selectedCampaignForMail.campaignName}</h1>
+                              <p style="margin: 10px 0 0; font-size: 16px;">Exclusive offer just for you!</p>
+                            </div>
+                            <div style="padding: 30px 20px;">
+                              <h2 style="color: #333; margin-bottom: 20px;">Don't miss out on this amazing deal!</h2>
+                              <div style="background: #f8f9ff; border-left: 4px solid #667eea; padding: 20px; margin: 20px 0;">
+                                <h3 style="color: #667eea; margin: 0 0 10px;">🎉 Special Offer</h3>
+                                <p style="font-size: 18px; font-weight: bold; color: #333; margin: 0;">
+                                  Get ${selectedCampaignForMail.offer.type === "PERCENT"
+                                    ? `${selectedCampaignForMail.offer.value}% discount`
+                                    : selectedCampaignForMail.offer.type === "AMOUNT"
+                                      ? `$${selectedCampaignForMail.offer.value} off`
+                                      : `special price of $${selectedCampaignForMail.offer.specialPrice}`} on ${
+                                        [...(selectedCampaignForMail.products.ancillaries || []), ...(selectedCampaignForMail.products.bundles || [])].length > 0
+                                          ? [...(selectedCampaignForMail.products.ancillaries || []), ...(selectedCampaignForMail.products.bundles || [])].join(", ")
+                                          : "our premium travel services"
+                                      }
+                                </p>
+                              </div>
+                              <p style="color: #666; line-height: 1.6;">
+                                We're excited to offer you this exclusive deal on our premium travel services. 
+                                This limited-time offer is specially curated for valued customers like you.
+                              </p>
+                              <div style="text-align: center; margin: 30px 0;">
+                                <a href="#" style="background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+                                  Claim Your Offer Now →
+                                </a>
+                              </div>
+                              <p style="color: #888; font-size: 14px; margin-top: 30px;">
+                                Valid from ${selectedCampaignForMail.lifecycle.startDate} to ${selectedCampaignForMail.lifecycle.endDate}. Terms and conditions apply.
+                              </p>
+                            </div>
+                            <div style="background: #f5f5f5; padding: 20px; text-align: center; color: #666; font-size: 14px;">
+                              <p>Best regards,<br>The OfferSense Team</p>
+                            </div>
+                          </div>
+                        `
+                      }}
+                    />
                   </div>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <AntButton
-                    size="small"
-                    icon={<Eye className="w-3 h-3" />}
-                    onClick={() => {
-                      setEmailPreviewVisible(true);
-                      setMailModalVisible(false);
-                    }}
-                  >
-                    Preview Template
-                  </AntButton>
-                  <span className="text-xs text-gray-500">View the email template before sending</span>
                 </div>
               </div>
             ) : (
@@ -2046,8 +2089,9 @@ export default function CampaignManager() {
 
             <div>
               <AntForm.Item
-                label="Recipient Email Address"
+                label="Mail ID (Recipient Email Address)"
                 className="mb-0"
+                required
               >
                 <Input
                   placeholder="Enter recipient email address"
@@ -2059,7 +2103,7 @@ export default function CampaignManager() {
                 />
               </AntForm.Item>
               <div className="text-xs text-gray-500 mt-1">
-                The campaign email will be sent to this address
+                The campaign email template will be sent to this email address
               </div>
             </div>
           </div>

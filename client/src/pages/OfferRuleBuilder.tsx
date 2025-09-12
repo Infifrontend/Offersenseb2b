@@ -436,9 +436,8 @@ export default function OfferRuleBuilder() {
     createForm
       .validateFields()
       .then((validatedValues) => {
-        console.log("All form validation passed:", validatedValues);
-
         try {
+          debugger;
           // Extract basic info from validated values
           const ruleCode = validatedValues.ruleCode?.trim();
           const ruleName = validatedValues.ruleName?.trim();

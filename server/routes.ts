@@ -4,17 +4,17 @@ import { storage } from "./storage";
 import multer from "multer";
 import csv from "csv-parser";
 import { Readable } from "stream";
-import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema, insertAirAncillaryRuleSchema, insertNonAirRateSchema, insertNonAirMarkupRuleSchema, insertBundleSchema, insertBundlePricingRuleSchema, insertOfferRuleSchema, insertOfferTraceSchema, insertAgentSchema, insertChannelPricingOverrideSchema, insertCohortSchema, insertAuditLogSchema, insertAgentTierSchema, insertAgentTierAssignmentSchema, insertTierAssignmentEngineSchema, insertCampaignSchema, insertCampaignMetricsSchema, insertCampaignDeliverySchema, insertSimulationSchema, insertInsightQuerySchema, agentTiers, agentTierAssignments } from "../shared/schema";
+import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema, insertAirAncillaryRuleSchema, insertNonAirRateSchema, insertNonAirMarkupRuleSchema, insertBundleSchema, insertBundlePricingRuleSchema, insertOfferRuleSchema, insertOfferTraceSchema, insertAgentSchema, insertChannelPricingOverrideSchema, insertCohortSchema, insertAuditLogSchema, insertAgentTierSchema, insertAgentTierAssignmentSchema, insertTierAssignmentEngineSchema, insertCampaignSchema, insertCampaignMetricsSchema, insertCampaignDeliverySchema, insertSimulationSchema, insertInsightQuerySchema } from "../shared/schema";
 
 // Enhanced AI template generation function
 async function generateAITemplates(type: string, context: any): Promise<any[]> {
   console.log(`Generating ${type} templates with context:`, context);
-
+  
   // Extract campaign details for template generation
   const {
     campaignName = 'Special Campaign',
     offerType = 'PERCENT',
-    offerValue,
+    offerValue = 10,
     specialPrice,
     products = { ancillaries: [], bundles: [] },
     target = { agentTiers: [], cohorts: [] },
@@ -52,33 +52,33 @@ async function generateAITemplates(type: string, context: any): Promise<any[]> {
               <h1 style="margin: 0; font-size: 24px;">${campaignName}</h1>
               <p style="margin: 10px 0 0; font-size: 16px;">Exclusive offer just for you!</p>
             </div>
-
+            
             <div style="padding: 30px 20px;">
               <h2 style="color: #333; margin-bottom: 20px;">Don't miss out on this amazing deal!</h2>
-
+              
               <div style="background: #f8f9ff; border-left: 4px solid #667eea; padding: 20px; margin: 20px 0;">
                 <h3 style="color: #667eea; margin: 0 0 10px;">🎉 Special Offer</h3>
                 <p style="font-size: 18px; font-weight: bold; color: #333; margin: 0;">
                   Get ${getOfferText()} on ${getProductMentions()}
                 </p>
               </div>
-
+              
               <p style="color: #666; line-height: 1.6;">
                 We're excited to offer you this exclusive deal on our premium travel services. 
                 This limited-time offer is specially curated for valued customers like you.
               </p>
-
+              
               <div style="text-align: center; margin: 30px 0;">
                 <a href="#" style="background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
                   Claim Your Offer Now →
                 </a>
               </div>
-
+              
               <p style="color: #888; font-size: 14px; margin-top: 30px;">
                 This offer is valid for a limited time. Terms and conditions apply.
               </p>
             </div>
-
+            
             <div style="background: #f5f5f5; padding: 20px; text-align: center; color: #666; font-size: 14px;">
               <p>Best regards,<br>The ${companyName} Team</p>
             </div>
@@ -100,10 +100,10 @@ async function generateAITemplates(type: string, context: any): Promise<any[]> {
               <h1 style="margin: 0; font-size: 22px;">⏰ Last Chance!</h1>
               <p style="margin: 10px 0 0; font-size: 16px;">Your exclusive offer expires soon</p>
             </div>
-
+            
             <div style="padding: 30px 20px;">
               <h2 style="color: #333; margin-bottom: 20px;">Don't let this opportunity slip away!</h2>
-
+              
               <div style="background: #fff5f5; border: 2px dashed #ff6b6b; padding: 20px; margin: 20px 0; text-align: center;">
                 <h3 style="color: #ff6b6b; margin: 0 0 10px;">🔥 Limited Time Offer</h3>
                 <p style="font-size: 20px; font-weight: bold; color: #333; margin: 0;">
@@ -111,25 +111,25 @@ async function generateAITemplates(type: string, context: any): Promise<any[]> {
                 </p>
                 <p style="color: #ff6b6b; font-weight: bold; margin: 10px 0 0;">EXPIRES IN 24 HOURS!</p>
               </div>
-
+              
               <p style="color: #666; line-height: 1.6;">
-                This is your final reminder about our ${campaignName.toLowerCase()}. 
+                This is your final reminder about our exclusive ${campaignName.toLowerCase()}. 
                 Secure your savings before this amazing deal disappears forever.
               </p>
-
+              
               <div style="text-align: center; margin: 30px 0;">
                 <a href="#" style="background: #ff6b6b; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);">
                   SECURE MY DISCOUNT NOW →
                 </a>
               </div>
-
+              
               <div style="background: #fffacd; border-left: 4px solid #ffd700; padding: 15px; margin: 20px 0;">
                 <p style="margin: 0; color: #b8860b; font-weight: bold;">
                   💡 Pro Tip: Customers who book within the next 6 hours get an additional surprise bonus!
                 </p>
               </div>
             </div>
-
+            
             <div style="background: #f5f5f5; padding: 20px; text-align: center; color: #666; font-size: 14px;">
               <p>Don't wait - book now!<br>The ${companyName} Team</p>
             </div>
@@ -151,17 +151,17 @@ async function generateAITemplates(type: string, context: any): Promise<any[]> {
               <h1 style="margin: 0; font-size: 24px;">✈️ Recommended Just For You</h1>
               <p style="margin: 10px 0 0; font-size: 16px;">Based on your travel preferences</p>
             </div>
-
+            
             <div style="padding: 30px 20px;">
               <p style="color: #666; line-height: 1.6; font-size: 16px;">
                 Hi there! 👋
               </p>
-
+              
               <p style="color: #666; line-height: 1.6;">
                 We noticed you're planning your next adventure, and we have something special that caught our attention. 
                 Our ${campaignName.toLowerCase()} is perfectly tailored for travelers like you.
               </p>
-
+              
               <div style="background: #f0f7ff; border-radius: 10px; padding: 25px; margin: 25px 0;">
                 <h3 style="color: #0984e3; margin: 0 0 15px; display: flex; align-items: center;">
                   🎯 Your Personalized Offer
@@ -173,7 +173,7 @@ async function generateAITemplates(type: string, context: any): Promise<any[]> {
                   <p style="color: #666; margin: 0;">Perfect for enhancing your travel experience</p>
                 </div>
               </div>
-
+              
               <div style="background: #fff9e6; border-left: 4px solid #ffa500; padding: 20px; margin: 20px 0;">
                 <h4 style="color: #ff8c00; margin: 0 0 10px;">Why this offer is perfect for you:</h4>
                 <ul style="color: #666; margin: 0; padding-left: 20px;">
@@ -183,18 +183,18 @@ async function generateAITemplates(type: string, context: any): Promise<any[]> {
                   <li>24/7 customer support included</li>
                 </ul>
               </div>
-
+              
               <div style="text-align: center; margin: 30px 0;">
                 <a href="#" style="background: #0984e3; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
                   Explore This Offer →
                 </a>
               </div>
-
+              
               <p style="color: #888; font-size: 14px; text-align: center;">
                 Have questions? Reply to this email - we're here to help! 💬
               </p>
             </div>
-
+            
             <div style="background: #f5f5f5; padding: 20px; text-align: center; color: #666; font-size: 14px;">
               <p>Happy travels!<br>Your friends at ${companyName}</p>
             </div>
@@ -208,7 +208,7 @@ async function generateAITemplates(type: string, context: any): Promise<any[]> {
       }
     ];
   } 
-
+  
   else if (type === 'whatsapp') {
     return [
       {
@@ -249,7 +249,7 @@ async function generateAITemplates(type: string, context: any): Promise<any[]> {
       }
     ];
   }
-
+  
   return [];
 }
 
@@ -258,35 +258,6 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 export async function registerRoutes(app: Express): Promise<Server> {
   console.log("Registering routes...");
-
-  // Test endpoint to verify database connectivity
-  app.get("/api/test/db", async (req, res) => {
-    try {
-      console.log("API: Testing database connectivity...");
-      
-      // Test basic database connection
-      const testQuery = await storage.db.select().from(storage.db.select().from(agentTiers).limit(1));
-      console.log("API: Database connection test successful");
-      
-      // Test tier assignments table specifically
-      const assignmentsCount = await storage.db.select().from(agentTierAssignments).limit(1);
-      console.log("API: Tier assignments table accessible");
-      
-      res.json({
-        success: true,
-        message: "Database connectivity verified",
-        timestamp: new Date().toISOString()
-      });
-    } catch (error: any) {
-      console.error("API: Database connectivity test failed:", error);
-      res.status(500).json({
-        success: false,
-        message: "Database connectivity failed",
-        error: error.message,
-        timestamp: new Date().toISOString()
-      });
-    }
-  });
 
   // AI Template Generation endpoint
   app.post("/api/ai/generate-templates", async (req, res) => {
@@ -1355,6 +1326,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  console.log("General bundle routes registered successfully");
+
   // Offer Rules Routes
 
   // Get all offer rules with optional filters
@@ -1737,44 +1710,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Agent Routes
 
-  // Get all agents
+  // Get all agents with optional filters
   app.get("/api/agents", async (req, res) => {
     try {
-      console.log("API: Fetching agents list");
-
-      // Get unique agent IDs from tier assignments
-      const assignments = await storage.getAgentTierAssignments({});
-      const uniqueAgentIds = [...new Set(assignments.map((a: any) => a.agentId))];
-
-      // If no assignments exist, create sample data
-      if (uniqueAgentIds.length === 0) {
-        const sampleAgents = [
-          { id: "AGT001", name: "John Smith", email: "john.smith@company.com", status: "ACTIVE" },
-          { id: "AGT002", name: "Sarah Johnson", email: "sarah.johnson@company.com", status: "ACTIVE" },
-          { id: "AGT003", name: "Michael Brown", email: "michael.brown@company.com", status: "ACTIVE" },
-          { id: "AGT004", name: "Emily Davis", email: "emily.davis@company.com", status: "ACTIVE" },
-          { id: "AGT005", name: "David Wilson", email: "david.wilson@company.com", status: "ACTIVE" },
-        ];
-        console.log(`API: Returning ${sampleAgents.length} sample agents`);
-        return res.json(sampleAgents);
-      }
-
-      // Transform agent IDs to agent objects (in a real system, this would come from a user/agent database)
-      const agents = uniqueAgentIds.map((agentId: string) => ({
-        id: agentId,
-        name: agentId.replace("AGT", "Agent "), // Simple name generation
-        email: `${agentId.toLowerCase()}@company.com`,
-        status: "ACTIVE"
-      }));
-
-      console.log(`API: Returning ${agents.length} agents from assignments`);
+      const filters = req.query;
+      const agents = await storage.getAgents(filters);
       res.json(agents);
     } catch (error: any) {
-      console.error("API: Error fetching agents:", error);
-      res.status(500).json({ 
-        message: "Failed to fetch agents", 
-        error: error.message 
-      });
+      res.status(500).json({ message: "Failed to fetch agents", error: error.message });
     }
   });
 
@@ -2383,105 +2326,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/tiers", async (req, res) => {
     try {
       const filters = req.query;
-      let tiers = await storage.getAgentTiers(filters);
-
-      // If no tiers exist and no specific filters, create sample data
-      if (tiers.length === 0 && Object.keys(filters).length === 0) {
-        console.log("No agent tiers found, creating sample tiers...");
-
-        // Create sample agent tiers
-        const sampleTiers = [
-          {
-            tierCode: "PLATINUM",
-            displayName: "Platinum Elite",
-            kpiWindow: "QUARTERLY" as const,
-            kpiThresholds: {
-              totalBookingValueMin: 50000000,
-              totalBookingsMin: 1500,
-              avgBookingsPerMonthMin: 400,
-              avgSearchesPerMonthMin: 5000,
-              conversionPctMin: 8.0
-            },
-            defaultPricingPolicy: {
-              type: "PERCENT" as const,
-              value: -2.0
-            },
-            description: "Highest tier for elite agents with exceptional performance",
-            status: "ACTIVE" as const,
-            createdBy: "system"
-          },
-          {
-            tierCode: "GOLD",
-            displayName: "Gold Premium",
-            kpiWindow: "QUARTERLY" as const,
-            kpiThresholds: {
-              totalBookingValueMin: 30000000,
-              totalBookingsMin: 1000,
-              avgBookingsPerMonthMin: 250,
-              avgSearchesPerMonthMin: 3000,
-              conversionPctMin: 7.5
-            },
-            defaultPricingPolicy: {
-              type: "PERCENT" as const,
-              value: -1.0
-            },
-            description: "Premium tier for high-performing agents",
-            status: "ACTIVE" as const,
-            createdBy: "system"
-          },
-          {
-            tierCode: "SILVER",
-            displayName: "Silver Standard",
-            kpiWindow: "QUARTERLY" as const,
-            kpiThresholds: {
-              totalBookingValueMin: 15000000,
-              totalBookingsMin: 500,
-              avgBookingsPerMonthMin: 125,
-              avgSearchesPerMonthMin: 1500,
-              conversionPctMin: 7.0
-            },
-            defaultPricingPolicy: {
-              type: "PERCENT" as const,
-              value: 0.0
-            },
-            description: "Standard tier for regular agents",
-            status: "ACTIVE" as const,
-            createdBy: "system"
-          },
-          {
-            tierCode: "BRONZE",
-            displayName: "Bronze Basic",
-            kpiWindow: "QUARTERLY" as const,
-            kpiThresholds: {
-              totalBookingValueMin: 5000000,
-              totalBookingsMin: 200,
-              avgBookingsPerMonthMin: 50,
-              avgSearchesPerMonthMin: 800,
-              conversionPctMin: 6.0
-            },
-            defaultPricingPolicy: {
-              type: "PERCENT" as const,
-              value: 1.0
-            },
-            description: "Basic tier for new or low-volume agents",
-            status: "ACTIVE" as const,
-            createdBy: "system"
-          }
-        ];
-
-        try {
-          for (const tierData of sampleTiers) {
-            await storage.insertAgentTier(tierData);
-            console.log(`Created agent tier: ${tierData.tierCode}`);
-          }
-
-          // Refetch after creating samples
-          tiers = await storage.getAgentTiers(filters);
-        } catch (createError: any) {
-          console.error("Error creating sample agent tiers:", createError);
-        }
-      }
-
+      const tiers = await storage.getAgentTiers(filters);
       res.json(tiers);
     } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch agent tiers", error: error.message });
@@ -2558,200 +2403,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Tier Assignment Engine Routes
-
-  // Get all assignment engines
-  app.get("/api/tiers/engines", async (req, res) => {
-    try {
-      console.log("API: GET /api/tiers/engines called with query:", req.query);
-      const filters = req.query;
-      let engines = await storage.getTierAssignmentEngines(filters);
-
-      // If no engines exist and no specific filters, create sample data
-      if (engines.length === 0 && Object.keys(filters).length === 0) {
-        console.log("No assignment engines found, creating sample engine...");
-
-        const sampleEngine = {
-          engineCode: "AUTO_TIER_EVAL",
-          schedule: "0 0 1 * *", // Monthly on 1st day
-          reassignmentMode: "AUTO",
-          overrideAllowed: "true",
-          status: "ACTIVE",
-          createdBy: "system"
-        };
-
-        try {
-          await storage.insertTierAssignmentEngine(sampleEngine);
-          console.log("Created sample assignment engine");
-
-          // Refetch after creating sample
-          engines = await storage.getTierAssignmentEngines(filters);
-        } catch (createError: any) {
-          console.error("Error creating sample assignment engine:", createError);
-        }
-      }
-
-      console.log(`API: Returning ${engines.length} assignment engines`);
-      res.json(engines);
-    } catch (error: any) {
-      console.error("API: Error fetching assignment engines:", error);
-      res.status(500).json({ message: "Failed to fetch assignment engines", error: error.message });
-    }
-  });
-
-  // Create assignment engine
-  app.post("/api/tiers/engines", async (req, res) => {
-    try {
-      const validatedData = insertTierAssignmentEngineSchema.parse(req.body);
-      const engine = await storage.insertTierAssignmentEngine(validatedData);
-      res.status(201).json(engine);
-    } catch (error: any) {
-      res.status(400).json({ message: "Invalid engine data", error: error.message });
-    }
-  });
-
-  // Get assignment engine by ID
-  app.get("/api/tiers/engines/:id", async (req, res) => {
-    try {
-      const engine = await storage.getTierAssignmentEngineById(req.params.id);
-      if (!engine) {
-        return res.status(404).json({ message: "Assignment engine not found" });
-      }
-      res.json(engine);
-    } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch assignment engine", error: error.message });
-    }
-  });
-
-  // Update assignment engine
-  app.put("/api/tiers/engines/:id", async (req, res) => {
-    try {
-      const validatedData = insertTierAssignmentEngineSchema.parse(req.body);
-      const engine = await storage.updateTierAssignmentEngine(req.params.id, validatedData);
-      res.json(engine);
-    } catch (error: any) {
-      res.status(400).json({ message: "Failed to update engine", error: error.message });
-    }
-  });
-
-  // Delete assignment engine
-  app.delete("/api/tiers/engines/:id", async (req, res) => {
-    try {
-      await storage.deleteTierAssignmentEngine(req.params.id);
-      res.status(204).send();
-    } catch (error: any) {
-      res.status(500).json({ message: "Failed to delete engine", error: error.message });
-    }
-  });
-
   // Agent Tier Assignment Routes
 
   // Get all tier assignments with optional filters
   app.get("/api/tiers/assignments", async (req, res) => {
     try {
-      console.log("API: GET /api/tiers/assignments endpoint called");
-      console.log("API: Request query params:", req.query);
-      console.log("API: Request method:", req.method);
-      console.log("API: Request path:", req.path);
-
-      const filters = req.query || {};
-
-      console.log("API: Calling storage.getAgentTierAssignments with filters:", filters);
-      let assignments = await storage.getAgentTierAssignments(filters);
-      console.log(`API: Storage method returned:`, assignments);
-      console.log(`API: Storage returned ${assignments?.length || 0} tier assignments`);
-
-      // Ensure we always have an array
-      if (!Array.isArray(assignments)) {
-        console.log("API: Converting non-array result to empty array");
-        assignments = [];
-      }
-
-      // If no assignments exist and no specific filters, create sample data
-      if (assignments.length === 0 && Object.keys(filters).length === 0) {
-        console.log("API: No tier assignments found, creating sample assignments...");
-
-        // First ensure we have tiers to assign
-        const existingTiers = await storage.getAgentTiers({ status: "ACTIVE" });
-        console.log(`API: Found ${existingTiers.length} existing tiers for sample creation`);
-
-        if (existingTiers.length > 0) {
-          // Create sample tier assignments
-          const sampleAssignments = [
-            {
-              agentId: "AGT001",
-              tierCode: "PLATINUM",
-              assignmentType: "AUTO" as const,
-              effectiveFrom: "2024-01-01",
-              kpiData: {
-                totalBookingValue: 75000000,
-                totalBookings: 2500,
-                avgBookingsPerMonth: 625,
-                avgSearchesPerMonth: 7500,
-                conversionPct: 8.3
-              },
-              assignedBy: "system",
-              justification: "Automatic assignment based on KPI evaluation",
-              status: "ACTIVE" as const,
-            },
-            {
-              agentId: "AGT002",
-              tierCode: "GOLD",
-              assignmentType: "AUTO" as const,
-              effectiveFrom: "2024-01-01",
-              kpiData: {
-                totalBookingValue: 45000000,
-                totalBookings: 1800,
-                avgBookingsPerMonth: 450,
-                avgSearchesPerMonth: 5000,
-                conversionPct: 9.0
-              },
-              assignedBy: "system",
-              justification: "Automatic assignment based on KPI evaluation",
-              status: "ACTIVE" as const,
-            },
-            {
-              agentId: "AGT003",
-              tierCode: "SILVER",
-              assignmentType: "MANUAL_OVERRIDE" as const,
-              effectiveFrom: "2024-02-15",
-              assignedBy: "admin",
-              justification: "Manual upgrade due to exceptional performance in specific routes",
-              status: "ACTIVE" as const,
-            }
-          ];
-
-          try {
-            for (const assignmentData of sampleAssignments) {
-              const created = await storage.insertAgentTierAssignment(assignmentData);
-              console.log(`API: Created tier assignment for agent: ${assignmentData.agentId}`, created);
-            }
-
-            // Refetch after creating samples
-            assignments = await storage.getAgentTierAssignments(filters);
-            console.log(`API: After sample creation: ${assignments?.length || 0} assignments`);
-          } catch (createError: any) {
-            console.error("API: Error creating sample tier assignments:", createError);
-            console.error("API: Create error details:", createError.message);
-            console.error("API: Create error stack:", createError.stack);
-          }
-        } else {
-          console.log("API: No tiers found, cannot create sample assignments");
-        }
-      }
-
-      console.log(`API: Final response - returning ${assignments.length} tier assignments`);
-      res.status(200).json(assignments);
+      const filters = req.query;
+      const assignments = await storage.getAgentTierAssignments(filters);
+      res.json(assignments);
     } catch (error: any) {
-      console.error("API: Critical error in /api/tiers/assignments endpoint:", error);
-      console.error("API: Error message:", error.message);
-      console.error("API: Error stack:", error.stack);
-      res.status(500).json({ 
-        message: "Failed to fetch tier assignments", 
-        error: error.message,
-        endpoint: "/api/tiers/assignments",
-        timestamp: new Date().toISOString()
-      });
+      res.status(500).json({ message: "Failed to fetch tier assignments", error: error.message });
     }
   });
 
@@ -2904,7 +2565,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Calculate KPIs
-      const kpiData = await storage.calculateAgentKPIs(agentId, window as any); // Cast needed due to string literal type
+      const kpiData = await storage.calculateAgentKPIs(agentId, window);
 
       // Evaluate tier
       const recommendedTier = await storage.evaluateAgentTier(agentId, kpiData);
@@ -2925,7 +2586,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Tier Assignment Engine Routes
 
+  // Get all assignment engines
+  app.get("/api/tiers/engines", async (req, res) => {
+    try {
+      const filters = req.query;
+      const engines = await storage.getTierAssignmentEngines(filters);
+      res.json(engines);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch assignment engines", error: error.message });
+    }
+  });
+
+  // Create assignment engine
+  app.post("/api/tiers/engines", async (req, res) => {
+    try {
+      const validatedData = insertTierAssignmentEngineSchema.parse(req.body);
+      const engine = await storage.insertTierAssignmentEngine(validatedData);
+      res.status(201).json(engine);
+    } catch (error: any) {
+      res.status(400).json({ message: "Invalid engine data", error: error.message });
+    }
+  });
+
+  // Update assignment engine
+  app.put("/api/tiers/engines/:id", async (req, res) => {
+    try {
+      const validatedData = insertTierAssignmentEngineSchema.parse(req.body);
+      const engine = await storage.updateTierAssignmentEngine(req.params.id, validatedData);
+      res.json(engine);
+    } catch (error: any) {
+      res.status(400).json({ message: "Failed to update engine", error: error.message });
+    }
+  });
+
+  // Delete assignment engine
+  app.delete("/api/tiers/engines/:id", async (req, res) => {
+    try {
+      await storage.deleteTierAssignmentEngine(req.params.id);
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to delete engine", error: error.message });
+    }
+  });
 
   // Campaign Management Routes
 

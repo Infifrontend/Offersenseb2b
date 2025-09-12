@@ -145,13 +145,6 @@ interface AssignmentEngine {
   updatedAt: string;
 }
 
-interface Agent {
-  id: string;
-  name: string;
-  email: string;
-  status: string;
-}
-
 type TierFormData = z.infer<typeof tierFormSchema>;
 type EngineFormData = z.infer<typeof engineFormSchema>;
 type OverrideFormData = z.infer<typeof overrideFormSchema>;
@@ -258,34 +251,9 @@ export default function AgentTierManager() {
   } = useQuery({
     queryKey: ["/api/tiers/engines"],
     queryFn: async () => {
-      console.log("Fetching tier assignment engines...");
       const response = await fetch("/api/tiers/engines");
-      if (!response.ok) {
-        console.error("Failed to fetch engines:", response.status, response.statusText);
-        throw new Error("Failed to fetch engines");
-      }
-      const data = await response.json();
-      console.log("Fetched engines:", data);
-      return data;
-    },
-  });
-
-  const {
-    data: agents = [],
-    isLoading: agentsLoading,
-    refetch: refetchAgents,
-  } = useQuery({
-    queryKey: ["/api/agents"],
-    queryFn: async () => {
-      console.log("Fetching agents...");
-      const response = await fetch("/api/agents");
-      if (!response.ok) {
-        console.error("Failed to fetch agents:", response.status, response.statusText);
-        throw new Error("Failed to fetch agents");
-      }
-      const data = await response.json();
-      console.log("Fetched agents:", data);
-      return data;
+      if (!response.ok) throw new Error("Failed to fetch engines");
+      return response.json();
     },
   });
 
@@ -942,26 +910,17 @@ export default function AgentTierManager() {
                   Configure automated tier assignment schedules and policies.
                 </p>
               </div>
-              <Space>
-                <AntButton
-                  icon={<ReloadOutlined />}
-                  onClick={() => refetchEngines()}
-                  loading={enginesLoading}
-                >
-                  Refresh
-                </AntButton>
-                <AntButton
-                  type="primary"
-                  icon={<PlusOutlined />}
-                  onClick={() => {
-                    setEditingEngine(null);
-                    engineForm.resetFields();
-                    setIsEngineModalVisible(true);
-                  }}
-                >
-                  Add Engine
-                </AntButton>
-              </Space>
+              <AntButton
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => {
+                  setEditingEngine(null);
+                  engineForm.resetFields();
+                  setIsEngineModalVisible(true);
+                }}
+              >
+                Add Engine
+              </AntButton>
             </div>
 
             <Table
@@ -1455,26 +1414,10 @@ export default function AgentTierManager() {
             <Col span={12}>
               <AntForm.Item
                 name="agentId"
-                label="Select Agent"
-                rules={[{ required: true, message: "Agent selection is required" }]}
+                label="Agent ID"
+                rules={[{ required: true, message: "Agent ID is required" }]}
               >
-                <AntSelect 
-                  placeholder="Select an agent"
-                  loading={agentsLoading}
-                  showSearch
-                  filterOption={(input, option) =>
-                    (option?.children as any)?.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                  }
-                >
-                  {agents.map((agent: any) => (
-                    <AntSelect.Option key={agent.id} value={agent.id}>
-                      <div className="flex flex-col">
-                        <span className="font-medium">{agent.name}</span>
-                        <span className="text-xs text-gray-500">{agent.id} • {agent.email}</span>
-                      </div>
-                    </AntSelect.Option>
-                  ))}
-                </AntSelect>
+                <Input placeholder="Enter Agent ID" />
               </AntForm.Item>
             </Col>
             <Col span={12}>

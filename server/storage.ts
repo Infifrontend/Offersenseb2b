@@ -186,8 +186,6 @@ export interface IStorage {
   supersedePreviousAssignments(agentId: string, newEffectiveFrom: string): Promise<void>;
   updateAgentTierAssignment(id: string, assignmentData: Partial<InsertAgentTierAssignment>): Promise<AgentTierAssignment>;
   deleteAgentTierAssignment(id: string): Promise<void>;
-  calculateAgentKPIs(agentId: string, window: string): Promise<any>;
-  evaluateAgentTier(agentId: string, kpiData: any): Promise<string>;
 
   // Tier Assignment Engine operations
   getTierAssignmentEngines(filters?: any): Promise<TierAssignmentEngine[]>;
@@ -1516,163 +1514,94 @@ export class DatabaseStorage implements IStorage {
 
   // Agent Tier Assignment operations
   async getAgentTierAssignments(filters: any = {}): Promise<AgentTierAssignment[]> {
-    console.log("Storage: getAgentTierAssignments called with filters:", filters);
+    let query = this.db.select().from(agentTierAssignments);
+    const conditions = [];
 
-    try {
-      let query = this.db.select().from(agentTierAssignments);
-      const conditions = [];
-
-      if (filters.agentId) {
-        conditions.push(eq(agentTierAssignments.agentId, filters.agentId));
-      }
-      if (filters.tierCode) {
-        conditions.push(eq(agentTierAssignments.tierCode, filters.tierCode));
-      }
-      if (filters.status) {
-        conditions.push(eq(agentTierAssignments.status, filters.status));
-      }
-      if (filters.assignmentType) {
-        conditions.push(eq(agentTierAssignments.assignmentType, filters.assignmentType));
-      }
-
-      if (conditions.length > 0) {
-        query = query.where(and(...conditions));
-      }
-
-      console.log("Storage: Executing tier assignments query...");
-      const results = await query.orderBy(desc(agentTierAssignments.effectiveFrom));
-      console.log(`Storage: Query executed successfully, found ${results?.length || 0} tier assignments`);
-
-      // Ensure we always return an array
-      return Array.isArray(results) ? results : [];
-    } catch (error: any) {
-      console.error("Storage: Database error in getAgentTierAssignments:", error);
-      console.error("Storage: Error details:", error.message);
-      // Throw the error instead of swallowing it so the route can handle it properly
-      throw new Error(`Failed to fetch tier assignments: ${error.message}`);
+    if (filters.agentId) {
+      conditions.push(eq(agentTierAssignments.agentId, filters.agentId));
     }
+    if (filters.tierCode) {
+      conditions.push(eq(agentTierAssignments.tierCode, filters.tierCode));
+    }
+    if (filters.status) {
+      conditions.push(eq(agentTierAssignments.status, filters.status));
+    }
+    if (filters.assignmentType) {
+      conditions.push(eq(agentTierAssignments.assignmentType, filters.assignmentType));
+    }
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+
+    return await query.orderBy(desc(agentTierAssignments.effectiveFrom));
   }
 
   async insertAgentTierAssignment(assignmentData: InsertAgentTierAssignment): Promise<AgentTierAssignment> {
-    console.log("Storage: insertAgentTierAssignment called with:", assignmentData);
-    
-    try {
-      const [result] = await this.db.insert(agentTierAssignments).values(assignmentData).returning();
-      console.log("Storage: Created tier assignment:", result);
-      return result;
-    } catch (error) {
-      console.error("Storage: Error creating tier assignment:", error);
-      throw error;
-    }
+    const [assignment] = await this.db.insert(agentTierAssignments).values(assignmentData).returning();
+    return assignment;
   }
 
   async getCurrentAgentTierAssignment(agentId: string): Promise<AgentTierAssignment | null> {
-    console.log("Storage: getCurrentAgentTierAssignment called for agent:", agentId);
-    
-    try {
-      const [result] = await this.db
-        .select()
-        .from(agentTierAssignments)
-        .where(
-          and(
-            eq(agentTierAssignments.agentId, agentId),
-            eq(agentTierAssignments.status, "ACTIVE")
-          )
+    const [assignment] = await this.db
+      .select()
+      .from(agentTierAssignments)
+      .where(
+        and(
+          eq(agentTierAssignments.agentId, agentId),
+          eq(agentTierAssignments.status, "ACTIVE"),
+          sql`${agentTierAssignments.effectiveFrom} <= CURRENT_DATE`,
+          sql`(${agentTierAssignments.effectiveTo} IS NULL OR ${agentTierAssignments.effectiveTo} > CURRENT_DATE)`
         )
-        .orderBy(desc(agentTierAssignments.effectiveFrom))
-        .limit(1);
-      
-      console.log("Storage: Current assignment:", result || "None found");
-      return result || null;
-    } catch (error) {
-      console.error("Storage: Error getting current assignment:", error);
-      throw error;
-    }
+      )
+      .orderBy(desc(agentTierAssignments.effectiveFrom))
+      .limit(1);
+    return assignment || null;
   }
 
   async supersedePreviousAssignments(agentId: string, newEffectiveFrom: string): Promise<void> {
-    console.log("Storage: supersedePreviousAssignments called for agent:", agentId);
-    
-    try {
-      await this.db
-        .update(agentTierAssignments)
-        .set({ 
-          status: "SUPERSEDED",
-          effectiveTo: newEffectiveFrom,
-          updatedAt: new Date()
-        })
-        .where(
-          and(
-            eq(agentTierAssignments.agentId, agentId),
-            eq(agentTierAssignments.status, "ACTIVE")
-          )
-        );
-      
-      console.log("Storage: Superseded previous assignments");
-    } catch (error) {
-      console.error("Storage: Error superseding assignments:", error);
-      throw error;
-    }
+    await this.db
+      .update(agentTierAssignments)
+      .set({ 
+        status: "SUPERSEDED", 
+        effectiveTo: newEffectiveFrom,
+        updatedAt: new Date() 
+      })
+      .where(
+        and(
+          eq(agentTierAssignments.agentId, agentId),
+          eq(agentTierAssignments.status, "ACTIVE")
+        )
+      );
   }
 
   async updateAgentTierAssignment(id: string, assignmentData: Partial<InsertAgentTierAssignment>): Promise<AgentTierAssignment> {
-    console.log("Storage: updateAgentTierAssignment called:", id, assignmentData);
-    
-    try {
-      const [result] = await this.db
-        .update(agentTierAssignments)
-        .set({ ...assignmentData, updatedAt: new Date() })
-        .where(eq(agentTierAssignments.id, id))
-        .returning();
-      
-      if (!result) {
-        throw new Error("Tier assignment not found");
-      }
-      
-      console.log("Storage: Updated tier assignment:", result);
-      return result;
-    } catch (error) {
-      console.error("Storage: Error updating tier assignment:", error);
-      throw error;
-    }
+    const [assignment] = await this.db
+      .update(agentTierAssignments)
+      .set({ ...assignmentData, updatedAt: new Date() })
+      .where(eq(agentTierAssignments.id, id))
+      .returning();
+    return assignment;
   }
 
   async deleteAgentTierAssignment(id: string): Promise<void> {
-    console.log("Storage: deleteAgentTierAssignment called:", id);
-    
-    try {
-      await this.db.delete(agentTierAssignments).where(eq(agentTierAssignments.id, id));
-      console.log("Storage: Deleted tier assignment");
-    } catch (error) {
-      console.error("Storage: Error deleting tier assignment:", error);
-      throw error;
-    }
+    await this.db.delete(agentTierAssignments).where(eq(agentTierAssignments.id, id));
   }
 
   // Tier Assignment Engine operations
   async getTierAssignmentEngines(filters: any = {}): Promise<TierAssignmentEngine[]> {
-    try {
-      console.log("Storage: getTierAssignmentEngines called with filters:", filters);
+    let query = this.db.select().from(tierAssignmentEngine);
+    const conditions = [];
 
-      let query = this.db.select().from(tierAssignmentEngine);
-      const conditions = [];
-
-      if (filters.status) {
-        conditions.push(eq(tierAssignmentEngine.status, filters.status));
-      }
-
-      if (conditions.length > 0) {
-        query = query.where(and(...conditions));
-      }
-
-      const results = await query.orderBy(desc(tierAssignmentEngine.createdAt));
-      console.log(`Storage: Found ${results?.length || 0} tier assignment engines`);
-
-      return Array.isArray(results) ? results : [];
-    } catch (error: any) {
-      console.error("Storage: Error in getTierAssignmentEngines:", error);
-      return [];
+    if (filters.status) {
+      conditions.push(eq(tierAssignmentEngine.status, filters.status));
     }
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+
+    return await query.orderBy(desc(tierAssignmentEngine.createdAt));
   }
 
   async insertTierAssignmentEngine(engineData: InsertTierAssignmentEngine): Promise<TierAssignmentEngine> {
@@ -1705,77 +1634,44 @@ export class DatabaseStorage implements IStorage {
     await this.db.delete(tierAssignmentEngine).where(eq(tierAssignmentEngine.id, id));
   }
 
-  async checkTierConflicts(tierData: InsertAgentTier): Promise<any[]> {
-    const conflicts = [];
-
-    // Check for duplicate tier code
-    const existingTier = await this.getAgentTierByCode(tierData.tierCode);
-    if (existingTier) {
-      conflicts.push({
-        type: 'DUPLICATE_TIER_CODE',
-        message: `Tier with code ${tierData.tierCode} already exists`,
-        conflictingTier: existingTier
-      });
-    }
-
-    return conflicts;
-  }
-
   // KPI calculation and tier evaluation helpers
   async calculateAgentKPIs(agentId: string, window: 'MONTHLY' | 'QUARTERLY'): Promise<any> {
-    console.log("Storage: calculateAgentKPIs called for agent:", agentId, "window:", window);
-    
-    // Mock KPI calculation - in real implementation this would aggregate booking data
+    // Mock KPI calculation - in real implementation, this would aggregate from booking data
     const mockKPIs = {
-      totalBookingValue: Math.floor(Math.random() * 100000000) + 10000000,
-      totalBookings: Math.floor(Math.random() * 3000) + 500,
-      avgBookingsPerMonth: Math.floor(Math.random() * 800) + 100,
-      avgSearchesPerMonth: Math.floor(Math.random() * 10000) + 1000,
-      conversionPct: Math.round((Math.random() * 5 + 5) * 100) / 100 // 5-10%
+      totalBookingValue: Math.floor(Math.random() * 100000000), // 0-100M
+      totalBookings: Math.floor(Math.random() * 2000), // 0-2000
+      avgBookingsPerMonth: Math.floor(Math.random() * 500), // 0-500
+      avgSearchesPerMonth: Math.floor(Math.random() * 6000), // 0-6000
+      conversionPct: Math.round((Math.random() * 15) * 100) / 100, // 0-15%
     };
-    
-    console.log("Storage: Calculated KPIs:", mockKPIs);
     return mockKPIs;
   }
 
   async evaluateAgentTier(agentId: string, kpiData: any): Promise<string> {
-    console.log("Storage: evaluateAgentTier called for agent:", agentId, "with KPIs:", kpiData);
-    
-    try {
-      // Get all active tiers
-      const tiers = await this.getAgentTiers({ status: "ACTIVE" });
-      
-      // Sort tiers by threshold requirements (descending order)
-      const sortedTiers = tiers.sort((a, b) => {
-        const aThresholds = a.kpiThresholds as any;
-        const bThresholds = b.kpiThresholds as any;
-        return (bThresholds.totalBookingValueMin || 0) - (aThresholds.totalBookingValueMin || 0);
-      });
-      
-      // Evaluate against each tier
-      for (const tier of sortedTiers) {
-        const thresholds = tier.kpiThresholds as any;
-        
-        const meetsRequirements = 
-          (kpiData.totalBookingValue >= (thresholds.totalBookingValueMin || 0)) &&
-          (kpiData.totalBookings >= (thresholds.totalBookingsMin || 0)) &&
-          (kpiData.avgBookingsPerMonth >= (thresholds.avgBookingsPerMonthMin || 0)) &&
-          (kpiData.avgSearchesPerMonth >= (thresholds.avgSearchesPerMonthMin || 0)) &&
-          (kpiData.conversionPct >= (thresholds.conversionPctMin || 0));
-        
-        if (meetsRequirements) {
-          console.log("Storage: Agent qualifies for tier:", tier.tierCode);
-          return tier.tierCode;
-        }
+    const tiers = await this.getAgentTiers({ status: 'ACTIVE' });
+
+    // Sort tiers by requirements (highest to lowest)
+    const sortedTiers = tiers.sort((a, b) => {
+      const aThreshold = (a.kpiThresholds as any).totalBookingValueMin;
+      const bThreshold = (b.kpiThresholds as any).totalBookingValueMin;
+      return bThreshold - aThreshold;
+    });
+
+    // Find the highest tier the agent qualifies for
+    for (const tier of sortedTiers) {
+      const thresholds = tier.kpiThresholds as any;
+
+      if (kpiData.totalBookingValue >= thresholds.totalBookingValueMin &&
+          kpiData.totalBookings >= thresholds.totalBookingsMin &&
+          kpiData.avgBookingsPerMonth >= thresholds.avgBookingsPerMonthMin &&
+          kpiData.avgSearchesPerMonth >= thresholds.avgSearchesPerMonthMin &&
+          kpiData.conversionPct >= thresholds.conversionPctMin) {
+        return tier.tierCode;
       }
-      
-      // Default to BRONZE if no tier matches
-      console.log("Storage: Agent defaults to BRONZE tier");
-      return "BRONZE";
-    } catch (error) {
-      console.error("Storage: Error evaluating tier:", error);
-      return "BRONZE"; // Safe default
     }
+
+    // Default to BRONZE if no tier qualifies
+    return 'BRONZE';
   }
 
   async checkTierConflicts(tierData: InsertAgentTier): Promise<any[]> {

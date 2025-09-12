@@ -889,9 +889,11 @@ export default function AirAncillariesDiscounting() {
               virtual={false}
               showSearch
               filterOption={(input, option) =>
-                option?.children?.toLowerCase().indexOf(input.toLowerCase()) >=
-                  0 ||
-                option?.value?.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                option?.children
+                  ?.toLowerCase()
+                  .indexOf(input.toLowerCase()) >= 0 ||
+                option?.value?.toLowerCase().indexOf(input.toLowerCase()) >=
+                  0
               }
             >
               {availableCohorts.map((cohort: any) => (
@@ -899,7 +901,9 @@ export default function AirAncillariesDiscounting() {
                   <div style={{ display: "flex", flexDirection: "column" }}>
                     <div className="cls-cohort-dropdwon">
                       <p>{cohort.cohortName}</p>{" "}
-                      <span className="text-gray-600">{cohort.cohortCode}</span>
+                      <span className="text-gray-600">
+                        {cohort.cohortCode}
+                      </span>
                     </div>
                   </div>
                 </AntSelect.Option>

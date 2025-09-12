@@ -27,7 +27,7 @@ import {
   Timeline,
   Divider,
   Radio,
-  Checkbox as AntCheckbox,
+  Checkbox,
 } from "antd";
 import {
   Megaphone,
@@ -54,7 +54,6 @@ import {
   Clock,
   AlertCircle,
   Square,
-  MessageCircle,
 } from "lucide-react";
 import dayjs from "dayjs";
 import { z } from "zod";
@@ -957,7 +956,28 @@ export default function CampaignManager() {
 
       {/* Campaign Modal */}
       <Modal
-        title={editingCampaign ? "Edit Campaign" : "Create New Campaign"}
+        title={
+          <div className="flex items-center space-x-3 py-2">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+              {editingCampaign ? (
+                <Edit className="w-5 h-5 text-white" />
+              ) : (
+                <Plus className="w-5 h-5 text-white" />
+              )}
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900">
+                {editingCampaign ? "Edit Campaign" : "Create New Campaign"}
+              </h2>
+              <p className="text-sm text-gray-500 mt-0.5">
+                {editingCampaign 
+                  ? "Update your campaign settings and targeting" 
+                  : "Set up a new upsell campaign with AI-powered templates"
+                }
+              </p>
+            </div>
+          </div>
+        }
         open={isCampaignModalVisible}
         onCancel={() => {
           setIsCampaignModalVisible(false);
@@ -966,472 +986,582 @@ export default function CampaignManager() {
         }}
         footer={null}
         width={1000}
+        className="campaign-modal"
+        styles={{
+          header: {
+            backgroundColor: '#fafafa',
+            borderBottom: '1px solid #f0f0f0',
+            borderRadius: '8px 8px 0 0',
+            padding: '20px 24px'
+          },
+          body: {
+            padding: '0'
+          }
+        }}
       >
+        <div className="bg-gray-50 px-6 py-4 border-b">
+          <div className="flex items-center space-x-4">
+            <div className="flex-1">
+              <div className="flex items-center space-x-2 text-sm text-gray-600 mb-2">
+                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                  <span className="text-xs font-medium text-blue-600">1</span>
+                </div>
+                <span>Campaign Details</span>
+                <div className="flex-1 h-px bg-gray-200"></div>
+                <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center">
+                  <span className="text-xs font-medium text-gray-400">2</span>
+                </div>
+                <span className="text-gray-400">Targeting</span>
+                <div className="flex-1 h-px bg-gray-200"></div>
+                <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center">
+                  <span className="text-xs font-medium text-gray-400">3</span>
+                </div>
+                <span className="text-gray-400">Products & Offers</span>
+                <div className="flex-1 h-px bg-gray-200"></div>
+                <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center">
+                  <span className="text-xs font-medium text-gray-400">4</span>
+                </div>
+                <span className="text-gray-400">Communication</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <AntForm
           form={campaignForm}
           layout="vertical"
           onFinish={handleCampaignSubmit}
-          className="mt-4"
+          className="p-6"
         >
-          <Row gutter={16}>
-            <Col span={12}>
-              <AntForm.Item
-                name="campaignCode"
-                label="Campaign Code"
-                rules={[
-                  { required: true, message: "Campaign code is required" },
-                ]}
-              >
-                <Input placeholder="PRETRAVEL_BAG_PUSH" />
-              </AntForm.Item>
-            </Col>
-            <Col span={12}>
-              <AntForm.Item
-                name="campaignName"
-                label="Campaign Name"
-                rules={[
-                  { required: true, message: "Campaign name is required" },
-                ]}
-              >
-                <Input placeholder="Pre-Travel Baggage Upsell" />
-              </AntForm.Item>
-            </Col>
-          </Row>
-
-          <Divider orientation="left">Target Audience</Divider>
-
-          <Row gutter={16}>
-            <Col span={12}>
-              <AntForm.Item name={["target", "agentTiers"]} label="Agent Tiers">
-                <AntSelect
-                  mode="multiple"
-                  placeholder="Select agent tiers"
-                  options={agentTiers.map((tier) => ({
-                    label: tier,
-                    value: tier,
-                  }))}
-                />
-              </AntForm.Item>
-            </Col>
-            <Col span={12}>
-              <AntForm.Item name={["target", "channel"]} label="Channels">
-                <AntSelect
-                  mode="multiple"
-                  placeholder="Select channels"
-                  options={channels.map((channel) => ({
-                    label: channel,
-                    value: channel,
-                  }))}
-                />
-              </AntForm.Item>
-            </Col>
-          </Row>
-
-          <Row gutter={16}>
-            <Col span={12}>
-              <AntForm.Item name={["target", "cohorts"]} label="Cohorts">
-                <AntSelect
-                  mode="multiple"
-                  placeholder="Select cohorts"
-                  loading={isCohortsLoading}
-                  options={availableCohorts.map(
-                    (cohort: { id: string; cohortName: string }) => ({
-                      label: cohort.cohortName,
-                      value: cohort.id,
-                    }),
-                  )}
-                />
-              </AntForm.Item>
-            </Col>
-            <Col span={12}>
-              <AntForm.Item name={["target", "pos"]} label="Point of Sale">
-                <AntSelect
-                  mode="multiple"
-                  placeholder="Select POS countries"
-                  options={[
-                    { label: "India (IN)", value: "IN" },
-                    { label: "UAE (AE)", value: "AE" },
-                    { label: "Singapore (SG)", value: "SG" },
-                    { label: "USA (US)", value: "US" },
+          {/* Campaign Basic Info Section */}
+          <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Megaphone className="w-4 h-4 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Campaign Information</h3>
+                <p className="text-sm text-gray-500">Basic details and identification for your campaign</p>
+              </div>
+            </div>
+            
+            <Row gutter={20}>
+              <Col span={12}>
+                <AntForm.Item
+                  name="campaignCode"
+                  label={<span className="text-sm font-medium text-gray-700">Campaign Code</span>}
+                  rules={[
+                    { required: true, message: "Campaign code is required" },
                   ]}
-                />
-              </AntForm.Item>
-            </Col>
-          </Row>
-
-          <Divider orientation="left">Products & Offer</Divider>
-          <Row gutter={16}>
-            <Col span={12}>
-              <AntForm.Item
-                name={["products", "ancillaries"]}
-                label="Ancillary Products"
-              >
-                <AntSelect
-                  mode="multiple"
-                  placeholder="Select ancillary products"
-                  loading={isAncillariesLoading}
-                  showSearch
-                  filterOption={(input, option) =>
-                    option?.children?.props?.children?.[0]?.props?.children?.[0]?.toLowerCase()
-                      .includes(input.toLowerCase()) ||
-                    option?.children?.props?.children?.[1]?.props?.children?.[0]?.toLowerCase()
-                      .includes(input.toLowerCase())
-                  }
                 >
-                  {availableAncillaries.map((rule: any) => (
-                    <AntSelect.Option key={rule.id} value={rule.ancillaryCode}>
-                      <div>
-                        <div className="font-medium">
-                          {`${rule.ruleCode} / ${rule.ancillaryCode}`}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {rule.adjustmentType === "FREE"
-                            ? "Free"
-                            : rule.adjustmentType === "PERCENT"
-                              ? `${rule.adjustmentValue}% discount`
-                              : `$${rule.adjustmentValue} discount`}{" "}
-                          • {rule.pos?.join(", ")} •{" "}
-                          {rule.agentTier?.join(", ")}
-                        </div>
-                      </div>
-                    </AntSelect.Option>
-                  ))}
-                </AntSelect>
-              </AntForm.Item>
-            </Col>
-            <Col span={12}>
-              <AntForm.Item
-                name={["products", "bundles"]}
-                label="Bundle Products"
-              >
-                <AntSelect
-                  mode="multiple"
-                  placeholder="Select bundle products"
-                  showSearch
-                  filterOption={(input, option) =>
-                    option?.label?.toLowerCase().indexOf(input.toLowerCase()) >=
-                    0
-                  }
+                  <Input 
+                    placeholder="PRETRAVEL_BAG_PUSH" 
+                    className="h-10 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  />
+                </AntForm.Item>
+              </Col>
+              <Col span={12}>
+                <AntForm.Item
+                  name="campaignName"
+                  label={<span className="text-sm font-medium text-gray-700">Campaign Name</span>}
+                  rules={[
+                    { required: true, message: "Campaign name is required" },
+                  ]}
                 >
-                  {bundles.map((bundle) => (
-                    <AntSelect.Option key={bundle.id} value={bundle.bundleCode}>
-                      <div>
-                        <div className="font-medium">{bundle.bundleCode}</div>
-                        <div className="text-xs text-gray-500">
-                          {bundle.bundleName} •{" "}
-                          {bundle.components?.slice(0, 3).join(", ")}
-                          {bundle.components?.length > 3 &&
-                            ` +${bundle.components.length - 3} more`}
-                        </div>
-                      </div>
-                    </AntSelect.Option>
-                  ))}
-                </AntSelect>
-              </AntForm.Item>
-            </Col>
-          </Row>
-
-          <Row gutter={16}>
-            <Col span={8}>
-              <AntForm.Item
-                name={["offer", "type"]}
-                label="Offer Type"
-                rules={[{ required: true, message: "Offer type is required" }]}
-              >
-                <AntSelect placeholder="Select offer type">
-                  {offerTypes.map((type) => (
-                    <AntSelect.Option key={type} value={type}>
-                      {type === "PERCENT"
-                        ? "Percentage Discount"
-                        : type === "AMOUNT"
-                          ? "Amount Discount"
-                          : "Special Price"}
-                    </AntSelect.Option>
-                  ))}
-                </AntSelect>
-              </AntForm.Item>
-            </Col>
-            <Col span={8}>
-              <AntForm.Item name={["offer", "value"]} label="Discount Value">
-                <InputNumber
-                  placeholder="10 (for 10% or $10)"
-                  style={{ width: "100%" }}
-                  min={0}
-                />
-              </AntForm.Item>
-            </Col>
-            <Col span={8}>
-              <AntForm.Item
-                name={["offer", "specialPrice"]}
-                label="Special Price"
-              >
-                <InputNumber
-                  placeholder="99.99"
-                  style={{ width: "100%" }}
-                  min={0}
-                  step={0.01}
-                />
-              </AntForm.Item>
-            </Col>
-          </Row>
-
-          <Divider orientation="left">Campaign Lifecycle</Divider>
-
-          <Row gutter={16}>
-            <Col span={12}>
-              <AntForm.Item
-                name={["lifecycle", "startDate"]}
-                label="Start Date"
-                rules={[{ required: true, message: "Start date is required" }]}
-              >
-                <DatePicker style={{ width: "100%" }} />
-              </AntForm.Item>
-            </Col>
-            <Col span={12}>
-              <AntForm.Item
-                name={["lifecycle", "endDate"]}
-                label="End Date"
-                rules={[{ required: true, message: "End date is required" }]}
-              >
-                <DatePicker style={{ width: "100%" }} />
-              </AntForm.Item>
-            </Col>
-          </Row>
-
-          <Row gutter={16}>
-            <Col span={8}>
-              <AntForm.Item
-                name={["lifecycle", "frequency"]}
-                label="Frequency (Cron)"
-              >
-                <Input placeholder="0 10 * * * (daily at 10 AM)" />
-              </AntForm.Item>
-            </Col>
-            <Col span={8}>
-              <AntForm.Item name={["lifecycle", "maxSends"]} label="Max Sends">
-                <InputNumber
-                  placeholder="3"
-                  style={{ width: "100%" }}
-                  min={1}
-                />
-              </AntForm.Item>
-            </Col>
-            <Col span={8}>
-              <AntForm.Item
-                name={["lifecycle", "capPerPNR"]}
-                label="Cap Per PNR"
-              >
-                <InputNumber
-                  placeholder="1"
-                  style={{ width: "100%" }}
-                  min={1}
-                />
-              </AntForm.Item>
-            </Col>
-          </Row>
-
-          <Divider orientation="left">Communication Channels</Divider>
-
-          <Row gutter={16}>
-            <Col span={8}>
-              <AntForm.Item name={["comms", "portalBanner"]} valuePropName="checked">
-                <AntCheckbox>Portal Banner</AntCheckbox>
-              </AntForm.Item>
-            </Col>
-            <Col span={8}>
-              <AntForm.Item name={["comms", "apiPush"]} valuePropName="checked">
-                <AntCheckbox>API Push Notifications</AntCheckbox>
-              </AntForm.Item>
-            </Col>
-          </Row>
-
-          {/* Email Template Preview & Selection */}
-          <div className="space-y-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
-            <h4 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-              <Mail className="w-5 h-5 text-blue-600" />
-              Email Template Preview & Selection
-            </h4>
-            <Tabs defaultActiveKey="1" className="email-template-tabs">
-              <TabPane tab="🎯 Promotional" key="1">
-                <div className="bg-white p-4 rounded border">
-                  <div className="border-l-4 border-blue-500 pl-3 mb-3">
-                    <h5 className="font-semibold text-gray-900">Promotional Campaign</h5>
-                    <p className="text-sm text-gray-600">Perfect for upselling and special offers</p>
-                  </div>
-                  <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded">
-                    <strong>Subject:</strong> Exclusive Offer - Add Comfort to Your Journey!<br/>
-                    <strong>Preview:</strong> Hi {"{"}{"{"} customerName {"}"}{"}"}, we have special ancillary offers waiting for you...
-                  </div>
-                  <div className="flex justify-end mt-3">
-                    <AntButton 
-                      type="primary" 
-                      size="small"
-                      onClick={() => {
-                        campaignForm.setFieldsValue({
-                          comms: { ...campaignForm.getFieldValue("comms"), emailTemplateId: "promotional_v1" }
-                        });
-                      }}
-                    >
-                      Select Template
-                    </AntButton>
-                  </div>
-                </div>
-              </TabPane>
-              <TabPane tab="📧 Welcome" key="2">
-                <div className="bg-white p-4 rounded border">
-                  <div className="border-l-4 border-green-500 pl-3 mb-3">
-                    <h5 className="font-semibold text-gray-900">Welcome Series</h5>
-                    <p className="text-sm text-gray-600">Great for onboarding new customers</p>
-                  </div>
-                  <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded">
-                    <strong>Subject:</strong> Welcome to Enhanced Travel Experience<br/>
-                    <strong>Preview:</strong> Welcome aboard! Discover amazing add-ons for your upcoming trip...
-                  </div>
-                  <div className="flex justify-end mt-3">
-                    <AntButton 
-                      type="primary" 
-                      size="small"
-                      onClick={() => {
-                        campaignForm.setFieldsValue({
-                          comms: { ...campaignForm.getFieldValue("comms"), emailTemplateId: "welcome_v1" }
-                        });
-                      }}
-                    >
-                      Select Template
-                    </AntButton>
-                  </div>
-                </div>
-              </TabPane>
-              <TabPane tab="⏰ Reminder" key="3">
-                <div className="bg-white p-4 rounded border">
-                  <div className="border-l-4 border-orange-500 pl-3 mb-3">
-                    <h5 className="font-semibold text-gray-900">Travel Reminder</h5>
-                    <p className="text-sm text-gray-600">Perfect for pre-travel communications</p>
-                  </div>
-                  <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded">
-                    <strong>Subject:</strong> Your Trip is Coming Up - Don't Miss Out!<br/>
-                    <strong>Preview:</strong> Your travel date is approaching. Add these essentials to your booking...
-                  </div>
-                  <div className="flex justify-end mt-3">
-                    <AntButton 
-                      type="primary" 
-                      size="small"
-                      onClick={() => {
-                        campaignForm.setFieldsValue({
-                          comms: { ...campaignForm.getFieldValue("comms"), emailTemplateId: "reminder_v1" }
-                        });
-                      }}
-                    >
-                      Select Template
-                    </AntButton>
-                  </div>
-                </div>
-              </TabPane>
-            </Tabs>
-            <AntForm.Item name={["comms", "emailTemplateId"]} style={{ display: 'none' }}>
-              <AntInput />
-            </AntForm.Item>
+                  <Input 
+                    placeholder="Pre-Travel Baggage Upsell" 
+                    className="h-10 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  />
+                </AntForm.Item>
+              </Col>
+            </Row>
           </div>
 
-          {/* WhatsApp Template Preview & Selection */}
-          <div className="space-y-4 p-4 bg-gradient-to-r from-green-50 to-teal-50 rounded-lg border border-green-200 mt-6">
-            <h4 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-              <MessageCircle className="w-5 h-5 text-green-600" />
-              WhatsApp Template Preview & Selection
-            </h4>
-            <Tabs defaultActiveKey="1" className="whatsapp-template-tabs">
-              <TabPane tab="🎁 Offer Alert" key="1">
-                <div className="bg-white p-4 rounded border">
-                  <div className="border-l-4 border-green-500 pl-3 mb-3">
-                    <h5 className="font-semibold text-gray-900">Special Offer Alert</h5>
-                    <p className="text-sm text-gray-600">Quick promotional messages</p>
-                  </div>
-                  <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded font-mono">
-                    🎯 *Special Offer for You!*<br/>
-                    Hi {"{{customerName}}"},<br/><br/>
-                    ✈️ Add comfort to your {"{{destination}}"} trip!<br/>
-                    💺 Extra legroom seats from ${"{{price}}"}<br/>
-                    🎒 Additional baggage starting ${"{{bagPrice}}"}<br/><br/>
-                    Book now: {"{{bookingLink}}"}
-                  </div>
-                  <div className="flex justify-end mt-3">
-                    <AntButton 
-                      type="primary" 
-                      size="small"
-                      onClick={() => {
-                        campaignForm.setFieldsValue({
-                          comms: { ...campaignForm.getFieldValue("comms"), whatsappTemplateId: "offer_alert_v1" }
-                        });
-                      }}
-                    >
-                      Select Template
-                    </AntButton>
-                  </div>
-                </div>
-              </TabPane>
-              <TabPane tab="📱 Quick Update" key="2">
-                <div className="bg-white p-4 rounded border">
-                  <div className="border-l-4 border-blue-500 pl-3 mb-3">
-                    <h5 className="font-semibold text-gray-900">Quick Update</h5>
-                    <p className="text-sm text-gray-600">Brief informational messages</p>
-                  </div>
-                  <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded font-mono">
-                    📢 *Travel Update*<br/>
-                    Hello {"{{customerName}}"},<br/><br/>
-                    Your booking {"{{pnr}}"} has new add-on options available.<br/><br/>
-                    🍽️ Meals: ${"{{mealPrice}}"}<br/>
-                    📶 Wi-Fi: ${"{{wifiPrice}}"}<br/><br/>
-                    Upgrade now: {"{{upgradeLink}}"}
-                  </div>
-                  <div className="flex justify-end mt-3">
-                    <AntButton 
-                      type="primary" 
-                      size="small"
-                      onClick={() => {
-                        campaignForm.setFieldsValue({
-                          comms: { ...campaignForm.getFieldValue("comms"), whatsappTemplateId: "quick_update_v1" }
-                        });
-                      }}
-                    >
-                      Select Template
-                    </AntButton>
-                  </div>
-                </div>
-              </TabPane>
-              <TabPane tab="⚡ Urgent" key="3">
-                <div className="bg-white p-4 rounded border">
-                  <div className="border-l-4 border-red-500 pl-3 mb-3">
-                    <h5 className="font-semibold text-gray-900">Urgent Notification</h5>
-                    <p className="text-sm text-gray-600">Time-sensitive offers</p>
-                  </div>
-                  <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded font-mono">
-                    🚨 *Limited Time Offer*<br/>
-                    {"{{customerName}}"},<br/><br/>
-                    ⏰ Only 24 hours left!<br/>
-                    🎒 FREE seat selection with baggage upgrade<br/>
-                    💺 Premium seats 50% OFF<br/><br/>
-                    Don't miss out: {"{{urgentLink}}"}
-                  </div>
-                  <div className="flex justify-end mt-3">
-                    <AntButton 
-                      type="primary" 
-                      size="small"
-                      onClick={() => {
-                        campaignForm.setFieldsValue({
-                          comms: { ...campaignForm.getFieldValue("comms"), whatsappTemplateId: "urgent_v1" }
-                        });
-                      }}
-                    >
-                      Select Template
-                    </AntButton>
-                  </div>
-                </div>
-              </TabPane>
-            </Tabs>
-            <AntForm.Item name={["comms", "whatsappTemplateId"]} style={{ display: 'none' }}>
-              <AntInput />
-            </AntForm.Item>
+          {/* Target Audience Section */}
+          <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                <Target className="w-4 h-4 text-green-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Target Audience</h3>
+                <p className="text-sm text-gray-500">Define who will receive this campaign</p>
+              </div>
+            </div>
+
+          <Row gutter={20}>
+              <Col span={12}>
+                <AntForm.Item 
+                  name={["target", "agentTiers"]} 
+                  label={<span className="text-sm font-medium text-gray-700">Agent Tiers</span>}
+                >
+                  <AntSelect
+                    mode="multiple"
+                    placeholder="Select agent tiers"
+                    className="rounded-lg"
+                    options={agentTiers.map((tier) => ({
+                      label: tier,
+                      value: tier,
+                    }))}
+                  />
+                </AntForm.Item>
+              </Col>
+              <Col span={12}>
+                <AntForm.Item 
+                  name={["target", "channel"]} 
+                  label={<span className="text-sm font-medium text-gray-700">Channels</span>}
+                >
+                  <AntSelect
+                    mode="multiple"
+                    placeholder="Select channels"
+                    className="rounded-lg"
+                    options={channels.map((channel) => ({
+                      label: channel,
+                      value: channel,
+                    }))}
+                  />
+                </AntForm.Item>
+              </Col>
+            </Row>
+
+            <Row gutter={20}>
+              <Col span={12}>
+                <AntForm.Item 
+                  name={["target", "cohorts"]} 
+                  label={<span className="text-sm font-medium text-gray-700">Cohorts</span>}
+                >
+                  <AntSelect
+                    mode="multiple"
+                    placeholder="Select cohorts"
+                    loading={isCohortsLoading}
+                    className="rounded-lg"
+                    options={availableCohorts.map(
+                      (cohort: { id: string; cohortName: string }) => ({
+                        label: cohort.cohortName,
+                        value: cohort.id,
+                      }),
+                    )}
+                  />
+                </AntForm.Item>
+              </Col>
+              <Col span={12}>
+                <AntForm.Item 
+                  name={["target", "pos"]} 
+                  label={<span className="text-sm font-medium text-gray-700">Point of Sale</span>}
+                >
+                  <AntSelect
+                    mode="multiple"
+                    placeholder="Select POS countries"
+                    className="rounded-lg"
+                    options={[
+                      { label: "India (IN)", value: "IN" },
+                      { label: "UAE (AE)", value: "AE" },
+                      { label: "Singapore (SG)", value: "SG" },
+                      { label: "USA (US)", value: "US" },
+                    ]}
+                  />
+                </AntForm.Item>
+              </Col>
+            </Row>
           </div>
+
+          {/* Products & Offer Section */}
+          <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                <ShoppingCart className="w-4 h-4 text-purple-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Products & Offers</h3>
+                <p className="text-sm text-gray-500">Select products and configure your offer details</p>
+              </div>
+            </div>
+          <Row gutter={20}>
+              <Col span={12}>
+                <AntForm.Item
+                  name={["products", "ancillaries"]}
+                  label={<span className="text-sm font-medium text-gray-700">Ancillary Products</span>}
+                >
+                  <AntSelect
+                    mode="multiple"
+                    placeholder="Select ancillary products"
+                    loading={isAncillariesLoading}
+                    showSearch
+                    className="rounded-lg"
+                    filterOption={(input, option) =>
+                      option?.children?.props?.children?.[0]?.props?.children?.[0]?.toLowerCase()
+                        .includes(input.toLowerCase()) ||
+                      option?.children?.props?.children?.[1]?.props?.children?.[0]?.toLowerCase()
+                        .includes(input.toLowerCase())
+                    }
+                  >
+                    {availableAncillaries.map((rule: any) => (
+                      <AntSelect.Option key={rule.id} value={rule.ancillaryCode}>
+                        <div>
+                          <div className="font-medium">
+                            {`${rule.ruleCode} / ${rule.ancillaryCode}`}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {rule.adjustmentType === "FREE"
+                              ? "Free"
+                              : rule.adjustmentType === "PERCENT"
+                                ? `${rule.adjustmentValue}% discount`
+                                : `$${rule.adjustmentValue} discount`}{" "}
+                            • {rule.pos?.join(", ")} •{" "}
+                            {rule.agentTier?.join(", ")}
+                          </div>
+                        </div>
+                      </AntSelect.Option>
+                    ))}
+                  </AntSelect>
+                </AntForm.Item>
+              </Col>
+              <Col span={12}>
+                <AntForm.Item
+                  name={["products", "bundles"]}
+                  label={<span className="text-sm font-medium text-gray-700">Bundle Products</span>}
+                >
+                  <AntSelect
+                    mode="multiple"
+                    placeholder="Select bundle products"
+                    showSearch
+                    className="rounded-lg"
+                    filterOption={(input, option) =>
+                      option?.label?.toLowerCase().indexOf(input.toLowerCase()) >=
+                      0
+                    }
+                  >
+                    {bundles.map((bundle) => (
+                      <AntSelect.Option key={bundle.id} value={bundle.bundleCode}>
+                        <div>
+                          <div className="font-medium">{bundle.bundleCode}</div>
+                          <div className="text-xs text-gray-500">
+                            {bundle.bundleName} •{" "}
+                            {bundle.components?.slice(0, 3).join(", ")}
+                            {bundle.components?.length > 3 &&
+                              ` +${bundle.components.length - 3} more`}
+                          </div>
+                        </div>
+                      </AntSelect.Option>
+                    ))}
+                  </AntSelect>
+                </AntForm.Item>
+              </Col>
+            </Row>
+
+            <Row gutter={20}>
+              <Col span={8}>
+                <AntForm.Item
+                  name={["offer", "type"]}
+                  label={<span className="text-sm font-medium text-gray-700">Offer Type</span>}
+                  rules={[{ required: true, message: "Offer type is required" }]}
+                >
+                  <AntSelect placeholder="Select offer type" className="rounded-lg">
+                    {offerTypes.map((type) => (
+                      <AntSelect.Option key={type} value={type}>
+                        {type === "PERCENT"
+                          ? "Percentage Discount"
+                          : type === "AMOUNT"
+                            ? "Amount Discount"
+                            : "Special Price"}
+                      </AntSelect.Option>
+                    ))}
+                  </AntSelect>
+                </AntForm.Item>
+              </Col>
+              <Col span={8}>
+                <AntForm.Item 
+                  name={["offer", "value"]} 
+                  label={<span className="text-sm font-medium text-gray-700">Discount Value</span>}
+                >
+                  <InputNumber
+                    placeholder="10 (for 10% or $10)"
+                    style={{ width: "100%" }}
+                    className="rounded-lg h-10"
+                    min={0}
+                  />
+                </AntForm.Item>
+              </Col>
+              <Col span={8}>
+                <AntForm.Item
+                  name={["offer", "specialPrice"]}
+                  label={<span className="text-sm font-medium text-gray-700">Special Price</span>}
+                >
+                  <InputNumber
+                    placeholder="99.99"
+                    style={{ width: "100%" }}
+                    className="rounded-lg h-10"
+                    min={0}
+                    step={0.01}
+                  />
+                </AntForm.Item>
+              </Col>
+            </Row>
+          </div>
+
+          {/* Campaign Lifecycle Section */}
+          <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                <Calendar className="w-4 h-4 text-orange-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Campaign Lifecycle</h3>
+                <p className="text-sm text-gray-500">Configure timing and frequency settings</p>
+              </div>
+            </div>
+
+          <Row gutter={20}>
+              <Col span={12}>
+                <AntForm.Item
+                  name={["lifecycle", "startDate"]}
+                  label={<span className="text-sm font-medium text-gray-700">Start Date</span>}
+                  rules={[{ required: true, message: "Start date is required" }]}
+                >
+                  <DatePicker style={{ width: "100%" }} className="h-10 rounded-lg" />
+                </AntForm.Item>
+              </Col>
+              <Col span={12}>
+                <AntForm.Item
+                  name={["lifecycle", "endDate"]}
+                  label={<span className="text-sm font-medium text-gray-700">End Date</span>}
+                  rules={[{ required: true, message: "End date is required" }]}
+                >
+                  <DatePicker style={{ width: "100%" }} className="h-10 rounded-lg" />
+                </AntForm.Item>
+              </Col>
+            </Row>
+
+            <Row gutter={20}>
+              <Col span={8}>
+                <AntForm.Item
+                  name={["lifecycle", "frequency"]}
+                  label={<span className="text-sm font-medium text-gray-700">Frequency (Cron)</span>}
+                >
+                  <Input 
+                    placeholder="0 10 * * * (daily at 10 AM)" 
+                    className="h-10 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  />
+                </AntForm.Item>
+              </Col>
+              <Col span={8}>
+                <AntForm.Item 
+                  name={["lifecycle", "maxSends"]} 
+                  label={<span className="text-sm font-medium text-gray-700">Max Sends</span>}
+                >
+                  <InputNumber
+                    placeholder="3"
+                    style={{ width: "100%" }}
+                    className="h-10 rounded-lg"
+                    min={1}
+                  />
+                </AntForm.Item>
+              </Col>
+              <Col span={8}>
+                <AntForm.Item
+                  name={["lifecycle", "capPerPNR"]}
+                  label={<span className="text-sm font-medium text-gray-700">Cap Per PNR</span>}
+                >
+                  <InputNumber
+                    placeholder="1"
+                    style={{ width: "100%" }}
+                    className="h-10 rounded-lg"
+                    min={1}
+                  />
+                </AntForm.Item>
+              </Col>
+            </Row>
+          </div>
+
+          {/* Communication Channels Section */}
+          <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center">
+                <MessageSquare className="w-4 h-4 text-pink-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Communication Channels</h3>
+                <p className="text-sm text-gray-500">Configure how your campaign will reach customers</p>
+              </div>
+            </div>
+
+          <Row gutter={16}>
+            <Col span={6}>
+              <AntForm.Item
+                name={["comms", "portalBanner"]}
+                label="Portal Banner"
+                valuePropName="checked"
+              >
+                <Switch />
+              </AntForm.Item>
+            </Col>
+            <Col span={6}>
+              <AntForm.Item
+                name={["comms", "apiPush"]}
+                label="API Push"
+                valuePropName="checked"
+              >
+                <Switch />
+              </AntForm.Item>
+            </Col>
+            <Col span={24}>
+              <div className="space-y-6">
+                {/* Email Template Section */}
+                <AntCard
+                  size="small"
+                  title={
+                    <div className="flex items-center space-x-2">
+                      <Mail className="w-4 h-4 text-blue-600" />
+                      <span>Email Templates</span>
+                    </div>
+                  }
+                  className="border-l-4 border-l-blue-500"
+                >
+                  <div className="space-y-4">
+                    <Row gutter={16} align="middle">
+                      <Col span={10}>
+                        <AntForm.Item
+                          name={["comms", "emailTemplateId"]}
+                          label="Selected Template"
+                          className="mb-0"
+                        >
+                          <Input
+                            placeholder={selectedEmailTemplate ? selectedEmailTemplate.subject : "No template selected"}
+                            disabled
+                            suffix={selectedEmailTemplate && <CheckCircle className="w-4 h-4 text-green-500" />}
+                          />
+                        </AntForm.Item>
+                      </Col>
+                      <Col span={14}>
+                        <div className="flex flex-wrap gap-2">
+                          <AntButton
+                            type="primary"
+                            icon={<MessageSquare className="w-4 h-4" />}
+                            onClick={() => handleGenerateTemplate('email')}
+                            loading={templateGenerationState.email.loading}
+                            size="small"
+                          >
+                            {templateGenerationState.email.loading ? 'Generating...' : 'Generate AI Templates'}
+                          </AntButton>
+                          {templateGenerationState.email.templates.length > 0 && (
+                            <AntButton
+                              ghost
+                              icon={<Eye className="w-4 h-4" />}
+                              onClick={() => setEmailPreviewVisible(true)}
+                              size="small"
+                            >
+                              Preview & Select ({templateGenerationState.email.templates.length})
+                            </AntButton>
+                          )}
+                          {selectedEmailTemplate && (
+                            <AntButton
+                              ghost
+                              icon={<Eye className="w-4 h-4" />}
+                              onClick={() => setEmailPreviewVisible(true)}
+                              size="small"
+                              type="primary"
+                            >
+                              View Selected
+                            </AntButton>
+                          )}
+                        </div>
+                      </Col>
+                    </Row>
+
+                    {templateGenerationState.email.templates.length > 0 && (
+                      <Alert
+                        message={`${templateGenerationState.email.templates.length} AI-generated email templates ready for preview`}
+                        type="success"
+                        showIcon
+                        className="text-xs"
+                      />
+                    )}
+
+                    <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
+                      <strong>AI will generate templates based on:</strong> Campaign name, offer details, target audience, and selected products
+                    </div>
+                  </div>
+                </AntCard>
+
+                {/* WhatsApp Template Section */}
+                <AntCard
+                  size="small"
+                  title={
+                    <div className="flex items-center space-x-2">
+                      <Smartphone className="w-4 h-4 text-green-600" />
+                      <span>WhatsApp Templates</span>
+                    </div>
+                  }
+                  className="border-l-4 border-l-green-500"
+                >
+                  <div className="space-y-4">
+                    <Row gutter={16} align="middle">
+                      <Col span={10}>
+                        <AntForm.Item
+                          name={["comms", "whatsappTemplateId"]}
+                          label="Selected Template"
+                          className="mb-0"
+                        >
+                          <Input
+                            placeholder={selectedWhatsappTemplate ? "WhatsApp template selected" : "No template selected"}
+                            disabled
+                            suffix={selectedWhatsappTemplate && <CheckCircle className="w-4 h-4 text-green-500" />}
+                          />
+                        </AntForm.Item>
+                      </Col>
+                      <Col span={14}>
+                        <div className="flex flex-wrap gap-2">
+                          <AntButton
+                            type="primary"
+                            icon={<Smartphone className="w-4 h-4" />}
+                            onClick={() => handleGenerateTemplate('whatsapp')}
+                            loading={templateGenerationState.whatsapp.loading}
+                            size="small"
+                          >
+                            {templateGenerationState.whatsapp.loading ? 'Generating...' : 'Generate AI Templates'}
+                          </AntButton>
+                          {templateGenerationState.whatsapp.templates.length > 0 && (
+                            <AntButton
+                              ghost
+                              icon={<Eye className="w-4 h-4" />}
+                              onClick={() => setWhatsappPreviewVisible(true)}
+                              size="small"
+                            >
+                              Preview & Select ({templateGenerationState.whatsapp.templates.length})
+                            </AntButton>
+                          )}
+                          {selectedWhatsappTemplate && (
+                            <AntButton
+                              ghost
+                              icon={<Eye className="w-4 h-4" />}
+                              onClick={() => setWhatsappPreviewVisible(true)}
+                              size="small"
+                              type="primary"
+                            >
+                              View Selected
+                            </AntButton>
+                          )}
+                        </div>
+                      </Col>
+                    </Row>
+
+                    {templateGenerationState.whatsapp.templates.length > 0 && (
+                      <Alert
+                        message={`${templateGenerationState.whatsapp.templates.length} AI-generated WhatsApp templates ready for preview`}
+                        type="success"
+                        showIcon
+                        className="text-xs"
+                      />
+                    )}
+
+                    <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
+                      <strong>AI will generate templates optimized for:</strong> WhatsApp format (160 chars), personalization, and mobile engagement
+                    </div>
+                  </div>
+                </AntCard>
+              </div>
+            </Col>
+          </Row>
 
           <AntForm.Item name="status" initialValue="DRAFT" hidden>
             <Input />
@@ -1440,22 +1570,34 @@ export default function CampaignManager() {
           <AntForm.Item name="createdBy" initialValue="current-user" hidden>
             <Input />
           </AntForm.Item>
+          </div>
 
-          <div className="flex justify-end gap-2">
-            <AntButton onClick={() => setIsCampaignModalVisible(false)}>
-              Cancel
-            </AntButton>
-            <AntButton
-              type="primary"
-              htmlType="submit"
-              loading={
-                editingCampaign
-                  ? updateCampaignMutation.isPending
-                  : createCampaignMutation.isPending
-              }
-            >
-              {editingCampaign ? "Update Campaign" : "Create Campaign"}
-            </AntButton>
+          {/* Action Buttons */}
+          <div className="bg-gray-50 px-6 py-4 border-t flex justify-between items-center rounded-b-lg">
+            <div className="text-sm text-gray-500">
+              {editingCampaign ? "Save changes to update your campaign" : "All fields are required unless marked optional"}
+            </div>
+            <div className="flex gap-3">
+              <AntButton 
+                onClick={() => setIsCampaignModalVisible(false)}
+                className="h-10 px-6 rounded-lg border-gray-300 hover:border-gray-400"
+              >
+                Cancel
+              </AntButton>
+              <AntButton
+                type="primary"
+                htmlType="submit"
+                loading={
+                  editingCampaign
+                    ? updateCampaignMutation.isPending
+                    : createCampaignMutation.isPending
+                }
+                className="h-10 px-8 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 border-0 shadow-md"
+                icon={editingCampaign ? <Edit className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+              >
+                {editingCampaign ? "Update Campaign" : "Create Campaign"}
+              </AntButton>
+            </div>
           </div>
         </AntForm>
       </Modal>

@@ -81,20 +81,20 @@ const simulationFormSchema = z.object({
     agentTier: z.array(z.string()).optional(),
     cohorts: z.array(z.string()).optional(),
     channel: z.array(z.string()).optional(),
-  }),
+  }).optional(),
   change: z.object({
     ruleType: z.enum(["DISCOUNT", "MARKUP", "ANCILLARY", "BUNDLE"]),
     adjustment: z.object({
       type: z.enum(["PERCENT", "AMOUNT"]),
-      value: z.number(),
+      value: z.number().min(-100, "Value must be greater than -100").max(1000, "Value must be less than 1000"),
     }),
     description: z.string().optional(),
   }),
   forecast: z.object({
-    revenueChangePct: z.string(),
-    conversionChangePct: z.string(),
-    marginImpactPct: z.string(),
-    attachRateChangePct: z.string().optional(),
+    revenueChangePct: z.string().regex(/^[+-]?\d+\.?\d*$/, "Invalid percentage format (use +1.5 or -2.0)"),
+    conversionChangePct: z.string().regex(/^[+-]?\d+\.?\d*$/, "Invalid percentage format (use +1.5 or -2.0)"),
+    marginImpactPct: z.string().regex(/^[+-]?\d+\.?\d*$/, "Invalid percentage format (use +1.5 or -2.0)"),
+    attachRateChangePct: z.string().regex(/^[+-]?\d+\.?\d*$/, "Invalid percentage format (use +1.5 or -2.0)").optional(),
   }),
 });
 
@@ -134,15 +134,25 @@ export default function AnalyticsSimulation() {
   const simulationForm = useForm<z.infer<typeof simulationFormSchema>>({
     resolver: zodResolver(simulationFormSchema),
     defaultValues: {
-      scope: {},
+      scenarioName: "",
+      scope: {
+        origin: "",
+        destination: "",
+        pos: [],
+        agentTier: [],
+        cohorts: [],
+        channel: [],
+      },
       change: {
         ruleType: "DISCOUNT",
         adjustment: { type: "PERCENT", value: 0 },
+        description: "",
       },
       forecast: {
         revenueChangePct: "+0.0",
         conversionChangePct: "+0.0",
         marginImpactPct: "+0.0",
+        attachRateChangePct: "+0.0",
       },
     },
   });
@@ -170,6 +180,8 @@ export default function AnalyticsSimulation() {
   // Create simulation mutation
   const createSimulationMutation = useMutation({
     mutationFn: async (data: z.infer<typeof simulationFormSchema>) => {
+      console.log("Submitting simulation data:", data);
+      
       const response = await fetch("/api/simulations", {
         method: "POST",
         headers: {
@@ -178,13 +190,23 @@ export default function AnalyticsSimulation() {
         },
         body: JSON.stringify(data),
       });
-      if (!response.ok) throw new Error("Failed to create simulation");
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
+        console.error("Simulation creation failed:", errorData);
+        throw new Error(errorData.message || `HTTP ${response.status}: Failed to create simulation`);
+      }
+      
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["simulations"] });
       setIsSimulationModalOpen(false);
       simulationForm.reset();
+    },
+    onError: (error) => {
+      console.error("Simulation creation error:", error);
+      // You could add a toast notification here if you have one set up
     },
   });
 
@@ -333,20 +355,44 @@ export default function AnalyticsSimulation() {
 
                     <div className="space-y-4">
                       <h4 className="font-medium">Target Scope</h4>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Origin</Label>
-                          <Input placeholder="DXB" />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Destination</Label>
-                          <Input placeholder="LHR" />
-                        </div>
-                      </div>
+                      
+
+                      <FormField
+                        control={simulationForm.control}
+                        name="scope.origin"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Origin</FormLabel>
+                            <FormControl>
+                              <Input placeholder="DXB" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={simulationForm.control}
+                        name="scope.destination"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Destination</FormLabel>
+                            <FormControl>
+                              <Input placeholder="LHR" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
                       <div className="space-y-2">
                         <Label>Point of Sale</Label>
-                        <Select>
+                        <Select onValueChange={(value) => {
+                          const currentPos = simulationForm.getValues("scope.pos") || [];
+                          if (!currentPos.includes(value)) {
+                            simulationForm.setValue("scope.pos", [...currentPos, value]);
+                          }
+                        }}>
                           <SelectTrigger>
                             <SelectValue placeholder="Select countries" />
                           </SelectTrigger>
@@ -362,7 +408,12 @@ export default function AnalyticsSimulation() {
 
                       <div className="space-y-2">
                         <Label>Agent Tiers</Label>
-                        <Select>
+                        <Select onValueChange={(value) => {
+                          const currentTiers = simulationForm.getValues("scope.agentTier") || [];
+                          if (!currentTiers.includes(value)) {
+                            simulationForm.setValue("scope.agentTier", [...currentTiers, value]);
+                          }
+                        }}>
                           <SelectTrigger>
                             <SelectValue placeholder="Select tiers" />
                           </SelectTrigger>
@@ -378,7 +429,12 @@ export default function AnalyticsSimulation() {
 
                       <div className="space-y-2">
                         <Label>Channels</Label>
-                        <Select>
+                        <Select onValueChange={(value) => {
+                          const currentChannels = simulationForm.getValues("scope.channel") || [];
+                          if (!currentChannels.includes(value)) {
+                            simulationForm.setValue("scope.channel", [...currentChannels, value]);
+                          }
+                        }}>
                           <SelectTrigger>
                             <SelectValue placeholder="Select channels" />
                           </SelectTrigger>
@@ -426,6 +482,23 @@ export default function AnalyticsSimulation() {
                         )}
                       />
 
+                      <FormField
+                        control={simulationForm.control}
+                        name="change.description"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Description</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                placeholder="Describe the proposed change..."
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
                       <div className="grid grid-cols-2 gap-4">
                         <FormField
                           control={simulationForm.control}
@@ -465,9 +538,10 @@ export default function AnalyticsSimulation() {
                                   type="number"
                                   step="0.1"
                                   {...field}
-                                  onChange={(e) =>
-                                    field.onChange(parseFloat(e.target.value))
-                                  }
+                                  onChange={(e) => {
+                                    const value = e.target.value === "" ? 0 : parseFloat(e.target.value);
+                                    field.onChange(isNaN(value) ? 0 : value);
+                                  }}
                                 />
                               </FormControl>
                               <FormMessage />

@@ -922,7 +922,8 @@ export default function CampaignManager() {
                   placeholder="Select ancillary products"
                   showSearch
                   filterOption={(input, option) =>
-                    option?.label?.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                    option?.children?.props?.children?.[0]?.props?.children?.toLowerCase().indexOf(input.toLowerCase()) >= 0 ||
+                    option?.children?.props?.children?.[1]?.props?.children?.toLowerCase().indexOf(input.toLowerCase()) >= 0
                   }
                 >
                   {ancillaryRules.map((rule) => (
@@ -941,7 +942,7 @@ export default function CampaignManager() {
                     </AntSelect.Option>
                   ))}
                 </AntSelect>
-              </AntForm.Item>
+              </AntForm.Item></old_str>
             </Col>
             <Col span={12}>
               <AntForm.Item

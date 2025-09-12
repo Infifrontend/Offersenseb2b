@@ -2129,6 +2129,184 @@ export default function AncillaryBundlingEngine() {
         </AntForm>
       </Modal>
 
+      {/* Create Bundle Pricing Rule Modal */}
+      <Modal
+        title="Create Bundle Pricing Rule"
+        open={isCreateBundlePricingModalOpen}
+        onCancel={() => setIsCreateBundlePricingModalOpen(false)}
+        footer={null}
+        width={600}
+      >
+        <Form {...pricingRuleForm}>
+          <form onSubmit={pricingRuleForm.handleSubmit((data) => {
+            const formattedData = {
+              ...data,
+              validFrom: data.validDates[0].format("YYYY-MM-DD"),
+              validTo: data.validDates[1].format("YYYY-MM-DD"),
+              discountValue: data.discountValue.toString(),
+              status: "ACTIVE"
+            };
+            delete formattedData.validDates;
+            createBundlePricingMutation.mutate(formattedData);
+          })}>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={pricingRuleForm.control}
+                  name="ruleCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Rule Code</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., BUNDLE_DISC_15" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={pricingRuleForm.control}
+                  name="bundleCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Bundle Code</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select bundle" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {bundles.map((bundle) => (
+                            <SelectItem key={bundle.bundleCode} value={bundle.bundleCode}>
+                              {bundle.bundleCode} - {bundle.bundleName}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <FormField
+                  control={pricingRuleForm.control}
+                  name="discountType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Discount Type</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {discountTypes.map((type) => (
+                            <SelectItem key={type} value={type}>
+                              {type}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={pricingRuleForm.control}
+                  name="discountValue"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Discount Value</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          placeholder="15" 
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={pricingRuleForm.control}
+                  name="priority"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Priority</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          placeholder="1" 
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={pricingRuleForm.control}
+                name="validDates"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Valid Period</FormLabel>
+                    <FormControl>
+                      <div className="flex gap-2">
+                        <Input 
+                          type="date" 
+                          placeholder="Start date"
+                          onChange={(e) => {
+                            const currentDates = field.value || [null, null];
+                            field.onChange([dayjs(e.target.value), currentDates[1]]);
+                          }}
+                        />
+                        <Input 
+                          type="date" 
+                          placeholder="End date"
+                          onChange={(e) => {
+                            const currentDates = field.value || [null, null];
+                            field.onChange([currentDates[0], dayjs(e.target.value)]);
+                          }}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex justify-end gap-2">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setIsCreateBundlePricingModalOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={createBundlePricingMutation.isPending}
+                >
+                  {createBundlePricingMutation.isPending ? "Creating..." : "Create Rule"}
+                </Button>
+              </div>
+            </div>
+          </form>
+        </Form>
+      </Modal>
+
       {/* Simulate Pricing Modal */}
       <Modal
         title="Simulate Bundle Pricing"

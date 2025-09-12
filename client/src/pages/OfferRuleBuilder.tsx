@@ -436,10 +436,16 @@ export default function OfferRuleBuilder() {
     const allFormValues = createForm.getFieldsValue();
     console.log("All form values:", allFormValues);
 
-    // Check if actions exist before validating form
+    // Check if actions exist and validate them properly
     const actions = allFormValues.actions || [];
-    if (actions.length === 0) {
-      alert("At least one action is required");
+    console.log("Actions array:", actions);
+    
+    // Filter out empty actions (actions with no type selected)
+    const validActions = actions.filter((action: any) => action && action.type);
+    console.log("Valid actions:", validActions);
+    
+    if (validActions.length === 0) {
+      alert("At least one action is required. Please add an action in the Actions step.");
       setCurrentStep(2);
       return;
     }
@@ -501,8 +507,9 @@ export default function OfferRuleBuilder() {
             return;
           }
 
-          // Get actions from validated values or fallback
-          const actions = validatedValues.actions || allFormValues.actions || [];
+          // Get actions from validated values or fallback, ensure we use valid actions
+          const finalActions = validatedValues.actions || allFormValues.actions || [];
+          const processedActions = finalActions.filter((action: any) => action && action.type);
 
           const formattedData = {
             ruleCode,
@@ -536,7 +543,7 @@ export default function OfferRuleBuilder() {
                     }
                   : undefined,
             },
-            actions: actions.map((action: any) => {
+            actions: processedActions.map((action: any) => {
               const formattedAction: any = {
                 type: action.type,
               };
@@ -1178,7 +1185,10 @@ export default function OfferRuleBuilder() {
                                     },
                                   ]}
                                 >
-                                  <AntSelect placeholder="Select action type">
+                                  <AntSelect 
+                                    placeholder="Select action type"
+                                    allowClear
+                                  >
                                     {actionTypes.map((action) => (
                                       <AntSelect.Option
                                         key={action.value}
@@ -1346,11 +1356,32 @@ export default function OfferRuleBuilder() {
                   <AntButton
                     type="primary"
                     onClick={() => {
-                      // For actions step, check if at least one action exists
+                      // For actions step, check if at least one valid action exists
                       if (currentStep === 2) {
                         const actions = createForm.getFieldValue("actions") || [];
-                        if (actions.length === 0) {
-                          alert("Please add at least one action before proceeding");
+                        const validActions = actions.filter((action: any) => action && action.type);
+                        console.log("Actions validation - all actions:", actions);
+                        console.log("Actions validation - valid actions:", validActions);
+                        
+                        if (validActions.length === 0) {
+                          alert("Please add at least one action with a valid action type before proceeding");
+                          return;
+                        }
+
+                        // Validate that each action has required fields
+                        const incompleteActions = validActions.filter((action: any) => {
+                          if (!action.type) return true;
+                          
+                          // For certain action types, check if required fields are present
+                          if ((action.type === 'DISCOUNT' || action.type === 'MARKUP') && !action.valueType) {
+                            return true;
+                          }
+                          
+                          return false;
+                        });
+
+                        if (incompleteActions.length > 0) {
+                          alert("Please complete all action configurations. Make sure each action has all required fields filled.");
                           return;
                         }
                       }

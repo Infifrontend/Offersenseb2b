@@ -948,7 +948,6 @@ export default function CampaignManager() {
           </Row>
 
           <Divider orientation="left">Products & Offer</Divider>
-          <p>{JSON.stringify(availableAncillaries)}</p>
           <Row gutter={16}>
             <Col span={12}>
               <AntForm.Item
@@ -972,7 +971,9 @@ export default function CampaignManager() {
                   {availableAncillaries.map((rule: any) => (
                     <AntSelect.Option key={rule.id} value={rule.ancillaryCode}>
                       <div>
-                        <div className="font-medium">{rule.ancillaryCode}</div>
+                        <div className="font-medium">
+                          {`${rule.ruleCode} / ${rule.ancillaryCode}`}
+                        </div>
                         <div className="text-xs text-gray-500">
                           {rule.adjustmentType === "FREE"
                             ? "Free"

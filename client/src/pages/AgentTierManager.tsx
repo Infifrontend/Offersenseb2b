@@ -847,7 +847,6 @@ export default function AgentTierManager() {
               loading={tiersLoading}
               rowKey="id"
               pagination={{ pageSize: 10 }}
-              scroll={{ y: 400 }}
               size="middle"
             />
           </div>

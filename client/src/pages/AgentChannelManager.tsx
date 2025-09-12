@@ -403,7 +403,7 @@ export default function AgentChannelManager() {
       width: 120,
       render: (channels: string[]) => (
         <Space size={4}>
-          {channels.map((channel) => (
+          {(channels || []).map((channel) => (
             <Tooltip key={channel} title={channel}>
               <span>{getChannelIcon(channel)}</span>
             </Tooltip>

@@ -296,11 +296,19 @@ export default function AncillaryBundlingEngine() {
     queryFn: async () => {
       try {
         console.log("Fetching bundle pricing rules from /api/bundles/pricing");
+        console.log("Using filters:", pricingFilters);
         const params = new URLSearchParams(pricingFilters);
-        const response = await fetch(`/api/bundles/pricing?${params}`);
+        const url = `/api/bundles/pricing?${params}`;
+        console.log("Full URL:", url);
+        
+        const response = await fetch(url);
+        console.log("Response status:", response.status);
+        console.log("Response headers:", Object.fromEntries(response.headers.entries()));
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          const errorText = await response.text();
+          console.error("Error response body:", errorText);
+          throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
         }
 
         const data = await response.json();
@@ -310,10 +318,19 @@ export default function AncillaryBundlingEngine() {
         return Array.isArray(data) ? data : [];
       } catch (error) {
         console.error("Error fetching bundle pricing rules:", error);
+        // Try to fall back to a test endpoint to verify connectivity
+        try {
+          const testResponse = await fetch('/api/test-bundles-pricing');
+          if (testResponse.ok) {
+            console.log("Test endpoint works, main endpoint has issues");
+          }
+        } catch (testError) {
+          console.error("Test endpoint also failed:", testError);
+        }
         return [];
       }
     },
-    retry: 1,
+    retry: 2,
     refetchOnWindowFocus: false,
     onError: (error: any) => {
       console.error("Bundle pricing rules query error:", error);
@@ -893,10 +910,41 @@ export default function AncillaryBundlingEngine() {
                 Manage bundle pricing and discount rules
               </p>
             </div>
-            <Button onClick={() => setIsCreatePricingModalOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Bundle Pricing Rule
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={() => setIsCreatePricingModalOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Bundle Pricing Rule
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={async () => {
+                  try {
+                    console.log("Testing API endpoints...");
+                    const testResponse = await fetch('/api/test-bundles-pricing');
+                    const testResult = await testResponse.text();
+                    console.log("Test endpoint result:", testResult);
+                    
+                    const pricingResponse = await fetch('/api/bundles/pricing');
+                    const pricingResult = await pricingResponse.text();
+                    console.log("Pricing endpoint result:", pricingResult);
+                    
+                    toast({
+                      title: "API Test",
+                      description: `Test: ${testResponse.status}, Pricing: ${pricingResponse.status}`,
+                    });
+                  } catch (error) {
+                    console.error("API test failed:", error);
+                    toast({
+                      title: "API Test Failed",
+                      description: error instanceof Error ? error.message : "Unknown error",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+              >
+                Test API
+              </Button>
+            </div>
           </div>
 
           <Card>

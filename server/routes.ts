@@ -774,92 +774,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Bundle Routes
+  // Bundle Pricing Rules Routes (Register BEFORE general bundle routes to avoid conflicts)
 
-  // Get all bundles with optional filters
-  app.get("/api/bundles", async (req, res) => {
-    try {
-      const filters = req.query;
-      const bundles = await storage.getBundles(filters);
-      res.json(bundles);
-    } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch bundles", error: error.message });
-    }
-  });
-
-  // Create single bundle
-  app.post("/api/bundles", async (req, res) => {
-    try {
-      const validatedData = insertBundleSchema.parse(req.body);
-
-      // Check for conflicts
-      const conflicts = await storage.checkBundleConflicts(validatedData);
-      if (conflicts.length > 0) {
-        return res.status(409).json({ 
-          message: "Bundle conflicts detected", 
-          conflicts 
-        });
-      }
-
-      const bundle = await storage.insertBundle(validatedData);
-      res.status(201).json(bundle);
-    } catch (error: any) {
-      res.status(400).json({ message: "Invalid bundle data", error: error.message });
-    }
-  });
-
-  // Get bundle by ID
-  app.get("/api/bundles/:id", async (req, res) => {
-    try {
-      const bundle = await storage.getBundleById(req.params.id);
-      if (!bundle) {
-        return res.status(404).json({ message: "Bundle not found" });
-      }
-      res.json(bundle);
-    } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch bundle", error: error.message });
-    }
-  });
-
-  // Update bundle
-  app.put("/api/bundles/:id", async (req, res) => {
-    try {
-      const validatedData = insertBundleSchema.parse(req.body);
-      const bundle = await storage.updateBundle(req.params.id, validatedData);
-      res.json(bundle);
-    } catch (error: any) {
-      res.status(400).json({ message: "Failed to update bundle", error: error.message });
-    }
-  });
-
-  // Update bundle status
-  app.patch("/api/bundles/:id/status", async (req, res) => {
-    try {
-      const { status } = req.body;
-      if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
-        return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
-      }
-
-      const bundle = await storage.updateBundleStatus(req.params.id, status);
-      res.json(bundle);
-    } catch (error: any) {
-      res.status(500).json({ message: "Failed to update bundle status", error: error.message });
-    }
-  });
-
-  // Delete bundle
-  app.delete("/api/bundles/:id", async (req, res) => {
-    try {
-      await storage.deleteBundle(req.params.id);
-      res.status(204).send();
-    } catch (error: any) {
-      res.status(500).json({ message: "Failed to delete bundle", error: error.message });
-    }
-  });
-
-  // Bundle Pricing Rules Routes
-
-  // Get all bundle pricing rules with optional filters
+  // Get all bundle pricing rules with optional filters  
   app.get("/api/bundles/pricing", async (req, res) => {
     try {
       const filters = req.query || {};
@@ -1056,7 +973,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  console.log("Bundle pricing routes registered successfully");
+  console.log("Bundle pricing routes registered successfully at /api/bundles/pricing");
+
+  // Bundle Routes (General bundle routes - placed AFTER pricing routes)
+
+  // Get all bundles with optional filters
+  app.get("/api/bundles", async (req, res) => {
+    try {
+      console.log("API: Fetching bundles with filters:", req.query);
+      const filters = req.query;
+      const bundles = await storage.getBundles(filters);
+      res.json(bundles);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch bundles", error: error.message });
+    }
+  });
+
+  // Create single bundle
+  app.post("/api/bundles", async (req, res) => {
+    try {
+      const validatedData = insertBundleSchema.parse(req.body);
+
+      // Check for conflicts
+      const conflicts = await storage.checkBundleConflicts(validatedData);
+      if (conflicts.length > 0) {
+        return res.status(409).json({ 
+          message: "Bundle conflicts detected", 
+          conflicts 
+        });
+      }
+
+      const bundle = await storage.insertBundle(validatedData);
+      res.status(201).json(bundle);
+    } catch (error: any) {
+      res.status(400).json({ message: "Invalid bundle data", error: error.message });
+    }
+  });
+
+  // Get bundle by ID
+  app.get("/api/bundles/:id", async (req, res) => {
+    try {
+      const bundle = await storage.getBundleById(req.params.id);
+      if (!bundle) {
+        return res.status(404).json({ message: "Bundle not found" });
+      }
+      res.json(bundle);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch bundle", error: error.message });
+    }
+  });
+
+  // Update bundle
+  app.put("/api/bundles/:id", async (req, res) => {
+    try {
+      const validatedData = insertBundleSchema.parse(req.body);
+      const bundle = await storage.updateBundle(req.params.id, validatedData);
+      res.json(bundle);
+    } catch (error: any) {
+      res.status(400).json({ message: "Failed to update bundle", error: error.message });
+    }
+  });
+
+  // Update bundle status
+  app.patch("/api/bundles/:id/status", async (req, res) => {
+    try {
+      const { status } = req.body;
+      if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
+        return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
+      }
+
+      const bundle = await storage.updateBundleStatus(req.params.id, status);
+      res.json(bundle);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to update bundle status", error: error.message });
+    }
+  });
+
+  // Delete bundle
+  app.delete("/api/bundles/:id", async (req, res) => {
+    try {
+      await storage.deleteBundle(req.params.id);
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to delete bundle", error: error.message });
+    }
+  });
+
+  console.log("General bundle routes registered successfully");
 
   // Offer Rules Routes
 

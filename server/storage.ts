@@ -1516,11 +1516,11 @@ export class DatabaseStorage implements IStorage {
   async getAgentTierAssignments(filters: any = {}): Promise<AgentTierAssignment[]> {
     try {
       console.log("Storage: getAgentTierAssignments called with filters:", filters);
-      
+
       // Check if database connection is working
       const connectionTest = await this.db.select().from(agentTiers).limit(1);
       console.log("Storage: Database connection test passed");
-      
+
       let query = this.db.select().from(agentTierAssignments);
       const conditions = [];
 
@@ -1544,7 +1544,7 @@ export class DatabaseStorage implements IStorage {
       console.log("Storage: Executing tier assignments query...");
       const results = await query.orderBy(desc(agentTierAssignments.effectiveFrom));
       console.log(`Storage: Successfully found ${results?.length || 0} tier assignments`);
-      
+
       // Ensure we always return an array
       const assignments = Array.isArray(results) ? results : [];
       console.log("Storage: Returning assignments array:", assignments.length);
@@ -1612,7 +1612,7 @@ export class DatabaseStorage implements IStorage {
   async getTierAssignmentEngines(filters: any = {}): Promise<TierAssignmentEngine[]> {
     try {
       console.log("Storage: getTierAssignmentEngines called with filters:", filters);
-      
+
       let query = this.db.select().from(tierAssignmentEngine);
       const conditions = [];
 
@@ -1626,15 +1626,13 @@ export class DatabaseStorage implements IStorage {
 
       const results = await query.orderBy(desc(tierAssignmentEngine.createdAt));
       console.log(`Storage: Found ${results?.length || 0} tier assignment engines`);
-      
+
       return Array.isArray(results) ? results : [];
     } catch (error: any) {
       console.error("Storage: Error in getTierAssignmentEngines:", error);
       return [];
     }
   }
-
-  async insertTierAssignmentEngine(engineData: InsertTierAssignmentEngine): Promise<TierAssignmentEngine> {</old_str>
 
   async insertTierAssignmentEngine(engineData: InsertTierAssignmentEngine): Promise<TierAssignmentEngine> {
     const [engine] = await this.db.insert(tierAssignmentEngine).values(engineData).returning();

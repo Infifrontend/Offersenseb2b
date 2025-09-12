@@ -924,7 +924,7 @@ export default function CampaignManager() {
                   placeholder="Select cohorts"
                   loading={isCohortsLoading}
                   options={availableCohorts.map(
-                    (cohort: { id: string; name: string }) => ({
+                    (cohort: { id: string; cohortName: string }) => ({
                       label: cohort.cohortName,
                       value: cohort.id,
                     }),

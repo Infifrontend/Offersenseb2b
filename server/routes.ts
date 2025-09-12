@@ -485,6 +485,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get ancillary products for dropdowns
+  app.get("/api/ancillary-products", async (req, res) => {
+    try {
+      const rules = await storage.getAirAncillaryRules({ status: "ACTIVE" });
+      // Group by ancillary code and return unique ancillary products
+      const products = rules.reduce((acc: any[], rule) => {
+        const existing = acc.find(p => p.ancillaryCode === rule.ancillaryCode);
+        if (!existing) {
+          acc.push({
+            id: rule.id,
+            ancillaryCode: rule.ancillaryCode,
+            adjustmentType: rule.adjustmentType,
+            adjustmentValue: rule.adjustmentValue,
+            pos: rule.pos,
+            agentTier: rule.agentTier
+          });
+        }
+        return acc;
+      }, []);
+      res.json(products);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch ancillary products", error: error.message });
+    }
+  });
+
   // Non-Air Rates Routes
 
   // Get all non-air rates with optional filters

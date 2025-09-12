@@ -1516,6 +1516,11 @@ export class DatabaseStorage implements IStorage {
   async getAgentTierAssignments(filters: any = {}): Promise<AgentTierAssignment[]> {
     try {
       console.log("Storage: getAgentTierAssignments called with filters:", filters);
+      
+      // Check if database connection is working
+      const connectionTest = await this.db.select().from(agentTiers).limit(1);
+      console.log("Storage: Database connection test passed");
+      
       let query = this.db.select().from(agentTierAssignments);
       const conditions = [];
 
@@ -1536,11 +1541,18 @@ export class DatabaseStorage implements IStorage {
         query = query.where(and(...conditions));
       }
 
+      console.log("Storage: Executing tier assignments query...");
       const results = await query.orderBy(desc(agentTierAssignments.effectiveFrom));
-      console.log(`Storage: Found ${results?.length || 0} tier assignments`);
-      return results || [];
+      console.log(`Storage: Successfully found ${results?.length || 0} tier assignments`);
+      
+      // Ensure we always return an array
+      const assignments = Array.isArray(results) ? results : [];
+      console.log("Storage: Returning assignments array:", assignments.length);
+      return assignments;
     } catch (error: any) {
       console.error("Storage: Error in getAgentTierAssignments:", error);
+      console.error("Storage: Error stack:", error.stack);
+      // Return empty array instead of throwing to prevent complete failure
       return [];
     }
   }

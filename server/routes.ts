@@ -2506,111 +2506,132 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all tier assignments with optional filters
   app.get("/api/tiers/assignments", async (req, res) => {
     try {
-      console.log("GET /api/tiers/assignments called with query:", req.query);
-      const filters = req.query;
+      console.log("API: GET /api/tiers/assignments called with query:", req.query);
+      const filters = req.query || {};
+      
+      console.log("API: Calling storage.getAgentTierAssignments...");
       let assignments = await storage.getAgentTierAssignments(filters);
-      console.log(`Found ${assignments?.length || 0} tier assignments`);
+      console.log(`API: Storage returned ${assignments?.length || 0} tier assignments`);
+      
+      // Ensure we always have an array
+      if (!Array.isArray(assignments)) {
+        console.log("API: Converting non-array result to empty array");
+        assignments = [];
+      }
       
       // If no assignments exist and no specific filters, create sample data
       if (assignments.length === 0 && Object.keys(filters).length === 0) {
-        console.log("No tier assignments found, creating sample assignments...");
+        console.log("API: No tier assignments found, creating sample assignments...");
         
-        // Create sample tier assignments
-        const sampleAssignments = [
-          {
-            agentId: "AGT001",
-            tierCode: "PLATINUM",
-            assignmentType: "AUTO" as const,
-            effectiveFrom: "2024-01-01",
-            kpiData: {
-              totalBookingValue: 75000000,
-              totalBookings: 2500,
-              avgBookingsPerMonth: 625,
-              avgSearchesPerMonth: 7500,
-              conversionPct: 8.3
+        // First ensure we have tiers to assign
+        const existingTiers = await storage.getAgentTiers({ status: "ACTIVE" });
+        console.log(`API: Found ${existingTiers.length} existing tiers`);
+        
+        if (existingTiers.length > 0) {
+          // Create sample tier assignments
+          const sampleAssignments = [
+            {
+              agentId: "AGT001",
+              tierCode: "PLATINUM",
+              assignmentType: "AUTO" as const,
+              effectiveFrom: "2024-01-01",
+              kpiData: {
+                totalBookingValue: 75000000,
+                totalBookings: 2500,
+                avgBookingsPerMonth: 625,
+                avgSearchesPerMonth: 7500,
+                conversionPct: 8.3
+              },
+              assignedBy: "system",
+              justification: "Automatic assignment based on KPI evaluation",
+              status: "ACTIVE" as const,
             },
-            assignedBy: "system",
-            justification: "Automatic assignment based on KPI evaluation",
-            status: "ACTIVE" as const,
-          },
-          {
-            agentId: "AGT002",
-            tierCode: "GOLD",
-            assignmentType: "AUTO" as const,
-            effectiveFrom: "2024-01-01",
-            kpiData: {
-              totalBookingValue: 45000000,
-              totalBookings: 1800,
-              avgBookingsPerMonth: 450,
-              avgSearchesPerMonth: 5000,
-              conversionPct: 9.0
+            {
+              agentId: "AGT002",
+              tierCode: "GOLD",
+              assignmentType: "AUTO" as const,
+              effectiveFrom: "2024-01-01",
+              kpiData: {
+                totalBookingValue: 45000000,
+                totalBookings: 1800,
+                avgBookingsPerMonth: 450,
+                avgSearchesPerMonth: 5000,
+                conversionPct: 9.0
+              },
+              assignedBy: "system",
+              justification: "Automatic assignment based on KPI evaluation",
+              status: "ACTIVE" as const,
             },
-            assignedBy: "system",
-            justification: "Automatic assignment based on KPI evaluation",
-            status: "ACTIVE" as const,
-          },
-          {
-            agentId: "AGT003",
-            tierCode: "SILVER",
-            assignmentType: "MANUAL_OVERRIDE" as const,
-            effectiveFrom: "2024-02-15",
-            assignedBy: "admin",
-            justification: "Manual upgrade due to exceptional performance in specific routes",
-            status: "ACTIVE" as const,
-          },
-          {
-            agentId: "AGT004",
-            tierCode: "BRONZE",
-            assignmentType: "AUTO" as const,
-            effectiveFrom: "2024-01-01",
-            kpiData: {
-              totalBookingValue: 15000000,
-              totalBookings: 800,
-              avgBookingsPerMonth: 200,
-              avgSearchesPerMonth: 2500,
-              conversionPct: 8.0
+            {
+              agentId: "AGT003",
+              tierCode: "SILVER",
+              assignmentType: "MANUAL_OVERRIDE" as const,
+              effectiveFrom: "2024-02-15",
+              assignedBy: "admin",
+              justification: "Manual upgrade due to exceptional performance in specific routes",
+              status: "ACTIVE" as const,
             },
-            assignedBy: "system",
-            justification: "Automatic assignment based on KPI evaluation",
-            status: "ACTIVE" as const,
-          },
-          {
-            agentId: "AGT005",
-            tierCode: "GOLD",
-            assignmentType: "AUTO" as const,
-            effectiveFrom: "2024-03-01",
-            kpiData: {
-              totalBookingValue: 48000000,
-              totalBookings: 1950,
-              avgBookingsPerMonth: 487,
-              avgSearchesPerMonth: 5200,
-              conversionPct: 9.4
+            {
+              agentId: "AGT004",
+              tierCode: "BRONZE",
+              assignmentType: "AUTO" as const,
+              effectiveFrom: "2024-01-01",
+              kpiData: {
+                totalBookingValue: 15000000,
+                totalBookings: 800,
+                avgBookingsPerMonth: 200,
+                avgSearchesPerMonth: 2500,
+                conversionPct: 8.0
+              },
+              assignedBy: "system",
+              justification: "Automatic assignment based on KPI evaluation",
+              status: "ACTIVE" as const,
             },
-            assignedBy: "system",
-            justification: "Automatic assignment based on KPI evaluation",
-            status: "ACTIVE" as const,
-          }
-        ];
+            {
+              agentId: "AGT005",
+              tierCode: "GOLD",
+              assignmentType: "AUTO" as const,
+              effectiveFrom: "2024-03-01",
+              kpiData: {
+                totalBookingValue: 48000000,
+                totalBookings: 1950,
+                avgBookingsPerMonth: 487,
+                avgSearchesPerMonth: 5200,
+                conversionPct: 9.4
+              },
+              assignedBy: "system",
+              justification: "Automatic assignment based on KPI evaluation",
+              status: "ACTIVE" as const,
+            }
+          ];
 
-        try {
-          for (const assignmentData of sampleAssignments) {
-            await storage.insertAgentTierAssignment(assignmentData);
-            console.log(`Created tier assignment for agent: ${assignmentData.agentId}`);
-          }
+          try {
+            for (const assignmentData of sampleAssignments) {
+              await storage.insertAgentTierAssignment(assignmentData);
+              console.log(`API: Created tier assignment for agent: ${assignmentData.agentId}`);
+            }
 
-          // Refetch after creating samples
-          assignments = await storage.getAgentTierAssignments(filters);
-          console.log(`After sample creation: ${assignments?.length || 0} assignments`);
-        } catch (createError: any) {
-          console.error("Error creating sample tier assignments:", createError);
+            // Refetch after creating samples
+            assignments = await storage.getAgentTierAssignments(filters);
+            console.log(`API: After sample creation: ${assignments?.length || 0} assignments`);
+          } catch (createError: any) {
+            console.error("API: Error creating sample tier assignments:", createError);
+          }
+        } else {
+          console.log("API: No tiers found, cannot create sample assignments");
         }
       }
       
-      console.log(`Returning ${assignments?.length || 0} tier assignments`);
+      console.log(`API: Returning ${assignments.length} tier assignments`);
       res.json(assignments);
     } catch (error: any) {
-      console.error("Error in /api/tiers/assignments:", error);
-      res.status(500).json({ message: "Failed to fetch tier assignments", error: error.message });
+      console.error("API: Error in /api/tiers/assignments:", error);
+      console.error("API: Error stack:", error.stack);
+      res.status(500).json({ 
+        message: "Failed to fetch tier assignments", 
+        error: error.message,
+        details: "Check server logs for more information"
+      });
     }
   });
 

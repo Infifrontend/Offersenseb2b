@@ -274,6 +274,16 @@ export default function CampaignManager() {
   const [metricsDateRange, setMetricsDateRange] = useState<
     [dayjs.Dayjs, dayjs.Dayjs] | null
   >(null);
+  
+  // Template generation states
+  const [templateGenerationState, setTemplateGenerationState] = useState({
+    email: { loading: false, templates: [] as any[] },
+    whatsapp: { loading: false, templates: [] as any[] }
+  });
+  const [emailPreviewVisible, setEmailPreviewVisible] = useState(false);
+  const [whatsappPreviewVisible, setWhatsappPreviewVisible] = useState(false);
+  const [selectedEmailTemplate, setSelectedEmailTemplate] = useState<any>(null);
+  const [selectedWhatsappTemplate, setSelectedWhatsappTemplate] = useState<any>(null);
 
   const queryClient = useQueryClient();
   const [campaignForm] = AntForm.useForm<CampaignFormData>();
@@ -495,6 +505,79 @@ export default function CampaignManager() {
 
   const handleStatusChange = (campaign: Campaign, newStatus: string) => {
     updateStatusMutation.mutate({ id: campaign.id, status: newStatus });
+  };
+
+  // Template generation handler
+  const handleGenerateTemplate = async (type: 'email' | 'whatsapp') => {
+    setTemplateGenerationState(prev => ({
+      ...prev,
+      [type]: { ...prev[type], loading: true }
+    }));
+
+    try {
+      // Get current form values to use as context
+      const formValues = campaignForm.getFieldsValue();
+      
+      const context = {
+        campaignName: formValues.campaignName || 'New Campaign',
+        offerType: formValues.offer?.type || 'PERCENT',
+        offerValue: formValues.offer?.value || 10,
+        products: [
+          ...(formValues.products?.ancillaries || []),
+          ...(formValues.products?.bundles || [])
+        ],
+        agentTiers: formValues.target?.agentTiers || [],
+        channel: type === 'email' ? 'Email' : 'WhatsApp'
+      };
+
+      const response = await fetch('/api/ai/generate-templates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, context })
+      });
+
+      if (!response.ok) throw new Error('Failed to generate templates');
+      
+      const generatedTemplates = await response.json();
+      
+      setTemplateGenerationState(prev => ({
+        ...prev,
+        [type]: { loading: false, templates: generatedTemplates }
+      }));
+
+      message.success(`Generated ${generatedTemplates.length} ${type} templates`);
+    } catch (error: any) {
+      message.error(error.message || 'Failed to generate templates');
+      setTemplateGenerationState(prev => ({
+        ...prev,
+        [type]: { ...prev[type], loading: false }
+      }));
+    }
+  };
+
+  // Template selection handlers
+  const handleSelectEmailTemplate = (template: any) => {
+    setSelectedEmailTemplate(template);
+    campaignForm.setFieldsValue({
+      comms: {
+        ...campaignForm.getFieldValue('comms'),
+        emailTemplateId: template.id
+      }
+    });
+    setEmailPreviewVisible(false);
+    message.success('Email template selected');
+  };
+
+  const handleSelectWhatsappTemplate = (template: any) => {
+    setSelectedWhatsappTemplate(template);
+    campaignForm.setFieldsValue({
+      comms: {
+        ...campaignForm.getFieldValue('comms'),
+        whatsappTemplateId: template.id
+      }
+    });
+    setWhatsappPreviewVisible(false);
+    message.success('WhatsApp template selected');
   };
 
   // Table columns
@@ -1141,21 +1224,88 @@ export default function CampaignManager() {
                 <Switch />
               </AntForm.Item>
             </Col>
-            <Col span={6}>
-              <AntForm.Item
-                name={["comms", "emailTemplateId"]}
-                label="Email Template"
-              >
-                <Input placeholder="TMP_BAG10" />
-              </AntForm.Item>
-            </Col>
-            <Col span={6}>
-              <AntForm.Item
-                name={["comms", "whatsappTemplateId"]}
-                label="WhatsApp Template"
-              >
-                <Input placeholder="WA_UPSELL_01" />
-              </AntForm.Item>
+            <Col span={24}>
+              <div className="space-y-4">
+                {/* Email Template Section */}
+                <AntCard size="small" title="Email Templates">
+                  <Row gutter={16} align="middle">
+                    <Col span={8}>
+                      <AntForm.Item
+                        name={["comms", "emailTemplateId"]}
+                        label="Selected Template"
+                      >
+                        <Input placeholder="Select or generate template" disabled />
+                      </AntForm.Item>
+                    </Col>
+                    <Col span={8}>
+                      <Space>
+                        <AntButton
+                          icon={<MessageSquare className="w-4 h-4" />}
+                          onClick={() => handleGenerateTemplate('email')}
+                          loading={templateGenerationState.email.loading}
+                        >
+                          Generate AI Templates
+                        </AntButton>
+                        {templateGenerationState.email.templates.length > 0 && (
+                          <AntButton
+                            type="primary"
+                            ghost
+                            icon={<Eye className="w-4 h-4" />}
+                            onClick={() => setEmailPreviewVisible(true)}
+                          >
+                            Preview & Select
+                          </AntButton>
+                        )}
+                      </Space>
+                    </Col>
+                  </Row>
+                  {templateGenerationState.email.templates.length > 0 && (
+                    <div className="mt-2">
+                      <Tag color="green">{templateGenerationState.email.templates.length} templates generated</Tag>
+                    </div>
+                  )}
+                </AntCard>
+
+                {/* WhatsApp Template Section */}
+                <AntCard size="small" title="WhatsApp Templates">
+                  <Row gutter={16} align="middle">
+                    <Col span={8}>
+                      <AntForm.Item
+                        name={["comms", "whatsappTemplateId"]}
+                        label="Selected Template"
+                      >
+                        <Input placeholder="Select or generate template" disabled />
+                      </AntForm.Item>
+                    </Col>
+                    <Col span={8}>
+                      <Space>
+                        <AntButton
+                          icon={<Smartphone className="w-4 h-4" />}
+                          onClick={() => handleGenerateTemplate('whatsapp')}
+                          loading={templateGenerationState.whatsapp.loading}
+                        >
+                          Generate AI Templates
+                        </AntButton>
+                        {templateGenerationState.whatsapp.templates.length > 0 && (
+                          <AntButton
+                            type="primary"
+                            ghost
+                            icon={<Eye className="w-4 h-4" />}
+                            onClick={() => setWhatsappPreviewVisible(true)}
+                          >
+                            Preview & Select
+                          </AntButton>
+                        )}
+                      </Space>
+                    </Col>
+                  </Row>
+                  {templateGenerationState.whatsapp.templates.length > 0 && (
+                    <div className="mt-2">
+                      <Tag color="blue">{templateGenerationState.whatsapp.templates.length} templates generated</Tag>
+                    </div>
+                  )}
+                </AntCard>
+              </div>
             </Col>
           </Row>
 
@@ -1382,6 +1532,156 @@ export default function CampaignManager() {
             )}
           </div>
         )}
+      </Modal>
+
+      {/* Email Template Preview Modal */}
+      <Modal
+        title="Email Template Preview & Selection"
+        open={emailPreviewVisible}
+        onCancel={() => setEmailPreviewVisible(false)}
+        footer={[
+          <AntButton key="cancel" onClick={() => setEmailPreviewVisible(false)}>
+            Cancel
+          </AntButton>,
+          <AntButton
+            key="regenerate"
+            icon={<MessageSquare className="w-4 h-4" />}
+            onClick={() => handleGenerateTemplate('email')}
+            loading={templateGenerationState.email.loading}
+          >
+            Regenerate Templates
+          </AntButton>
+        ]}
+        width={800}
+      >
+        <div className="space-y-4">
+          {templateGenerationState.email.templates.map((template, index) => (
+            <AntCard
+              key={index}
+              size="small"
+              title={`Template ${index + 1}: ${template.subject}`}
+              extra={
+                <AntButton
+                  type="primary"
+                  size="small"
+                  onClick={() => handleSelectEmailTemplate(template)}
+                >
+                  Select This Template
+                </AntButton>
+              }
+              className="border-l-4 border-l-blue-500"
+            >
+              <div className="space-y-3">
+                <div>
+                  <strong className="text-sm text-gray-600">Subject:</strong>
+                  <div className="mt-1 p-2 bg-gray-50 rounded text-sm">
+                    {template.subject}
+                  </div>
+                </div>
+                <div>
+                  <strong className="text-sm text-gray-600">Preview:</strong>
+                  <div className="mt-1 p-3 bg-white border rounded text-sm max-h-40 overflow-y-auto">
+                    <div dangerouslySetInnerHTML={{ __html: template.htmlContent }} />
+                  </div>
+                </div>
+                <div className="flex justify-between items-center text-xs text-gray-500">
+                  <span>Tone: {template.tone}</span>
+                  <span>CTA: {template.callToAction}</span>
+                </div>
+              </div>
+            </AntCard>
+          ))}
+          {templateGenerationState.email.templates.length === 0 && (
+            <div className="text-center py-8">
+              <p className="text-gray-500">No email templates generated yet</p>
+              <AntButton
+                type="primary"
+                icon={<MessageSquare className="w-4 h-4" />}
+                onClick={() => handleGenerateTemplate('email')}
+                className="mt-2"
+              >
+                Generate Email Templates
+              </AntButton>
+            </div>
+          )}
+        </div>
+      </Modal>
+
+      {/* WhatsApp Template Preview Modal */}
+      <Modal
+        title="WhatsApp Template Preview & Selection"
+        open={whatsappPreviewVisible}
+        onCancel={() => setWhatsappPreviewVisible(false)}
+        footer={[
+          <AntButton key="cancel" onClick={() => setWhatsappPreviewVisible(false)}>
+            Cancel
+          </AntButton>,
+          <AntButton
+            key="regenerate"
+            icon={<Smartphone className="w-4 h-4" />}
+            onClick={() => handleGenerateTemplate('whatsapp')}
+            loading={templateGenerationState.whatsapp.loading}
+          >
+            Regenerate Templates
+          </AntButton>
+        ]}
+        width={600}
+      >
+        <div className="space-y-4">
+          {templateGenerationState.whatsapp.templates.map((template, index) => (
+            <AntCard
+              key={index}
+              size="small"
+              title={`Template ${index + 1}`}
+              extra={
+                <AntButton
+                  type="primary"
+                  size="small"
+                  onClick={() => handleSelectWhatsappTemplate(template)}
+                >
+                  Select This Template
+                </AntButton>
+              }
+              className="border-l-4 border-l-green-500"
+            >
+              <div className="space-y-3">
+                <div className="bg-green-50 p-3 rounded-lg border border-green-200">
+                  <div className="flex items-start space-x-2">
+                    <Smartphone className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                    <div className="text-sm whitespace-pre-wrap">{template.message}</div>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center text-xs text-gray-500">
+                  <span>Length: {template.message.length} chars</span>
+                  <span>Style: {template.style}</span>
+                </div>
+                {template.variables && template.variables.length > 0 && (
+                  <div>
+                    <strong className="text-xs text-gray-600">Variables used:</strong>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {template.variables.map((variable: string, i: number) => (
+                        <Tag key={i} size="small" color="blue">{variable}</Tag>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </AntCard>
+          ))}
+          {templateGenerationState.whatsapp.templates.length === 0 && (
+            <div className="text-center py-8">
+              <p className="text-gray-500">No WhatsApp templates generated yet</p>
+              <AntButton
+                type="primary"
+                icon={<Smartphone className="w-4 h-4" />}
+                onClick={() => handleGenerateTemplate('whatsapp')}
+                className="mt-2"
+              >
+                Generate WhatsApp Templates
+              </AntButton>
+            </div>
+          )}
+        </div>
       </Modal>
     </div>
   );

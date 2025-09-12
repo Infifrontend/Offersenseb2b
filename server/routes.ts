@@ -6,11 +6,65 @@ import csv from "csv-parser";
 import { Readable } from "stream";
 import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema, insertAirAncillaryRuleSchema, insertNonAirRateSchema, insertNonAirMarkupRuleSchema, insertBundleSchema, insertBundlePricingRuleSchema, insertOfferRuleSchema, insertOfferTraceSchema, insertAgentSchema, insertChannelPricingOverrideSchema, insertCohortSchema, insertAuditLogSchema, insertAgentTierSchema, insertAgentTierAssignmentSchema, insertTierAssignmentEngineSchema, insertCampaignSchema, insertCampaignMetricsSchema, insertCampaignDeliverySchema, insertSimulationSchema, insertInsightQuerySchema } from "../shared/schema";
 
+// Mock function for AI template generation (replace with actual implementation)
+async function generateAITemplates(type: string, context: any): Promise<any[]> {
+  console.log(`Generating ${type} templates with context:`, context);
+  // In a real application, this would call an AI service (e.g., OpenAI, Gemini)
+  // to generate template content based on the provided context.
+  // For now, returning mock data.
+  if (type === 'email') {
+    return [
+      {
+        name: "Welcome Email",
+        subject: `Welcome to ${context.companyName}!`,
+        body: `Hi ${context.userName},\n\nWelcome aboard! We're excited to have you.\n\nBest,\nThe ${context.companyName} Team`
+      },
+      {
+        name: "Promotional Offer",
+        subject: `Special Offer Just For You!`,
+        body: `Dear ${context.userName},\n\nDon't miss out on our latest promotion!\n\nVisit our website for details.\n\nRegards,\n${context.companyName}`
+      }
+    ];
+  } else if (type === 'whatsapp') {
+    return [
+      {
+        name: "Order Confirmation",
+        message: `Hello ${context.userName},\n\nYour order #${context.orderId} has been confirmed. Thank you for shopping with us!`
+      },
+      {
+        name: "Shipping Update",
+        message: `Hi ${context.userName},\n\nGood news! Your order has shipped. Track it here: ${context.trackingLink}`
+      }
+    ];
+  }
+  return [];
+}
+
+
 const upload = multer({ storage: multer.memoryStorage() });
 
 export async function registerRoutes(app: Express): Promise<Server> {
   console.log("Registering routes...");
-  
+
+  // AI Template Generation endpoint
+  app.post("/api/ai/generate-templates", async (req, res) => {
+    try {
+      const { type, context } = req.body;
+
+      if (!type || !['email', 'whatsapp'].includes(type)) {
+        return res.status(400).json({ message: "Invalid template type" });
+      }
+
+      // Generate templates based on context
+      const templates = await generateAITemplates(type, context);
+
+      res.json(templates);
+    } catch (error) {
+      console.error("Template generation error:", error);
+      res.status(500).json({ message: "Failed to generate templates" });
+    }
+  });
+
   // Negotiated Fares Routes
 
   // Get all negotiated fares with optional filters

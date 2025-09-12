@@ -432,110 +432,117 @@ export default function OfferRuleBuilder() {
   const onCreateSubmit = async () => {
     console.log("Create Rule button clicked");
 
-    // Get all form values directly
-    const allFormValues = await createForm.validateFields();
-    console.log("All form values:", allFormValues);
+    try {
+      // Get all form values
+      const allFormValues = await createForm.validateFields();
+      console.log("All form values:", allFormValues);
 
-    // Extract and validate required fields directly from form values
-    const ruleCode = allFormValues.ruleCode?.trim();
-    const ruleName = allFormValues.ruleName?.trim();
-    const ruleType = allFormValues.ruleType;
-    const priority = allFormValues.priority || 1;
-    const validFrom = allFormValues.validFrom;
-    const validTo = allFormValues.validTo;
+      // Extract and validate required fields
+      const ruleCode = allFormValues.ruleCode?.trim();
+      const ruleName = allFormValues.ruleName?.trim();
+      const ruleType = allFormValues.ruleType;
+      const priority = allFormValues.priority || 1;
+      const validFrom = allFormValues.validFrom;
+      const validTo = allFormValues.validTo;
 
-    // Check required fields
-    if (!ruleCode || !ruleName || !ruleType || !validFrom || !validTo) {
-      const missingFields = [];
-      if (!ruleCode) missingFields.push("Rule Code");
-      if (!ruleName) missingFields.push("Rule Name");
-      if (!ruleType) missingFields.push("Rule Type");
-      if (!validFrom) missingFields.push("Valid From");
-      if (!validTo) missingFields.push("Valid To");
+      // Check required fields
+      if (!ruleCode || !ruleName || !ruleType || !validFrom || !validTo) {
+        const missingFields = [];
+        if (!ruleCode) missingFields.push("Rule Code");
+        if (!ruleName) missingFields.push("Rule Name");
+        if (!ruleType) missingFields.push("Rule Type");
+        if (!validFrom) missingFields.push("Valid From");
+        if (!validTo) missingFields.push("Valid To");
 
-      alert(
-        `Please fill in the following required fields: ${missingFields.join(", ")}`,
-      );
-      setCurrentStep(0);
-      return;
-    }
+        alert(
+          `Please fill in the following required fields: ${missingFields.join(", ")}`,
+        );
+        setCurrentStep(0);
+        return;
+      }
 
-    // Get actions (allow empty actions array)
-    const actions = allFormValues.actions || [];
-    const processedActions = actions
-      .filter((action: any) => action && action.type)
-      .map((action: any) => {
-        const formattedAction: any = {
-          type: action.type,
-        };
-
-        if (action.scope) formattedAction.scope = action.scope;
-        if (action.valueType) formattedAction.valueType = action.valueType;
-        if (action.value !== undefined && action.value !== null)
-          formattedAction.value = Number(action.value);
-        if (action.ancillaryCode)
-          formattedAction.ancillaryCode = action.ancillaryCode;
-        if (action.bundleCode) formattedAction.bundleCode = action.bundleCode;
-        if (action.bannerText) formattedAction.bannerText = action.bannerText;
-
-        // Add pricing object for compatibility
-        if (
-          action.valueType &&
-          action.value !== undefined &&
-          action.value !== null
-        ) {
-          formattedAction.pricing = {
-            type: action.valueType,
-            value: Number(action.value),
+      // Process actions
+      const actions = allFormValues.actions || [];
+      const processedActions = actions
+        .filter((action: any) => action && action.type)
+        .map((action: any) => {
+          const formattedAction: any = {
+            type: action.type,
           };
-        }
 
-        return formattedAction;
-      });
+          if (action.scope) formattedAction.scope = action.scope;
+          if (action.valueType) formattedAction.valueType = action.valueType;
+          if (action.value !== undefined && action.value !== null)
+            formattedAction.value = Number(action.value);
+          if (action.ancillaryCode)
+            formattedAction.ancillaryCode = action.ancillaryCode;
+          if (action.bundleCode) formattedAction.bundleCode = action.bundleCode;
+          if (action.bannerText) formattedAction.bannerText = action.bannerText;
 
-    const formattedData = {
-      ruleCode,
-      ruleName,
-      ruleType,
-      conditions: {
-        origin: allFormValues["conditions.origin"] || undefined,
-        destination: allFormValues["conditions.destination"] || undefined,
-        pos: allFormValues["conditions.pos"] || [],
-        agentTier: allFormValues["conditions.agentTier"] || [],
-        cohortCodes: allFormValues["conditions.cohortCodes"] || [],
-        channel: allFormValues["conditions.channel"] || [],
-        cabinClass: allFormValues["conditions.cabinClass"] || [],
-        tripType: allFormValues["conditions.tripType"] || [],
-        seasonCode: allFormValues["conditions.seasonCode"] || undefined,
-        bookingWindow:
-          allFormValues["conditions.bookingWindowMin"] &&
-          allFormValues["conditions.bookingWindowMax"]
-            ? {
-                min: allFormValues["conditions.bookingWindowMin"],
-                max: allFormValues["conditions.bookingWindowMax"],
-              }
-            : undefined,
-        travelWindow:
-          allFormValues["conditions.travelWindowMin"] &&
-          allFormValues["conditions.travelWindowMax"]
-            ? {
-                min: allFormValues["conditions.travelWindowMin"],
-                max: allFormValues["conditions.travelWindowMax"],
-              }
-            : undefined,
-      },
-      actions: processedActions,
-      priority,
-      validFrom: validFrom?.format ? validFrom.format("YYYY-MM-DD") : validFrom,
-      validTo: validTo?.format ? validTo.format("YYYY-MM-DD") : validTo,
-      justification: allFormValues.justification || undefined,
-      createdBy: "admin", // This would come from auth context in a real app
-      status: "DRAFT",
-    };
+          // Add pricing object for compatibility
+          if (
+            action.valueType &&
+            action.value !== undefined &&
+            action.value !== null
+          ) {
+            formattedAction.pricing = {
+              type: action.valueType,
+              value: Number(action.value),
+            };
+          }
 
-    console.log("Final formatted data:", formattedData);
+          return formattedAction;
+        });
 
-    createRuleMutation.mutate(formattedData);
+      // Format the complete data object
+      const formattedData = {
+        ruleCode,
+        ruleName,
+        ruleType,
+        conditions: {
+          origin: allFormValues["conditions.origin"] || undefined,
+          destination: allFormValues["conditions.destination"] || undefined,
+          pos: allFormValues["conditions.pos"] || [],
+          agentTier: allFormValues["conditions.agentTier"] || [],
+          cohortCodes: allFormValues["conditions.cohortCodes"] || [],
+          channel: allFormValues["conditions.channel"] || [],
+          cabinClass: allFormValues["conditions.cabinClass"] || [],
+          tripType: allFormValues["conditions.tripType"] || [],
+          seasonCode: allFormValues["conditions.seasonCode"] || undefined,
+          bookingWindow:
+            allFormValues["conditions.bookingWindowMin"] &&
+            allFormValues["conditions.bookingWindowMax"]
+              ? {
+                  min: allFormValues["conditions.bookingWindowMin"],
+                  max: allFormValues["conditions.bookingWindowMax"],
+                }
+              : undefined,
+          travelWindow:
+            allFormValues["conditions.travelWindowMin"] &&
+            allFormValues["conditions.travelWindowMax"]
+              ? {
+                  min: allFormValues["conditions.travelWindowMin"],
+                  max: allFormValues["conditions.travelWindowMax"],
+                }
+              : undefined,
+        },
+        actions: processedActions,
+        priority,
+        validFrom: validFrom?.format ? validFrom.format("YYYY-MM-DD") : validFrom,
+        validTo: validTo?.format ? validTo.format("YYYY-MM-DD") : validTo,
+        justification: allFormValues.justification || undefined,
+        createdBy: "admin", // This would come from auth context in a real app
+        status: "DRAFT",
+      };
+
+      console.log("Final formatted data:", formattedData);
+
+      // Submit the data
+      createRuleMutation.mutate(formattedData);
+    } catch (error) {
+      console.error("Validation error:", error);
+      alert("Please fill in all required fields correctly.");
+    }
   };
 
   const onEditSubmit = (values: any) => {
@@ -810,7 +817,6 @@ export default function OfferRuleBuilder() {
           <Steps current={currentStep} items={steps} className="mb-8" />
 
           <AntForm
-            onFinish={onCreateSubmit}
             form={createForm}
             layout="vertical"
             autoComplete="off"
@@ -1312,7 +1318,6 @@ export default function OfferRuleBuilder() {
                 ) : (
                   <AntButton
                     type="primary"
-                    htmlType="submit"
                     onClick={onCreateSubmit}
                     loading={createRuleMutation.isPending}
                   >

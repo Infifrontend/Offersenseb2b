@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import multer from "multer";
 import csv from "csv-parser";
 import { Readable } from "stream";
-import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema, insertAirAncillaryRuleSchema, insertNonAirRateSchema, insertNonAirMarkupRuleSchema, insertBundleSchema, insertBundlePricingRuleSchema, insertOfferRuleSchema, insertOfferTraceSchema, insertAgentSchema, insertChannelPricingOverrideSchema, insertCohortSchema, insertAuditLogSchema, insertAgentTierSchema, insertAgentTierAssignmentSchema, insertTierAssignmentEngineSchema, insertCampaignSchema, insertCampaignMetricsSchema, insertCampaignDeliverySchema, insertSimulationSchema, insertInsightQuerySchema } from "../shared/schema";
+import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema, insertAirAncillaryRuleSchema, insertNonAirRateSchema, insertNonAirMarkupRuleSchema, insertBundleSchema, insertBundlePricingRuleSchema, insertOfferRuleSchema, insertOfferTraceSchema, insertAgentSchema, insertChannelPricingOverrideSchema, insertCohortSchema, insertAuditLogSchema, insertAgentTierSchema, insertAgentTierAssignmentSchema, insertTierAssignmentEngineSchema, insertCampaignSchema, insertCampaignMetricsSchema, insertCampaignDeliverySchema, insertSimulationSchema, insertInsightQuerySchema, agentTiers, agentTierAssignments } from "../shared/schema";
 
 // Enhanced AI template generation function
 async function generateAITemplates(type: string, context: any): Promise<any[]> {

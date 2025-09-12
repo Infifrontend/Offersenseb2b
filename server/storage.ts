@@ -1548,8 +1548,8 @@ export class DatabaseStorage implements IStorage {
     } catch (error: any) {
       console.error("Storage: Database error in getAgentTierAssignments:", error);
       console.error("Storage: Error details:", error.message);
-      // Return empty array instead of throwing to prevent API 500 errors
-      return [];
+      // Throw the error instead of swallowing it so the route can handle it properly
+      throw new Error(`Failed to fetch tier assignments: ${error.message}`);
     }
   }
 

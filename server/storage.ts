@@ -318,7 +318,7 @@ export interface IStorage {
   evaluateAgentTier(agentId: string, kpiData: any): Promise<string>;
 
   // Tier Assignment Engine operations
-  getTierAssignmentEngines(): Promise<TierAssignmentEngine[]>;
+  getTierAssignmentEngines(filters?: any): Promise<TierAssignmentEngine[]>;
   insertTierAssignmentEngine(
     engineData: InsertTierAssignmentEngine,
   ): Promise<TierAssignmentEngine>;
@@ -2082,7 +2082,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Tier Assignment Engine operations
-  async getTierAssignmentEngines(): Promise<TierAssignmentEngine[]> {
+  async getTierAssignmentEngines(filters: any = {}): Promise<TierAssignmentEngine[]> {
     try {
       let query = this.db.select().from(tierAssignmentEngine);
       const conditions = [];

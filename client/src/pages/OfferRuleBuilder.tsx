@@ -791,48 +791,20 @@ export default function OfferRuleBuilder() {
       {/* Create Rule Modal */}
       <Modal
         title={
-          <div className="flex items-center space-x-3 py-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center">
-              {selectedRule ? (
-                <Edit className="w-5 h-5 text-white" />
-              ) : (
-                <Plus className="w-5 h-5 text-white" />
-              )}
-            </div>
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">
-                {selectedRule ? "Edit Offer Rule" : "Create New Offer Rule"}
-              </h2>
-              <p className="text-sm text-gray-500 mt-0.5">
-                {selectedRule
-                  ? "Update rule configuration and targeting criteria"
-                  : "Build intelligent pricing rules with advanced targeting"}
-              </p>
-            </div>
+          <div className="flex items-center gap-3">
+            <GitBranch className="w-5 h-5 text-blue-600" />
+            <span>Create New Offer Rule</span>
           </div>
         }
         open={isCreateModalOpen}
         onCancel={() => {
           setIsCreateModalOpen(false);
-          setSelectedRule(null);
           createForm.resetFields();
           setCurrentStep(0);
         }}
         footer={null}
-        width={1000}
+        width={900}
         destroyOnClose
-        className="trendy-modal"
-        styles={{
-          header: {
-            backgroundColor: '#fafafa',
-            borderBottom: '1px solid #f0f0f0',
-            borderRadius: '8px 8px 0 0',
-            padding: '20px 24px'
-          },
-          body: {
-            padding: '0'
-          }
-        }}
       >
         <div className="mt-6">
           <Steps current={currentStep} items={steps} className="mb-8" />
@@ -1585,21 +1557,7 @@ export default function OfferRuleBuilder() {
 
       {/* Edit Modal */}
       <Modal
-        title={
-          <div className="flex items-center space-x-3 py-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center">
-              <Edit className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">
-                Edit Offer Rule
-              </h2>
-              <p className="text-sm text-gray-500 mt-0.5">
-                Update rule configuration and targeting criteria
-              </p>
-            </div>
-          </div>
-        }
+        title="Edit Offer Rule"
         open={isEditModalOpen}
         onCancel={() => {
           setIsEditModalOpen(false);
@@ -1607,20 +1565,8 @@ export default function OfferRuleBuilder() {
           editForm.resetFields();
         }}
         footer={null}
-        width={1000}
+        width={800}
         destroyOnClose
-        className="trendy-modal"
-        styles={{
-          header: {
-            backgroundColor: '#fafafa',
-            borderBottom: '1px solid #f0f0f0',
-            borderRadius: '8px 8px 0 0',
-            padding: '20px 24px'
-          },
-          body: {
-            padding: '0'
-          }
-        }}
       >
         <AntForm
           form={editForm}

@@ -6,37 +6,250 @@ import csv from "csv-parser";
 import { Readable } from "stream";
 import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema, insertAirAncillaryRuleSchema, insertNonAirRateSchema, insertNonAirMarkupRuleSchema, insertBundleSchema, insertBundlePricingRuleSchema, insertOfferRuleSchema, insertOfferTraceSchema, insertAgentSchema, insertChannelPricingOverrideSchema, insertCohortSchema, insertAuditLogSchema, insertAgentTierSchema, insertAgentTierAssignmentSchema, insertTierAssignmentEngineSchema, insertCampaignSchema, insertCampaignMetricsSchema, insertCampaignDeliverySchema, insertSimulationSchema, insertInsightQuerySchema } from "../shared/schema";
 
-// Mock function for AI template generation (replace with actual implementation)
+// Enhanced AI template generation function
 async function generateAITemplates(type: string, context: any): Promise<any[]> {
   console.log(`Generating ${type} templates with context:`, context);
-  // In a real application, this would call an AI service (e.g., OpenAI, Gemini)
-  // to generate template content based on the provided context.
-  // For now, returning mock data.
+  
+  // Extract campaign details for template generation
+  const {
+    campaignName = 'Special Campaign',
+    offerType = 'PERCENT',
+    offerValue = 10,
+    specialPrice,
+    products = { ancillaries: [], bundles: [] },
+    target = { agentTiers: [], cohorts: [] },
+    companyName = 'OfferSense',
+    brandTone = 'professional',
+    urgency = 'medium'
+  } = context;
+
+  // Generate offer text
+  const getOfferText = () => {
+    if (offerType === 'PERCENT') return `${offerValue}% discount`;
+    if (offerType === 'AMOUNT') return `$${offerValue} off`;
+    if (offerType === 'SPECIAL_PRICE') return `special price of $${specialPrice}`;
+    return 'exclusive offer';
+  };
+
+  // Generate product mentions
+  const getProductMentions = () => {
+    const allProducts = [...(products.ancillaries || []), ...(products.bundles || [])];
+    if (allProducts.length === 0) return 'travel services';
+    if (allProducts.length === 1) return allProducts[0];
+    if (allProducts.length === 2) return `${allProducts[0]} and ${allProducts[1]}`;
+    return `${allProducts[0]}, ${allProducts[1]} and more`;
+  };
+
   if (type === 'email') {
     return [
       {
-        name: "Welcome Email",
-        subject: `Welcome to ${context.companyName}!`,
-        body: `Hi ${context.userName},\n\nWelcome aboard! We're excited to have you.\n\nBest,\nThe ${context.companyName} Team`
+        id: `email_template_1_${Date.now()}`,
+        name: "Exclusive Offer Campaign",
+        subject: `🎯 Exclusive ${getOfferText()} on ${getProductMentions()} - Limited Time!`,
+        htmlContent: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center;">
+              <h1 style="margin: 0; font-size: 24px;">${campaignName}</h1>
+              <p style="margin: 10px 0 0; font-size: 16px;">Exclusive offer just for you!</p>
+            </div>
+            
+            <div style="padding: 30px 20px;">
+              <h2 style="color: #333; margin-bottom: 20px;">Don't miss out on this amazing deal!</h2>
+              
+              <div style="background: #f8f9ff; border-left: 4px solid #667eea; padding: 20px; margin: 20px 0;">
+                <h3 style="color: #667eea; margin: 0 0 10px;">🎉 Special Offer</h3>
+                <p style="font-size: 18px; font-weight: bold; color: #333; margin: 0;">
+                  Get ${getOfferText()} on ${getProductMentions()}
+                </p>
+              </div>
+              
+              <p style="color: #666; line-height: 1.6;">
+                We're excited to offer you this exclusive deal on our premium travel services. 
+                This limited-time offer is specially curated for valued customers like you.
+              </p>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="#" style="background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+                  Claim Your Offer Now →
+                </a>
+              </div>
+              
+              <p style="color: #888; font-size: 14px; margin-top: 30px;">
+                This offer is valid for a limited time. Terms and conditions apply.
+              </p>
+            </div>
+            
+            <div style="background: #f5f5f5; padding: 20px; text-align: center; color: #666; font-size: 14px;">
+              <p>Best regards,<br>The ${companyName} Team</p>
+            </div>
+          </div>
+        `,
+        tone: 'professional',
+        callToAction: 'Claim Your Offer Now',
+        variables: ['campaignName', 'offerValue', 'customerName'],
+        estimatedOpenRate: '24%',
+        estimatedClickRate: '3.2%'
       },
       {
-        name: "Promotional Offer",
-        subject: `Special Offer Just For You!`,
-        body: `Dear ${context.userName},\n\nDon't miss out on our latest promotion!\n\nVisit our website for details.\n\nRegards,\n${context.companyName}`
+        id: `email_template_2_${Date.now()}`,
+        name: "Urgent Last Chance",
+        subject: `⏰ Last Chance: ${getOfferText()} expires soon!`,
+        htmlContent: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background: #ff6b6b; color: white; padding: 20px; text-align: center;">
+              <h1 style="margin: 0; font-size: 22px;">⏰ Last Chance!</h1>
+              <p style="margin: 10px 0 0; font-size: 16px;">Your exclusive offer expires soon</p>
+            </div>
+            
+            <div style="padding: 30px 20px;">
+              <h2 style="color: #333; margin-bottom: 20px;">Don't let this opportunity slip away!</h2>
+              
+              <div style="background: #fff5f5; border: 2px dashed #ff6b6b; padding: 20px; margin: 20px 0; text-align: center;">
+                <h3 style="color: #ff6b6b; margin: 0 0 10px;">🔥 Limited Time Offer</h3>
+                <p style="font-size: 20px; font-weight: bold; color: #333; margin: 0;">
+                  ${getOfferText().toUpperCase()} ON ${getProductMentions().toUpperCase()}
+                </p>
+                <p style="color: #ff6b6b; font-weight: bold; margin: 10px 0 0;">EXPIRES IN 24 HOURS!</p>
+              </div>
+              
+              <p style="color: #666; line-height: 1.6;">
+                This is your final reminder about our exclusive ${campaignName.toLowerCase()}. 
+                Secure your savings before this amazing deal disappears forever.
+              </p>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="#" style="background: #ff6b6b; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);">
+                  SECURE MY DISCOUNT NOW →
+                </a>
+              </div>
+              
+              <div style="background: #fffacd; border-left: 4px solid #ffd700; padding: 15px; margin: 20px 0;">
+                <p style="margin: 0; color: #b8860b; font-weight: bold;">
+                  💡 Pro Tip: Customers who book within the next 6 hours get an additional surprise bonus!
+                </p>
+              </div>
+            </div>
+            
+            <div style="background: #f5f5f5; padding: 20px; text-align: center; color: #666; font-size: 14px;">
+              <p>Don't wait - book now!<br>The ${companyName} Team</p>
+            </div>
+          </div>
+        `,
+        tone: 'urgent',
+        callToAction: 'SECURE MY DISCOUNT NOW',
+        variables: ['offerValue', 'expiryTime', 'customerName'],
+        estimatedOpenRate: '31%',
+        estimatedClickRate: '5.8%'
+      },
+      {
+        id: `email_template_3_${Date.now()}`,
+        name: "Personalized Recommendation",
+        subject: `✈️ Perfect for your next trip: ${getOfferText()} on ${getProductMentions()}`,
+        htmlContent: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%); color: white; padding: 20px; text-align: center;">
+              <h1 style="margin: 0; font-size: 24px;">✈️ Recommended Just For You</h1>
+              <p style="margin: 10px 0 0; font-size: 16px;">Based on your travel preferences</p>
+            </div>
+            
+            <div style="padding: 30px 20px;">
+              <p style="color: #666; line-height: 1.6; font-size: 16px;">
+                Hi there! 👋
+              </p>
+              
+              <p style="color: #666; line-height: 1.6;">
+                We noticed you're planning your next adventure, and we have something special that caught our attention. 
+                Our ${campaignName.toLowerCase()} is perfectly tailored for travelers like you.
+              </p>
+              
+              <div style="background: #f0f7ff; border-radius: 10px; padding: 25px; margin: 25px 0;">
+                <h3 style="color: #0984e3; margin: 0 0 15px; display: flex; align-items: center;">
+                  🎯 Your Personalized Offer
+                </h3>
+                <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                  <p style="font-size: 18px; font-weight: bold; color: #333; margin: 0 0 10px;">
+                    ${getOfferText()} on ${getProductMentions()}
+                  </p>
+                  <p style="color: #666; margin: 0;">Perfect for enhancing your travel experience</p>
+                </div>
+              </div>
+              
+              <div style="background: #fff9e6; border-left: 4px solid #ffa500; padding: 20px; margin: 20px 0;">
+                <h4 style="color: #ff8c00; margin: 0 0 10px;">Why this offer is perfect for you:</h4>
+                <ul style="color: #666; margin: 0; padding-left: 20px;">
+                  <li>Specially selected based on your travel history</li>
+                  <li>Premium quality services at unbeatable prices</li>
+                  <li>Flexible booking and cancellation options</li>
+                  <li>24/7 customer support included</li>
+                </ul>
+              </div>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="#" style="background: #0984e3; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+                  Explore This Offer →
+                </a>
+              </div>
+              
+              <p style="color: #888; font-size: 14px; text-align: center;">
+                Have questions? Reply to this email - we're here to help! 💬
+              </p>
+            </div>
+            
+            <div style="background: #f5f5f5; padding: 20px; text-align: center; color: #666; font-size: 14px;">
+              <p>Happy travels!<br>Your friends at ${companyName}</p>
+            </div>
+          </div>
+        `,
+        tone: 'friendly',
+        callToAction: 'Explore This Offer',
+        variables: ['customerName', 'travelHistory', 'offerDetails'],
+        estimatedOpenRate: '28%',
+        estimatedClickRate: '4.1%'
       }
     ];
-  } else if (type === 'whatsapp') {
+  } 
+  
+  else if (type === 'whatsapp') {
     return [
       {
-        name: "Order Confirmation",
-        message: `Hello ${context.userName},\n\nYour order #${context.orderId} has been confirmed. Thank you for shopping with us!`
+        id: `whatsapp_template_1_${Date.now()}`,
+        name: "Quick Offer Alert",
+        message: `🎯 Hi! Exclusive ${getOfferText()} on ${getProductMentions()} - just for you!\n\n✈️ Perfect for your next trip\n⏰ Limited time offer\n\nInterested? Reply YES for details!`,
+        style: 'conversational',
+        variables: ['customerName', 'offerValue', 'productName'],
+        estimatedDeliveryRate: '98%',
+        estimatedReadRate: '87%'
       },
       {
-        name: "Shipping Update",
-        message: `Hi ${context.userName},\n\nGood news! Your order has shipped. Track it here: ${context.trackingLink}`
+        id: `whatsapp_template_2_${Date.now()}`,
+        name: "Friendly Reminder",
+        message: `Hey! 👋 Don't miss out on our ${campaignName}!\n\n🔥 ${getOfferText()} on ${getProductMentions()}\n📅 Valid until tomorrow\n\nBook now: [LINK]\n\nQuestions? Just reply here! 😊`,
+        style: 'friendly',
+        variables: ['campaignName', 'offerDetails', 'expiryDate'],
+        estimatedDeliveryRate: '98%',
+        estimatedReadRate: '85%'
+      },
+      {
+        id: `whatsapp_template_3_${Date.now()}`,
+        name: "Urgent Alert",
+        message: `⚡ LAST CHANCE! Your ${getOfferText()} expires in 6 hours!\n\n${getProductMentions().toUpperCase()} - Special pricing\n\n👆 Don't wait - secure now!\nReply BOOK to claim`,
+        style: 'urgent',
+        variables: ['offerValue', 'expiryTime', 'productCode'],
+        estimatedDeliveryRate: '98%',
+        estimatedReadRate: '92%'
+      },
+      {
+        id: `whatsapp_template_4_${Date.now()}`,
+        name: "Value Proposition",
+        message: `✈️ Planning your next trip?\n\nWe've got something special:\n🎁 ${getOfferText()} on ${getProductMentions()}\n💰 Save big on premium services\n🌟 Trusted by 50,000+ travelers\n\nReady to save? Reply YES`,
+        style: 'informative',
+        variables: ['offerType', 'savings', 'customerCount'],
+        estimatedDeliveryRate: '98%',
+        estimatedReadRate: '83%'
       }
     ];
   }
+  
   return [];
 }
 

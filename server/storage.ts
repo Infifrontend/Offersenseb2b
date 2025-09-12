@@ -1514,27 +1514,35 @@ export class DatabaseStorage implements IStorage {
 
   // Agent Tier Assignment operations
   async getAgentTierAssignments(filters: any = {}): Promise<AgentTierAssignment[]> {
-    let query = this.db.select().from(agentTierAssignments);
-    const conditions = [];
+    try {
+      console.log("Storage: getAgentTierAssignments called with filters:", filters);
+      let query = this.db.select().from(agentTierAssignments);
+      const conditions = [];
 
-    if (filters.agentId) {
-      conditions.push(eq(agentTierAssignments.agentId, filters.agentId));
-    }
-    if (filters.tierCode) {
-      conditions.push(eq(agentTierAssignments.tierCode, filters.tierCode));
-    }
-    if (filters.status) {
-      conditions.push(eq(agentTierAssignments.status, filters.status));
-    }
-    if (filters.assignmentType) {
-      conditions.push(eq(agentTierAssignments.assignmentType, filters.assignmentType));
-    }
+      if (filters.agentId) {
+        conditions.push(eq(agentTierAssignments.agentId, filters.agentId));
+      }
+      if (filters.tierCode) {
+        conditions.push(eq(agentTierAssignments.tierCode, filters.tierCode));
+      }
+      if (filters.status) {
+        conditions.push(eq(agentTierAssignments.status, filters.status));
+      }
+      if (filters.assignmentType) {
+        conditions.push(eq(agentTierAssignments.assignmentType, filters.assignmentType));
+      }
 
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions));
-    }
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
 
-    return await query.orderBy(desc(agentTierAssignments.effectiveFrom));
+      const results = await query.orderBy(desc(agentTierAssignments.effectiveFrom));
+      console.log(`Storage: Found ${results?.length || 0} tier assignments`);
+      return results || [];
+    } catch (error: any) {
+      console.error("Storage: Error in getAgentTierAssignments:", error);
+      return [];
+    }
   }
 
   async insertAgentTierAssignment(assignmentData: InsertAgentTierAssignment): Promise<AgentTierAssignment> {

@@ -2506,8 +2506,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all tier assignments with optional filters
   app.get("/api/tiers/assignments", async (req, res) => {
     try {
+      console.log("GET /api/tiers/assignments called with query:", req.query);
       const filters = req.query;
       let assignments = await storage.getAgentTierAssignments(filters);
+      console.log(`Found ${assignments?.length || 0} tier assignments`);
       
       // If no assignments exist and no specific filters, create sample data
       if (assignments.length === 0 && Object.keys(filters).length === 0) {
@@ -2598,13 +2600,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           // Refetch after creating samples
           assignments = await storage.getAgentTierAssignments(filters);
+          console.log(`After sample creation: ${assignments?.length || 0} assignments`);
         } catch (createError: any) {
           console.error("Error creating sample tier assignments:", createError);
         }
       }
       
+      console.log(`Returning ${assignments?.length || 0} tier assignments`);
       res.json(assignments);
     } catch (error: any) {
+      console.error("Error in /api/tiers/assignments:", error);
       res.status(500).json({ message: "Failed to fetch tier assignments", error: error.message });
     }
   });

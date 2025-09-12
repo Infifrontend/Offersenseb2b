@@ -337,7 +337,7 @@ export default function CampaignManager() {
 
   // Mutations
   const createCampaignMutation = useMutation({
-    mutationFn: async (data: Campaign FormData) => {
+    mutationFn: async (data: CampaignFormData) => {
       const response = await fetch("/api/campaigns", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

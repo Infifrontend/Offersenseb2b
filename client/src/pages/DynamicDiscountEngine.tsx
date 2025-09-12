@@ -881,84 +881,42 @@ export default function DynamicDiscountEngine() {
             </Col>
           </Row>
 
-          <Row gutter={16}>
-            <Col span={24}>
-              <AntForm.Item
-                label="Point of Sale"
-                name="pos"
-                rules={[
-                  { required: true, message: "Please select at least one POS" },
-                ]}
-              >
-                <AntCheckbox.Group style={{ width: "100%" }}>
-                  <Row gutter={[16, 8]}>
-                    {countriesData.map((country) => (
-                      <Col span={6} key={country.code}>
-                        <AntCheckbox
-                          value={country.code}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            padding: "4px 8px",
-                            borderRadius: "4px",
-                            border: "1px solid #d9d9d9",
-                            marginBottom: "8px",
-                            fontSize: "14px",
-                          }}
-                        >
-                          <span style={{ fontWeight: "500" }}>
-                            {country.code}
-                          </span>
-                          <span
-                            style={{
-                              fontSize: "12px",
-                              color: "#666",
-                              marginLeft: "4px",
-                            }}
-                          >
-                            {country.name}
-                          </span>
-                        </AntCheckbox>
-                      </Col>
-                    ))}
-                  </Row>
-                </AntCheckbox.Group>
-              </AntForm.Item>
-            </Col>
-          </Row>
-          <AntForm.Item
-            label="Agent Tiers"
-            name="agentTier"
-            rules={[
-              {
-                required: true,
-                message: "Please select at least one agent tier",
-              },
-            ]}
-          >
-            <AntCheckbox.Group style={{ width: "100%" }}>
-              <Row gutter={[16, 8]}>
-                {agentTiers.map((tier) => (
-                  <Col span={6} key={tier}>
-                    <AntCheckbox
-                      value={tier}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        padding: "4px 8px",
-                        borderRadius: "4px",
-                        border: "1px solid #d9d9d9",
-                        marginBottom: "8px",
-                        fontSize: "14px",
-                      }}
-                    >
-                      <span style={{ fontWeight: "500" }}>{tier}</span>
-                    </AntCheckbox>
-                  </Col>
+          <div className="grid grid-cols-2 gap-4">
+            <AntForm.Item
+              label="Point of Sale"
+              name="pos"
+              rules={[
+                { required: true, message: "At least one POS is required" },
+              ]}
+            >
+              <AntSelect mode="multiple" placeholder="Select countries">
+                {countriesData.map((country) => (
+                  <AntSelect.Option key={country.code} value={country.code}>
+                    {country.code} - {country.name}
+                  </AntSelect.Option>
                 ))}
-              </Row>
-            </AntCheckbox.Group>
-          </AntForm.Item>
+              </AntSelect>
+            </AntForm.Item>
+
+            <AntForm.Item
+              label="Agent Tiers"
+              name="agentTier"
+              rules={[
+                {
+                  required: true,
+                  message: "At least one agent tier is required",
+                },
+              ]}
+            >
+              <AntSelect mode="multiple" placeholder="Select agent tiers">
+                {agentTiers.map((tier) => (
+                  <AntSelect.Option key={tier} value={tier}>
+                    {tier}
+                  </AntSelect.Option>
+                ))}
+              </AntSelect>
+            </AntForm.Item>
+          </div>
           <AntForm.Item label="Eligible Cohorts (Optional)" name="cohortCodes">
             <AntSelect
               mode="multiple"
@@ -1184,86 +1142,42 @@ export default function DynamicDiscountEngine() {
             </Col>
           </Row>
 
-          <Row gutter={16}>
-            <Col span={12}>
-              <AntForm.Item
-                label="Point of Sale"
-                name="pos"
-                rules={[
-                  { required: true, message: "Please select at least one POS" },
-                ]}
-              >
-                <AntCheckbox.Group style={{ width: "100%" }}>
-                  <Row gutter={[16, 8]}>
-                    {countriesData.map((country) => (
-                      <Col span={6} key={country.code}>
-                        <AntCheckbox
-                          value={country.code}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            padding: "4px 8px",
-                            borderRadius: "4px",
-                            border: "1px solid #d9d9d9",
-                            marginBottom: "8px",
-                            fontSize: "14px",
-                          }}
-                        >
-                          <span style={{ fontWeight: "500" }}>
-                            {country.code}
-                          </span>
-                          <span
-                            style={{
-                              fontSize: "12px",
-                              color: "#666",
-                              marginLeft: "4px",
-                            }}
-                          >
-                            {country.name}
-                          </span>
-                        </AntCheckbox>
-                      </Col>
-                    ))}
-                  </Row>
-                </AntCheckbox.Group>
-              </AntForm.Item>
-            </Col>
-            <Col span={12}>
-              <AntForm.Item
-                label="Agent Tiers"
-                name="agentTier"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please select at least one agent tier",
-                  },
-                ]}
-              >
-                <AntCheckbox.Group style={{ width: "100%" }}>
-                  <Row gutter={[16, 8]}>
-                    {agentTiers.map((tier) => (
-                      <Col span={6} key={tier}>
-                        <AntCheckbox
-                          value={tier}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            padding: "4px 8px",
-                            borderRadius: "4px",
-                            border: "1px solid #d9d9d9",
-                            marginBottom: "8px",
-                            fontSize: "14px",
-                          }}
-                        >
-                          <span style={{ fontWeight: "500" }}>{tier}</span>
-                        </AntCheckbox>
-                      </Col>
-                    ))}
-                  </Row>
-                </AntCheckbox.Group>
-              </AntForm.Item>
-            </Col>
-          </Row>
+          <div className="grid grid-cols-2 gap-4">
+            <AntForm.Item
+              label="Point of Sale"
+              name="pos"
+              rules={[
+                { required: true, message: "At least one POS is required" },
+              ]}
+            >
+              <AntSelect mode="multiple" placeholder="Select countries">
+                {countriesData.map((country) => (
+                  <AntSelect.Option key={country.code} value={country.code}>
+                    {country.code} - {country.name}
+                  </AntSelect.Option>
+                ))}
+              </AntSelect>
+            </AntForm.Item>
+
+            <AntForm.Item
+              label="Agent Tiers"
+              name="agentTier"
+              rules={[
+                {
+                  required: true,
+                  message: "At least one agent tier is required",
+                },
+              ]}
+            >
+              <AntSelect mode="multiple" placeholder="Select agent tiers">
+                {agentTiers.map((tier) => (
+                  <AntSelect.Option key={tier} value={tier}>
+                    {tier}
+                  </AntSelect.Option>
+                ))}
+              </AntSelect>
+            </AntForm.Item>
+          </div>
 
           <AntForm.Item label="Eligible Cohorts (Optional)" name="cohortCodes">
             <AntSelect

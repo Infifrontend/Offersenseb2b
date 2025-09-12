@@ -873,76 +873,42 @@ export default function NegotiatedFareManager() {
             </Col>
           </Row>
 
-          <AntForm.Item
-            label="Point of Sale (POS)"
-            name="pos"
-            rules={[
-              { required: true, message: "Please select at least one POS" },
-            ]}
-          >
-            <AntCheckbox.Group style={{ width: "100%" }}>
-              <Row gutter={[16, 8]}>
+          <div className="grid grid-cols-2 gap-4">
+            <AntForm.Item
+              label="Point of Sale"
+              name="pos"
+              rules={[
+                { required: true, message: "At least one POS is required" },
+              ]}
+            >
+              <AntSelect mode="multiple" placeholder="Select countries">
                 {countriesData.map((country) => (
-                  <Col span={6} key={country.code}>
-                    <AntCheckbox
-                      value={country.code}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        padding: "4px 8px",
-                        borderRadius: "4px",
-                        border: "1px solid #d9d9d9",
-                        marginBottom: "8px",
-                        fontSize: "14px",
-                      }}
-                    >
-                      <span style={{ fontWeight: "500" }}>{country.code}</span>
-                      <span
-                        style={{
-                          fontSize: "12px",
-                          color: "#666",
-                          marginLeft: "4px",
-                        }}
-                      >
-                        {country.name}
-                      </span>
-                    </AntCheckbox>
-                  </Col>
+                  <AntSelect.Option key={country.code} value={country.code}>
+                    {country.code} - {country.name}
+                  </AntSelect.Option>
                 ))}
-              </Row>
-            </AntCheckbox.Group>
-          </AntForm.Item>
+              </AntSelect>
+            </AntForm.Item>
 
-          <AntForm.Item
-            label="Eligible Agent Tiers"
-            name="eligibleAgentTiers"
-            rules={[
-              { required: true, message: "Please select at least one tier" },
-            ]}
-          >
-            <AntCheckbox.Group style={{ width: "100%" }}>
-              <Row gutter={[16, 8]}>
+            <AntForm.Item
+              label="Agent Tiers"
+              name="eligibleAgentTiers"
+              rules={[
+                {
+                  required: true,
+                  message: "At least one agent tier is required",
+                },
+              ]}
+            >
+              <AntSelect mode="multiple" placeholder="Select agent tiers">
                 {agentTiers.map((tier) => (
-                  <Col span={6} key={tier}>
-                    <AntCheckbox
-                      value={tier}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        padding: "4px 8px",
-                        borderRadius: "4px",
-                        border: "1px solid #d9d9d9",
-                        marginBottom: "8px",
-                        fontSize: "14px",
-                      }}
-                    >
-                      <span style={{ fontWeight: "500" }}>{tier}</span>
-                    </AntCheckbox>
-                  </Col>
+                  <AntSelect.Option key={tier} value={tier}>
+                    {tier}
+                  </AntSelect.Option>
                 ))}
-              </Row>
-            </AntCheckbox.Group>
-          </AntForm.Item>
+              </AntSelect>
+            </AntForm.Item>
+          </div>
 
           <Row gutter={16}>
             <Col span={8}>
@@ -1623,76 +1589,42 @@ export default function NegotiatedFareManager() {
             </Col>
           </Row>
 
-          <AntForm.Item
-            label="Point of Sale (POS)"
-            name="pos"
-            rules={[
-              { required: true, message: "Please select at least one POS" },
-            ]}
-          >
-            <AntCheckbox.Group style={{ width: "100%" }}>
-              <Row gutter={[16, 8]}>
+          <div className="grid grid-cols-2 gap-4">
+            <AntForm.Item
+              label="Point of Sale"
+              name="pos"
+              rules={[
+                { required: true, message: "At least one POS is required" },
+              ]}
+            >
+              <AntSelect mode="multiple" placeholder="Select countries">
                 {countriesData.map((country) => (
-                  <Col span={6} key={country.code}>
-                    <AntCheckbox
-                      value={country.code}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        padding: "4px 8px",
-                        borderRadius: "4px",
-                        border: "1px solid #d9d9d9",
-                        marginBottom: "8px",
-                        fontSize: "14px",
-                      }}
-                    >
-                      <span style={{ fontWeight: "500" }}>{country.code}</span>
-                      <span
-                        style={{
-                          fontSize: "12px",
-                          color: "#666",
-                          marginLeft: "4px",
-                        }}
-                      >
-                        {country.name}
-                      </span>
-                    </AntCheckbox>
-                  </Col>
+                  <AntSelect.Option key={country.code} value={country.code}>
+                    {country.code} - {country.name}
+                  </AntSelect.Option>
                 ))}
-              </Row>
-            </AntCheckbox.Group>
-          </AntForm.Item>
+              </AntSelect>
+            </AntForm.Item>
 
-          <AntForm.Item
-            label="Eligible Agent Tiers"
-            name="eligibleAgentTiers"
-            rules={[
-              { required: true, message: "Please select at least one tier" },
-            ]}
-          >
-            <AntCheckbox.Group style={{ width: "100%" }}>
-              <Row gutter={[16, 8]}>
+            <AntForm.Item
+              label="Agent Tiers"
+              name="eligibleAgentTiers"
+              rules={[
+                {
+                  required: true,
+                  message: "At least one agent tier is required",
+                },
+              ]}
+            >
+              <AntSelect mode="multiple" placeholder="Select agent tiers">
                 {agentTiers.map((tier) => (
-                  <Col span={6} key={tier}>
-                    <AntCheckbox
-                      value={tier}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        padding: "4px 8px",
-                        borderRadius: "4px",
-                        border: "1px solid #d9d9d9",
-                        marginBottom: "8px",
-                        fontSize: "14px",
-                      }}
-                    >
-                      <span style={{ fontWeight: "500" }}>{tier}</span>
-                    </AntCheckbox>
-                  </Col>
+                  <AntSelect.Option key={tier} value={tier}>
+                    {tier}
+                  </AntSelect.Option>
                 ))}
-              </Row>
-            </AntCheckbox.Group>
-          </AntForm.Item>
+              </AntSelect>
+            </AntForm.Item>
+          </div>
 
           <Row gutter={16}>
             <Col span={8}>

@@ -315,12 +315,12 @@ export default function AgentChannelManager() {
     setIsOverrideModalVisible(true);
   };
 
-  const handleEditOverride = (override: ChannelOverride) => {
-    setEditingOverride(override);
+  const handleEditOverride = (record: ChannelOverride) => {
+    setEditingOverride(record);
     overrideForm.setFieldsValue({
-      ...override,
-      validFrom: override.validFrom,
-      validTo: override.validTo,
+      ...record,
+      validFrom: dayjs(record.validFrom),
+      validTo: dayjs(record.validTo),
     });
     setIsOverrideModalVisible(true);
   };
@@ -348,13 +348,20 @@ export default function AgentChannelManager() {
   const handleOverrideSubmit = async (values: any) => {
     try {
       const validatedData = overrideFormSchema.parse(values);
+      // Format the data with proper date strings
+      const formattedData = {
+        ...validatedData,
+        validFrom: validatedData.validFrom?.format("YYYY-MM-DD"),
+        validTo: validatedData.validTo?.format("YYYY-MM-DD"),
+      };
+
       if (editingOverride) {
         await updateOverrideMutation.mutateAsync({
           id: editingOverride.id,
-          data: validatedData,
+          data: formattedData,
         });
       } else {
-        await createOverrideMutation.mutateAsync(validatedData);
+        await createOverrideMutation.mutateAsync(formattedData);
       }
     } catch (error: any) {
       if (error.errors) {

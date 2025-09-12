@@ -882,7 +882,6 @@ export default function CampaignManager() {
               loading={campaignsLoading}
               rowKey="id"
               pagination={{ pageSize: 10 }}
-              scroll={{ x: 1020 }}
               size="small"
             />
           </div>

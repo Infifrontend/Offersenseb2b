@@ -1061,97 +1061,121 @@ export default function CohortManager() {
         <CardHeader>
           <CardTitle>Cohorts</CardTitle>
         </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Code</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Criteria</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8">
-                    Loading cohorts...
-                  </TableCell>
-                </TableRow>
-              ) : cohorts.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={7}
-                    className="text-center py-8 text-muted-foreground"
-                  >
-                    No cohorts found
-                  </TableCell>
-                </TableRow>
-              ) : (
-                cohorts.map((cohort: Cohort) => (
-                  <TableRow key={cohort.id}>
-                    <TableCell className="font-medium">
-                      {cohort.cohortCode}
-                    </TableCell>
-                    <TableCell>{cohort.cohortName}</TableCell>
-                    <TableCell>{getTypeBadge(cohort.type)}</TableCell>
-                    <TableCell>
-                      <div className="text-xs text-muted-foreground max-w-xs truncate">
-                        {JSON.stringify(cohort.criteria)}
-                      </div>
-                    </TableCell>
-                    <TableCell>{getStatusBadge(cohort.status)}</TableCell>
-                    <TableCell>
-                      {new Date(cohort.createdAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleEdit(cohort)}>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() =>
-                              updateStatusMutation.mutate({
-                                id: cohort.id,
-                                status:
-                                  cohort.status === "ACTIVE"
-                                    ? "INACTIVE"
-                                    : "ACTIVE",
-                              })
-                            }
-                          >
-                            <Eye className="h-4 w-4 mr-2" />
-                            {cohort.status === "ACTIVE"
-                              ? "Deactivate"
-                              : "Activate"}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() =>
-                              deleteCohortMutation.mutate(cohort.id)
-                            }
-                            className="text-red-600"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+        <CardContent className="p-0">
+          <div className="w-full">
+            <table className="w-full caption-bottom text-sm">
+              <thead className="[&_tr]:border-b">
+                <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 w-[15%]">
+                    Code
+                  </th>
+                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 w-[20%]">
+                    Name
+                  </th>
+                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 w-[12%]">
+                    Type
+                  </th>
+                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 w-[25%]">
+                    Criteria
+                  </th>
+                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 w-[10%]">
+                    Status
+                  </th>
+                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 w-[12%]">
+                    Created
+                  </th>
+                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 w-[6%]">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="[&_tr:last-child]:border-0">
+                {isLoading ? (
+                  <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                    <td colSpan={7} className="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-center py-8">
+                      Loading cohorts...
+                    </td>
+                  </tr>
+                ) : cohorts.length === 0 ? (
+                  <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                    <td
+                      colSpan={7}
+                      className="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-center py-8 text-muted-foreground"
+                    >
+                      No cohorts found
+                    </td>
+                  </tr>
+                ) : (
+                  cohorts.map((cohort: Cohort) => (
+                    <tr key={cohort.id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                      <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0 font-medium">
+                        <div className="truncate">{cohort.cohortCode}</div>
+                      </td>
+                      <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                        <div className="truncate">{cohort.cohortName}</div>
+                      </td>
+                      <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                        {getTypeBadge(cohort.type)}
+                      </td>
+                      <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                        <div className="text-xs text-muted-foreground truncate max-w-[200px]">
+                          {JSON.stringify(cohort.criteria)}
+                        </div>
+                      </td>
+                      <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                        {getStatusBadge(cohort.status)}
+                      </td>
+                      <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                        <div className="text-sm">
+                          {new Date(cohort.createdAt).toLocaleDateString()}
+                        </div>
+                      </td>
+                      <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleEdit(cohort)}>
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                updateStatusMutation.mutate({
+                                  id: cohort.id,
+                                  status:
+                                    cohort.status === "ACTIVE"
+                                      ? "INACTIVE"
+                                      : "ACTIVE",
+                                })
+                              }
+                            >
+                              <Eye className="h-4 w-4 mr-2" />
+                              {cohort.status === "ACTIVE"
+                                ? "Deactivate"
+                                : "Activate"}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                deleteCohortMutation.mutate(cohort.id)
+                              }
+                              className="text-red-600"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </CardContent>
       </Card>
     </div>

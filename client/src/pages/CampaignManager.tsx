@@ -288,6 +288,8 @@ export default function CampaignManager() {
   const [whatsappPreviewVisible, setWhatsappPreviewVisible] = useState(false);
   const [selectedEmailTemplate, setSelectedEmailTemplate] = useState<any>(null);
   const [selectedWhatsappTemplate, setSelectedWhatsappTemplate] = useState<any>(null);
+  const [customEmailPrompt, setCustomEmailPrompt] = useState('');
+  const [customWhatsappPrompt, setCustomWhatsappPrompt] = useState('');
 
   const queryClient = useQueryClient();
   const [campaignForm] = AntForm.useForm<CampaignFormData>();
@@ -546,7 +548,8 @@ export default function CampaignManager() {
         companyName: 'OfferSense',
         brandTone: type === 'email' ? 'professional' : 'friendly',
         urgency: 'medium',
-        personalization: true
+        personalization: true,
+        customPrompt: type === 'email' ? customEmailPrompt : customWhatsappPrompt
       };
 
       const response = await fetch('/api/ai/generate-templates', {
@@ -962,6 +965,10 @@ export default function CampaignManager() {
           setIsCampaignModalVisible(false);
           setEditingCampaign(null);
           campaignForm.resetFields();
+          setCustomEmailPrompt('');
+          setCustomWhatsappPrompt('');
+          setSelectedEmailTemplate(null);
+          setSelectedWhatsappTemplate(null);
         }}
         footer={null}
         width={1000}
@@ -1264,68 +1271,117 @@ export default function CampaignManager() {
                   className="border-l-4 border-l-blue-500"
                 >
                   <div className="space-y-4">
-                    <Row gutter={16} align="middle">
-                      <Col span={10}>
+                    {/* Template Selection Section */}
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <h4 className="text-sm font-medium mb-3 flex items-center">
+                        <CheckCircle className="w-4 h-4 mr-2 text-blue-600" />
+                        Select from Existing Templates
+                      </h4>
+                      
+                      {templateGenerationState.email.templates.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {templateGenerationState.email.templates.map((template, index) => (
+                            <div
+                              key={index}
+                              className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-md ${
+                                selectedEmailTemplate?.subject === template.subject
+                                  ? 'border-blue-500 bg-blue-100'
+                                  : 'border-gray-200 bg-white hover:border-blue-300'
+                              }`}
+                              onClick={() => handleSelectEmailTemplate(template)}
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <h5 className="font-medium text-sm text-gray-900 mb-1">
+                                    {template.subject}
+                                  </h5>
+                                  <p className="text-xs text-gray-600 mb-2 line-clamp-2">
+                                    {template.name}
+                                  </p>
+                                  <div className="flex gap-1">
+                                    <Badge variant="outline" className="text-xs">
+                                      {template.tone}
+                                    </Badge>
+                                    <Badge variant="outline" className="text-xs text-blue-600">
+                                      {template.estimatedOpenRate}
+                                    </Badge>
+                                  </div>
+                                </div>
+                                {selectedEmailTemplate?.subject === template.subject && (
+                                  <CheckCircle className="w-4 h-4 text-blue-600 flex-shrink-0 ml-2" />
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-6 text-gray-500">
+                          <Mail className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                          <p className="text-sm">No email templates available</p>
+                          <p className="text-xs">Generate templates using AI below</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* AI Generation Section */}
+                    <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg">
+                      <h4 className="text-sm font-medium mb-3 flex items-center">
+                        <MessageSquare className="w-4 h-4 mr-2 text-purple-600" />
+                        Generate Templates with AI
+                      </h4>
+                      
+                      <div className="space-y-3">
                         <AntForm.Item
-                          name={["comms", "emailTemplateId"]}
-                          label="Selected Template"
-                          className="mb-0"
+                          label="Custom AI Prompt (Optional)"
+                          className="mb-2"
                         >
-                          <Input
-                            placeholder={selectedEmailTemplate ? selectedEmailTemplate.subject : "No template selected"}
-                            disabled
-                            suffix={selectedEmailTemplate && <CheckCircle className="w-4 h-4 text-green-500" />}
+                          <TextArea
+                            placeholder="e.g., 'Create a professional email template with urgency for last-minute bookings, focusing on comfort and convenience...'"
+                            rows={3}
+                            className="text-sm"
+                            value={customEmailPrompt}
+                            onChange={(e) => setCustomEmailPrompt(e.target.value)}
                           />
                         </AntForm.Item>
-                      </Col>
-                      <Col span={14}>
-                        <div className="flex flex-wrap gap-2">
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="text-xs text-gray-600">
+                            <strong>AI will use:</strong> Campaign details, offers, products, and target audience
+                          </div>
                           <AntButton
                             type="primary"
                             icon={<MessageSquare className="w-4 h-4" />}
                             onClick={() => handleGenerateTemplate('email')}
                             loading={templateGenerationState.email.loading}
-                            size="small"
+                            className="bg-gradient-to-r from-purple-600 to-pink-600 border-none"
                           >
                             {templateGenerationState.email.loading ? 'Generating...' : 'Generate AI Templates'}
                           </AntButton>
-                          {templateGenerationState.email.templates.length > 0 && (
-                            <AntButton
-                              ghost
-                              icon={<Eye className="w-4 h-4" />}
-                              onClick={() => setEmailPreviewVisible(true)}
-                              size="small"
-                            >
-                              Preview & Select ({templateGenerationState.email.templates.length})
-                            </AntButton>
-                          )}
-                          {selectedEmailTemplate && (
-                            <AntButton
-                              ghost
-                              icon={<Eye className="w-4 h-4" />}
-                              onClick={() => setEmailPreviewVisible(true)}
-                              size="small"
-                              type="primary"
-                            >
-                              View Selected
-                            </AntButton>
-                          )}
                         </div>
-                      </Col>
-                    </Row>
-
-                    {templateGenerationState.email.templates.length > 0 && (
-                      <Alert
-                        message={`${templateGenerationState.email.templates.length} AI-generated email templates ready for preview`}
-                        type="success"
-                        showIcon
-                        className="text-xs"
-                      />
-                    )}
-
-                    <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
-                      <strong>AI will generate templates based on:</strong> Campaign name, offer details, target audience, and selected products
+                      </div>
                     </div>
+
+                    {/* Selected Template Display */}
+                    {selectedEmailTemplate && (
+                      <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="text-sm font-medium text-green-800 mb-1">
+                              ✓ Selected Email Template
+                            </h4>
+                            <p className="text-sm text-green-700">{selectedEmailTemplate.subject}</p>
+                            <p className="text-xs text-green-600 mt-1">{selectedEmailTemplate.name}</p>
+                          </div>
+                          <AntButton
+                            size="small"
+                            icon={<Eye className="w-3 h-3" />}
+                            onClick={() => setEmailPreviewVisible(true)}
+                          >
+                            Preview
+                          </AntButton>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </AntCard>
 
@@ -1341,68 +1397,119 @@ export default function CampaignManager() {
                   className="border-l-4 border-l-green-500"
                 >
                   <div className="space-y-4">
-                    <Row gutter={16} align="middle">
-                      <Col span={10}>
+                    {/* Template Selection Section */}
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      <h4 className="text-sm font-medium mb-3 flex items-center">
+                        <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
+                        Select from Existing Templates
+                      </h4>
+                      
+                      {templateGenerationState.whatsapp.templates.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {templateGenerationState.whatsapp.templates.map((template, index) => (
+                            <div
+                              key={index}
+                              className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-md ${
+                                selectedWhatsappTemplate?.message === template.message
+                                  ? 'border-green-500 bg-green-100'
+                                  : 'border-gray-200 bg-white hover:border-green-300'
+                              }`}
+                              onClick={() => handleSelectWhatsappTemplate(template)}
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <h5 className="font-medium text-sm text-gray-900 mb-1">
+                                    {template.name}
+                                  </h5>
+                                  <p className="text-xs text-gray-600 mb-2 line-clamp-2">
+                                    {template.message.substring(0, 80)}...
+                                  </p>
+                                  <div className="flex gap-1">
+                                    <Badge variant="outline" className="text-xs">
+                                      {template.style}
+                                    </Badge>
+                                    <Badge variant="outline" className={`text-xs ${template.message.length <= 160 ? 'text-green-600' : 'text-orange-600'}`}>
+                                      {template.message.length} chars
+                                    </Badge>
+                                  </div>
+                                </div>
+                                {selectedWhatsappTemplate?.message === template.message && (
+                                  <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0 ml-2" />
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-6 text-gray-500">
+                          <Smartphone className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                          <p className="text-sm">No WhatsApp templates available</p>
+                          <p className="text-xs">Generate templates using AI below</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* AI Generation Section */}
+                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg">
+                      <h4 className="text-sm font-medium mb-3 flex items-center">
+                        <Smartphone className="w-4 h-4 mr-2 text-green-600" />
+                        Generate Templates with AI
+                      </h4>
+                      
+                      <div className="space-y-3">
                         <AntForm.Item
-                          name={["comms", "whatsappTemplateId"]}
-                          label="Selected Template"
-                          className="mb-0"
+                          label="Custom AI Prompt (Optional)"
+                          className="mb-2"
                         >
-                          <Input
-                            placeholder={selectedWhatsappTemplate ? "WhatsApp template selected" : "No template selected"}
-                            disabled
-                            suffix={selectedWhatsappTemplate && <CheckCircle className="w-4 h-4 text-green-500" />}
+                          <TextArea
+                            placeholder="e.g., 'Create a friendly WhatsApp message under 160 characters about baggage upgrades with emojis...'"
+                            rows={3}
+                            className="text-sm"
+                            value={customWhatsappPrompt}
+                            onChange={(e) => setCustomWhatsappPrompt(e.target.value)}
                           />
                         </AntForm.Item>
-                      </Col>
-                      <Col span={14}>
-                        <div className="flex flex-wrap gap-2">
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="text-xs text-gray-600">
+                            <strong>AI will optimize for:</strong> Character limit, mobile format, and engagement
+                          </div>
                           <AntButton
                             type="primary"
                             icon={<Smartphone className="w-4 h-4" />}
                             onClick={() => handleGenerateTemplate('whatsapp')}
                             loading={templateGenerationState.whatsapp.loading}
-                            size="small"
+                            className="bg-gradient-to-r from-green-600 to-emerald-600 border-none"
                           >
                             {templateGenerationState.whatsapp.loading ? 'Generating...' : 'Generate AI Templates'}
                           </AntButton>
-                          {templateGenerationState.whatsapp.templates.length > 0 && (
-                            <AntButton
-                              ghost
-                              icon={<Eye className="w-4 h-4" />}
-                              onClick={() => setWhatsappPreviewVisible(true)}
-                              size="small"
-                            >
-                              Preview & Select ({templateGenerationState.whatsapp.templates.length})
-                            </AntButton>
-                          )}
-                          {selectedWhatsappTemplate && (
-                            <AntButton
-                              ghost
-                              icon={<Eye className="w-4 h-4" />}
-                              onClick={() => setWhatsappPreviewVisible(true)}
-                              size="small"
-                              type="primary"
-                            >
-                              View Selected
-                            </AntButton>
-                          )}
                         </div>
-                      </Col>
-                    </Row>
-
-                    {templateGenerationState.whatsapp.templates.length > 0 && (
-                      <Alert
-                        message={`${templateGenerationState.whatsapp.templates.length} AI-generated WhatsApp templates ready for preview`}
-                        type="success"
-                        showIcon
-                        className="text-xs"
-                      />
-                    )}
-
-                    <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
-                      <strong>AI will generate templates optimized for:</strong> WhatsApp format (160 chars), personalization, and mobile engagement
+                      </div>
                     </div>
+
+                    {/* Selected Template Display */}
+                    {selectedWhatsappTemplate && (
+                      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="text-sm font-medium text-blue-800 mb-1">
+                              ✓ Selected WhatsApp Template
+                            </h4>
+                            <p className="text-sm text-blue-700">{selectedWhatsappTemplate.name}</p>
+                            <p className="text-xs text-blue-600 mt-1">
+                              {selectedWhatsappTemplate.message.length} characters • {selectedWhatsappTemplate.style}
+                            </p>
+                          </div>
+                          <AntButton
+                            size="small"
+                            icon={<Eye className="w-3 h-3" />}
+                            onClick={() => setWhatsappPreviewVisible(true)}
+                          >
+                            Preview
+                          </AntButton>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </AntCard>
               </div>

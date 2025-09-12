@@ -72,7 +72,6 @@ import {
 } from "chart.js";
 import { SendOutlined } from "@ant-design/icons";
 
-
 // Register Chart.js components
 ChartJS.register(
   CategoryScale,
@@ -312,17 +311,19 @@ export default function CampaignManager() {
   });
 
   // Fetch available cohorts for dropdowns
-  const { data: availableCohorts = [], isLoading: isCohortsLoading } = useQuery({
-    queryKey: ["cohorts"],
-    queryFn: async () => {
-      const response = await fetch("/api/cohorts");
-      if (!response.ok) throw new Error("Failed to fetch cohorts");
-      const data = await response.json();
-      console.log("Available cohorts for dropdown:", data);
-      return data;
+  const { data: availableCohorts = [], isLoading: isCohortsLoading } = useQuery(
+    {
+      queryKey: ["cohorts"],
+      queryFn: async () => {
+        const response = await fetch("/api/cohorts");
+        if (!response.ok) throw new Error("Failed to fetch cohorts");
+        const data = await response.json();
+        console.log("Available cohorts for dropdown:", data);
+        return data;
+      },
+      staleTime: 1000 * 60 * 10, // 10 minutes
     },
-    staleTime: 1000 * 60 * 10, // 10 minutes
-  });
+  );
 
   const { data: campaignMetrics, isLoading: metricsLoading } = useQuery({
     queryKey: [
@@ -516,7 +517,8 @@ export default function CampaignManager() {
           {record.target.cohorts && record.target.cohorts.length > 0 && (
             <div className="flex flex-wrap gap-1">
               <Tag color="blue" size="small">
-                {record.target.cohorts.length} cohort{record.target.cohorts.length > 1 ? 's' : ''}
+                {record.target.cohorts.length} cohort
+                {record.target.cohorts.length > 1 ? "s" : ""}
               </Tag>
             </div>
           )}
@@ -528,13 +530,16 @@ export default function CampaignManager() {
       key: "products",
       width: 120,
       render: (record: Campaign) => {
-        const totalProducts = (record.products.ancillaries?.length || 0) + (record.products.bundles?.length || 0);
-        if (totalProducts === 0) return <span className="text-gray-400">-</span>;
+        const totalProducts =
+          (record.products.ancillaries?.length || 0) +
+          (record.products.bundles?.length || 0);
+        if (totalProducts === 0)
+          return <span className="text-gray-400">-</span>;
 
         return (
           <div className="text-sm">
             <Tag color="green" size="small">
-              {totalProducts} product{totalProducts > 1 ? 's' : ''}
+              {totalProducts} product{totalProducts > 1 ? "s" : ""}
             </Tag>
           </div>
         );
@@ -547,11 +552,23 @@ export default function CampaignManager() {
       render: (record: Campaign) => {
         const { offer } = record;
         if (offer.type === "PERCENT") {
-          return <Tag color="orange" size="small">{offer.value}% Off</Tag>;
+          return (
+            <Tag color="orange" size="small">
+              {offer.value}% Off
+            </Tag>
+          );
         } else if (offer.type === "AMOUNT") {
-          return <Tag color="orange" size="small">${offer.value} Off</Tag>;
+          return (
+            <Tag color="orange" size="small">
+              ${offer.value} Off
+            </Tag>
+          );
         } else if (offer.type === "SPECIAL_PRICE") {
-          return <Tag color="red" size="small">${offer.specialPrice}</Tag>;
+          return (
+            <Tag color="red" size="small">
+              ${offer.specialPrice}
+            </Tag>
+          );
         }
         return <span className="text-gray-400">-</span>;
       },
@@ -580,11 +597,14 @@ export default function CampaignManager() {
         if (record.comms.whatsappTemplateId) channels.push("WhatsApp");
         if (record.comms.apiPush) channels.push("API");
 
-        if (channels.length === 0) return <span className="text-gray-400">-</span>;
+        if (channels.length === 0)
+          return <span className="text-gray-400">-</span>;
 
         return (
           <div className="text-xs">
-            <Tag size="small">{channels.length} channel{channels.length > 1 ? 's' : ''}</Tag>
+            <Tag size="small">
+              {channels.length} channel{channels.length > 1 ? "s" : ""}
+            </Tag>
           </div>
         );
       },
@@ -890,10 +910,12 @@ export default function CampaignManager() {
                   mode="multiple"
                   placeholder="Select cohorts"
                   loading={isCohortsLoading}
-                  options={availableCohorts.map((cohort: { id: string; name: string }) => ({
-                    label: cohort.name,
-                    value: cohort.id,
-                  }))}
+                  options={availableCohorts.map(
+                    (cohort: { id: string; name: string }) => ({
+                      label: cohort.cohortName,
+                      value: cohort.id,
+                    }),
+                  )}
                 />
               </AntForm.Item>
             </Col>
@@ -926,21 +948,26 @@ export default function CampaignManager() {
                   placeholder="Select ancillary products"
                   showSearch
                   filterOption={(input, option) =>
-                    option?.children?.props?.children?.[0]?.props?.children?.toLowerCase().indexOf(input.toLowerCase()) >= 0 ||
-                    option?.children?.props?.children?.[1]?.props?.children?.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                    option?.children?.props?.children?.[0]?.props?.children
+                      ?.toLowerCase()
+                      .indexOf(input.toLowerCase()) >= 0 ||
+                    option?.children?.props?.children?.[1]?.props?.children
+                      ?.toLowerCase()
+                      .indexOf(input.toLowerCase()) >= 0
                   }
                 >
                   {ancillaryRules.map((rule) => (
-                    <AntSelect.Option key={rule.id} value={rule.ancillaryCode}>
+                    <AntSelect.Option key={rule.id} value={rule.ancillaryCode}> 
                       <div>
                         <div className="font-medium">{rule.ancillaryCode}</div>
                         <div className="text-xs text-gray-500">
                           {rule.adjustmentType === "FREE"
                             ? "Free"
                             : rule.adjustmentType === "PERCENT"
-                            ? `${rule.adjustmentValue}% discount`
-                            : `$${rule.adjustmentValue} discount`
-                          } • {rule.pos?.join(", ")} • {rule.agentTier?.join(", ")}
+                              ? `${rule.adjustmentValue}% discount`
+                              : `$${rule.adjustmentValue} discount`}{" "}
+                          • {rule.pos?.join(", ")} •{" "}
+                          {rule.agentTier?.join(", ")}
                         </div>
                       </div>
                     </AntSelect.Option>
@@ -958,7 +985,8 @@ export default function CampaignManager() {
                   placeholder="Select bundle products"
                   showSearch
                   filterOption={(input, option) =>
-                    option?.label?.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                    option?.label?.toLowerCase().indexOf(input.toLowerCase()) >=
+                    0
                   }
                 >
                   {bundles.map((bundle) => (
@@ -966,8 +994,10 @@ export default function CampaignManager() {
                       <div>
                         <div className="font-medium">{bundle.bundleCode}</div>
                         <div className="text-xs text-gray-500">
-                          {bundle.bundleName} • {bundle.components?.slice(0, 3).join(", ")}
-                          {bundle.components?.length > 3 && ` +${bundle.components.length - 3} more`}
+                          {bundle.bundleName} •{" "}
+                          {bundle.components?.slice(0, 3).join(", ")}
+                          {bundle.components?.length > 3 &&
+                            ` +${bundle.components.length - 3} more`}
                         </div>
                       </div>
                     </AntSelect.Option>

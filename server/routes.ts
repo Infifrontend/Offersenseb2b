@@ -14,7 +14,7 @@ async function generateAITemplates(type: string, context: any): Promise<any[]> {
   const {
     campaignName = 'Special Campaign',
     offerType = 'PERCENT',
-    offerValue = 10,
+    offerValue,
     specialPrice,
     products = { ancillaries: [], bundles: [] },
     target = { agentTiers: [], cohorts: [] },
@@ -1325,8 +1325,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to delete bundle", error: error.message });
     }
   });
-
-  console.log("General bundle routes registered successfully");
 
   // Offer Rules Routes
 
@@ -2868,7 +2866,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Calculate KPIs
-      const kpiData = await storage.calculateAgentKPIs(agentId, window);
+      const kpiData = await storage.calculateAgentKPIs(agentId, window as any); // Cast needed due to string literal type
 
       // Evaluate tier
       const recommendedTier = await storage.evaluateAgentTier(agentId, kpiData);
@@ -2889,7 +2887,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  
+
 
   // Campaign Management Routes
 

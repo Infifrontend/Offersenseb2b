@@ -456,12 +456,12 @@ export default function OfferRuleBuilder() {
           });
 
           // Validate actions exist
-          // const actions = validatedValues.actions || [];
-          // if (actions.length === 0) {
-          //   alert("At least one action is required");
-          //   setCurrentStep(2);
-          //   return;
-          // }
+          const actions = validatedValues.actions || [];
+          if (actions.length === 0) {
+            alert("At least one action is required");
+            setCurrentStep(2);
+            return;
+          }
 
           const formattedData = {
             ruleCode,

@@ -409,6 +409,23 @@ export default function AnalyticsSimulation() {
                             ))}
                           </SelectContent>
                         </Select>
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {(simulationForm.watch("scope.pos") || []).map((pos: string) => (
+                            <div key={pos} className="bg-orange-100 text-orange-800 text-sm px-2 py-1 rounded-md flex items-center gap-1">
+                              {pos}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const currentPos = simulationForm.getValues("scope.pos") || [];
+                                  simulationForm.setValue("scope.pos", currentPos.filter((p: string) => p !== pos));
+                                }}
+                                className="text-orange-600 hover:text-orange-800 ml-1"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                        </div>
                       </div>
 
                       <div className="space-y-2">
@@ -430,6 +447,23 @@ export default function AnalyticsSimulation() {
                             ))}
                           </SelectContent>
                         </Select>
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {(simulationForm.watch("scope.agentTier") || []).map((tier: string) => (
+                            <div key={tier} className="bg-green-100 text-green-800 text-sm px-2 py-1 rounded-md flex items-center gap-1">
+                              {tier}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const currentTiers = simulationForm.getValues("scope.agentTier") || [];
+                                  simulationForm.setValue("scope.agentTier", currentTiers.filter((t: string) => t !== tier));
+                                }}
+                                className="text-green-600 hover:text-green-800 ml-1"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                        </div>
                       </div>
 
                       <div className="space-y-2">
@@ -451,6 +485,61 @@ export default function AnalyticsSimulation() {
                             ))}
                           </SelectContent>
                         </Select>
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {(simulationForm.watch("scope.channel") || []).map((channel: string) => (
+                            <div key={channel} className="bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded-md flex items-center gap-1">
+                              {channel}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const currentChannels = simulationForm.getValues("scope.channel") || [];
+                                  simulationForm.setValue("scope.channel", currentChannels.filter((c: string) => c !== channel));
+                                }}
+                                className="text-blue-600 hover:text-blue-800 ml-1"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Cohorts (Optional)</Label>
+                        <Select onValueChange={(value) => {
+                          const currentCohorts = simulationForm.getValues("scope.cohorts") || [];
+                          if (!currentCohorts.includes(value)) {
+                            simulationForm.setValue("scope.cohorts", [...currentCohorts, value]);
+                          }
+                        }}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select cohorts" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {["PREMIUM_CUSTOMERS", "FREQUENT_TRAVELERS", "BUSINESS_SEGMENT", "LEISURE_SEGMENT", "HIGH_VALUE_CUSTOMERS"].map((cohort) => (
+                              <SelectItem key={cohort} value={cohort}>
+                                {cohort}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {(simulationForm.watch("scope.cohorts") || []).map((cohort: string) => (
+                            <div key={cohort} className="bg-purple-100 text-purple-800 text-sm px-2 py-1 rounded-md flex items-center gap-1">
+                              {cohort}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const currentCohorts = simulationForm.getValues("scope.cohorts") || [];
+                                  simulationForm.setValue("scope.cohorts", currentCohorts.filter((c: string) => c !== cohort));
+                                }}
+                                className="text-purple-600 hover:text-purple-800 ml-1"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
 

@@ -157,7 +157,7 @@
   --card-foreground: hsl(0 0% 15%);
   --popover: hsl(0 0% 100%);
   --popover-foreground: hsl(0 0% 15%);
-  --primary: rgb(29, 47, 126);
+  --primary: #1e4076;
   --primary-foreground: hsl(0 0% 98%);
   --secondary: #4a5897;
   --secondary-foreground: hsl(0 0% 15%);

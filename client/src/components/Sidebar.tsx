@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect } from "react";
 
 interface SidebarProps {
   collapsed: boolean;
@@ -182,7 +183,26 @@ export default function Sidebar({
   onMobileClose,
 }: SidebarProps) {
   const { toast } = useToast();
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
+  const [user, setUser] = useState<any | null>(null);
+
+  useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      try {
+        setUser(JSON.parse(userData));
+      } catch {
+        // Invalid user data
+        localStorage.removeItem("user");
+        localStorage.removeItem("isAuthenticated");
+        setLocation("/login");
+      }
+    } else {
+      // If no user data, redirect to login
+      setLocation("/login");
+    }
+  }, [setLocation]);
+
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("isAuthenticated");
@@ -193,6 +213,15 @@ export default function Sidebar({
     });
 
     setLocation("/login");
+  };
+
+  const getUserInitials = (username: string) => {
+    return username
+      .split(" ")
+      .map((part) => part.charAt(0))
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   const sidebarWidth = collapsed ? "80px" : "250px";
@@ -288,9 +317,8 @@ export default function Sidebar({
           </div>
           <div className="flex-1 min-w-0  ">
             <p className="text-sm font-medium  truncate cls-primary-clr">
-              John Doe
+              {user?.username || "User"}
             </p>
-            <p className="text-xs text-gray-500 capitalize">Administrator</p>
           </div>
         </div>
         <Button

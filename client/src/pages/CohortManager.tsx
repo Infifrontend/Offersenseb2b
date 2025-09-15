@@ -322,11 +322,11 @@ export default function CohortManager() {
     }
 
     if (values.channel) {
-      criteria.channel = values.channel;
+      criteria.channel = Array.isArray(values.channel) ? values.channel : [values.channel];
     }
 
     if (values.device) {
-      criteria.device = values.device;
+      criteria.device = Array.isArray(values.device) ? values.device : [values.device];
     }
 
     if (values.season) {
@@ -751,7 +751,8 @@ export default function CohortManager() {
                       <Col span={8}>
                         <AntForm.Item name="channel" label="Channel">
                           <AntSelect
-                            placeholder="Select channel"
+                            mode="multiple"
+                            placeholder="Select channels"
                             style={{ width: "100%" }}
                             dropdownStyle={{ zIndex: 9999 }}
                             getPopupContainer={(trigger) =>
@@ -770,7 +771,8 @@ export default function CohortManager() {
                       <Col span={8}>
                         <AntForm.Item name="device" label="Device Type">
                           <AntSelect
-                            placeholder="Select device"
+                            mode="multiple"
+                            placeholder="Select devices"
                             style={{ width: "100%" }}
                             dropdownStyle={{ zIndex: 9999 }}
                             getPopupContainer={(trigger) =>

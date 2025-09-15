@@ -460,14 +460,8 @@ export const cohorts = pgTable("cohorts", {
 export const insertCohortSchema = createInsertSchema(cohorts, {
   criteria: z.object({
     pos: z.array(z.string()).optional(),
-    channel: z.union([
-      z.enum(["API", "PORTAL", "MOBILE"]),
-      z.array(z.enum(["API", "PORTAL", "MOBILE"]))
-    ]).optional(),
-    device: z.union([
-      z.enum(["DESKTOP", "MOBILE", "TABLET"]),
-      z.array(z.enum(["DESKTOP", "MOBILE", "TABLET"]))
-    ]).optional(),
+    channel: z.array(z.enum(["API", "PORTAL", "MOBILE"])).optional(),
+    device: z.array(z.enum(["DESKTOP", "MOBILE", "TABLET"])).optional(),
     bookingWindow: z.object({
       min: z.number(),
       max: z.number()

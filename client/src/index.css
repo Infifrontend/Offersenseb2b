@@ -157,7 +157,7 @@
   --card-foreground: hsl(0 0% 15%);
   --popover: hsl(0 0% 100%);
   --popover-foreground: hsl(0 0% 15%);
-  --primary: rgb(255, 79, 23);
+  --primary: #FF4F17
   --primary-foreground: hsl(0 0% 98%);
   --secondary: #4a5897;
   --secondary-foreground: hsl(0 0% 15%);
@@ -169,7 +169,7 @@
   --destructive-foreground: hsl(0 0% 100%);
   --border: hsl(210 20% 90%);
   --input: hsl(210 20% 90%);
-  --ring: rgb(255, 79, 23);
+  --ring: #FF4F17
   --chart-1: hsl(210 92% 54%);
   --chart-2: hsl(159.7826 100% 36.0784%);
   --chart-3: hsl(42.0290 92.8251% 56.2745%);
@@ -177,12 +177,12 @@
   --chart-5: hsl(341.4894 75.2000% 50.9804%);
   --sidebar: hsl(0 0% 100%);
   --sidebar-foreground: hsl(0 0% 15%);
-  --sidebar-primary: rgb(255, 79, 23);
+  --sidebar-primary: #FF4F17
   --sidebar-primary-foreground: hsl(0 0% 98%);
   --sidebar-accent: hsl(210 92% 96%);
   --sidebar-accent-foreground: #4a5897;
   --sidebar-border: hsl(210 20% 90%);
-  --sidebar-ring: rgb(255, 79, 23);
+  --sidebar-ring: #FF4F17
   --font-sans: Inter, system-ui, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Menlo, monospace;
@@ -206,7 +206,7 @@
   --card-foreground: hsl(0 0% 85.0980%);
   --popover: hsl(0 0% 0%);
   --popover-foreground: hsl(200 6.6667% 91.1765%);
-  --primary: rgb(255, 79, 23);
+  --primary: #FF4F17
   --primary-foreground: hsl(0 0% 98%);
   --secondary: #4a5897;
   --secondary-foreground: hsl(210 25% 7.8431%);
@@ -218,7 +218,7 @@
   --destructive-foreground: hsl(0 0% 100%);
   --border: hsl(210 5.2632% 14.9020%);
   --input: hsl(207.6923 27.6596% 18.4314%);
-  --ring: rgb(255, 79, 23);
+  --ring: #FF4F17
   --chart-1: hsl(210 92% 54%);
   --chart-2: hsl(159.7826 100% 36.0784%);
   --chart-3: hsl(42.0290 92.8251% 56.2745%);
@@ -226,12 +226,12 @@
   --chart-5: hsl(341.4894 75.2000% 50.9804%);
   --sidebar: hsl(228 9.8039% 10%);
   --sidebar-foreground: hsl(0 0% 85.0980%);
-  --sidebar-primary: rgb(255, 79, 23);
+  --sidebar-primary: #FF4F17
   --sidebar-primary-foreground: hsl(0 0% 98%);
   --sidebar-accent: hsl(205.7143 70% 7.8431%);
   --sidebar-accent-foreground: #4a5897;
   --sidebar-border: hsl(205.7143 15.7895% 26.0784%);
-  --sidebar-ring: rgb(255, 79, 23);
+  --sidebar-ring: #FF4F17
   --font-sans: Inter, system-ui, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Menlo, monospace;
@@ -313,25 +313,14 @@
 }
 
 .cls-filter-sticky button {
-  border-radius: 8px 0px 0px 8px;
-  width: 48px;
-  height: 48px;
-  background-color: #3b5998 !important;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.15);
-}
-
-.cls-filter-sticky button:hover {
-  background-color: #2d4373 !important;
+  border-radius: 10px 0px 0px 10px;
+  width: 20px;
+  height: 40px;
 }
 
 .cls-filter-sticky button svg {
-  height: 20px;
-  width: 20px;
-  color: white;
+  height: 25px;
+  width: 25px;
 }
 
 /* Hide scrollbar */

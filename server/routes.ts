@@ -2475,136 +2475,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Tier Assignment Engine Routes - MUST be before /api/tiers/:id to avoid route conflicts
-
-  // Get all assignment engines
-  app.get("/api/tiers/engines", async (req, res) => {
-    try {
-      const filters = req.query;
-      const engines = await storage.getTierAssignmentEngines(filters);
-      res.json(engines);
-    } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch assignment engines", error: error.message });
-    }
-  });
-
-  // Create assignment engine
-  app.post("/api/tiers/engines", async (req, res) => {
-    try {
-      console.log("API: Creating tier assignment engine:", req.body);
-      const validatedData = insertTierAssignmentEngineSchema.parse(req.body);
-
-      // Check for conflicts
-      const conflicts = await storage.checkTierAssignmentEngineConflicts(validatedData);
-      if (conflicts.length > 0) {
-        return res.status(409).json({ 
-          message: "Engine conflicts detected", 
-          conflicts 
-        });
-      }
-
-      const engine = await storage.insertTierAssignmentEngine(validatedData);
-      console.log("API: Successfully created tier assignment engine:", engine);
-      res.status(201).json(engine);
-    } catch (error: any) {
-      console.error("API: Error creating tier assignment engine:", error);
-      if (error.errors && Array.isArray(error.errors)) {
-        // Zod validation errors
-        return res.status(400).json({ 
-          message: "Validation failed", 
-          errors: error.errors,
-          error: error.message 
-        });
-      }
-      res.status(400).json({ message: "Invalid engine data", error: error.message });
-    }
-  });
-
-  // Get assignment engine by ID
-  app.get("/api/tiers/engines/:id", async (req, res) => {
-    try {
-      const engine = await storage.getTierAssignmentEngineById(req.params.id);
-      if (!engine) {
-        return res.status(404).json({ message: "Engine not found" });
-      }
-      res.json(engine);
-    } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch engine", error: error.message });
-    }
-  });
-
-  // Update assignment engine
-  app.put("/api/tiers/engines/:id", async (req, res) => {
-    try {
-      console.log("API: Updating tier assignment engine:", req.params.id, req.body);
-      const validatedData = insertTierAssignmentEngineSchema.parse(req.body);
-      const engine = await storage.updateTierAssignmentEngine(req.params.id, validatedData);
-      console.log("API: Successfully updated tier assignment engine:", engine);
-      res.json(engine);
-    } catch (error: any) {
-      console.error("API: Error updating tier assignment engine:", error);
-      if (error.errors && Array.isArray(error.errors)) {
-        // Zod validation errors
-        return res.status(400).json({ 
-          message: "Validation failed", 
-          errors: error.errors,
-          error: error.message 
-        });
-      }
-      res.status(400).json({ message: "Failed to update engine", error: error.message });
-    }
-  });
-
-  // Update assignment engine status
-  app.patch("/api/tiers/engines/:id/status", async (req, res) => {
-    try {
-      const { status } = req.body;
-      if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
-        return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
-      }
-
-      const engine = await storage.updateTierAssignmentEngineStatus(req.params.id, status);
-      res.json(engine);
-    } catch (error: any) {
-      res.status(500).json({ message: "Failed to update engine status", error: error.message });
-    }
-  });
-
-  // Run assignment engine manually
-  app.post("/api/tiers/engines/:id/run", async (req, res) => {
-    try {
-      const engine = await storage.getTierAssignmentEngineById(req.params.id);
-      if (!engine) {
-        return res.status(404).json({ message: "Engine not found" });
-      }
-
-      // Update run timestamps
-      const now = new Date();
-      const nextRun = new Date(now.getTime() + 24 * 60 * 60 * 1000); // Next day
-      await storage.updateEngineRunTimestamps(req.params.id, now, nextRun);
-
-      // In a real implementation, this would trigger the actual tier assignment process
-      res.json({ 
-        success: true, 
-        message: "Engine run initiated successfully",
-        lastRunAt: now.toISOString(),
-        nextRunAt: nextRun.toISOString()
-      });
-    } catch (error: any) {
-      res.status(500).json({ message: "Failed to run engine", error: error.message });
-    }
-  });
-
-  // Delete assignment engine
-  app.delete("/api/tiers/engines/:id", async (req, res) => {
-    try {
-      await storage.deleteTierAssignmentEngine(req.params.id);
-      res.status(204).send();
-    } catch (error: any) {
-      res.status(500).json({ message: "Failed to delete engine", error: error.message });
-    }
-  });
-
   // Agent Tier Assignment Routes - MUST be before /api/tiers/:id to avoid route conflicts
 
   // Get all tier assignments with optional filters
@@ -2868,7 +2738,135 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  
+  // Tier Assignment Engine Routes
+
+  // Get all assignment engines
+  app.get("/api/tiers/engines", async (req, res) => {
+    try {
+      const filters = req.query;
+      const engines = await storage.getTierAssignmentEngines(filters);
+      res.json(engines);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch assignment engines", error: error.message });
+    }
+  });
+
+  // Create assignment engine
+  app.post("/api/tiers/engines", async (req, res) => {
+    try {
+      console.log("API: Creating tier assignment engine:", req.body);
+      const validatedData = insertTierAssignmentEngineSchema.parse(req.body);
+
+      // Check for conflicts
+      const conflicts = await storage.checkTierAssignmentEngineConflicts(validatedData);
+      if (conflicts.length > 0) {
+        return res.status(409).json({ 
+          message: "Engine conflicts detected", 
+          conflicts 
+        });
+      }
+
+      const engine = await storage.insertTierAssignmentEngine(validatedData);
+      console.log("API: Successfully created tier assignment engine:", engine);
+      res.status(201).json(engine);
+    } catch (error: any) {
+      console.error("API: Error creating tier assignment engine:", error);
+      if (error.errors && Array.isArray(error.errors)) {
+        // Zod validation errors
+        return res.status(400).json({ 
+          message: "Validation failed", 
+          errors: error.errors,
+          error: error.message 
+        });
+      }
+      res.status(400).json({ message: "Invalid engine data", error: error.message });
+    }
+  });
+
+  // Get assignment engine by ID
+  app.get("/api/tiers/engines/:id", async (req, res) => {
+    try {
+      const engine = await storage.getTierAssignmentEngineById(req.params.id);
+      if (!engine) {
+        return res.status(404).json({ message: "Engine not found" });
+      }
+      res.json(engine);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch engine", error: error.message });
+    }
+  });
+
+  // Update assignment engine
+  app.put("/api/tiers/engines/:id", async (req, res) => {
+    try {
+      console.log("API: Updating tier assignment engine:", req.params.id, req.body);
+      const validatedData = insertTierAssignmentEngineSchema.parse(req.body);
+      const engine = await storage.updateTierAssignmentEngine(req.params.id, validatedData);
+      console.log("API: Successfully updated tier assignment engine:", engine);
+      res.json(engine);
+    } catch (error: any) {
+      console.error("API: Error updating tier assignment engine:", error);
+      if (error.errors && Array.isArray(error.errors)) {
+        // Zod validation errors
+        return res.status(400).json({ 
+          message: "Validation failed", 
+          errors: error.errors,
+          error: error.message 
+        });
+      }
+      res.status(400).json({ message: "Failed to update engine", error: error.message });
+    }
+  });
+
+  // Update assignment engine status
+  app.patch("/api/tiers/engines/:id/status", async (req, res) => {
+    try {
+      const { status } = req.body;
+      if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
+        return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
+      }
+
+      const engine = await storage.updateTierAssignmentEngineStatus(req.params.id, status);
+      res.json(engine);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to update engine status", error: error.message });
+    }
+  });
+
+  // Run assignment engine manually
+  app.post("/api/tiers/engines/:id/run", async (req, res) => {
+    try {
+      const engine = await storage.getTierAssignmentEngineById(req.params.id);
+      if (!engine) {
+        return res.status(404).json({ message: "Engine not found" });
+      }
+
+      // Update run timestamps
+      const now = new Date();
+      const nextRun = new Date(now.getTime() + 24 * 60 * 60 * 1000); // Next day
+      await storage.updateEngineRunTimestamps(req.params.id, now, nextRun);
+
+      // In a real implementation, this would trigger the actual tier assignment process
+      res.json({ 
+        success: true, 
+        message: "Engine run initiated successfully",
+        lastRunAt: now.toISOString(),
+        nextRunAt: nextRun.toISOString()
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to run engine", error: error.message });
+    }
+  });
+
+  // Delete assignment engine
+  app.delete("/api/tiers/engines/:id", async (req, res) => {
+    try {
+      await storage.deleteTierAssignmentEngine(req.params.id);
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to delete engine", error: error.message });
+    }
+  });
 
   // Campaign Management Routes
 

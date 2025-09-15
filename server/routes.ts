@@ -2464,18 +2464,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Agent Tier Management Routes
 
-  // Get all agent tiers with optional filters
-  app.get("/api/tiers", async (req, res) => {
-    try {
-      const filters = req.query;
-      const tiers = await storage.getAgentTiers(filters);
-      res.json(tiers);
-    } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch agent tiers", error: error.message });
-    }
-  });
-
-  // Tier Assignment Engine Routes - MUST be before /api/tiers/:id to avoid route conflicts
+  // Tier Assignment Engine Routes - MUST be before general tier routes to avoid route conflicts
 
   // Get all assignment engines
   app.get("/api/tiers/engines", async (req, res) => {
@@ -2798,6 +2787,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // General tier routes - MUST be after specific routes like /api/tiers/engines
+
+  // Get all agent tiers with optional filters
+  app.get("/api/tiers", async (req, res) => {
+    try {
+      const filters = req.query;
+      const tiers = await storage.getAgentTiers(filters);
+      res.json(tiers);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch agent tiers", error: error.message });
+    }
+  });
+
   // Create single agent tier
   app.post("/api/tiers", async (req, res) => {
     try {
@@ -2819,7 +2821,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get tier by ID - MUST be after specific routes like /api/tiers/assignments
+  // Get tier by ID - MUST be after specific routes like /api/tiers/engines and /api/tiers/assignments
   app.get("/api/tiers/:id", async (req, res) => {
     try {
       const tier = await storage.getAgentTierById(req.params.id);

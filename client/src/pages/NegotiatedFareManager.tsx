@@ -273,18 +273,55 @@ export default function NegotiatedFareManager() {
 
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
+      // Validate file type
+      if (!file.name.toLowerCase().endsWith('.csv')) {
+        throw new Error("Please upload a CSV file (.csv extension required)");
+      }
+
+      // Validate file size (limit to 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        throw new Error("File size must be less than 10MB");
+      }
+
+      // Validate file is not empty
+      if (file.size === 0) {
+        throw new Error("The uploaded file is empty");
+      }
+
       const formData = new FormData();
       formData.append("file", file);
+      
       const response = await fetch("/api/negofares/upload", {
         method: "POST",
         body: formData,
       });
-      if (!response.ok) throw new Error("Upload failed");
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Upload failed");
+      }
+      
       return response.json();
     },
     onSuccess: (data) => {
       setUploadResult(data);
       queryClient.invalidateQueries({ queryKey: ["/api/negofares"] });
+      
+      // Show success message with details
+      if (data.success) {
+        const message = `Upload completed successfully! 
+        ✅ ${data.inserted} records inserted
+        ${data.conflicts > 0 ? `⚠️ ${data.conflicts} conflicts detected` : ''}
+        ${data.errors > 0 ? `❌ ${data.errors} errors found` : ''}`;
+        
+        // Use a more user-friendly notification
+        alert(message);
+      }
+    },
+    onError: (error: any) => {
+      // Show error message to user
+      alert(`Upload failed: ${error.message}`);
+      setUploadResult(null);
     },
   });
 
@@ -330,7 +367,46 @@ export default function NegotiatedFareManager() {
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      uploadMutation.mutate(file);
+      // Reset any previous upload results
+      setUploadResult(null);
+      
+      // Validate file before upload
+      const validationErrors = [];
+      
+      if (!file.name.toLowerCase().endsWith('.csv')) {
+        validationErrors.push("File must be a CSV file (.csv extension)");
+      }
+      
+      if (file.size > 10 * 1024 * 1024) {
+        validationErrors.push("File size must be less than 10MB");
+      }
+      
+      if (file.size === 0) {
+        validationErrors.push("File cannot be empty");
+      }
+      
+      if (validationErrors.length > 0) {
+        alert(`Validation failed:\n• ${validationErrors.join('\n• ')}`);
+        // Reset the file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        return;
+      }
+      
+      // Show confirmation dialog before upload
+      const confirmed = window.confirm(
+        `Are you sure you want to upload "${file.name}"?\n\nThis will process the CSV file and update the negotiated fares database.`
+      );
+      
+      if (confirmed) {
+        uploadMutation.mutate(file);
+      } else {
+        // Reset the file input if user cancels
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      }
     }
   };
 
@@ -533,10 +609,11 @@ export default function NegotiatedFareManager() {
             <Button
               variant="outline"
               onClick={() => fileInputRef.current?.click()}
+              disabled={uploadMutation.isPending}
               className="gap-2"
             >
               <Upload className="w-4 h-4" />
-              Upload CSV
+              {uploadMutation.isPending ? "Uploading..." : "Upload CSV"}
             </Button>
 
             <input
@@ -562,6 +639,101 @@ export default function NegotiatedFareManager() {
           </div>
         </div>
       </div>
+
+      {/* Upload Result Section */}
+      {uploadResult && (
+        <div className="mb-6">
+          <div className={`p-4 rounded-lg border ${
+            uploadResult.success 
+              ? 'bg-green-50 border-green-200' 
+              : 'bg-red-50 border-red-200'
+          }`}>
+            <h3 className={`font-semibold mb-2 ${
+              uploadResult.success ? 'text-green-800' : 'text-red-800'
+            }`}>
+              Upload Results
+            </h3>
+            {uploadResult.success ? (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-green-700">
+                  <span className="text-sm">✅ Successfully processed CSV file</span>
+                </div>
+                <div className="grid grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium">Records Inserted:</span>
+                    <span className="ml-2 text-green-800 font-bold">{uploadResult.inserted}</span>
+                  </div>
+                  {uploadResult.conflicts > 0 && (
+                    <div>
+                      <span className="font-medium">Conflicts:</span>
+                      <span className="ml-2 text-yellow-600 font-bold">{uploadResult.conflicts}</span>
+                    </div>
+                  )}
+                  {uploadResult.errors > 0 && (
+                    <div>
+                      <span className="font-medium">Errors:</span>
+                      <span className="ml-2 text-red-600 font-bold">{uploadResult.errors}</span>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Show conflicts if any */}
+                {uploadResult.data?.conflicts && uploadResult.data.conflicts.length > 0 && (
+                  <details className="mt-3">
+                    <summary className="cursor-pointer text-yellow-700 hover:text-yellow-800">
+                      View Conflicts ({uploadResult.data.conflicts.length})
+                    </summary>
+                    <div className="mt-2 max-h-32 overflow-y-auto">
+                      {uploadResult.data.conflicts.slice(0, 5).map((conflict: any, index: number) => (
+                        <div key={index} className="text-xs text-yellow-700 p-1 border-l-2 border-yellow-300 pl-2 mb-1">
+                          {conflict.data.fareCode} - {conflict.conflicts.join(', ')}
+                        </div>
+                      ))}
+                      {uploadResult.data.conflicts.length > 5 && (
+                        <div className="text-xs text-yellow-600">
+                          ... and {uploadResult.data.conflicts.length - 5} more conflicts
+                        </div>
+                      )}
+                    </div>
+                  </details>
+                )}
+                
+                {/* Show errors if any */}
+                {uploadResult.data?.errors && uploadResult.data.errors.length > 0 && (
+                  <details className="mt-3">
+                    <summary className="cursor-pointer text-red-700 hover:text-red-800">
+                      View Errors ({uploadResult.data.errors.length})
+                    </summary>
+                    <div className="mt-2 max-h-32 overflow-y-auto">
+                      {uploadResult.data.errors.slice(0, 5).map((error: any, index: number) => (
+                        <div key={index} className="text-xs text-red-700 p-1 border-l-2 border-red-300 pl-2 mb-1">
+                          Row {index + 2}: {error.error}
+                        </div>
+                      ))}
+                      {uploadResult.data.errors.length > 5 && (
+                        <div className="text-xs text-red-600">
+                          ... and {uploadResult.data.errors.length - 5} more errors
+                        </div>
+                      )}
+                    </div>
+                  </details>
+                )}
+              </div>
+            ) : (
+              <div className="text-red-700">
+                <span>❌ Upload failed: {uploadResult.message || 'Unknown error'}</span>
+              </div>
+            )}
+            
+            <button
+              onClick={() => setUploadResult(null)}
+              className="mt-3 text-xs text-gray-600 hover:text-gray-800 underline"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Fare Inventory Section */}
       <div className="mb-6">

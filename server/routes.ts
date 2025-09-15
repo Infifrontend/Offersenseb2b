@@ -329,83 +329,190 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/negofares/upload", upload.single("file"), async (req, res) => {
     try {
       if (!req.file) {
-        return res.status(400).json({ message: "No file uploaded" });
+        return res.status(400).json({ 
+          success: false,
+          message: "No file uploaded. Please select a CSV file." 
+        });
+      }
+
+      // Validate file type
+      if (!req.file.originalname.toLowerCase().endsWith('.csv')) {
+        return res.status(400).json({ 
+          success: false,
+          message: "Invalid file type. Please upload a CSV file (.csv extension required)." 
+        });
+      }
+
+      // Validate file size (10MB limit)
+      if (req.file.size > 10 * 1024 * 1024) {
+        return res.status(400).json({ 
+          success: false,
+          message: "File too large. Please upload a file smaller than 10MB." 
+        });
+      }
+
+      // Validate file is not empty
+      if (req.file.size === 0) {
+        return res.status(400).json({ 
+          success: false,
+          message: "Empty file uploaded. Please upload a file with data." 
+        });
       }
 
       const results: any[] = [];
       const errors: any[] = [];
       const conflicts: any[] = [];
+      let rowNumber = 1; // Track row numbers for better error reporting
 
-      // Parse CSV
-      const stream = Readable.from(req.file.buffer.toString());
+      console.log(`Processing CSV upload: ${req.file.originalname} (${req.file.size} bytes)`);
 
-      stream
-        .pipe(csv())
-        .on("data", async (data) => {
-          try {
-            // Transform CSV data to match schema
-            const transformedData = {
-              airlineCode: data.airlineCode,
-              fareCode: data.fareCode,
-              origin: data.origin,
-              destination: data.destination,
-              tripType: data.tripType,
-              cabinClass: data.cabinClass,
-              baseNetFare: data.baseNetFare,
-              currency: data.currency,
-              bookingStartDate: data.bookingStartDate,
-              bookingEndDate: data.bookingEndDate,
-              travelStartDate: data.travelStartDate,
-              travelEndDate: data.travelEndDate,
-              pos: JSON.parse(data.pos || "[]"),
-              seatAllotment: data.seatAllotment ? parseInt(data.seatAllotment) : null,
-              minStay: data.minStay ? parseInt(data.minStay) : null,
-              maxStay: data.maxStay ? parseInt(data.maxStay) : null,
-              blackoutDates: data.blackoutDates ? JSON.parse(data.blackoutDates) : null,
-              eligibleAgentTiers: JSON.parse(data.eligibleAgentTiers || '["BRONZE"]'),
-              eligibleCohorts: data.eligibleCohorts ? JSON.parse(data.eligibleCohorts) : null,
-              remarks: data.remarks || null,
-            };
+      try {
+        const csvContent = req.file.buffer.toString('utf8');
+        
+        // Check if file has content
+        if (!csvContent.trim()) {
+          return res.status(400).json({ 
+            success: false,
+            message: "CSV file appears to be empty." 
+          });
+        }
 
-            const validatedData = insertNegotiatedFareSchema.parse(transformedData);
+        // Validate CSV headers
+        const lines = csvContent.split('\n');
+        if (lines.length < 2) {
+          return res.status(400).json({ 
+            success: false,
+            message: "CSV file must contain headers and at least one data row." 
+          });
+        }
 
-            // Check for conflicts
-            const fareConflicts = await storage.checkFareConflicts(validatedData);
-            if (fareConflicts.length > 0) {
-              conflicts.push({ data: validatedData, conflicts: fareConflicts });
-            } else {
-              results.push(validatedData);
-            }
-          } catch (error: any) {
-            errors.push({ data, error: error.message });
-          }
-        })
-        .on("end", async () => {
-          try {
-            // Insert valid fares
-            const insertedFares: any[] = [];
-            for (const fareData of results) {
-              const fare = await storage.insertNegotiatedFare(fareData);
-              insertedFares.push(fare);
-            }
+        const requiredHeaders = ['airlineCode', 'fareCode', 'origin', 'destination', 'tripType', 'cabinClass', 'baseNetFare', 'currency'];
+        const actualHeaders = lines[0].toLowerCase().split(',').map(h => h.trim());
+        const missingHeaders = requiredHeaders.filter(header => !actualHeaders.includes(header.toLowerCase()));
+        
+        if (missingHeaders.length > 0) {
+          return res.status(400).json({ 
+            success: false,
+            message: `Missing required CSV headers: ${missingHeaders.join(', ')}. Please ensure your CSV file contains all required columns.` 
+          });
+        }
 
-            res.json({
-              success: true,
-              inserted: insertedFares.length,
-              conflicts: conflicts.length,
-              errors: errors.length,
-              data: {
-                insertedFares,
-                conflicts,
-                errors,
-              },
-            });
-          } catch (error: any) {
-            res.status(500).json({ message: "Failed to insert fares", error: error.message });
-          }
+        // Parse CSV
+        const stream = Readable.from(csvContent);
+
+        await new Promise((resolve, reject) => {
+          stream
+            .pipe(csv())
+            .on("data", async (data) => {
+              rowNumber++;
+              try {
+                // Validate required fields are present
+                const requiredFields = ['airlineCode', 'fareCode', 'origin', 'destination', 'tripType', 'cabinClass', 'baseNetFare', 'currency'];
+                const missingFields = requiredFields.filter(field => !data[field] || data[field].trim() === '');
+                
+                if (missingFields.length > 0) {
+                  errors.push({ 
+                    row: rowNumber,
+                    data, 
+                    error: `Missing required fields: ${missingFields.join(', ')}` 
+                  });
+                  return;
+                }
+
+                // Transform CSV data to match schema
+                const transformedData = {
+                  airlineCode: data.airlineCode?.trim(),
+                  fareCode: data.fareCode?.trim(),
+                  origin: data.origin?.trim().toUpperCase(),
+                  destination: data.destination?.trim().toUpperCase(),
+                  tripType: data.tripType?.trim().toUpperCase(),
+                  cabinClass: data.cabinClass?.trim().toUpperCase(),
+                  baseNetFare: data.baseNetFare?.trim(),
+                  currency: data.currency?.trim().toUpperCase(),
+                  bookingStartDate: data.bookingStartDate?.trim(),
+                  bookingEndDate: data.bookingEndDate?.trim(),
+                  travelStartDate: data.travelStartDate?.trim(),
+                  travelEndDate: data.travelEndDate?.trim(),
+                  pos: data.pos ? JSON.parse(data.pos) : [],
+                  seatAllotment: data.seatAllotment ? parseInt(data.seatAllotment) : null,
+                  minStay: data.minStay ? parseInt(data.minStay) : null,
+                  maxStay: data.maxStay ? parseInt(data.maxStay) : null,
+                  blackoutDates: data.blackoutDates ? JSON.parse(data.blackoutDates) : null,
+                  eligibleAgentTiers: data.eligibleAgentTiers ? JSON.parse(data.eligibleAgentTiers) : ["BRONZE"],
+                  eligibleCohorts: data.eligibleCohorts ? JSON.parse(data.eligibleCohorts) : null,
+                  remarks: data.remarks?.trim() || null,
+                };
+
+                const validatedData = insertNegotiatedFareSchema.parse(transformedData);
+
+                // Check for conflicts
+                const fareConflicts = await storage.checkFareConflicts(validatedData);
+                if (fareConflicts.length > 0) {
+                  conflicts.push({ 
+                    row: rowNumber,
+                    data: validatedData, 
+                    conflicts: fareConflicts.map(c => c.message || c) 
+                  });
+                } else {
+                  results.push(validatedData);
+                }
+              } catch (error: any) {
+                console.error(`Error processing row ${rowNumber}:`, error);
+                errors.push({ 
+                  row: rowNumber,
+                  data, 
+                  error: error.message || 'Invalid data format' 
+                });
+              }
+            })
+            .on("end", resolve)
+            .on("error", reject);
         });
+
+        console.log(`CSV processing complete: ${results.length} valid, ${errors.length} errors, ${conflicts.length} conflicts`);
+
+        // Insert valid fares
+        const insertedFares: any[] = [];
+        for (const fareData of results) {
+          try {
+            const fare = await storage.insertNegotiatedFare(fareData);
+            insertedFares.push(fare);
+          } catch (insertError: any) {
+            console.error('Error inserting fare:', insertError);
+            errors.push({ 
+              data: fareData, 
+              error: `Database insertion failed: ${insertError.message}` 
+            });
+          }
+        }
+
+        res.json({
+          success: true,
+          message: `Upload completed successfully. ${insertedFares.length} records processed.`,
+          inserted: insertedFares.length,
+          conflicts: conflicts.length,
+          errors: errors.length,
+          data: {
+            insertedFares,
+            conflicts,
+            errors,
+          },
+        });
+
+      } catch (parseError: any) {
+        console.error('CSV parsing error:', parseError);
+        res.status(400).json({ 
+          success: false,
+          message: `Failed to parse CSV file: ${parseError.message}` 
+        });
+      }
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to process upload", error: error.message });
+      console.error('Upload processing error:', error);
+      res.status(500).json({ 
+        success: false,
+        message: "Failed to process upload", 
+        error: error.message 
+      });
     }
   });
 

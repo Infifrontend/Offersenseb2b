@@ -1541,8 +1541,229 @@ export class DatabaseStorage implements IStorage {
         query = query.where(and(...conditions));
       }
 
-      if (filters.agentId) {
-        conditions.push(eq(agentTierAssignments.agentId, filters.agentId));
+      const results = await query.orderBy(desc(agentTierAssignments.effectiveFrom));
+      console.log(`Storage: Found ${results?.length || 0} tier assignments`);
+      
+      // If no assignments exist, create sample data
+      if (!results || results.length === 0) {
+        console.log("Storage: No tier assignments found, creating sample assignments...");
+        
+        try {
+          const sampleAssignments = [
+            {
+              agentId: "AGT001",
+              tierCode: "PLATINUM",
+              assignmentType: "AUTO",
+              effectiveFrom: "2024-01-01",
+              assignedBy: "system",
+              justification: "Automatic tier assignment based on KPI evaluation",
+              status: "ACTIVE",
+            },
+            {
+              agentId: "AGT002", 
+              tierCode: "GOLD",
+              assignmentType: "AUTO",
+              effectiveFrom: "2024-01-01",
+              assignedBy: "system",
+              justification: "Automatic tier assignment based on KPI evaluation",
+              status: "ACTIVE",
+            },
+            {
+              agentId: "AGT003",
+              tierCode: "SILVER", 
+              assignmentType: "MANUAL_OVERRIDE",
+              effectiveFrom: "2024-02-01",
+              assignedBy: "admin",
+              justification: "Manual override due to special circumstances",
+              status: "ACTIVE",
+            }
+          ];
+
+          for (const assignmentData of sampleAssignments) {
+            try {
+              await this.insertAgentTierAssignment(assignmentData);
+              console.log(`Storage: Created sample assignment for agent: ${assignmentData.agentId}`);
+            } catch (assignmentError) {
+              console.error(`Storage: Error creating sample assignment for ${assignmentData.agentId}:`, assignmentError);
+            }
+          }
+
+          // Refetch after creating samples
+          const newResults = await query.orderBy(desc(agentTierAssignments.effectiveFrom));
+          console.log(`Storage: After sample creation: ${newResults?.length || 0} tier assignments`);
+          return Array.isArray(newResults) ? newResults : [];
+        } catch (createError: any) {
+          console.error("Storage: Error creating sample tier assignments:", createError);
+        }
+      }
+
+      return Array.isArray(results) ? results : [];
+    } catch (error: any) {
+      console.error("Storage: Error in getAgentTierAssignments:", error);
+      return [];
+    }
+  }
+
+  async insertAgentTierAssignment(assignmentData: InsertAgentTierAssignment): Promise<AgentTierAssignment> {
+    const [assignment] = await this.db.insert(agentTierAssignments).values(assignmentData).returning();
+    return assignment;
+  }
+
+  async getCurrentAgentTierAssignment(agentId: string): Promise<AgentTierAssignment | null> {
+    const [assignment] = await this.db
+      .select()
+      .from(agentTierAssignments)
+      .where(
+        and(
+          eq(agentTierAssignments.agentId, agentId),
+          eq(agentTierAssignments.status, "ACTIVE"),
+          sql`${agentTierAssignments.effectiveFrom} <= CURRENT_DATE`,
+          sql`(${agentTierAssignments.effectiveTo} IS NULL OR ${agentTierAssignments.effectiveTo} > CURRENT_DATE)`
+        )
+      )
+      .orderBy(desc(agentTierAssignments.effectiveFrom))
+      .limit(1);
+    return assignment || null;
+  }
+
+  async supersedePreviousAssignments(agentId: string, newEffectiveFrom: string): Promise<void> {
+    await this.db
+      .update(agentTierAssignments)
+      .set({ 
+        status: "SUPERSEDED", 
+        effectiveTo: newEffectiveFrom,
+        updatedAt: new Date() 
+      })
+      .where(
+        and(
+          eq(agentTierAssignments.agentId, agentId),
+          eq(agentTierAssignments.status, "ACTIVE")
+        )
+      );
+  }
+
+  async updateAgentTierAssignment(id: string, assignmentData: Partial<InsertAgentTierAssignment>): Promise<AgentTierAssignment> {
+    const [assignment] = await this.db
+      .update(agentTierAssignments)
+      .set({ ...assignmentData, updatedAt: new Date() })
+      .where(eq(agentTierAssignments.id, id))
+      .returning();
+    return assignment;
+  }
+
+  async deleteAgentTierAssignment(id: string): Promise<void> {
+    await this.db.delete(agentTierAssignments).where(eq(agentTierAssignments.id, id));
+  }
+
+  // Tier Assignment Engine operations
+  async getTierAssignmentEngines(filters: any = {}): Promise<TierAssignmentEngine[]> {
+    let query = this.db.select().from(tierAssignmentEngine);
+    const conditions = [];
+
+    if (filters.status) {
+      conditions.push(eq(tierAssignmentEngine.status, filters.status));
+    }
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+
+    return await query.orderBy(desc(tierAssignmentEngine.createdAt));
+  }
+
+  async insertTierAssignmentEngine(engineData: InsertTierAssignmentEngine): Promise<TierAssignmentEngine> {
+    const [engine] = await this.db.insert(tierAssignmentEngine).values(engineData).returning();
+    return engine;
+  }
+
+  async getTierAssignmentEngineById(id: string): Promise<TierAssignmentEngine | null> {
+    const [engine] = await this.db.select().from(tierAssignmentEngine).where(eq(tierAssignmentEngine.id, id));
+    return engine || null;
+  }
+
+  async updateTierAssignmentEngine(id: string, engineData: Partial<InsertTierAssignmentEngine>): Promise<TierAssignmentEngine> {
+    const [engine] = await this.db
+      .update(tierAssignmentEngine)
+      .set({ ...engineData, updatedAt: new Date() })
+      .where(eq(tierAssignmentEngine.id, id))
+      .returning();
+    return engine;
+  }
+
+  async updateEngineRunTimestamps(id: string, lastRunAt: Date, nextRunAt: Date): Promise<void> {
+    await this.db
+      .update(tierAssignmentEngine)
+      .set({ lastRunAt, nextRunAt, updatedAt: new Date() })
+      .where(eq(tierAssignmentEngine.id, id));
+  }
+
+  async deleteTierAssignmentEngine(id: string): Promise<void> {
+    await this.db.delete(tierAssignmentEngine).where(eq(tierAssignmentEngine.id, id));
+  }
+
+  // KPI calculation and tier evaluation helpers
+  async calculateAgentKPIs(agentId: string, window: 'MONTHLY' | 'QUARTERLY'): Promise<any> {
+    // Mock KPI calculation - in real implementation, this would aggregate from booking data
+    const mockKPIs = {
+      totalBookingValue: Math.floor(Math.random() * 100000000), // 0-100M
+      totalBookings: Math.floor(Math.random() * 2000), // 0-2000
+      avgBookingsPerMonth: Math.floor(Math.random() * 500), // 0-500
+      avgSearchesPerMonth: Math.floor(Math.random() * 6000), // 0-6000
+      conversionPct: Math.round((Math.random() * 15) * 100) / 100, // 0-15%
+    };
+    return mockKPIs;
+  }
+
+  async evaluateAgentTier(agentId: string, kpiData: any): Promise<string> {
+    const tiers = await this.getAgentTiers({ status: 'ACTIVE' });
+
+    // Sort tiers by requirements (highest to lowest)
+    const sortedTiers = tiers.sort((a, b) => {
+      const aThreshold = (a.kpiThresholds as any).totalBookingValueMin;
+      const bThreshold = (b.kpiThresholds as any).totalBookingValueMin;
+      return bThreshold - aThreshold;
+    });
+
+    // Find the highest tier the agent qualifies for
+    for (const tier of sortedTiers) {
+      const thresholds = tier.kpiThresholds as any;
+
+      if (kpiData.totalBookingValue >= thresholds.totalBookingValueMin &&
+          kpiData.totalBookings >= thresholds.totalBookingsMin &&
+          kpiData.avgBookingsPerMonth >= thresholds.avgBookingsPerMonthMin &&
+          kpiData.avgSearchesPerMonth >= thresholds.avgSearchesPerMonthMin &&
+          kpiData.conversionPct >= thresholds.conversionPctMin) {
+        return tier.tierCode;
+      }
+    }
+
+    // Default to BRONZE if no tier qualifies
+    return 'BRONZE';
+  }
+
+  async checkTierConflicts(tierData: InsertAgentTier): Promise<any[]> {
+    const conflicts = [];
+
+    // Check for duplicate tier code
+    const existingTier = await this.getAgentTierByCode(tierData.tierCode);
+    if (existingTier) {
+      conflicts.push({
+        type: 'DUPLICATE_TIER_CODE',
+        message: `Tier with code ${tierData.tierCode} already exists`,
+        conflictingTier: existingTier
+      });
+    }
+
+    return conflicts;
+  }
+
+  async getAgentTierByCode(tierCode: string): Promise<AgentTier | null> {
+    const [tier] = await this.db
+      .select()
+      .from(agentTiers)
+      .where(eq(agentTiers.tierCode, tierCode))
+      .limit(1);
+    return tier || null;
       }
       if (filters.tierCode) {
         conditions.push(eq(agentTierAssignments.tierCode, filters.tierCode));

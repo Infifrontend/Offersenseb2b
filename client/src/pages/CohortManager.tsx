@@ -160,20 +160,6 @@ export default function CohortManager() {
   console.log("Loading state:", isLoading);
   console.log("Error state:", error);
 
-  // Add loading state check after all hooks
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <div className="text-lg font-medium text-gray-600">
-            Loading cohorts...
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   // Create cohort mutation
   const createCohortMutation = useMutation({
     mutationFn: async (data: CohortFormData) => {
@@ -443,6 +429,20 @@ export default function CohortManager() {
       </Badge>
     );
   };
+
+  // Add loading state check after all hooks and functions are defined
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="text-lg font-medium text-gray-600">
+            Loading cohorts...
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

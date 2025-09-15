@@ -273,21 +273,6 @@ export default function NegotiatedFareManager() {
 
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
-      // Validate file type
-      if (!file.name.toLowerCase().endsWith('.csv')) {
-        throw new Error("Please upload a CSV file (.csv extension required)");
-      }
-
-      // Validate file size (limit to 10MB)
-      if (file.size > 10 * 1024 * 1024) {
-        throw new Error("File size must be less than 10MB");
-      }
-
-      // Validate file is not empty
-      if (file.size === 0) {
-        throw new Error("The uploaded file is empty");
-      }
-
       const formData = new FormData();
       formData.append("file", file);
       
@@ -370,33 +355,9 @@ export default function NegotiatedFareManager() {
       // Reset any previous upload results
       setUploadResult(null);
       
-      // Validate file before upload
-      const validationErrors = [];
-      
-      if (!file.name.toLowerCase().endsWith('.csv')) {
-        validationErrors.push("File must be a CSV file (.csv extension)");
-      }
-      
-      if (file.size > 10 * 1024 * 1024) {
-        validationErrors.push("File size must be less than 10MB");
-      }
-      
-      if (file.size === 0) {
-        validationErrors.push("File cannot be empty");
-      }
-      
-      if (validationErrors.length > 0) {
-        alert(`Validation failed:\n• ${validationErrors.join('\n• ')}`);
-        // Reset the file input
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-        }
-        return;
-      }
-      
       // Show confirmation dialog before upload
       const confirmed = window.confirm(
-        `Are you sure you want to upload "${file.name}"?\n\nThis will process the CSV file and update the negotiated fares database.`
+        `Are you sure you want to upload "${file.name}"?\n\nThis will process the file and update the negotiated fares database.`
       );
       
       if (confirmed) {
@@ -646,7 +607,6 @@ export default function NegotiatedFareManager() {
             <input
               ref={fileInputRef}
               type="file"
-              accept=".csv,.xlsx"
               onChange={handleFileUpload}
               className="hidden"
             />

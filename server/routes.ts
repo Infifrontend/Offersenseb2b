@@ -325,37 +325,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Upload CSV/Excel file
+  // Upload file
   app.post("/api/negofares/upload", upload.single("file"), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ 
           success: false,
-          message: "No file uploaded. Please select a CSV file." 
-        });
-      }
-
-      // Validate file type
-      if (!req.file.originalname.toLowerCase().endsWith('.csv')) {
-        return res.status(400).json({ 
-          success: false,
-          message: "Invalid file type. Please upload a CSV file (.csv extension required)." 
-        });
-      }
-
-      // Validate file size (10MB limit)
-      if (req.file.size > 10 * 1024 * 1024) {
-        return res.status(400).json({ 
-          success: false,
-          message: "File too large. Please upload a file smaller than 10MB." 
-        });
-      }
-
-      // Validate file is not empty
-      if (req.file.size === 0) {
-        return res.status(400).json({ 
-          success: false,
-          message: "Empty file uploaded. Please upload a file with data." 
+          message: "No file uploaded. Please select a file." 
         });
       }
 
@@ -368,35 +344,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       try {
         const csvContent = req.file.buffer.toString('utf8');
-        
-        // Check if file has content
-        if (!csvContent.trim()) {
-          return res.status(400).json({ 
-            success: false,
-            message: "CSV file appears to be empty." 
-          });
-        }
-
-        // Validate CSV headers
-        const lines = csvContent.split('\n').filter(line => line.trim());
-        if (lines.length < 2) {
-          return res.status(400).json({ 
-            success: false,
-            message: "CSV file must contain headers and at least one data row." 
-          });
-        }
-
-        // Required headers based on negotiated_fares table schema
-        const requiredHeaders = ['airlineCode', 'fareCode', 'origin', 'destination', 'tripType', 'cabinClass', 'baseNetFare', 'currency', 'bookingStartDate', 'bookingEndDate', 'travelStartDate', 'travelEndDate', 'pos', 'eligibleAgentTiers'];
-        const actualHeaders = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-        const missingHeaders = requiredHeaders.filter(header => !actualHeaders.includes(header));
-        
-        if (missingHeaders.length > 0) {
-          return res.status(400).json({ 
-            success: false,
-            message: `Missing required CSV headers: ${missingHeaders.join(', ')}. Please ensure your CSV file contains all required columns.` 
-          });
-        }
 
         // Parse CSV
         const stream = Readable.from(csvContent);
@@ -690,10 +637,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
 
       } catch (parseError: any) {
-        console.error('CSV parsing error:', parseError);
+        console.error('File parsing error:', parseError);
         res.status(400).json({ 
           success: false,
-          message: `Failed to parse CSV file: ${parseError.message}. Please ensure the file is properly formatted.` 
+          message: `Failed to parse file: ${parseError.message}. Please ensure the file is properly formatted.` 
         });
       }
     } catch (error: any) {

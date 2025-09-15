@@ -270,14 +270,14 @@ export class DatabaseStorage implements IStorage {
 
       if (userCount === 0) {
         console.log("No users found, creating default admin user...");
-        const hashedPassword = await bcrypt.hash("password123", 10);
+        const hashedPassword = await bcrypt.hash("infi123", 10);
 
         await this.db.insert(users).values({
           username: "admin",
           password: hashedPassword
         });
 
-        console.log("Default admin user created (username: admin, password: password123)");
+        console.log("Default admin user created (username: admin, password: infi123)");
       }
     } catch (error) {
       console.error("Error initializing default user:", error);

@@ -2627,24 +2627,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch tier assignments", error: error.message });
     }
   });
-    try {
-      const filters = req.query;
-      console.log("API: Fetching tier assignments with filters:", filters);
-      const assignments = await storage.getAgentTierAssignments(filters);
-      console.log(`API: Found ${assignments?.length || 0} tier assignments`);
-
-      // Ensure we always return an array
-      if (!Array.isArray(assignments)) {
-        console.log("API: Assignments is not an array, returning empty array");
-        return res.json([]);
-      }
-
-      res.json(assignments);
-    } catch (error: any) {
-      console.error("API: Error fetching tier assignments:", error);
-      res.status(500).json({ message: "Failed to fetch tier assignments", error: error.message });
-    }
-  });
 
   // Assign tier to agent (manual override)
   app.post("/api/tiers/override", async (req, res) => {

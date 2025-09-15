@@ -1520,6 +1520,27 @@ export class DatabaseStorage implements IStorage {
       let query = this.db.select().from(agentTierAssignments);
       const conditions = [];
 
+      // Apply filters if provided
+      if (filters.agentId) {
+        conditions.push(eq(agentTierAssignments.agentId, filters.agentId));
+      }
+      
+      if (filters.tierCode) {
+        conditions.push(eq(agentTierAssignments.tierCode, filters.tierCode));
+      }
+      
+      if (filters.status) {
+        conditions.push(eq(agentTierAssignments.status, filters.status));
+      }
+      
+      if (filters.assignmentType) {
+        conditions.push(eq(agentTierAssignments.assignmentType, filters.assignmentType));
+      }
+
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+
       if (filters.agentId) {
         conditions.push(eq(agentTierAssignments.agentId, filters.agentId));
       }

@@ -238,10 +238,19 @@ export default function AgentTierManager() {
   } = useQuery({
     queryKey: ["/api/tiers/assignments"],
     queryFn: async () => {
+      console.log("Fetching tier assignments from API...");
       const response = await fetch("/api/tiers/assignments");
-      if (!response.ok) throw new Error("Failed to fetch assignments");
-      return response.json();
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Failed to fetch assignments:", errorText);
+        throw new Error(`Failed to fetch assignments: ${response.status} ${response.statusText}`);
+      }
+      const data = await response.json();
+      console.log("Received tier assignments data:", data);
+      return Array.isArray(data) ? data : [];
     },
+    retry: 3,
+    retryDelay: 1000,
   });
 
   const {

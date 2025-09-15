@@ -1018,11 +1018,19 @@ export default function AncillaryBundlingEngine() {
 
       {/* Create Bundle Modal */}
       <Modal
-        title="Create Bundle"
+        title={
+          <div className="flex items-center gap-3">
+            <div className="modal-header-icon">
+              <Plus className="w-4 h-4" />
+            </div>
+            <span>Create New Bundle</span>
+          </div>
+        }
         open={isCreateBundleModalOpen}
         onCancel={() => setIsCreateBundleModalOpen(false)}
         footer={null}
-        width={800}
+        width={600}
+        className="create-modal modern-modal"
       >
         <AntForm
           form={antForm}

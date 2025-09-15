@@ -31,6 +31,7 @@ import {
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { z } from "zod";
+import { Plus, Edit } from "lucide-react"; // Assuming these icons are available
 
 // Form validation schemas
 const agentFormSchema = z.object({
@@ -805,9 +806,16 @@ export default function AgentChannelManager() {
       {/* Channel Override Modal */}
       <Modal
         title={
-          editingOverride
-            ? "Edit Channel Override"
-            : "Create New Channel Override"
+          <div className="flex items-center gap-3">
+            <div className="modal-header-icon">
+              {editingOverride ? (
+                <Edit className="w-4 h-4" />
+              ) : (
+                <Plus className="w-4 h-4" />
+              )}
+            </div>
+            <span>{editingOverride ? "Edit Override" : "Create New Override"}</span>
+          </div>
         }
         open={isOverrideModalVisible}
         onCancel={() => {
@@ -816,7 +824,8 @@ export default function AgentChannelManager() {
           overrideForm.resetFields();
         }}
         footer={null}
-        width={800}
+        width={600}
+        className={editingOverride ? "edit-modal modern-modal" : "create-modal modern-modal"}
       >
         <AntForm
           form={overrideForm}

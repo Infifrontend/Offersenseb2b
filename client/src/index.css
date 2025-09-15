@@ -19,6 +19,179 @@
   padding: 16px 24px;
 }
 
+/* Modern Modal Header Styles */
+.modern-modal-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px 8px 0 0;
+  padding: 20px 24px;
+  color: white;
+  border: none !important;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.modern-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: white !important;
+}
+
+.modern-modal-header .anticon {
+  font-size: 20px;
+  color: white;
+}
+
+/* Create Modal Specific Styles */
+.create-modal .ant-modal-header {
+  background: linear-gradient(135deg, var(--primary) 0%, #ff6b35 100%);
+  border-radius: 8px 8px 0 0;
+  padding: 20px 24px;
+  color: white;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(255, 79, 23, 0.2);
+}
+
+.create-modal .ant-modal-title {
+  color: white !important;
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.create-modal .ant-modal-close {
+  color: white !important;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.create-modal .ant-modal-close:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.create-modal .ant-modal-close .anticon {
+  color: white !important;
+}
+
+/* Edit Modal Styles */
+.edit-modal .ant-modal-header {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  border-radius: 8px 8px 0 0;
+  padding: 20px 24px;
+  color: white;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+}
+
+.edit-modal .ant-modal-title {
+  color: white !important;
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.edit-modal .ant-modal-close {
+  color: white !important;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.edit-modal .ant-modal-close:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.edit-modal .ant-modal-close .anticon {
+  color: white !important;
+}
+
+/* View Modal Styles */
+.view-modal .ant-modal-header {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  border-radius: 8px 8px 0 0;
+  padding: 20px 24px;
+  color: white;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
+}
+
+.view-modal .ant-modal-title {
+  color: white !important;
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.view-modal .ant-modal-close {
+  color: white !important;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.view-modal .ant-modal-close:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.view-modal .ant-modal-close .anticon {
+  color: white !important;
+}
+
+/* Modal Content Enhancements */
+.modern-modal .ant-modal-content {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.modern-modal .ant-modal-body {
+  padding: 24px;
+  background: #fafafa;
+}
+
+.modern-modal .ant-modal-footer {
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+  padding: 16px 24px;
+  border-radius: 0 0 8px 8px;
+}
+
+/* Icon Styles for Modal Headers */
+.modal-header-icon {
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+/* Responsive Modal Headers */
+@media (max-width: 768px) {
+  .create-modal .ant-modal-header,
+  .edit-modal .ant-modal-header,
+  .view-modal .ant-modal-header {
+    padding: 16px 20px;
+  }
+  
+  .create-modal .ant-modal-title,
+  .edit-modal .ant-modal-title,
+  .view-modal .ant-modal-title {
+    font-size: 16px;
+  }
+}
+
 .cls-cohort-dropdwon {
   display: flex;
   justify-content: space-between;

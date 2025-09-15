@@ -774,11 +774,19 @@ export default function NonAirAncillaries() {
 
       {/* Create Rule Modal */}
       <Modal
-        title="Create New Markup Rule"
+        title={
+          <div className="flex items-center gap-3">
+            <div className="modal-header-icon">
+              <Plus className="w-4 h-4" />
+            </div>
+            <span>Create New Markup Rule</span>
+          </div>
+        }
         open={isCreateRuleModalOpen}
         onCancel={() => setIsCreateRuleModalOpen(false)}
         footer={null}
         width={800}
+        className="create-modal modern-modal"
       >
         <AntForm form={ruleForm} onFinish={handleCreateRule} layout="vertical">
           <Row gutter={16}>

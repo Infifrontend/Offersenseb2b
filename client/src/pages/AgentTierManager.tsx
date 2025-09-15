@@ -633,12 +633,23 @@ export default function AgentTierManager() {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      render: (status: string) => (
-        <Badge
-          status={status === "ACTIVE" ? "success" : "default"}
-          text={status}
-        />
-      ),
+      width: "12%",
+      render: (status: string) => {
+        const isActive = status === "ACTIVE";
+        return (
+          <Tag
+            color={isActive ? "green" : "orange"}
+            style={{
+              fontWeight: 500,
+              textAlign: "center",
+              minWidth: "80px",
+              display: "inline-block",
+            }}
+          >
+            {status === "ACTIVE" ? "Active" : "Superseded"}
+          </Tag>
+        );
+      },
     },
     {
       title: "Created",

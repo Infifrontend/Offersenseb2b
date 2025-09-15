@@ -434,38 +434,46 @@ export default function NegotiatedFareManager() {
       "remarks",
     ];
 
-    // Sample data following all validation rules
+    // Enhanced sample data with more realistic examples
     const sampleRows = [
-      // Row 1: Basic economy fare with minimum required fields
-      'AA,NEGO001,NYC,LAX,ROUND_TRIP,ECONOMY,299.00,USD,2024-01-01,2024-12-31,2024-02-01,2024-11-30,"[""US"",""CA""]",50,7,30,"[]","[""GOLD"",""SILVER""]","[]","Sample economy fare - US/Canada POS"',
+      // Row 1: Basic economy fare - US domestic
+      'AA,ECO001,JFK,LAX,ROUND_TRIP,ECONOMY,299.00,USD,2025-01-01,2025-12-31,2025-02-01,2025-11-30,"[""US"",""CA""]",50,7,30,"[]","[""GOLD"",""SILVER""]","[]","US domestic economy fare"',
       
-      // Row 2: Premium economy with multiple POS and agent tiers
-      'DL,PREM002,JFK,LHR,ROUND_TRIP,PREMIUM_ECONOMY,599.00,USD,2024-03-01,2024-10-31,2024-04-01,2024-09-30,"[""US"",""GB"",""DE""]",25,3,21,"[]","[""PLATINUM"",""GOLD""]","[]","Premium transatlantic fare"',
+      // Row 2: Premium economy - International
+      'DL,PREM002,JFK,LHR,ROUND_TRIP,PREMIUM_ECONOMY,899.00,USD,2025-03-01,2025-10-31,2025-04-01,2025-09-30,"[""US"",""GB""]",25,3,21,"[]","[""PLATINUM"",""GOLD""]","[""FESTIVE_2025""]","Transatlantic premium economy"',
       
-      // Row 3: Business class with blackout dates
-      'UA,BIZ003,SFO,NRT,ONE_WAY,BUSINESS,1299.00,USD,2024-01-15,2024-11-15,2024-02-01,2024-10-31,"[""US"",""IN""]",10,1,14,"[""2024-07-04"",""2024-12-25""]","[""PLATINUM""]","[""HIGH_VALUE""]","Business class with holiday blackouts"',
+      // Row 3: Business class with blackouts
+      'UA,BIZ003,SFO,NRT,ONE_WAY,BUSINESS,1299.00,USD,2025-01-15,2025-11-15,2025-02-01,2025-10-31,"[""US"",""IN""]",10,1,14,"[""2025-07-04"",""2025-12-25""]","[""PLATINUM""]","[""HIGH_VALUE""]","Business class - holiday restrictions"',
       
-      // Row 4: First class with cohorts
-      'QF,FIRST004,LAX,SYD,ROUND_TRIP,FIRST,4999.00,AUD,2024-02-01,2024-08-31,2024-03-01,2024-07-31,"[""AU"",""US""]",5,7,90,"[]","[""PLATINUM""]","[""FESTIVE_2025"",""PORTAL_USERS""]","Luxury first class service"',
+      // Row 4: First class luxury
+      'SQ,FIRST004,SIN,LAX,ROUND_TRIP,FIRST,3999.00,USD,2025-02-01,2025-08-31,2025-03-01,2025-07-31,"[""SG"",""US""]",5,7,90,"[]","[""PLATINUM""]","[""PORTAL_USERS""]","Singapore Airlines first class"',
       
-      // Row 5: Multi-city with extended stays
-      'SQ,MULTI005,SIN,LAX,MULTI_CITY,ECONOMY,899.00,SGD,2024-01-01,2024-06-30,2024-02-15,2024-05-31,"[""SG"",""US""]",30,14,180,"[]","[""GOLD"",""SILVER"",""BRONZE""]","[]","Multi-city flexible fare"',
+      // Row 5: Regional economy
+      'AI,REG005,DEL,BOM,ONE_WAY,ECONOMY,89.00,USD,2025-01-01,2025-12-31,2025-01-01,2025-12-31,"[""IN""]",100,0,0,"[]","[""BRONZE"",""SILVER""]","[]","India domestic route"',
       
-      // Row 6: Regional fare with minimal restrictions
-      'AI,REG006,DEL,BOM,ONE_WAY,ECONOMY,89.00,INR,2024-01-01,2024-12-31,2024-01-01,2024-12-31,"[""IN""]",100,0,0,"[]","[""BRONZE"",""SILVER""]","[]","Domestic regional fare India"'
+      // Row 6: Multi-city flexible
+      'EK,MULTI006,DXB,NYC,MULTI_CITY,BUSINESS,1899.00,USD,2025-01-01,2025-06-30,2025-02-15,2025-05-31,"[""AE"",""US""]",20,14,180,"[]","[""GOLD"",""PLATINUM""]","[]","Emirates multi-city business"'
     ];
 
-    // Create CSV content with headers and sample data
-    const csvRows = [headers.join(","), ...sampleRows];
-    const csvContent = "data:text/csv;charset=utf-8," + csvRows.join("\n");
-
-    const encodedUri = encodeURI(csvContent);
+    // Create CSV with proper formatting
+    const csvRows = [
+      headers.join(","),
+      ...sampleRows
+    ];
+    
+    const csvContent = csvRows.join("\n");
+    
+    // Create and download the file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `negotiated_fares_template_${Date.now()}.csv`);
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `negotiated_fares_template_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const onSubmit = (values: any) => {

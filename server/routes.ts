@@ -534,14 +534,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     if (!Array.isArray(cohorts)) {
                       validationErrors.push('eligibleCohorts must be a JSON array');
                     } else {
-                      // Validate that cohort codes exist (optional validation)
-                      // In production, you might want to validate against actual cohorts in database
-                      const validCohortFormats = /^[A-Z_0-9]+$/;
+                      // Validate cohort code format
                       const invalidCohorts = cohorts.filter(cohort => 
-                        typeof cohort !== 'string' || cohort.length === 0
+                        typeof cohort !== 'string' || cohort.length === 0 || cohort.length > 50
                       );
                       if (invalidCohorts.length > 0) {
-                        validationErrors.push('All cohort codes must be non-empty strings');
+                        validationErrors.push('All cohort codes must be non-empty strings (max 50 chars)');
                       }
                     }
                   } catch (parseError) {

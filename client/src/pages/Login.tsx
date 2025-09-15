@@ -207,7 +207,7 @@ export default function Login() {
               <AlertDescription>
                 <strong>Demo Credentials:</strong><br />
                 Username: <code className="text-sm bg-gray-100 px-1 rounded">admin</code><br />
-                Password: <code className="text-sm bg-gray-100 px-1 rounded">infi123</code>
+                Password: <code className="text-sm bg-gray-100 px-1 rounded">password123</code>
               </AlertDescription>
             </Alert>
           </CardContent>

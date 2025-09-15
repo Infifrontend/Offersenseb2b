@@ -1326,8 +1326,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  console.log("General bundle routes registered successfully");
-
   // Offer Rules Routes
 
   // Get all offer rules with optional filters
@@ -2550,13 +2548,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Agent Tier Assignment Routes
 
   // Get all tier assignments with optional filters
+  // The original route definition for `/api/tiers/assignments` was duplicated.
+  // This version is kept as it's the correct one according to the problem description.
   app.get("/api/tiers/assignments", async (req, res) => {
     try {
       const filters = req.query;
       console.log("API: Fetching tier assignments with filters:", filters);
       const assignments = await storage.getAgentTierAssignments(filters);
       console.log(`API: Found ${assignments?.length || 0} tier assignments`);
-      
+
       // Ensure we always return an array
       if (!Array.isArray(assignments)) {
         console.log("API: Assignments is not an array, returning empty array");
@@ -3064,9 +3064,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         `,
         textBody: `
           ${campaign.campaignName}
-          
+
           Special Offer Just For You!
-          
+
           Offer: ${
             campaign.offer.type === "PERCENT"
               ? `${campaign.offer.value}% Off`
@@ -3074,9 +3074,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 ? `$${campaign.offer.value} Off`
                 : `Special Price: $${campaign.offer.specialPrice}`
           }
-          
+
           Valid from ${campaign.lifecycle.startDate} to ${campaign.lifecycle.endDate}
-          
+
           Best regards,
           The OfferSense Team
         `

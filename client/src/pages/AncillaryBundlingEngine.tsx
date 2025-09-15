@@ -300,7 +300,7 @@ export default function AncillaryBundlingEngine() {
         const params = new URLSearchParams(pricingFilters);
         const url = `/api/bundles/pricing?${params}`;
         console.log("Full URL:", url);
-        
+
         const response = await fetch(url);
         console.log("Response status:", response.status);
         console.log("Response headers:", Object.fromEntries(response.headers.entries()));
@@ -861,6 +861,19 @@ export default function AncillaryBundlingEngine() {
     deleteBundlePricingMutation.mutate(id);
   };
 
+  if (bundlesLoading && isPricingRulesLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="text-lg font-medium text-gray-600">
+            Loading bundling data...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -915,19 +928,19 @@ export default function AncillaryBundlingEngine() {
                 <Plus className="h-4 w-4 mr-2" />
                 Add Bundle Pricing Rule
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={async () => {
                   try {
                     console.log("Testing API endpoints...");
                     const testResponse = await fetch('/api/test-bundles-pricing');
                     const testResult = await testResponse.text();
                     console.log("Test endpoint result:", testResult);
-                    
+
                     const pricingResponse = await fetch('/api/bundles/pricing');
                     const pricingResult = await pricingResponse.text();
                     console.log("Pricing endpoint result:", pricingResult);
-                    
+
                     toast({
                       title: "API Test",
                       description: `Test: ${testResponse.status}, Pricing: ${pricingResponse.status}`,

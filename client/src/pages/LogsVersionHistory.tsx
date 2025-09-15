@@ -483,8 +483,13 @@ export default function LogsVersionHistory() {
         </CardHeader>
         <CardContent className="p-0">
           {isLoading ? (
-            <div className="flex justify-center p-8">
-              <RefreshCw className="w-6 h-6 animate-spin" />
+            <div className="flex items-center justify-center min-h-screen">
+              <div className="text-center space-y-4">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                <div className="text-lg font-medium text-gray-600">
+                  Loading audit logs...
+                </div>
+              </div>
             </div>
           ) : filteredLogs.length === 0 ? (
             <div className="p-6">

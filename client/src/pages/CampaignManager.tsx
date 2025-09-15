@@ -290,7 +290,7 @@ export default function CampaignManager() {
   const [selectedWhatsappTemplate, setSelectedWhatsappTemplate] = useState<any>(null);
   const [customEmailPrompt, setCustomEmailPrompt] = useState('');
   const [customWhatsappPrompt, setCustomWhatsappPrompt] = useState('');
-  
+
   // Mail sending modal states
   const [mailModalVisible, setMailModalVisible] = useState(false);
   const [selectedCampaignForMail, setSelectedCampaignForMail] = useState<Campaign | null>(null);
@@ -533,7 +533,7 @@ export default function CampaignManager() {
       // Build comprehensive context for AI generation
       const context = {
         campaignName: formValues.campaignName || 'New Campaign',
-        campaignCode: formValues.campaignCode || 'CAMPAIGN_001',
+        campaignCode: formConstruct.campaignCode || 'CAMPAIGN_001',
         offerType: formValues.offer?.type || 'PERCENT',
         offerValue: formValues.offer?.value || 10,
         specialPrice: formValues.offer?.specialPrice,
@@ -855,61 +855,36 @@ export default function CampaignManager() {
     (c: Campaign) => c.status === "ACTIVE",
   );
 
+  if (campaignsLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="text-lg font-medium text-gray-600">
+            Loading campaigns...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      {/* Header */}
-
-      {/* Statistics Cards */}
-      <Row gutter={16}>
-        <Col span={6}>
-          <AntCard>
-            <Statistic
-              title="Total Campaigns"
-              value={campaigns.length}
-              prefix={<Megaphone className="w-4 h-4" />}
-              valueStyle={{ color: "#3f8600" }}
-            />
-          </AntCard>
-        </Col>
-        <Col span={6}>
-          <AntCard>
-            <Statistic
-              title="Active Campaigns"
-              value={activeCampaigns.length}
-              prefix={<Play className="w-4 h-4" />}
-              valueStyle={{ color: "#1890ff" }}
-            />
-          </AntCard>
-        </Col>
-        <Col span={6}>
-          <AntCard>
-            <Statistic
-              title="Draft Campaigns"
-              value={campaignStats.DRAFT || 0}
-              prefix={<Edit className="w-4 h-4" />}
-              valueStyle={{ color: "#722ed1" }}
-            />
-          </AntCard>
-        </Col>
-        <Col span={6}>
-          <AntCard>
-            <Statistic
-              title="Completed Campaigns"
-              value={campaignStats.COMPLETED || 0}
-              prefix={<CheckCircle className="w-4 h-4" />}
-              valueStyle={{ color: "#52c41a" }}
-            />
-          </AntCard>
-        </Col>
-      </Row>
-
-      {/* Main Content */}
-      <Tabs
-        activeKey={activeTab}
-        onChange={setActiveTab}
-        className="bg-white p-4 rounded-lg"
+      <ShadcnTabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="space-y-4"
       >
-        <TabPane tab="Campaign Management" key="campaigns">
+        <TabsList className="bg-white p-2 rounded-md">
+          <TabsTrigger value="campaigns" className="px-4 py-2">
+            Campaign Management
+          </TabsTrigger>
+          <TabsTrigger value="performance" className="px-4 py-2">
+            Performance Dashboard
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="campaigns">
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <div>
@@ -942,9 +917,9 @@ export default function CampaignManager() {
               size="small"
             />
           </div>
-        </TabPane>
+        </TabsContent>
 
-        <TabPane tab="Performance Dashboard" key="performance">
+        <TabsContent value="performance">
           <div className="space-y-4">
             <div>
               <h3 className="text-lg font-semibold">
@@ -1010,8 +985,8 @@ export default function CampaignManager() {
               </Row>
             )}
           </div>
-        </TabPane>
-      </Tabs>
+        </TabsContent>
+      </ShadcnTabs>
 
       {/* Campaign Modal */}
       <Modal
@@ -1333,7 +1308,7 @@ export default function CampaignManager() {
                         <CheckCircle className="w-4 h-4 mr-2 text-blue-600" />
                         Select from Existing Templates
                       </h4>
-                      
+
                       {templateGenerationState.email.templates.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           {templateGenerationState.email.templates.map((template, index) => (
@@ -1385,7 +1360,7 @@ export default function CampaignManager() {
                         <MessageSquare className="w-4 h-4 mr-2 text-purple-600" />
                         Generate Templates with AI
                       </h4>
-                      
+
                       <div className="space-y-3">
                         <AntForm.Item
                           label="Custom AI Prompt (Optional)"
@@ -1399,7 +1374,7 @@ export default function CampaignManager() {
                             onChange={(e) => setCustomEmailPrompt(e.target.value)}
                           />
                         </AntForm.Item>
-                        
+
                         <div className="flex items-center justify-between">
                           <div className="text-xs text-gray-600">
                             <strong>AI will use:</strong> Campaign details, offers, products, and target audience
@@ -1459,7 +1434,7 @@ export default function CampaignManager() {
                         <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
                         Select from Existing Templates
                       </h4>
-                      
+
                       {templateGenerationState.whatsapp.templates.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           {templateGenerationState.whatsapp.templates.map((template, index) => (
@@ -1511,7 +1486,7 @@ export default function CampaignManager() {
                         <Smartphone className="w-4 h-4 mr-2 text-green-600" />
                         Generate Templates with AI
                       </h4>
-                      
+
                       <div className="space-y-3">
                         <AntForm.Item
                           label="Custom AI Prompt (Optional)"
@@ -1525,7 +1500,7 @@ export default function CampaignManager() {
                             onChange={(e) => setCustomWhatsappPrompt(e.target.value)}
                           />
                         </AntForm.Item>
-                        
+
                         <div className="flex items-center justify-between">
                           <div className="text-xs text-gray-600">
                             <strong>AI will optimize for:</strong> Character limit, mobile format, and engagement
@@ -2030,7 +2005,7 @@ export default function CampaignManager() {
                             } - Limited Time!
                       </div>
                     </div>
-                    <div 
+                    <div
                       className="email-preview-content"
                       dangerouslySetInnerHTML={{
                         __html: `

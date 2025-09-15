@@ -357,10 +357,12 @@ export default function Dashboard() {
 
   if (metricsLoading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <div className="relative">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-200"></div>
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent absolute top-0 left-0"></div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="text-lg font-medium text-gray-600">
+            Loading dashboard metrics...
+          </div>
         </div>
       </div>
     );

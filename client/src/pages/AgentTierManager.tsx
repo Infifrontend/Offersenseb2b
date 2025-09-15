@@ -770,6 +770,19 @@ export default function AgentTierManager() {
     {},
   );
 
+  if (tiersLoading && assignmentsLoading && enginesLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="text-lg font-medium text-gray-600">
+            Loading agent tier data...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -835,289 +848,303 @@ export default function AgentTierManager() {
         activeKey={activeTab}
         onChange={setActiveTab}
         className="bg-white p-4 rounded-lg"
-      >
-        <TabPane tab="Tier Definitions" key="tiers">
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="text-lg font-semibold">
-                  Agent Tier Definitions
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Define tier criteria and KPI thresholds for automatic agent
-                  classification.
-                </p>
-              </div>
-              <AntButton
-                className="bg-primary text-white"
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={() => {
-                  setEditingTier(null);
-                  tierForm.resetFields();
-                  setIsTierModalVisible(true);
-                }}
-              >
-                Add Tier
-              </AntButton>
-            </div>
-
-            <Table
-              columns={tierColumns}
-              dataSource={tiers}
-              loading={tiersLoading}
-              rowKey="id"
-              pagination={{ pageSize: 10 }}
-              size="middle"
-            />
-          </div>
-        </TabPane>
-
-        <TabPane tab="Tier Assignments" key="assignments">
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="text-lg font-semibold">Tier Assignments</h3>
-                <p className="text-sm text-muted-foreground">
-                  View and manage current tier assignments for all agents.
-                </p>
-                {/* Debug info - remove in production */}
-                {process.env.NODE_ENV === 'development' && (
-                  <div className="text-xs text-gray-400 mt-1">
-                    Debug: {assignments.length} total assignments, {activeAssignments.length} active
-                    {assignmentsError && ` | Error: ${assignmentsError.message}`}
+        items={[
+          {
+            key: "tiers",
+            label: "Tier Definitions",
+            children: (
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="text-lg font-semibold">
+                      Agent Tier Definitions
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Define tier criteria and KPI thresholds for automatic agent
+                      classification.
+                    </p>
                   </div>
-                )}
-              </div>
-              <Space>
-                <AntButton
-                  icon={<PlayCircleOutlined />}
-                  onClick={() => setIsAssignmentModalVisible(true)}
-                >
-                  Bulk Assign
-                </AntButton>
-                <AntButton
-                  type="primary"
-                  icon={<EditOutlined />}
-                  onClick={() => setIsOverrideModalVisible(true)}
-                >
-                  Manual Override
-                </AntButton>
-              </Space>
-            </div>
-
-            {/* Assignment Statistics */}
-            <Row gutter={16} className="mb-4">
-              {tierCodes.map((tierCode) => (
-                <Col span={6} key={tierCode}>
-                  <AntCard size="small">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        {getTierIcon(tierCode)}
-                        <span className="font-medium">{tierCode}</span>
-                      </div>
-                      <Badge
-                        count={assignmentStats[tierCode] || 0}
-                        style={{ backgroundColor: getTierColor(tierCode) }}
-                      />
-                    </div>
-                  </AntCard>
-                </Col>
-              ))}
-            </Row>
-
-            <Table
-              columns={assignmentColumns}
-              dataSource={assignments}
-              loading={assignmentsLoading}
-              rowKey="id"
-              pagination={{ pageSize: 15 }}
-              scroll={{ y: 400 }}
-              size="middle"
-            />
-          </div>
-        </TabPane>
-
-        <TabPane tab="Assignment Engine" key="engines">
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="text-lg font-semibold">
-                  Tier Assignment Engines
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Configure automated tier assignment schedules and policies.
-                </p>
-              </div>
-              <AntButton
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={() => {
-                  setEditingEngine(null);
-                  engineForm.resetFields();
-                  setIsEngineModalVisible(true);
-                }}
-              >
-                Add Engine
-              </AntButton>
-            </div>
-
-            <Table
-              columns={engineColumns}
-              dataSource={engines}
-              loading={enginesLoading}
-              rowKey="id"
-              pagination={{ pageSize: 10 }}
-              scroll={{ y: 400 }}
-              size="middle"
-            />
-          </div>
-        </TabPane>
-
-        <TabPane tab="Tier Evaluation" key="evaluation">
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-lg font-semibold">Agent Tier Evaluation</h3>
-              <p className="text-sm text-muted-foreground">
-                Evaluate individual agents against tier criteria and preview
-                tier recommendations.
-              </p>
-            </div>
-
-            <AntCard>
-              <AntForm
-                form={evaluationForm}
-                layout="inline"
-                onFinish={handleTierEvaluation}
-                className="mb-4"
-              >
-                <AntForm.Item
-                  name="agentId"
-                  rules={[{ required: true, message: "Agent ID is required" }]}
-                >
-                  <Input placeholder="Enter Agent ID" style={{ width: 200 }} />
-                </AntForm.Item>
-                <AntForm.Item
-                  name="window"
-                  rules={[
-                    { required: true, message: "KPI window is required" },
-                  ]}
-                >
-                  <AntSelect
-                    placeholder="Select KPI Window"
-                    style={{ width: 150 }}
-                  >
-                    <AntSelect.Option value="MONTHLY">Monthly</AntSelect.Option>
-                    <AntSelect.Option value="QUARTERLY">
-                      Quarterly
-                    </AntSelect.Option>
-                  </AntSelect>
-                </AntForm.Item>
-                <AntForm.Item>
                   <AntButton
+                    className="bg-primary text-white"
                     type="primary"
-                    htmlType="submit"
-                    loading={evaluateTierMutation.isPending}
-                    icon={<BarChartOutlined />}
+                    icon={<PlusOutlined />}
+                    onClick={() => {
+                      setEditingTier(null);
+                      tierForm.resetFields();
+                      setIsTierModalVisible(true);
+                    }}
                   >
-                    Evaluate
+                    Add Tier
                   </AntButton>
-                </AntForm.Item>
-              </AntForm>
+                </div>
 
-              {evaluationResult && (
-                <div className="space-y-4">
-                  <Alert
-                    message={
-                      evaluationResult.tierChangeRequired
-                        ? "Tier Change Recommended"
-                        : "No Tier Change Needed"
-                    }
-                    description={
-                      evaluationResult.tierChangeRequired
-                        ? `Agent should be upgraded/downgraded from ${evaluationResult.currentTier || "No Tier"} to ${evaluationResult.recommendedTier}`
-                        : `Agent remains in ${evaluationResult.currentTier} tier`
-                    }
-                    type={
-                      evaluationResult.tierChangeRequired
-                        ? "warning"
-                        : "success"
-                    }
-                    showIcon
-                  />
+                <Table
+                  columns={tierColumns}
+                  dataSource={tiers}
+                  loading={tiersLoading}
+                  rowKey="id"
+                  pagination={{ pageSize: 10 }}
+                  size="middle"
+                />
+              </div>
+            ),
+          },
+          {
+            key: "assignments",
+            label: "Tier Assignments",
+            children: (
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="text-lg font-semibold">Tier Assignments</h3>
+                    <p className="text-sm text-muted-foreground">
+                      View and manage current tier assignments for all agents.
+                    </p>
+                    {/* Debug info - remove in production */}
+                    {process.env.NODE_ENV === 'development' && (
+                      <div className="text-xs text-gray-400 mt-1">
+                        Debug: {assignments.length} total assignments, {activeAssignments.length} active
+                        {assignmentsError && ` | Error: ${assignmentsError.message}`}
+                      </div>
+                    )}
+                  </div>
+                  <Space>
+                    <AntButton
+                      icon={<PlayCircleOutlined />}
+                      onClick={() => setIsAssignmentModalVisible(true)}
+                    >
+                      Bulk Assign
+                    </AntButton>
+                    <AntButton
+                      type="primary"
+                      icon={<EditOutlined />}
+                      onClick={() => setIsOverrideModalVisible(true)}
+                    >
+                      Manual Override
+                    </AntButton>
+                  </Space>
+                </div>
 
-                  <Row gutter={16}>
-                    <Col span={12}>
-                      <AntCard title="Current KPI Performance" size="small">
-                        <Descriptions column={1} size="small">
-                          <Descriptions.Item label="Booking Value">
-                            {formatCurrency(
-                              evaluationResult.kpiData.totalBookingValue,
-                            )}
-                          </Descriptions.Item>
-                          <Descriptions.Item label="Total Bookings">
-                            {evaluationResult.kpiData.totalBookings.toLocaleString()}
-                          </Descriptions.Item>
-                          <Descriptions.Item label="Avg Bookings/Month">
-                            {evaluationResult.kpiData.avgBookingsPerMonth.toLocaleString()}
-                          </Descriptions.Item>
-                          <Descriptions.Item label="Avg Searches/Month">
-                            {evaluationResult.kpiData.avgSearchesPerMonth.toLocaleString()}
-                          </Descriptions.Item>
-                          <Descriptions.Item label="Conversion Rate">
-                            {evaluationResult.kpiData.conversionPct}%
-                          </Descriptions.Item>
-                        </Descriptions>
-                      </AntCard>
-                    </Col>
-                    <Col span={12}>
-                      <AntCard title="Tier Recommendation" size="small">
-                        <div className="flex items-center gap-4">
-                          <div className="text-center">
-                            <div className="text-sm text-gray-500 mb-1">
-                              Current
-                            </div>
-                            <div className="flex items-center gap-2">
-                              {evaluationResult.currentTier
-                                ? getTierIcon(evaluationResult.currentTier)
-                                : "-"}
-                              <Tag
-                                color={
-                                  evaluationResult.currentTier
-                                    ? getTierColor(evaluationResult.currentTier)
-                                    : "default"
-                                }
-                              >
-                                {evaluationResult.currentTier || "No Tier"}
-                              </Tag>
-                            </div>
+                {/* Assignment Statistics */}
+                <Row gutter={16} className="mb-4">
+                  {tierCodes.map((tierCode) => (
+                    <Col span={6} key={tierCode}>
+                      <AntCard size="small">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            {getTierIcon(tierCode)}
+                            <span className="font-medium">{tierCode}</span>
                           </div>
-                          <div>→</div>
-                          <div className="text-center">
-                            <div className="text-sm text-gray-500 mb-1">
-                              Recommended
-                            </div>
-                            <div className="flex items-center gap-2">
-                              {getTierIcon(evaluationResult.recommendedTier)}
-                              <Tag
-                                color={getTierColor(
-                                  evaluationResult.recommendedTier,
-                                )}
-                              >
-                                {evaluationResult.recommendedTier}
-                              </Tag>
-                            </div>
-                          </div>
+                          <Badge
+                            count={assignmentStats[tierCode] || 0}
+                            style={{ backgroundColor: getTierColor(tierCode) }}
+                          />
                         </div>
                       </AntCard>
                     </Col>
-                  </Row>
+                  ))}
+                </Row>
+
+                <Table
+                  columns={assignmentColumns}
+                  dataSource={assignments}
+                  loading={assignmentsLoading}
+                  rowKey="id"
+                  pagination={{ pageSize: 15 }}
+                  scroll={{ y: 400 }}
+                  size="middle"
+                />
+              </div>
+            ),
+          },
+          {
+            key: "engines",
+            label: "Assignment Engine",
+            children: (
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="text-lg font-semibold">
+                      Tier Assignment Engines
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Configure automated tier assignment schedules and policies.
+                    </p>
+                  </div>
+                  <AntButton
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={() => {
+                      setEditingEngine(null);
+                      engineForm.resetFields();
+                      setIsEngineModalVisible(true);
+                    }}
+                  >
+                    Add Engine
+                  </AntButton>
                 </div>
-              )}
-            </AntCard>
-          </div>
-        </TabPane>
-      </Tabs>
+
+                <Table
+                  columns={engineColumns}
+                  dataSource={engines}
+                  loading={enginesLoading}
+                  rowKey="id"
+                  pagination={{ pageSize: 10 }}
+                  scroll={{ y: 400 }}
+                  size="middle"
+                />
+              </div>
+            ),
+          },
+          {
+            key: "evaluation",
+            label: "Tier Evaluation",
+            children: (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-semibold">Agent Tier Evaluation</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Evaluate individual agents against tier criteria and preview
+                    tier recommendations.
+                  </p>
+                </div>
+
+                <AntCard>
+                  <AntForm
+                    form={evaluationForm}
+                    layout="inline"
+                    onFinish={handleTierEvaluation}
+                    className="mb-4"
+                  >
+                    <AntForm.Item
+                      name="agentId"
+                      rules={[{ required: true, message: "Agent ID is required" }]}
+                    >
+                      <Input placeholder="Enter Agent ID" style={{ width: 200 }} />
+                    </AntForm.Item>
+                    <AntForm.Item
+                      name="window"
+                      rules={[
+                        { required: true, message: "KPI window is required" },
+                      ]}
+                    >
+                      <AntSelect
+                        placeholder="Select KPI Window"
+                        style={{ width: 150 }}
+                      >
+                        <AntSelect.Option value="MONTHLY">Monthly</AntSelect.Option>
+                        <AntSelect.Option value="QUARTERLY">
+                          Quarterly
+                        </AntSelect.Option>
+                      </AntSelect>
+                    </AntForm.Item>
+                    <AntForm.Item>
+                      <AntButton
+                        type="primary"
+                        htmlType="submit"
+                        loading={evaluateTierMutation.isPending}
+                        icon={<BarChartOutlined />}
+                      >
+                        Evaluate
+                      </AntButton>
+                    </AntForm.Item>
+                  </AntForm>
+
+                  {evaluationResult && (
+                    <div className="space-y-4">
+                      <Alert
+                        message={
+                          evaluationResult.tierChangeRequired
+                            ? "Tier Change Recommended"
+                            : "No Tier Change Needed"
+                        }
+                        description={
+                          evaluationResult.tierChangeRequired
+                            ? `Agent should be upgraded/downgraded from ${evaluationResult.currentTier || "No Tier"} to ${evaluationResult.recommendedTier}`
+                            : `Agent remains in ${evaluationResult.currentTier} tier`
+                        }
+                        type={
+                          evaluationResult.tierChangeRequired
+                            ? "warning"
+                            : "success"
+                        }
+                        showIcon
+                      />
+
+                      <Row gutter={16}>
+                        <Col span={12}>
+                          <AntCard title="Current KPI Performance" size="small">
+                            <Descriptions column={1} size="small">
+                              <Descriptions.Item label="Booking Value">
+                                {formatCurrency(
+                                  evaluationResult.kpiData.totalBookingValue,
+                                )}
+                              </Descriptions.Item>
+                              <Descriptions.Item label="Total Bookings">
+                                {evaluationResult.kpiData.totalBookings.toLocaleString()}
+                              </Descriptions.Item>
+                              <Descriptions.Item label="Avg Bookings/Month">
+                                {evaluationResult.kpiData.avgBookingsPerMonth.toLocaleString()}
+                              </Descriptions.Item>
+                              <Descriptions.Item label="Avg Searches/Month">
+                                {evaluationResult.kpiData.avgSearchesPerMonth.toLocaleString()}
+                              </Descriptions.Item>
+                              <Descriptions.Item label="Conversion Rate">
+                                {evaluationResult.kpiData.conversionPct}%
+                              </Descriptions.Item>
+                            </Descriptions>
+                          </AntCard>
+                        </Col>
+                        <Col span={12}>
+                          <AntCard title="Tier Recommendation" size="small">
+                            <div className="flex items-center gap-4">
+                              <div className="text-center">
+                                <div className="text-sm text-gray-500 mb-1">
+                                  Current
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  {evaluationResult.currentTier
+                                    ? getTierIcon(evaluationResult.currentTier)
+                                    : "-"}
+                                  <Tag
+                                    color={
+                                      evaluationResult.currentTier
+                                        ? getTierColor(evaluationResult.currentTier)
+                                        : "default"
+                                    }
+                                  >
+                                    {evaluationResult.currentTier || "No Tier"}
+                                  </Tag>
+                                </div>
+                              </div>
+                              <div>→</div>
+                              <div className="text-center">
+                                <div className="text-sm text-gray-500 mb-1">
+                                  Recommended
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  {getTierIcon(evaluationResult.recommendedTier)}
+                                  <Tag
+                                    color={getTierColor(
+                                      evaluationResult.recommendedTier,
+                                    )}
+                                  >
+                                    {evaluationResult.recommendedTier}
+                                  </Tag>
+                                </div>
+                              </div>
+                            </div>
+                          </AntCard>
+                        </Col>
+                      </Row>
+                    </div>
+                  )}
+                </AntCard>
+              </div>
+            ),
+          },
+        ]}
+      />
 
       {/* Tier Modal */}
       <Modal

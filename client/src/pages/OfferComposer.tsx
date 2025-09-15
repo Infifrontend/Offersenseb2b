@@ -257,6 +257,19 @@ export default function OfferComposer() {
     return source === "NEGOTIATED" ? "green" : "blue";
   };
 
+  if (tracesLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="text-lg font-medium text-gray-600">
+            Loading offer data...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

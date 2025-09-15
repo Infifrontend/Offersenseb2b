@@ -413,7 +413,7 @@ export default function NegotiatedFareManager() {
   const downloadTemplate = () => {
     const headers = [
       "airlineCode",
-      "fareCode",
+      "fareCode", 
       "origin",
       "destination",
       "tripType",
@@ -434,16 +434,35 @@ export default function NegotiatedFareManager() {
       "remarks",
     ];
 
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      headers.join(",") +
-      "\n" +
-      'AA,NEGO001,NYC,LAX,ROUND_TRIP,ECONOMY,299.00,USD,2024-01-01,2024-12-31,2024-02-01,2024-11-30,"[""US"",""CA""]",50,7,30,"[]","[""GOLD"",""SILVER""]","[]","Sample negotiated fare"';
+    // Sample data following all validation rules
+    const sampleRows = [
+      // Row 1: Basic economy fare with minimum required fields
+      'AA,NEGO001,NYC,LAX,ROUND_TRIP,ECONOMY,299.00,USD,2024-01-01,2024-12-31,2024-02-01,2024-11-30,"[""US"",""CA""]",50,7,30,"[]","[""GOLD"",""SILVER""]","[]","Sample economy fare - US/Canada POS"',
+      
+      // Row 2: Premium economy with multiple POS and agent tiers
+      'DL,PREM002,JFK,LHR,ROUND_TRIP,PREMIUM_ECONOMY,599.00,USD,2024-03-01,2024-10-31,2024-04-01,2024-09-30,"[""US"",""GB"",""DE""]",25,3,21,"[]","[""PLATINUM"",""GOLD""]","[]","Premium transatlantic fare"',
+      
+      // Row 3: Business class with blackout dates
+      'UA,BIZ003,SFO,NRT,ONE_WAY,BUSINESS,1299.00,USD,2024-01-15,2024-11-15,2024-02-01,2024-10-31,"[""US"",""IN""]",10,1,14,"[""2024-07-04"",""2024-12-25""]","[""PLATINUM""]","[""HIGH_VALUE""]","Business class with holiday blackouts"',
+      
+      // Row 4: First class with cohorts
+      'QF,FIRST004,LAX,SYD,ROUND_TRIP,FIRST,4999.00,AUD,2024-02-01,2024-08-31,2024-03-01,2024-07-31,"[""AU"",""US""]",5,7,90,"[]","[""PLATINUM""]","[""FESTIVE_2025"",""PORTAL_USERS""]","Luxury first class service"',
+      
+      // Row 5: Multi-city with extended stays
+      'SQ,MULTI005,SIN,LAX,MULTI_CITY,ECONOMY,899.00,SGD,2024-01-01,2024-06-30,2024-02-15,2024-05-31,"[""SG"",""US""]",30,14,180,"[]","[""GOLD"",""SILVER"",""BRONZE""]","[]","Multi-city flexible fare"',
+      
+      // Row 6: Regional fare with minimal restrictions
+      'AI,REG006,DEL,BOM,ONE_WAY,ECONOMY,89.00,INR,2024-01-01,2024-12-31,2024-01-01,2024-12-31,"[""IN""]",100,0,0,"[]","[""BRONZE"",""SILVER""]","[]","Domestic regional fare India"'
+    ];
+
+    // Create CSV content with headers and sample data
+    const csvRows = [headers.join(","), ...sampleRows];
+    const csvContent = "data:text/csv;charset=utf-8," + csvRows.join("\n");
 
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "negotiated_fares_template.csv");
+    link.setAttribute("download", `negotiated_fares_template_${Date.now()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

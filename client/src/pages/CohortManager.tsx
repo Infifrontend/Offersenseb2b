@@ -198,12 +198,28 @@ export default function CohortManager() {
         body: JSON.stringify(data),
       });
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to update cohort");
+        const errorText = await response.text();
+        console.log("Response status:", response.status);
+        console.log("Response text:", errorText);
+
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch (parseError) {
+          throw new Error(`Server error (${response.status}): ${errorText}`);
+        }
+        throw new Error(errorData.message || "Failed to update cohort");
       }
-      return response.json();
+
+      let updatedCohort;
+      try {
+        updatedCohort = JSON.parse(await response.text());
+      } catch (parseError) {
+        throw new Error("Invalid JSON response from server");
+      }
+      return updatedCohort;
     },
-    onSuccess: () => {
+    onSuccess: (updatedCohort) => {
       queryClient.invalidateQueries({ queryKey: ["cohorts"] });
       setIsDialogOpen(false);
       setSelectedCohort(null);

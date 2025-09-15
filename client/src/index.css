@@ -48,10 +48,23 @@
 .create-modal .ant-modal-header {
   background: linear-gradient(135deg, var(--primary) 0%, #ff6b35 100%);
   border-radius: 8px 8px 0 0;
-  padding: 20px 24px;
+  padding: 24px 24px;
   color: white;
   border: none !important;
-  box-shadow: 0 4px 12px rgba(255, 79, 23, 0.2);
+  box-shadow: 0 4px 20px rgba(255, 79, 23, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.create-modal .ant-modal-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+  pointer-events: none;
 }
 
 .create-modal .ant-modal-title {
@@ -61,21 +74,100 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  position: relative;
+  z-index: 1;
 }
 
 .create-modal .ant-modal-close {
   color: white !important;
   opacity: 0.8;
-  transition: opacity 0.2s ease;
+  transition: all 0.2s ease;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
 }
 
 .create-modal .ant-modal-close:hover {
   opacity: 1;
-  background: rgba(255, 255, 255, 0.1) !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  transform: scale(1.05);
 }
 
 .create-modal .ant-modal-close .anticon {
   color: white !important;
+  font-size: 16px;
+}
+
+.create-modal .ant-modal-content {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 79, 23, 0.1);
+}
+
+.create-modal .ant-modal-body {
+  padding: 24px;
+  background: linear-gradient(to bottom, #fafafa 0%, #f5f5f5 100%);
+  min-height: 60vh;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+/* Enhanced form field styles */
+.create-modal .ant-form-item-label > label {
+  font-weight: 500;
+  color: #374151;
+}
+
+.create-modal .ant-input,
+.create-modal .ant-select-selector,
+.create-modal .ant-picker {
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  transition: all 0.2s ease;
+}
+
+.create-modal .ant-input:focus,
+.create-modal .ant-select-focused .ant-select-selector,
+.create-modal .ant-picker:hover,
+.create-modal .ant-picker.ant-picker-focused {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(255, 79, 23, 0.1);
+}
+
+.create-modal .ant-input:hover,
+.create-modal .ant-select:not(.ant-select-disabled):hover .ant-select-selector {
+  border-color: #9ca3af;
+}
+
+/* Section styling enhancements */
+.create-modal .ant-form > div {
+  transition: all 0.3s ease;
+}
+
+.create-modal .ant-form > div:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Progress indicator styling */
+.create-modal .ant-form h4 {
+  position: relative;
+  padding-left: 0;
+}
+
+/* Button enhancements */
+.create-modal .ant-btn {
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  height: auto;
+  padding: 10px 20px;
 }
 
 /* Edit Modal Styles */

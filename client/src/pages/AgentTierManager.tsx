@@ -234,6 +234,7 @@ export default function AgentTierManager() {
   const {
     data: assignments = [],
     isLoading: assignmentsLoading,
+    error: assignmentsError,
     refetch: refetchAssignments,
   } = useQuery({
     queryKey: ["/api/tiers/assignments"],
@@ -869,6 +870,13 @@ export default function AgentTierManager() {
                 <p className="text-sm text-muted-foreground">
                   View and manage current tier assignments for all agents.
                 </p>
+                {/* Debug info - remove in production */}
+                {process.env.NODE_ENV === 'development' && (
+                  <div className="text-xs text-gray-400 mt-1">
+                    Debug: {assignments.length} total assignments, {activeAssignments.length} active
+                    {assignmentsError && ` | Error: ${assignmentsError.message}`}
+                  </div>
+                )}
               </div>
               <Space>
                 <AntButton

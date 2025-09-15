@@ -533,7 +533,7 @@ export default function CampaignManager() {
       // Build comprehensive context for AI generation
       const context = {
         campaignName: formValues.campaignName || 'New Campaign',
-        campaignCode: formConstruct.campaignCode || 'CAMPAIGN_001',
+        campaignCode: formValues.campaignCode || 'CAMPAIGN_001',
         offerType: formValues.offer?.type || 'PERCENT',
         offerValue: formValues.offer?.value || 10,
         specialPrice: formValues.offer?.specialPrice,

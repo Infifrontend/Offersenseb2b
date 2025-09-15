@@ -274,7 +274,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get user from database
       const user = await storage.getUserByUsername(username);
-      
+
       if (!user) {
         return res.status(401).json({
           success: false,
@@ -284,7 +284,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Verify password
       const isValidPassword = await bcrypt.compare(password, user.password);
-      
+
       if (!isValidPassword) {
         return res.status(401).json({
           success: false,
@@ -362,21 +362,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // AI Template Generation endpoint
+  // AI Template Generation
   app.post("/api/ai/generate-templates", async (req, res) => {
     try {
       const { type, context } = req.body;
 
-      if (!type || !['email', 'whatsapp'].includes(type)) {
-        return res.status(400).json({ message: "Invalid template type" });
+      if (!type || !context) {
+        return res.status(400).json({ message: "Type and context are required" });
       }
 
-      // Generate templates based on context
-      const templates = await generateAITemplates(type, context);
+      if (!['email', 'whatsapp'].includes(type)) {
+        return res.status(400).json({ message: "Type must be 'email' or 'whatsapp'" });
+      }
 
+      const templates = await generateAITemplates(type, context);
       res.json(templates);
     } catch (error) {
-      console.error("Template generation error:", error);
+      console.error("Error generating AI templates:", error);
       res.status(500).json({ message: "Failed to generate templates" });
     }
   });
@@ -459,7 +461,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               try {
                 // Log the raw data for debugging
                 console.log(`Processing row ${rowNumber}:`, JSON.stringify(data, null, 2));
-                
+
                 // Validate required fields against negotiated_fares table structure
                 const validationErrors: string[] = [];
 
@@ -693,7 +695,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Insert valid fares with transaction handling
         const insertedFares: any[] = [];
         const insertionErrors: any[] = [];
-        
+
         for (const fareData of results) {
           try {
             const fare = await storage.insertNegotiatedFare(fareData);
@@ -3217,7 +3219,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  
+
 
   // Campaign Management Routes
 

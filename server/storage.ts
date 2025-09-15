@@ -1701,6 +1701,35 @@ export class DatabaseStorage implements IStorage {
     await this.db.delete(tierAssignmentEngine).where(eq(tierAssignmentEngine.id, id));
   }
 
+  async checkTierAssignmentEngineConflicts(engineData: InsertTierAssignmentEngine): Promise<any[]> {
+    const conflicts = [];
+
+    // Check for duplicate engine code
+    const existingEngine = await this.db
+      .select()
+      .from(tierAssignmentEngine)
+      .where(eq(tierAssignmentEngine.engineCode, engineData.engineCode));
+
+    if (existingEngine.length > 0) {
+      conflicts.push({
+        type: 'DUPLICATE_ENGINE_CODE',
+        message: `Engine with code ${engineData.engineCode} already exists`,
+        conflictingEngine: existingEngine[0]
+      });
+    }
+
+    return conflicts;
+  }
+
+  async updateTierAssignmentEngineStatus(id: string, status: string): Promise<TierAssignmentEngine> {
+    const [engine] = await this.db
+      .update(tierAssignmentEngine)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(tierAssignmentEngine.id, id))
+      .returning();
+    return engine;
+  }
+
   // KPI calculation and tier evaluation helpers
   async calculateAgentKPIs(agentId: string, window: 'MONTHLY' | 'QUARTERLY'): Promise<any> {
     // Mock KPI calculation - in real implementation, this would aggregate from booking data

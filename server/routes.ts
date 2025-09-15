@@ -2738,8 +2738,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  
-
   // Tier Assignment Engine Routes
 
   // Get all assignment engines
@@ -2758,7 +2756,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("API: Creating tier assignment engine:", req.body);
       const validatedData = insertTierAssignmentEngineSchema.parse(req.body);
-      
+
       // Check for conflicts
       const conflicts = await storage.checkTierAssignmentEngineConflicts(validatedData);
       if (conflicts.length > 0) {

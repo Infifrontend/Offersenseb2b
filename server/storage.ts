@@ -266,18 +266,26 @@ export class DatabaseStorage implements IStorage {
   // Initialize default admin user if none exists
   private async initializeDefaultUser() {
     try {
-      const userCount = await this.db.$count(users);
-
-      if (userCount === 0) {
-        console.log("No users found, creating default admin user...");
+      // Create default admin user if no users exist
+      const existingUsers = await this.db.select().from(users).limit(1);
+      if (existingUsers.length === 0) {
         const hashedPassword = await bcrypt.hash("password123", 10);
-
-        await this.db.insert(users).values({
+        await this.createUser({
           username: "admin",
           password: hashedPassword
         });
-
         console.log("Default admin user created (username: admin, password: password123)");
+      }
+
+      // Create Admin user with infi123 password
+      const adminUser = await this.getUserByUsername("Admin");
+      if (!adminUser) {
+        const hashedPassword = await bcrypt.hash("infi123", 10);
+        await this.createUser({
+          username: "Admin",
+          password: hashedPassword
+        });
+        console.log("Admin user created (username: Admin, password: infi123)");
       }
     } catch (error) {
       console.error("Error initializing default user:", error);

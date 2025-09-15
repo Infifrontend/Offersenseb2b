@@ -21,10 +21,33 @@ import type {
   CampaignDelivery,
   Simulation,
   InsightQuery,
+  InsertUser,
+  InsertNegotiatedFare,
+  InsertDynamicDiscountRule,
+  InsertAirAncillaryRule,
+  InsertNonAirRate,
+  InsertNonAirMarkupRule,
+  InsertBundle,
+  InsertBundlePricingRule,
+  InsertOfferRule,
+  InsertOfferTrace,
+  InsertAgent,
+  InsertChannelPricingOverride,
+  InsertCohort,
+  InsertAuditLog,
+  InsertAgentTier,
+  InsertAgentTierAssignment,
+  InsertTierAssignmentEngine,
+  InsertCampaign,
+  InsertCampaignMetrics,
+  InsertCampaignDelivery,
+  InsertSimulation,
+  InsertInsightQuery,
 } from "../shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte, sql, like, inArray, or, ilike } from "drizzle-orm";
 import * as crypto from 'crypto';
+import bcrypt from "bcryptjs";
 
 
 export interface IStorage {
@@ -84,7 +107,7 @@ export interface IStorage {
 
   // Bundle Pricing Rules
   insertBundlePricingRule(rule: InsertBundlePricingRule): Promise<BundlePricingRule>;
-  getBundlePricingRules(filters?: any): Promise<BundlePricingRule[]>;
+  getBundlePricingRules(filters?: any): Promise<InsertBundlePricingRule[]>;
   getBundlePricingRuleById(id: string): Promise<InsertBundlePricingRule | undefined>;
   updateBundlePricingRule(id: string, rule: Partial<InsertBundlePricingRule>): Promise<InsertBundlePricingRule>;
   updateBundlePricingRuleStatus(id: string, status: string): Promise<InsertBundlePricingRule>;
@@ -235,22 +258,55 @@ export interface IStorage {
 export class DatabaseStorage implements IStorage {
   private db = db;
 
+  constructor() {
+    this.db = db;
+    this.initializeDefaultUser();
+  }
+
+  // Initialize default admin user if none exists
+  private async initializeDefaultUser() {
+    try {
+      const userCount = await this.db.$count(users);
+
+      if (userCount === 0) {
+        console.log("No users found, creating default admin user...");
+        const hashedPassword = await bcrypt.hash("password123", 10);
+
+        await this.db.insert(users).values({
+          username: "admin",
+          password: hashedPassword
+        });
+
+        console.log("Default admin user created (username: admin, password: password123)");
+      }
+    } catch (error) {
+      console.error("Error initializing default user:", error);
+    }
+  }
+
+  // User management methods
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await this.db
+      .select()
+      .from(users)
+      .where(eq(users.username, username))
+      .limit(1);
+
+    return user || undefined;
+  }
+
+  async createUser(userData: InsertUser): Promise<User> {
+    const [user] = await this.db
+      .insert(users)
+      .values(userData)
+      .returning();
+
+    return user;
+  }
+
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await this.db.select().from(users).where(eq(users.id, id));
     return user || undefined;
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await this.db.select().from(users).where(eq(users.username, username));
-    return user || undefined;
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await this.db
-      .insert(users)
-      .values(insertUser)
-      .returning();
-    return user;
   }
 
   async insertNegotiatedFare(fare: InsertNegotiatedFare): Promise<NegotiatedFare> {
@@ -947,7 +1003,7 @@ export class DatabaseStorage implements IStorage {
 
         // Check POS overlap
         if (existingConditions.pos && newConditions.pos) {
-          const posOverlap = existingConditions.pos.some((pos: string) => 
+          const posOverlap = existingConditions.pos.some((pos: string) =>
             newConditions.pos.includes(pos)
           );
           if (posOverlap) hasOverlap = true;
@@ -955,7 +1011,7 @@ export class DatabaseStorage implements IStorage {
 
         // Check agent tier overlap
         if (existingConditions.agentTier && newConditions.agentTier) {
-          const tierOverlap = existingConditions.agentTier.some((tier: string) => 
+          const tierOverlap = existingConditions.agentTier.some((tier: string) =>
             newConditions.agentTier.includes(tier)
           );
           if (tierOverlap) hasOverlap = true;
@@ -963,7 +1019,7 @@ export class DatabaseStorage implements IStorage {
 
         // Check channel overlap
         if (existingConditions.channel && newConditions.channel) {
-          const channelOverlap = existingConditions.channel.some((channel: string) => 
+          const channelOverlap = existingConditions.channel.some((channel: string) =>
             newConditions.channel.includes(channel)
           );
           if (channelOverlap) hasOverlap = true;
@@ -1560,7 +1616,7 @@ export class DatabaseStorage implements IStorage {
               status: "ACTIVE",
             },
             {
-              agentId: "AGT002", 
+              agentId: "AGT002",
               tierCode: "GOLD",
               assignmentType: "AUTO",
               effectiveFrom: "2024-01-01",
@@ -1570,7 +1626,7 @@ export class DatabaseStorage implements IStorage {
             },
             {
               agentId: "AGT003",
-              tierCode: "SILVER", 
+              tierCode: "SILVER",
               assignmentType: "MANUAL_OVERRIDE",
               effectiveFrom: "2024-02-01",
               assignedBy: "admin",
@@ -1629,10 +1685,10 @@ export class DatabaseStorage implements IStorage {
   async supersedePreviousAssignments(agentId: string, newEffectiveFrom: string): Promise<void> {
     await this.db
       .update(agentTierAssignments)
-      .set({ 
-        status: "SUPERSEDED", 
+      .set({
+        status: "SUPERSEDED",
         effectiveTo: newEffectiveFrom,
-        updatedAt: new Date() 
+        updatedAt: new Date()
       })
       .where(
         and(
@@ -1758,10 +1814,10 @@ export class DatabaseStorage implements IStorage {
       const thresholds = tier.kpiThresholds as any;
 
       if (kpiData.totalBookingValue >= thresholds.totalBookingValueMin &&
-          kpiData.totalBookings >= thresholds.totalBookingsMin &&
-          kpiData.avgBookingsPerMonth >= thresholds.avgBookingsPerMonthMin &&
-          kpiData.avgSearchesPerMonth >= thresholds.avgSearchesPerMonthMin &&
-          kpiData.conversionPct >= thresholds.conversionPctMin) {
+        kpiData.totalBookings >= thresholds.totalBookingsMin &&
+        kpiData.avgBookingsPerMonth >= thresholds.avgBookingsPerMonthMin &&
+        kpiData.avgSearchesPerMonth >= thresholds.avgSearchesPerMonthMin &&
+        kpiData.conversionPct >= thresholds.conversionPctMin) {
         return tier.tierCode;
       }
     }

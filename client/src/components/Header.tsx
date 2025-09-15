@@ -1,5 +1,22 @@
 import { useLocation } from "wouter";
-import { Menu, Bell } from "lucide-react";
+import { Menu, Bell, Settings, User, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect } from "react";
+
+interface User {
+  id: string;
+  username: string;
+}
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -27,6 +44,46 @@ const pageLabels: Record<string, string> = {
 export default function Header({ onToggleSidebar, isMobile }: HeaderProps) {
   const [location] = useLocation();
   const currentPageLabel = pageLabels[location] || "Dashboard";
+  const { toast } = useToast();
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      try {
+        setUser(JSON.parse(userData));
+      } catch {
+        // Invalid user data
+        localStorage.removeItem("user");
+        localStorage.removeItem("isAuthenticated");
+        setLocation("/login");
+      }
+    } else {
+      // If no user data, redirect to login
+      setLocation("/login");
+    }
+  }, [setLocation]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("isAuthenticated");
+
+    toast({
+      title: "Logged Out",
+      description: "You have been successfully logged out.",
+    });
+
+    setLocation("/login");
+  };
+
+  const getUserInitials = (username: string) => {
+    return username
+      .split(" ")
+      .map(part => part.charAt(0))
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
   return (
     <header className="bg-card border-b border-border px-6 py-4 flex items-center justify-between">
@@ -227,6 +284,45 @@ export default function Header({ onToggleSidebar, isMobile }: HeaderProps) {
           <Bell className="w-5 h-5 text-muted-foreground" />
           <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full"></span>
         </button>
+        
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src="/avatars/01.png" alt={user?.username || "User"} />
+                <AvatarFallback>
+                  {user ? getUserInitials(user.username) : "U"}
+                </AvatarFallback>
+              </Avatar>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56" align="end" forceMount>
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium leading-none">
+                  {user?.username || "User"}
+                </p>
+                <p className="text-xs leading-none text-muted-foreground">
+                  {user?.id || ""}
+                </p>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              <User className="mr-2 h-4 w-4" />
+              <span>Profile</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Settings</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Log out</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );

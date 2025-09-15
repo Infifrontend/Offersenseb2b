@@ -1,0 +1,109 @@
+Error:   Failed to scan for dependencies from entries:
+  /home/runner/workspace/client/index.html
+
+  ✘ [ERROR] The symbol "alertVariants" has already been declared
+
+    client/src/components/ui/alert.tsx:65:6:
+      65 │ const alertVariants = cva(
+         ╵       ~~~~~~~~~~~~~
+
+  The symbol "alertVariants" was originally declared here:
+
+    client/src/components/ui/alert.tsx:6:6:
+      6 │ const alertVariants = cva(
+        ╵       ~~~~~~~~~~~~~
+
+
+✘ [ERROR] The symbol "Alert" has already been declared
+
+    client/src/components/ui/alert.tsx:81:6:
+      81 │ const Alert = React.forwardRef<
+         ╵       ~~~~~
+
+  The symbol "Alert" was originally declared here:
+
+    client/src/components/ui/alert.tsx:22:6:
+      22 │ const Alert = React.forwardRef<
+         ╵       ~~~~~
+
+
+✘ [ERROR] The symbol "AlertTitle" has already been declared
+
+    client/src/components/ui/alert.tsx:94:6:
+      94 │ const AlertTitle = React.forwardRef<
+         ╵       ~~~~~~~~~~
+
+  The symbol "AlertTitle" was originally declared here:
+
+    client/src/components/ui/alert.tsx:35:6:
+      35 │ const AlertTitle = React.forwardRef<
+         ╵       ~~~~~~~~~~
+
+
+✘ [ERROR] The symbol "AlertDescription" has already been declared
+
+    client/src/components/ui/alert.tsx:106:6:
+      106 │ const AlertDescription = React.forwardRef<
+          ╵       ~~~~~~~~~~~~~~~~
+
+  The symbol "AlertDescription" was originally declared here:
+
+    client/src/components/ui/alert.tsx:47:6:
+      47 │ const AlertDescription = React.forwardRef<
+         ╵       ~~~~~~~~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "Alert"
+
+    client/src/components/ui/alert.tsx:118:9:
+      118 │ export { Alert, AlertTitle, AlertDescription }
+          ╵          ~~~~~
+
+  The name "Alert" was originally exported here:
+
+    client/src/components/ui/alert.tsx:59:9:
+      59 │ export { Alert, AlertTitle, AlertDescription }
+         ╵          ~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "AlertTitle"
+
+    client/src/components/ui/alert.tsx:118:16:
+      118 │ export { Alert, AlertTitle, AlertDescription }
+          ╵                 ~~~~~~~~~~
+
+  The name "AlertTitle" was originally exported here:
+
+    client/src/components/ui/alert.tsx:59:16:
+      59 │ export { Alert, AlertTitle, AlertDescription }
+         ╵                 ~~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "AlertDescription"
+
+    client/src/components/ui/alert.tsx:118:28:
+      118 │ export { Alert, AlertTitle, AlertDescription }
+          ╵                             ~~~~~~~~~~~~~~~~
+
+  The name "AlertDescription" was originally exported here:
+
+    client/src/components/ui/alert.tsx:59:28:
+      59 │ export { Alert, AlertTitle, AlertDescription }
+         ╵                             ~~~~~~~~~~~~~~~~
+
+
+    at failureErrorWithLog (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:1472:15)
+    at /home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:945:25
+    at runOnEndCallbacks (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:1315:45)
+    at buildResponseToResult (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:943:7)
+    at /home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:955:9
+    at new Promise (<anonymous>)
+    at requestCallbacks.on-end (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:954:54)
+    at handleRequest (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:647:17)
+    at handleIncomingPacket (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:672:7)
+    at Socket.readFromStdout (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:600:7)
+    at Socket.emit (node:events:524:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:191:23)

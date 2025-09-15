@@ -388,8 +388,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Required headers based on negotiated_fares table schema
         const requiredHeaders = ['airlineCode', 'fareCode', 'origin', 'destination', 'tripType', 'cabinClass', 'baseNetFare', 'currency', 'bookingStartDate', 'bookingEndDate', 'travelStartDate', 'travelEndDate', 'pos', 'eligibleAgentTiers'];
-        const actualHeaders = lines[0].toLowerCase().split(',').map(h => h.trim().replace(/"/g, ''));
-        const missingHeaders = requiredHeaders.filter(header => !actualHeaders.includes(header.toLowerCase()));
+        const actualHeaders = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+        const missingHeaders = requiredHeaders.filter(header => !actualHeaders.includes(header));
         
         if (missingHeaders.length > 0) {
           return res.status(400).json({ 
@@ -488,11 +488,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 let posArray = [];
                 if (data.pos) {
                   try {
-                    posArray = JSON.parse(data.pos);
+                    // Handle the specific format from your CSV: "[""US"",""CA""]"
+                    const posString = data.pos.replace(/\"\"/g, '"'); // Convert double quotes to single quotes
+                    posArray = JSON.parse(posString);
                     if (!Array.isArray(posArray) || posArray.length === 0) {
                       validationErrors.push('pos must be a non-empty JSON array of country codes');
                     }
-                  } catch {
+                  } catch (parseError) {
+                    console.error('POS parsing error:', parseError, 'Original value:', data.pos);
                     validationErrors.push('pos must be valid JSON array format');
                   }
                 }
@@ -501,7 +504,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 let agentTiers = [];
                 if (data.eligibleAgentTiers) {
                   try {
-                    agentTiers = JSON.parse(data.eligibleAgentTiers);
+                    // Handle the specific format from your CSV: "[""GOLD"",""SILVER""]"
+                    const tiersString = data.eligibleAgentTiers.replace(/\"\"/g, '"'); // Convert double quotes to single quotes
+                    agentTiers = JSON.parse(tiersString);
                     if (!Array.isArray(agentTiers)) {
                       validationErrors.push('eligibleAgentTiers must be a JSON array');
                     } else {
@@ -511,19 +516,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
                         validationErrors.push(`Invalid agent tiers: ${invalidTiers.join(', ')}. Must be one of: ${validTiers.join(', ')}`);
                       }
                     }
-                  } catch {
+                  } catch (parseError) {
+                    console.error('Agent tiers parsing error:', parseError, 'Original value:', data.eligibleAgentTiers);
                     validationErrors.push('eligibleAgentTiers must be valid JSON array format');
                   }
                 }
 
+                // Validate eligibleCohorts (optional)
+                let cohorts = [];
+                if (data.eligibleCohorts && data.eligibleCohorts.trim() !== '' && data.eligibleCohorts !== '[]') {
+                  try {
+                    const cohortsString = data.eligibleCohorts.replace(/\"\"/g, '"');
+                    cohorts = JSON.parse(cohortsString);
+                    if (!Array.isArray(cohorts)) {
+                      validationErrors.push('eligibleCohorts must be a JSON array');
+                    }
+                  } catch (parseError) {
+                    console.error('Cohorts parsing error:', parseError, 'Original value:', data.eligibleCohorts);
+                    validationErrors.push('eligibleCohorts must be valid JSON array format');
+                  }
+                }
+
+                // Validate blackoutDates (optional)
+                let blackoutDatesArray = [];
+                if (data.blackoutDates && data.blackoutDates.trim() !== '' && data.blackoutDates !== '[]') {
+                  try {
+                    const blackoutString = data.blackoutDates.replace(/\"\"/g, '"');
+                    blackoutDatesArray = JSON.parse(blackoutString);
+                    if (!Array.isArray(blackoutDatesArray)) {
+                      validationErrors.push('blackoutDates must be a JSON array');
+                    }
+                  } catch (parseError) {
+                    console.error('Blackout dates parsing error:', parseError, 'Original value:', data.blackoutDates);
+                    validationErrors.push('blackoutDates must be valid JSON array format');
+                  }
+                }
+
                 // Validate optional numeric fields
-                if (data.seatAllotment && (isNaN(parseInt(data.seatAllotment)) || parseInt(data.seatAllotment) < 0)) {
+                if (data.seatAllotment && data.seatAllotment.trim() !== '' && (isNaN(parseInt(data.seatAllotment)) || parseInt(data.seatAllotment) < 0)) {
                   validationErrors.push('seatAllotment must be a positive integer');
                 }
-                if (data.minStay && (isNaN(parseInt(data.minStay)) || parseInt(data.minStay) < 0)) {
+                if (data.minStay && data.minStay.trim() !== '' && (isNaN(parseInt(data.minStay)) || parseInt(data.minStay) < 0)) {
                   validationErrors.push('minStay must be a positive integer');
                 }
-                if (data.maxStay && (isNaN(parseInt(data.maxStay)) || parseInt(data.maxStay) < 0)) {
+                if (data.maxStay && data.maxStay.trim() !== '' && (isNaN(parseInt(data.maxStay)) || parseInt(data.maxStay) < 0)) {
                   validationErrors.push('maxStay must be a positive integer');
                 }
 
@@ -551,12 +587,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   travelStartDate: data.travelStartDate.trim(),
                   travelEndDate: data.travelEndDate.trim(),
                   pos: posArray.length > 0 ? posArray : ["US"],
-                  seatAllotment: data.seatAllotment ? parseInt(data.seatAllotment) : null,
-                  minStay: data.minStay ? parseInt(data.minStay) : null,
-                  maxStay: data.maxStay ? parseInt(data.maxStay) : null,
-                  blackoutDates: data.blackoutDates ? JSON.parse(data.blackoutDates) : null,
+                  seatAllotment: data.seatAllotment && data.seatAllotment.trim() !== '' ? parseInt(data.seatAllotment) : null,
+                  minStay: data.minStay && data.minStay.trim() !== '' ? parseInt(data.minStay) : null,
+                  maxStay: data.maxStay && data.maxStay.trim() !== '' ? parseInt(data.maxStay) : null,
+                  blackoutDates: blackoutDatesArray.length > 0 ? blackoutDatesArray : null,
                   eligibleAgentTiers: agentTiers.length > 0 ? agentTiers : ["BRONZE"],
-                  eligibleCohorts: data.eligibleCohorts ? JSON.parse(data.eligibleCohorts) : null,
+                  eligibleCohorts: cohorts.length > 0 ? cohorts : null,
                   remarks: data.remarks?.trim() || null,
                 };
 

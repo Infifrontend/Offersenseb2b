@@ -2626,7 +2626,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("API: Error fetching tier assignments:", error);
       res.status(500).json({ message: "Failed to fetch tier assignments", error: error.message });
     }
-  });</old_str>
+  });
     try {
       const filters = req.query;
       console.log("API: Fetching tier assignments with filters:", filters);

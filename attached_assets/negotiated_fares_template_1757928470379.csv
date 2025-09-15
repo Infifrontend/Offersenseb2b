@@ -1,0 +1,2 @@
+airlineCode,fareCode,origin,destination,tripType,cabinClass,baseNetFare,currency,bookingStartDate,bookingEndDate,travelStartDate,travelEndDate,pos,seatAllotment,minStay,maxStay,blackoutDates,eligibleAgentTiers,eligibleCohorts,remarks
+AA,NEGO001,NYC,LAX,ROUND_TRIP,ECONOMY,299.00,USD,2024-01-01,2024-12-31,2024-02-01,2024-11-30,"[""US"",""CA""]",50,7,30,"[]","[""GOLD"",""SILVER""]","[]","Sample negotiated fare"

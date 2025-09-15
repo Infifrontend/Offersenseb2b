@@ -2475,81 +2475,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create single agent tier
-  app.post("/api/tiers", async (req, res) => {
-    try {
-      const validatedData = insertAgentTierSchema.parse(req.body);
-
-      // Check for conflicts
-      const conflicts = await storage.checkTierConflicts(validatedData);
-      if (conflicts.length > 0) {
-        return res.status(409).json({ 
-          message: "Tier conflicts detected", 
-          conflicts 
-        });
-      }
-
-      const tier = await storage.insertAgentTier(validatedData);
-      res.status(201).json(tier);
-    } catch (error: any) {
-      res.status(400).json({ message: "Invalid tier data", error: error.message });
-    }
-  });
-
-  // Get tier by ID
-  app.get("/api/tiers/:id", async (req, res) => {
-    try {
-      const tier = await storage.getAgentTierById(req.params.id);
-      if (!tier) {
-        return res.status(404).json({ message: "Tier not found" });
-      }
-      res.json(tier);
-    } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch tier", error: error.message });
-    }
-  });
-
-  // Update tier
-  app.put("/api/tiers/:id", async (req, res) => {
-    try {
-      const validatedData = insertAgentTierSchema.parse(req.body);
-      const tier = await storage.updateAgentTier(req.params.id, validatedData);
-      res.json(tier);
-    } catch (error: any) {
-      res.status(400).json({ message: "Failed to update tier", error: error.message });
-    }
-  });
-
-  // Update tier status
-  app.patch("/api/tiers/:id/status", async (req, res) => {
-    try {
-      const { status } = req.body;
-      if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
-        return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
-      }
-
-      const tier = await storage.updateAgentTierStatus(req.params.id, status);
-      res.json(tier);
-    } catch (error: any) {
-      res.status(500).json({ message: "Failed to update tier status", error: error.message });
-    }
-  });
-
-  // Delete tier
-  app.delete("/api/tiers/:id", async (req, res) => {
-    try {
-      await storage.deleteAgentTier(req.params.id);
-      res.status(204).send();
-    } catch (error: any) {
-      res.status(500).json({ message: "Failed to delete tier", error: error.message });
-    }
-  });
-
-  // Agent Tier Assignment Routes
+  // Agent Tier Assignment Routes - MUST be before /api/tiers/:id to avoid route conflicts
 
   // Get all tier assignments with optional filters
-  // The original route definition for `/api/tiers/assignments` was duplicated.
-  // This version is kept as it's the correct one according to the problem description.
   app.get("/api/tiers/assignments", async (req, res) => {
     try {
       const filters = req.query;
@@ -2739,6 +2667,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to evaluate agent tier", error: error.message });
     }
   });
+
+  // Create single agent tier
+  app.post("/api/tiers", async (req, res) => {
+    try {
+      const validatedData = insertAgentTierSchema.parse(req.body);
+
+      // Check for conflicts
+      const conflicts = await storage.checkTierConflicts(validatedData);
+      if (conflicts.length > 0) {
+        return res.status(409).json({ 
+          message: "Tier conflicts detected", 
+          conflicts 
+        });
+      }
+
+      const tier = await storage.insertAgentTier(validatedData);
+      res.status(201).json(tier);
+    } catch (error: any) {
+      res.status(400).json({ message: "Invalid tier data", error: error.message });
+    }
+  });
+
+  // Get tier by ID - MUST be after specific routes like /api/tiers/assignments
+  app.get("/api/tiers/:id", async (req, res) => {
+    try {
+      const tier = await storage.getAgentTierById(req.params.id);
+      if (!tier) {
+        return res.status(404).json({ message: "Tier not found" });
+      }
+      res.json(tier);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch tier", error: error.message });
+    }
+  });
+
+  // Update tier
+  app.put("/api/tiers/:id", async (req, res) => {
+    try {
+      const validatedData = insertAgentTierSchema.parse(req.body);
+      const tier = await storage.updateAgentTier(req.params.id, validatedData);
+      res.json(tier);
+    } catch (error: any) {
+      res.status(400).json({ message: "Failed to update tier", error: error.message });
+    }
+  });
+
+  // Update tier status
+  app.patch("/api/tiers/:id/status", async (req, res) => {
+    try {
+      const { status } = req.body;
+      if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
+        return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
+      }
+
+      const tier = await storage.updateAgentTierStatus(req.params.id, status);
+      res.json(tier);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to update tier status", error: error.message });
+    }
+  });
+
+  // Delete tier
+  app.delete("/api/tiers/:id", async (req, res) => {
+    try {
+      await storage.deleteAgentTier(req.params.id);
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to delete tier", error: error.message });
+    }
+  });
+
+  
 
   // Tier Assignment Engine Routes
 

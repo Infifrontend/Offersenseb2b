@@ -434,25 +434,25 @@ export default function NegotiatedFareManager() {
       "remarks",
     ];
 
-    // Enhanced sample data with more realistic examples
+    // Enhanced sample data with proper JSON formatting for arrays
     const sampleRows = [
       // Row 1: Basic economy fare - US domestic
       'AA,ECO001,JFK,LAX,ROUND_TRIP,ECONOMY,299.00,USD,2025-01-01,2025-12-31,2025-02-01,2025-11-30,"[""US"",""CA""]",50,7,30,"[]","[""GOLD"",""SILVER""]","[]","US domestic economy fare"',
       
-      // Row 2: Premium economy - International
+      // Row 2: Premium economy - International  
       'DL,PREM002,JFK,LHR,ROUND_TRIP,PREMIUM_ECONOMY,899.00,USD,2025-03-01,2025-10-31,2025-04-01,2025-09-30,"[""US"",""GB""]",25,3,21,"[]","[""PLATINUM"",""GOLD""]","[""FESTIVE_2025""]","Transatlantic premium economy"',
       
       // Row 3: Business class with blackouts
-      'UA,BIZ003,SFO,NRT,ONE_WAY,BUSINESS,1299.00,USD,2025-01-15,2025-11-15,2025-02-01,2025-10-31,"[""US"",""IN""]",10,1,14,"[""2025-07-04"",""2025-12-25""]","[""PLATINUM""]","[""HIGH_VALUE""]","Business class - holiday restrictions"',
+      'UA,BIZ003,SFO,NRT,ONE_WAY,BUSINESS,1299.00,USD,2025-01-15,2025-11-15,2025-02-01,2025-10-31,"[""US"",""JP""]",10,1,14,"[""2025-07-04"",""2025-12-25""]","[""PLATINUM""]","[""HIGH_VALUE""]","Business class - holiday restrictions"',
       
       // Row 4: First class luxury
       'SQ,FIRST004,SIN,LAX,ROUND_TRIP,FIRST,3999.00,USD,2025-02-01,2025-08-31,2025-03-01,2025-07-31,"[""SG"",""US""]",5,7,90,"[]","[""PLATINUM""]","[""PORTAL_USERS""]","Singapore Airlines first class"',
       
-      // Row 5: Regional economy
-      'AI,REG005,DEL,BOM,ONE_WAY,ECONOMY,89.00,USD,2025-01-01,2025-12-31,2025-01-01,2025-12-31,"[""IN""]",100,0,0,"[]","[""BRONZE"",""SILVER""]","[]","India domestic route"',
+      // Row 5: Regional economy with minimal data
+      'AI,REG005,DEL,BOM,ONE_WAY,ECONOMY,89.00,USD,2025-01-01,2025-12-31,2025-01-01,2025-12-31,"[""IN""]",,,,,"[""BRONZE"",""SILVER""]",,"India domestic route"',
       
       // Row 6: Multi-city flexible
-      'EK,MULTI006,DXB,NYC,MULTI_CITY,BUSINESS,1899.00,USD,2025-01-01,2025-06-30,2025-02-15,2025-05-31,"[""AE"",""US""]",20,14,180,"[]","[""GOLD"",""PLATINUM""]","[]","Emirates multi-city business"'
+      'EK,MULTI006,DXB,JFK,MULTI_CITY,BUSINESS,1899.00,USD,2025-01-01,2025-06-30,2025-02-15,2025-05-31,"[""AE"",""US""]",20,14,180,"[]","[""GOLD"",""PLATINUM""]","[]","Emirates multi-city business"'
     ];
 
     // Create CSV with proper formatting
@@ -822,15 +822,33 @@ export default function NegotiatedFareManager() {
               {/* Validation Tips */}
               {(uploadResult.errors > 0 || uploadResult.conflicts > 0) && (
                 <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
-                  <div className="text-blue-800 font-medium text-sm mb-2">💡 Tips for CSV Upload:</div>
-                  <ul className="text-xs text-blue-700 space-y-1">
-                    <li>• Ensure airlineCode is exactly 2 characters (e.g., "AA", "DL")</li>
-                    <li>• Origin/destination must be 3-letter airport codes (e.g., "NYC", "LAX")</li>
-                    <li>• Dates must be in YYYY-MM-DD format</li>
-                    <li>• POS and eligibleAgentTiers must be valid JSON arrays</li>
-                    <li>• baseNetFare must be a positive number</li>
-                    <li>• Check for overlapping booking/travel periods for conflicts</li>
-                  </ul>
+                  <div className="text-blue-800 font-medium text-sm mb-2">💡 CSV Upload Validation Requirements:</div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <div className="text-xs font-medium text-blue-800 mb-1">Required Field Formats:</div>
+                      <ul className="text-xs text-blue-700 space-y-1">
+                        <li>• <strong>airlineCode:</strong> Exactly 2 characters (e.g., "AA", "DL")</li>
+                        <li>• <strong>fareCode:</strong> Required, max 50 characters</li>
+                        <li>• <strong>origin/destination:</strong> 3-letter airport codes (e.g., "JFK", "LAX")</li>
+                        <li>• <strong>tripType:</strong> ONE_WAY, ROUND_TRIP, or MULTI_CITY</li>
+                        <li>• <strong>cabinClass:</strong> ECONOMY, PREMIUM_ECONOMY, BUSINESS, or FIRST</li>
+                        <li>• <strong>baseNetFare:</strong> Positive number</li>
+                        <li>• <strong>currency:</strong> 3-letter code (e.g., "USD", "EUR")</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <div className="text-xs font-medium text-blue-800 mb-1">Date & Array Formats:</div>
+                      <ul className="text-xs text-blue-700 space-y-1">
+                        <li>• <strong>Dates:</strong> YYYY-MM-DD format</li>
+                        <li>• <strong>pos:</strong> JSON array like ["US","CA"]</li>
+                        <li>• <strong>eligibleAgentTiers:</strong> JSON array with PLATINUM, GOLD, SILVER, BRONZE</li>
+                        <li>• <strong>eligibleCohorts:</strong> JSON array or empty []</li>
+                        <li>• <strong>blackoutDates:</strong> JSON array of dates or empty []</li>
+                        <li>• Booking period must not overlap with existing conflicting fares</li>
+                        <li>• Travel dates must be after booking dates</li>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

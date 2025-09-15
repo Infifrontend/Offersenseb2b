@@ -460,8 +460,14 @@ export const cohorts = pgTable("cohorts", {
 export const insertCohortSchema = createInsertSchema(cohorts, {
   criteria: z.object({
     pos: z.array(z.string()).optional(),
-    channel: z.enum(["API", "PORTAL", "MOBILE"]).optional(),
-    device: z.enum(["DESKTOP", "MOBILE", "TABLET"]).optional(),
+    channel: z.union([
+      z.enum(["API", "PORTAL", "MOBILE"]),
+      z.array(z.enum(["API", "PORTAL", "MOBILE"]))
+    ]).optional(),
+    device: z.union([
+      z.enum(["DESKTOP", "MOBILE", "TABLET"]),
+      z.array(z.enum(["DESKTOP", "MOBILE", "TABLET"]))
+    ]).optional(),
     bookingWindow: z.object({
       min: z.number(),
       max: z.number()
@@ -475,6 +481,7 @@ export const insertCohortSchema = createInsertSchema(cohorts, {
       }).optional(),
       preferredCabinClass: z.array(z.enum(["ECONOMY", "PREMIUM_ECONOMY", "BUSINESS", "FIRST"])).optional(),
     }).optional(),
+    eligibleCohorts: z.array(z.string()).optional(),
   }),
 }).omit({
   id: true,

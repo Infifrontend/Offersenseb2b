@@ -646,91 +646,167 @@ export default function NegotiatedFareManager() {
           <div className={`p-4 rounded-lg border ${
             uploadResult.success 
               ? 'bg-green-50 border-green-200' 
-              : 'bg-red-50 border-red-200'
+              : uploadResult.inserted > 0
+                ? 'bg-orange-50 border-orange-200'
+                : 'bg-red-50 border-red-200'
           }`}>
-            <h3 className={`font-semibold mb-2 ${
-              uploadResult.success ? 'text-green-800' : 'text-red-800'
-            }`}>
-              Upload Results
-            </h3>
-            {uploadResult.success ? (
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-green-700">
-                  <span className="text-sm">✅ Successfully processed CSV file</span>
-                </div>
-                <div className="grid grid-cols-3 gap-4 text-sm">
-                  <div>
-                    <span className="font-medium">Records Inserted:</span>
-                    <span className="ml-2 text-green-800 font-bold">{uploadResult.inserted}</span>
-                  </div>
-                  {uploadResult.conflicts > 0 && (
-                    <div>
-                      <span className="font-medium">Conflicts:</span>
-                      <span className="ml-2 text-yellow-600 font-bold">{uploadResult.conflicts}</span>
-                    </div>
-                  )}
-                  {uploadResult.errors > 0 && (
-                    <div>
-                      <span className="font-medium">Errors:</span>
-                      <span className="ml-2 text-red-600 font-bold">{uploadResult.errors}</span>
-                    </div>
-                  )}
-                </div>
-                
-                {/* Show conflicts if any */}
-                {uploadResult.data?.conflicts && uploadResult.data.conflicts.length > 0 && (
-                  <details className="mt-3">
-                    <summary className="cursor-pointer text-yellow-700 hover:text-yellow-800">
-                      View Conflicts ({uploadResult.data.conflicts.length})
-                    </summary>
-                    <div className="mt-2 max-h-32 overflow-y-auto">
-                      {uploadResult.data.conflicts.slice(0, 5).map((conflict: any, index: number) => (
-                        <div key={index} className="text-xs text-yellow-700 p-1 border-l-2 border-yellow-300 pl-2 mb-1">
-                          {conflict.data.fareCode} - {conflict.conflicts.join(', ')}
-                        </div>
-                      ))}
-                      {uploadResult.data.conflicts.length > 5 && (
-                        <div className="text-xs text-yellow-600">
-                          ... and {uploadResult.data.conflicts.length - 5} more conflicts
-                        </div>
-                      )}
-                    </div>
-                  </details>
-                )}
-                
-                {/* Show errors if any */}
-                {uploadResult.data?.errors && uploadResult.data.errors.length > 0 && (
-                  <details className="mt-3">
-                    <summary className="cursor-pointer text-red-700 hover:text-red-800">
-                      View Errors ({uploadResult.data.errors.length})
-                    </summary>
-                    <div className="mt-2 max-h-32 overflow-y-auto">
-                      {uploadResult.data.errors.slice(0, 5).map((error: any, index: number) => (
-                        <div key={index} className="text-xs text-red-700 p-1 border-l-2 border-red-300 pl-2 mb-1">
-                          Row {index + 2}: {error.error}
-                        </div>
-                      ))}
-                      {uploadResult.data.errors.length > 5 && (
-                        <div className="text-xs text-red-600">
-                          ... and {uploadResult.data.errors.length - 5} more errors
-                        </div>
-                      )}
-                    </div>
-                  </details>
-                )}
-              </div>
-            ) : (
-              <div className="text-red-700">
-                <span>❌ Upload failed: {uploadResult.message || 'Unknown error'}</span>
-              </div>
-            )}
+            <div className="flex items-center justify-between mb-3">
+              <h3 className={`font-semibold ${
+                uploadResult.success 
+                  ? 'text-green-800' 
+                  : uploadResult.inserted > 0
+                    ? 'text-orange-800'
+                    : 'text-red-800'
+              }`}>
+                CSV Upload Results
+              </h3>
+              <button
+                onClick={() => setUploadResult(null)}
+                className="text-xs text-gray-500 hover:text-gray-700 px-2 py-1 hover:bg-gray-100 rounded"
+              >
+                ✕ Close
+              </button>
+            </div>
             
-            <button
-              onClick={() => setUploadResult(null)}
-              className="mt-3 text-xs text-gray-600 hover:text-gray-800 underline"
-            >
-              Dismiss
-            </button>
+            <div className="space-y-3">
+              {/* Summary Message */}
+              <div className={`flex items-start gap-2 p-3 rounded-md ${
+                uploadResult.success 
+                  ? 'bg-green-100 text-green-800' 
+                  : uploadResult.inserted > 0
+                    ? 'bg-orange-100 text-orange-800'
+                    : 'bg-red-100 text-red-800'
+              }`}>
+                <span className="font-medium">
+                  {uploadResult.success ? '✅' : uploadResult.inserted > 0 ? '⚠️' : '❌'}
+                </span>
+                <div>
+                  <div className="font-medium">{uploadResult.message}</div>
+                  {uploadResult.totalRows && (
+                    <div className="text-sm mt-1">
+                      Total rows processed: {uploadResult.totalRows}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Statistics */}
+              <div className="grid grid-cols-3 gap-4 p-3 bg-gray-50 rounded-md">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600">{uploadResult.inserted || 0}</div>
+                  <div className="text-xs text-gray-600">Successfully Inserted</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-yellow-600">{uploadResult.conflicts || 0}</div>
+                  <div className="text-xs text-gray-600">Conflicts Found</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-red-600">{uploadResult.errors || 0}</div>
+                  <div className="text-xs text-gray-600">Validation Errors</div>
+                </div>
+              </div>
+
+              {/* Successfully Inserted Records */}
+              {uploadResult.data?.insertedFares && uploadResult.data.insertedFares.length > 0 && (
+                <details className="bg-green-50 border border-green-200 rounded-md">
+                  <summary className="cursor-pointer text-green-700 hover:text-green-800 p-3 font-medium">
+                    ✅ Successfully Inserted Records ({uploadResult.data.insertedFares.length})
+                  </summary>
+                  <div className="px-3 pb-3 max-h-40 overflow-y-auto">
+                    <div className="space-y-1">
+                      {uploadResult.data.insertedFares.slice(0, 10).map((fare: any, index: number) => (
+                        <div key={index} className="text-sm text-green-700 bg-white p-2 rounded border-l-2 border-green-400">
+                          <span className="font-medium">{fare.fareCode}</span> - {fare.route} 
+                          <span className="text-xs text-gray-600 ml-2">({fare.currency} {fare.baseNetFare})</span>
+                        </div>
+                      ))}
+                      {uploadResult.data.insertedFares.length > 10 && (
+                        <div className="text-xs text-green-600 font-medium">
+                          ... and {uploadResult.data.insertedFares.length - 10} more records
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </details>
+              )}
+              
+              {/* Show conflicts if any */}
+              {uploadResult.data?.conflicts && uploadResult.data.conflicts.length > 0 && (
+                <details className="bg-yellow-50 border border-yellow-200 rounded-md">
+                  <summary className="cursor-pointer text-yellow-700 hover:text-yellow-800 p-3 font-medium">
+                    ⚠️ Conflicting Records ({uploadResult.data.conflicts.length})
+                  </summary>
+                  <div className="px-3 pb-3 max-h-40 overflow-y-auto">
+                    <div className="text-xs text-yellow-700 mb-2">
+                      These records conflict with existing fares and were not inserted:
+                    </div>
+                    <div className="space-y-1">
+                      {uploadResult.data.conflicts.slice(0, 10).map((conflict: any, index: number) => (
+                        <div key={index} className="text-sm text-yellow-700 bg-white p-2 rounded border-l-2 border-yellow-400">
+                          <div className="font-medium">
+                            Row {conflict.row}: {conflict.data?.fareCode || 'Unknown'} - {conflict.data?.route || 'Unknown Route'}
+                          </div>
+                          <div className="text-xs text-gray-600 mt-1">
+                            {Array.isArray(conflict.conflicts) ? conflict.conflicts.join('; ') : conflict.conflicts}
+                          </div>
+                        </div>
+                      ))}
+                      {uploadResult.data.conflicts.length > 10 && (
+                        <div className="text-xs text-yellow-600 font-medium">
+                          ... and {uploadResult.data.conflicts.length - 10} more conflicts
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </details>
+              )}
+              
+              {/* Show validation errors if any */}
+              {uploadResult.data?.errors && uploadResult.data.errors.length > 0 && (
+                <details className="bg-red-50 border border-red-200 rounded-md">
+                  <summary className="cursor-pointer text-red-700 hover:text-red-800 p-3 font-medium">
+                    ❌ Validation Errors ({uploadResult.data.errors.length})
+                  </summary>
+                  <div className="px-3 pb-3 max-h-40 overflow-y-auto">
+                    <div className="text-xs text-red-700 mb-2">
+                      These records failed validation against the database schema:
+                    </div>
+                    <div className="space-y-1">
+                      {uploadResult.data.errors.slice(0, 10).map((error: any, index: number) => (
+                        <div key={index} className="text-sm text-red-700 bg-white p-2 rounded border-l-2 border-red-400">
+                          <div className="font-medium">
+                            Row {error.row || index + 2}: {error.data?.fareCode || error.data?.airlineCode || 'Data Issue'}
+                          </div>
+                          <div className="text-xs text-gray-600 mt-1">
+                            {error.error}
+                          </div>
+                        </div>
+                      ))}
+                      {uploadResult.data.errors.length > 10 && (
+                        <div className="text-xs text-red-600 font-medium">
+                          ... and {uploadResult.data.errors.length - 10} more errors
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </details>
+              )}
+
+              {/* Validation Tips */}
+              {(uploadResult.errors > 0 || uploadResult.conflicts > 0) && (
+                <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+                  <div className="text-blue-800 font-medium text-sm mb-2">💡 Tips for CSV Upload:</div>
+                  <ul className="text-xs text-blue-700 space-y-1">
+                    <li>• Ensure airlineCode is exactly 2 characters (e.g., "AA", "DL")</li>
+                    <li>• Origin/destination must be 3-letter airport codes (e.g., "NYC", "LAX")</li>
+                    <li>• Dates must be in YYYY-MM-DD format</li>
+                    <li>• POS and eligibleAgentTiers must be valid JSON arrays</li>
+                    <li>• baseNetFare must be a positive number</li>
+                    <li>• Check for overlapping booking/travel periods for conflicts</li>
+                  </ul>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

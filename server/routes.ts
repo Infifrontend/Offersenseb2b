@@ -378,7 +378,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         // Validate CSV headers
-        const lines = csvContent.split('\n');
+        const lines = csvContent.split('\n').filter(line => line.trim());
         if (lines.length < 2) {
           return res.status(400).json({ 
             success: false,
@@ -386,8 +386,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
 
-        const requiredHeaders = ['airlineCode', 'fareCode', 'origin', 'destination', 'tripType', 'cabinClass', 'baseNetFare', 'currency'];
-        const actualHeaders = lines[0].toLowerCase().split(',').map(h => h.trim());
+        // Required headers based on negotiated_fares table schema
+        const requiredHeaders = ['airlineCode', 'fareCode', 'origin', 'destination', 'tripType', 'cabinClass', 'baseNetFare', 'currency', 'bookingStartDate', 'bookingEndDate', 'travelStartDate', 'travelEndDate', 'pos', 'eligibleAgentTiers'];
+        const actualHeaders = lines[0].toLowerCase().split(',').map(h => h.trim().replace(/"/g, ''));
         const missingHeaders = requiredHeaders.filter(header => !actualHeaders.includes(header.toLowerCase()));
         
         if (missingHeaders.length > 0) {
@@ -406,52 +407,173 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .on("data", async (data) => {
               rowNumber++;
               try {
-                // Validate required fields are present
-                const requiredFields = ['airlineCode', 'fareCode', 'origin', 'destination', 'tripType', 'cabinClass', 'baseNetFare', 'currency'];
-                const missingFields = requiredFields.filter(field => !data[field] || data[field].trim() === '');
-                
-                if (missingFields.length > 0) {
+                // Validate required fields against negotiated_fares table structure
+                const validationErrors: string[] = [];
+
+                // Validate airlineCode (2 characters)
+                if (!data.airlineCode || data.airlineCode.trim().length !== 2) {
+                  validationErrors.push('airlineCode must be exactly 2 characters');
+                }
+
+                // Validate fareCode (required, max 50 chars)
+                if (!data.fareCode || data.fareCode.trim().length === 0) {
+                  validationErrors.push('fareCode is required');
+                } else if (data.fareCode.trim().length > 50) {
+                  validationErrors.push('fareCode must be 50 characters or less');
+                }
+
+                // Validate origin/destination (3 characters)
+                if (!data.origin || data.origin.trim().length !== 3) {
+                  validationErrors.push('origin must be exactly 3 characters');
+                }
+                if (!data.destination || data.destination.trim().length !== 3) {
+                  validationErrors.push('destination must be exactly 3 characters');
+                }
+
+                // Validate tripType
+                const validTripTypes = ['ONE_WAY', 'ROUND_TRIP', 'MULTI_CITY'];
+                if (!data.tripType || !validTripTypes.includes(data.tripType.trim().toUpperCase())) {
+                  validationErrors.push(`tripType must be one of: ${validTripTypes.join(', ')}`);
+                }
+
+                // Validate cabinClass
+                const validCabinClasses = ['ECONOMY', 'PREMIUM_ECONOMY', 'BUSINESS', 'FIRST'];
+                if (!data.cabinClass || !validCabinClasses.includes(data.cabinClass.trim().toUpperCase())) {
+                  validationErrors.push(`cabinClass must be one of: ${validCabinClasses.join(', ')}`);
+                }
+
+                // Validate baseNetFare (numeric)
+                if (!data.baseNetFare || isNaN(parseFloat(data.baseNetFare))) {
+                  validationErrors.push('baseNetFare must be a valid number');
+                } else if (parseFloat(data.baseNetFare) < 0) {
+                  validationErrors.push('baseNetFare must be positive');
+                }
+
+                // Validate currency (3 characters)
+                if (!data.currency || data.currency.trim().length !== 3) {
+                  validationErrors.push('currency must be exactly 3 characters');
+                }
+
+                // Validate dates
+                const dateFields = ['bookingStartDate', 'bookingEndDate', 'travelStartDate', 'travelEndDate'];
+                for (const field of dateFields) {
+                  if (!data[field]) {
+                    validationErrors.push(`${field} is required`);
+                  } else {
+                    const date = new Date(data[field]);
+                    if (isNaN(date.getTime())) {
+                      validationErrors.push(`${field} must be a valid date (YYYY-MM-DD format)`);
+                    }
+                  }
+                }
+
+                // Validate date logic
+                if (data.bookingStartDate && data.bookingEndDate) {
+                  const startDate = new Date(data.bookingStartDate);
+                  const endDate = new Date(data.bookingEndDate);
+                  if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime()) && startDate > endDate) {
+                    validationErrors.push('bookingStartDate cannot be after bookingEndDate');
+                  }
+                }
+
+                if (data.travelStartDate && data.travelEndDate) {
+                  const startDate = new Date(data.travelStartDate);
+                  const endDate = new Date(data.travelEndDate);
+                  if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime()) && startDate > endDate) {
+                    validationErrors.push('travelStartDate cannot be after travelEndDate');
+                  }
+                }
+
+                // Validate POS (must be valid JSON array)
+                let posArray = [];
+                if (data.pos) {
+                  try {
+                    posArray = JSON.parse(data.pos);
+                    if (!Array.isArray(posArray) || posArray.length === 0) {
+                      validationErrors.push('pos must be a non-empty JSON array of country codes');
+                    }
+                  } catch {
+                    validationErrors.push('pos must be valid JSON array format');
+                  }
+                }
+
+                // Validate eligibleAgentTiers
+                let agentTiers = [];
+                if (data.eligibleAgentTiers) {
+                  try {
+                    agentTiers = JSON.parse(data.eligibleAgentTiers);
+                    if (!Array.isArray(agentTiers)) {
+                      validationErrors.push('eligibleAgentTiers must be a JSON array');
+                    } else {
+                      const validTiers = ['PLATINUM', 'GOLD', 'SILVER', 'BRONZE'];
+                      const invalidTiers = agentTiers.filter(tier => !validTiers.includes(tier));
+                      if (invalidTiers.length > 0) {
+                        validationErrors.push(`Invalid agent tiers: ${invalidTiers.join(', ')}. Must be one of: ${validTiers.join(', ')}`);
+                      }
+                    }
+                  } catch {
+                    validationErrors.push('eligibleAgentTiers must be valid JSON array format');
+                  }
+                }
+
+                // Validate optional numeric fields
+                if (data.seatAllotment && (isNaN(parseInt(data.seatAllotment)) || parseInt(data.seatAllotment) < 0)) {
+                  validationErrors.push('seatAllotment must be a positive integer');
+                }
+                if (data.minStay && (isNaN(parseInt(data.minStay)) || parseInt(data.minStay) < 0)) {
+                  validationErrors.push('minStay must be a positive integer');
+                }
+                if (data.maxStay && (isNaN(parseInt(data.maxStay)) || parseInt(data.maxStay) < 0)) {
+                  validationErrors.push('maxStay must be a positive integer');
+                }
+
+                if (validationErrors.length > 0) {
                   errors.push({ 
                     row: rowNumber,
                     data, 
-                    error: `Missing required fields: ${missingFields.join(', ')}` 
+                    error: validationErrors.join('; ') 
                   });
                   return;
                 }
 
                 // Transform CSV data to match schema
                 const transformedData = {
-                  airlineCode: data.airlineCode?.trim(),
-                  fareCode: data.fareCode?.trim(),
-                  origin: data.origin?.trim().toUpperCase(),
-                  destination: data.destination?.trim().toUpperCase(),
-                  tripType: data.tripType?.trim().toUpperCase(),
-                  cabinClass: data.cabinClass?.trim().toUpperCase(),
-                  baseNetFare: data.baseNetFare?.trim(),
-                  currency: data.currency?.trim().toUpperCase(),
-                  bookingStartDate: data.bookingStartDate?.trim(),
-                  bookingEndDate: data.bookingEndDate?.trim(),
-                  travelStartDate: data.travelStartDate?.trim(),
-                  travelEndDate: data.travelEndDate?.trim(),
-                  pos: data.pos ? JSON.parse(data.pos) : [],
+                  airlineCode: data.airlineCode.trim().toUpperCase(),
+                  fareCode: data.fareCode.trim(),
+                  origin: data.origin.trim().toUpperCase(),
+                  destination: data.destination.trim().toUpperCase(),
+                  tripType: data.tripType.trim().toUpperCase(),
+                  cabinClass: data.cabinClass.trim().toUpperCase(),
+                  baseNetFare: parseFloat(data.baseNetFare).toString(),
+                  currency: data.currency.trim().toUpperCase(),
+                  bookingStartDate: data.bookingStartDate.trim(),
+                  bookingEndDate: data.bookingEndDate.trim(),
+                  travelStartDate: data.travelStartDate.trim(),
+                  travelEndDate: data.travelEndDate.trim(),
+                  pos: posArray.length > 0 ? posArray : ["US"],
                   seatAllotment: data.seatAllotment ? parseInt(data.seatAllotment) : null,
                   minStay: data.minStay ? parseInt(data.minStay) : null,
                   maxStay: data.maxStay ? parseInt(data.maxStay) : null,
                   blackoutDates: data.blackoutDates ? JSON.parse(data.blackoutDates) : null,
-                  eligibleAgentTiers: data.eligibleAgentTiers ? JSON.parse(data.eligibleAgentTiers) : ["BRONZE"],
+                  eligibleAgentTiers: agentTiers.length > 0 ? agentTiers : ["BRONZE"],
                   eligibleCohorts: data.eligibleCohorts ? JSON.parse(data.eligibleCohorts) : null,
                   remarks: data.remarks?.trim() || null,
                 };
 
+                // Final schema validation
                 const validatedData = insertNegotiatedFareSchema.parse(transformedData);
 
-                // Check for conflicts
+                // Check for business logic conflicts
                 const fareConflicts = await storage.checkFareConflicts(validatedData);
                 if (fareConflicts.length > 0) {
                   conflicts.push({ 
                     row: rowNumber,
-                    data: validatedData, 
-                    conflicts: fareConflicts.map(c => c.message || c) 
+                    data: {
+                      fareCode: validatedData.fareCode,
+                      route: `${validatedData.origin}-${validatedData.destination}`,
+                      cabinClass: validatedData.cabinClass
+                    }, 
+                    conflicts: fareConflicts.map(c => `Overlapping with existing fare: ${c.fareCode} (${c.origin}-${c.destination})`)
                   });
                 } else {
                   results.push(validatedData);
@@ -461,7 +583,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 errors.push({ 
                   row: rowNumber,
                   data, 
-                  error: error.message || 'Invalid data format' 
+                  error: `Schema validation failed: ${error.message}` 
                 });
               }
             })
@@ -471,27 +593,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         console.log(`CSV processing complete: ${results.length} valid, ${errors.length} errors, ${conflicts.length} conflicts`);
 
-        // Insert valid fares
+        // Insert valid fares with transaction handling
         const insertedFares: any[] = [];
+        const insertionErrors: any[] = [];
+        
         for (const fareData of results) {
           try {
             const fare = await storage.insertNegotiatedFare(fareData);
-            insertedFares.push(fare);
+            insertedFares.push({
+              id: fare.id,
+              fareCode: fare.fareCode,
+              route: `${fare.origin}-${fare.destination}`,
+              baseNetFare: fare.baseNetFare,
+              currency: fare.currency
+            });
           } catch (insertError: any) {
             console.error('Error inserting fare:', insertError);
-            errors.push({ 
-              data: fareData, 
+            insertionErrors.push({ 
+              fareCode: fareData.fareCode,
+              route: `${fareData.origin}-${fareData.destination}`,
               error: `Database insertion failed: ${insertError.message}` 
             });
           }
         }
 
+        // Add insertion errors to main errors array
+        errors.push(...insertionErrors.map(err => ({
+          data: { fareCode: err.fareCode, route: err.route },
+          error: err.error
+        })));
+
+        const totalProcessed = insertedFares.length + errors.length + conflicts.length;
+        const successMessage = insertedFares.length > 0 
+          ? `Upload completed! ${insertedFares.length} of ${totalProcessed} records successfully processed.`
+          : `Upload completed with issues. ${totalProcessed} records processed, but none were saved due to validation errors.`;
+
         res.json({
-          success: true,
-          message: `Upload completed successfully. ${insertedFares.length} records processed.`,
+          success: insertedFares.length > 0,
+          message: successMessage,
           inserted: insertedFares.length,
           conflicts: conflicts.length,
           errors: errors.length,
+          totalRows: totalProcessed,
           data: {
             insertedFares,
             conflicts,
@@ -503,14 +646,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error('CSV parsing error:', parseError);
         res.status(400).json({ 
           success: false,
-          message: `Failed to parse CSV file: ${parseError.message}` 
+          message: `Failed to parse CSV file: ${parseError.message}. Please ensure the file is properly formatted.` 
         });
       }
     } catch (error: any) {
       console.error('Upload processing error:', error);
       res.status(500).json({ 
         success: false,
-        message: "Failed to process upload", 
+        message: "Internal server error during upload processing", 
         error: error.message 
       });
     }

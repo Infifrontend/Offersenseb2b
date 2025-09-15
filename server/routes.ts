@@ -407,6 +407,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .on("data", async (data) => {
               rowNumber++;
               try {
+                // Log the raw data for debugging
+                console.log(`Processing row ${rowNumber}:`, JSON.stringify(data, null, 2));
+                
                 // Validate required fields against negotiated_fares table structure
                 const validationErrors: string[] = [];
 
@@ -530,6 +533,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     cohorts = JSON.parse(cohortsString);
                     if (!Array.isArray(cohorts)) {
                       validationErrors.push('eligibleCohorts must be a JSON array');
+                    } else {
+                      // Validate that cohort codes exist (optional validation)
+                      // In production, you might want to validate against actual cohorts in database
+                      const validCohortFormats = /^[A-Z_0-9]+$/;
+                      const invalidCohorts = cohorts.filter(cohort => 
+                        typeof cohort !== 'string' || cohort.length === 0
+                      );
+                      if (invalidCohorts.length > 0) {
+                        validationErrors.push('All cohort codes must be non-empty strings');
+                      }
                     }
                   } catch (parseError) {
                     console.error('Cohorts parsing error:', parseError, 'Original value:', data.eligibleCohorts);

@@ -1972,7 +1972,7 @@ export default function NegotiatedFareManager() {
               }}
             >
               {availableCohorts.map((cohort: any) => (
-                <AntSelect.Option key={cohort.id} value={cohort.cohortName}>
+                <AntSelect.Option key={cohort.id} value={cohort.cohortCode}>
                   <div
                     style={{
                       display: "flex",

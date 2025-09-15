@@ -79,7 +79,7 @@ export default function Header({ onToggleSidebar, isMobile }: HeaderProps) {
   const getUserInitials = (username: string) => {
     return username
       .split(" ")
-      .map(part => part.charAt(0))
+      .map((part) => part.charAt(0))
       .join("")
       .toUpperCase()
       .slice(0, 2);
@@ -284,12 +284,15 @@ export default function Header({ onToggleSidebar, isMobile }: HeaderProps) {
           <Bell className="w-5 h-5 text-muted-foreground" />
           <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full"></span>
         </button>
-        
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
               <Avatar className="h-8 w-8">
-                <AvatarImage src="/avatars/01.png" alt={user?.username || "User"} />
+                <AvatarImage
+                  src="/avatars/01.png"
+                  alt={user?.username || "User"}
+                />
                 <AvatarFallback>
                   {user ? getUserInitials(user.username) : "U"}
                 </AvatarFallback>

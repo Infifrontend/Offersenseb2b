@@ -19,6 +19,7 @@ import {
   Plane,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 interface SidebarProps {
   collapsed: boolean;
@@ -180,10 +181,18 @@ export default function Sidebar({
   onToggle,
   onMobileClose,
 }: SidebarProps) {
+  const { toast } = useToast();
   const [location] = useLocation();
   const handleLogout = () => {
-    // logout();
-    console.log("Logged out");
+    localStorage.removeItem("user");
+    localStorage.removeItem("isAuthenticated");
+
+    toast({
+      title: "Logged Out",
+      description: "You have been successfully logged out.",
+    });
+
+    setLocation("/login");
   };
 
   const sidebarWidth = collapsed ? "80px" : "250px";

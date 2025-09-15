@@ -1,8 +1,13 @@
-
 import React, { useState } from "react";
 import { useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,7 +40,9 @@ export default function Login() {
   const [errors, setErrors] = useState<Partial<LoginCredentials>>({});
 
   const loginMutation = useMutation({
-    mutationFn: async (credentials: LoginCredentials): Promise<AuthResponse> => {
+    mutationFn: async (
+      credentials: LoginCredentials,
+    ): Promise<AuthResponse> => {
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
@@ -56,7 +63,7 @@ export default function Login() {
         // Store user session
         localStorage.setItem("user", JSON.stringify(data.user));
         localStorage.setItem("isAuthenticated", "true");
-        
+
         toast({
           title: "Login Successful",
           description: `Welcome back, ${data.user.username}!`,
@@ -94,7 +101,7 @@ export default function Login() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -103,11 +110,11 @@ export default function Login() {
   };
 
   const handleInputChange = (field: keyof LoginCredentials, value: string) => {
-    setCredentials(prev => ({ ...prev, [field]: value }));
-    
+    setCredentials((prev) => ({ ...prev, [field]: value }));
+
     // Clear error when user starts typing
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
 
@@ -122,9 +129,7 @@ export default function Login() {
             </div>
           </div>
           <h1 className="text-3xl font-bold text-gray-900">OfferSense</h1>
-          <p className="text-gray-600 mt-2">
-            Travel Offer Management Platform
-          </p>
+          <p className="text-gray-600 mt-2">Travel Offer Management Platform</p>
         </div>
 
         {/* Login Card */}
@@ -145,7 +150,9 @@ export default function Login() {
                   type="text"
                   placeholder="Enter your username"
                   value={credentials.username}
-                  onChange={(e) => handleInputChange("username", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("username", e.target.value)
+                  }
                   className={errors.username ? "border-red-500" : ""}
                   disabled={loginMutation.isPending}
                 />
@@ -163,8 +170,12 @@ export default function Login() {
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     value={credentials.password}
-                    onChange={(e) => handleInputChange("password", e.target.value)}
-                    className={errors.password ? "border-red-500 pr-10" : "pr-10"}
+                    onChange={(e) =>
+                      handleInputChange("password", e.target.value)
+                    }
+                    className={
+                      errors.password ? "border-red-500 pr-10" : "pr-10"
+                    }
                     disabled={loginMutation.isPending}
                   />
                   <button
@@ -201,15 +212,6 @@ export default function Login() {
                 )}
               </Button>
             </form>
-
-            {/* Demo Credentials Info */}
-            <Alert className="mt-6">
-              <AlertDescription>
-                <strong>Demo Credentials:</strong><br />
-                Username: <code className="text-sm bg-gray-100 px-1 rounded">admin</code><br />
-                Password: <code className="text-sm bg-gray-100 px-1 rounded">password123</code>
-              </AlertDescription>
-            </Alert>
           </CardContent>
         </Card>
 

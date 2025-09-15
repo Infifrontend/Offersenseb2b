@@ -29,7 +29,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../components/ui/table";
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -1076,75 +1076,65 @@ export default function CohortManager() {
           <CardTitle>Cohorts</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="w-full">
-            <table className="w-full caption-bottom text-sm">
-              <thead className="[&_tr]:border-b">
-                <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 w-[15%]">
-                    Code
-                  </th>
-                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 w-[20%]">
-                    Name
-                  </th>
-                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 w-[12%]">
-                    Type
-                  </th>
-                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 w-[25%]">
-                    Criteria
-                  </th>
-                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 w-[10%]">
-                    Status
-                  </th>
-                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 w-[12%]">
-                    Created
-                  </th>
-                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 w-[6%]">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="[&_tr:last-child]:border-0">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-[120px]">Code</TableHead>
+                  <TableHead className="min-w-[180px]">Name</TableHead>
+                  <TableHead className="min-w-[100px]">Type</TableHead>
+                  <TableHead className="min-w-[150px] hidden md:table-cell">Criteria</TableHead>
+                  <TableHead className="min-w-[80px]">Status</TableHead>
+                  <TableHead className="min-w-[100px] hidden lg:table-cell">Created</TableHead>
+                  <TableHead className="w-[50px]">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {isLoading ? (
-                  <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                    <td colSpan={7} className="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-center py-8">
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8">
                       Loading cohorts...
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ) : cohorts.length === 0 ? (
-                  <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                    <td
+                  <TableRow>
+                    <TableCell
                       colSpan={7}
-                      className="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-center py-8 text-muted-foreground"
+                      className="text-center py-8 text-muted-foreground"
                     >
                       No cohorts found
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   cohorts.map((cohort: Cohort) => (
-                    <tr key={cohort.id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                      <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0 font-medium">
-                        <div className="truncate">{cohort.cohortCode}</div>
-                      </td>
-                      <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
-                        <div className="truncate">{cohort.cohortName}</div>
-                      </td>
-                      <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
-                        {getTypeBadge(cohort.type)}
-                      </td>
-                      <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
-                        <div className="text-xs text-muted-foreground truncate max-w-[200px]">
-                          {JSON.stringify(cohort.criteria)}
+                    <TableRow key={cohort.id}>
+                      <TableCell className="font-medium">
+                        <div className="truncate max-w-[120px]" title={cohort.cohortCode}>
+                          {cohort.cohortCode}
                         </div>
-                      </td>
-                      <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                      </TableCell>
+                      <TableCell>
+                        <div className="truncate max-w-[180px]" title={cohort.cohortName}>
+                          {cohort.cohortName}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {getTypeBadge(cohort.type)}
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        <div className="text-xs text-muted-foreground truncate max-w-[150px]" title={JSON.stringify(cohort.criteria)}>
+                          {Object.keys(cohort.criteria || {}).join(', ') || 'No criteria'}
+                        </div>
+                      </TableCell>
+                      <TableCell>
                         {getStatusBadge(cohort.status)}
-                      </td>
-                      <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell">
                         <div className="text-sm">
                           {new Date(cohort.createdAt).toLocaleDateString()}
                         </div>
-                      </td>
-                      <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                      </TableCell>
+                      <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="h-8 w-8 p-0">
@@ -1183,12 +1173,12 @@ export default function CohortManager() {
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         </CardContent>
       </Card>

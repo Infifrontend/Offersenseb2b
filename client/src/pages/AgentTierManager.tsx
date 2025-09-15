@@ -234,7 +234,6 @@ export default function AgentTierManager() {
   const {
     data: assignments = [],
     isLoading: assignmentsLoading,
-    error: assignmentsError,
     refetch: refetchAssignments,
   } = useQuery({
     queryKey: ["/api/tiers/assignments"],
@@ -252,8 +251,6 @@ export default function AgentTierManager() {
     },
     retry: 3,
     retryDelay: 1000,
-    staleTime: 30000, // 30 seconds
-    refetchOnWindowFocus: true,
   });
 
   const {
@@ -750,24 +747,16 @@ export default function AgentTierManager() {
     return acc;
   }, {});
 
-  // Ensure assignments is always an array and filter for active assignments
-  const safeAssignments = Array.isArray(assignments) ? assignments : [];
-  const activeAssignments = safeAssignments.filter(
-    (a: TierAssignment) => a && a.status === "ACTIVE",
+  const activeAssignments = assignments.filter(
+    (a: TierAssignment) => a.status === "ACTIVE",
   );
-
-  // Initialize assignment stats with all tier codes set to 0
-  const assignmentStats = tierCodes.reduce((acc: any, tierCode: string) => {
-    acc[tierCode] = 0;
-    return acc;
-  }, {});
-
-  // Count active assignments for each tier
-  activeAssignments.forEach((assignment: TierAssignment) => {
-    if (assignment && assignment.tierCode && tierCodes.includes(assignment.tierCode)) {
-      assignmentStats[assignment.tierCode] = (assignmentStats[assignment.tierCode] || 0) + 1;
-    }
-  });
+  const assignmentStats = activeAssignments.reduce(
+    (acc: any, assignment: TierAssignment) => {
+      acc[assignment.tierCode] = (acc[assignment.tierCode] || 0) + 1;
+      return acc;
+    },
+    {},
+  );
 
   return (
     <div className="space-y-6">
@@ -880,13 +869,6 @@ export default function AgentTierManager() {
                 <p className="text-sm text-muted-foreground">
                   View and manage current tier assignments for all agents.
                 </p>
-                {/* Debug info - remove in production */}
-                {process.env.NODE_ENV === 'development' && (
-                  <div className="text-xs text-gray-400 mt-1">
-                    Debug: {safeAssignments.length} total assignments, {activeAssignments.length} active
-                    {assignmentsError && ` | Error: ${assignmentsError.message}`}
-                  </div>
-                )}
               </div>
               <Space>
                 <AntButton
@@ -917,7 +899,6 @@ export default function AgentTierManager() {
                       </div>
                       <Badge
                         count={assignmentStats[tierCode] || 0}
-                        showZero={true}
                         style={{ backgroundColor: getTierColor(tierCode) }}
                       />
                     </div>

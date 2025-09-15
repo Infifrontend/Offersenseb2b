@@ -1,4 +1,4 @@
-import { useLocation } from "wouter";
+import { useLocation, useRoute } from "wouter";
 import { Menu, Bell, Settings, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,7 +42,7 @@ const pageLabels: Record<string, string> = {
 };
 
 export default function Header({ onToggleSidebar, isMobile }: HeaderProps) {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const currentPageLabel = pageLabels[location] || "Dashboard";
   const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);

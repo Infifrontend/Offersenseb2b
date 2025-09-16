@@ -3540,7 +3540,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         agentId: "demo-agent",
         deliveryChannel: "EMAIL",
         deliveryStatus: "SENT",
-        sentAt: new Date().toISOString(),
+        sentAt: new Date(),
       };
 
       await storage.insertCampaignDelivery(deliveryData);

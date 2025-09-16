@@ -4351,7 +4351,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Send email using Nodemailer
       const mailOptions = {
-        from: process.env.SMTP_FROM || process.env.SMTP_USER,
+        from: `"OfferSense Campaign" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
         to: recipientEmail,
         subject: emailContent.subject,
         text: emailContent.textBody,

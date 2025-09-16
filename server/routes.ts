@@ -3187,16 +3187,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/tiers/:id", async (req, res) => {
     try {
       const validatedData = insertAgentTierSchema.parse(req.body);
-      
-      // Always check for conflicts but exclude the current tier
-      const conflicts = await storage.checkTierConflicts(validatedData, req.params.id);
-      if (conflicts.length > 0) {
-        return res.status(409).json({ 
-          message: "Tier conflicts detected", 
-          conflicts 
-        });
+      // Check for conflicts only if tierCode is being changed
+      const existingTier = await storage.getAgentTierById(req.params.id);
+      if (existingTier && existingTier.tierCode !== validatedData.tierCode) {
+        const conflicts = await storage.checkTierConflicts(validatedData, req.params.id);
+        if (conflicts.length > 0) {
+          return res.status(409).json({ 
+            message: "Tier conflicts detected", 
+            conflicts 
+          });
+        }
       }
-      
       const tier = await storage.updateAgentTier(req.params.id, validatedData);
       res.json(tier);
     } catch (error: any) {

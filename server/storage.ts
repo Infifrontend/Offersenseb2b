@@ -1555,12 +1555,25 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateAgentTier(id: string, tierData: InsertAgentTier): Promise<AgentTier> {
-    const [tier] = await this.db
-      .update(agentTiers)
-      .set({ ...tierData, updatedAt: new Date() })
-      .where(eq(agentTiers.id, id))
-      .returning();
-    return tier;
+    try {
+      const [tier] = await this.db
+        .update(agentTiers)
+        .set({ ...tierData, updatedAt: new Date() })
+        .where(eq(agentTiers.id, id))
+        .returning();
+      
+      if (!tier) {
+        throw new Error('Tier not found');
+      }
+      
+      return tier;
+    } catch (error: any) {
+      // Handle unique constraint violation
+      if (error.code === '23505' && error.constraint?.includes('tier_code')) {
+        throw new Error(`Tier code '${tierData.tierCode}' already exists`);
+      }
+      throw error;
+    }
   }
 
   async updateAgentTierStatus(id: string, status: string): Promise<AgentTier> {
@@ -1834,12 +1847,12 @@ export class DatabaseStorage implements IStorage {
     return 'BRONZE';
   }
 
-  async checkTierConflicts(tierData: InsertAgentTier): Promise<any[]> {
+  async checkTierConflicts(tierData: InsertAgentTier, excludeId?: string): Promise<any[]> {
     const conflicts = [];
 
     // Check for duplicate tier code
     const existingTier = await this.getAgentTierByCode(tierData.tierCode);
-    if (existingTier) {
+    if (existingTier && existingTier.id !== excludeId) {
       conflicts.push({
         type: 'DUPLICATE_TIER_CODE',
         message: `Tier with code ${tierData.tierCode} already exists`,

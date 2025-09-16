@@ -299,7 +299,10 @@ export default function AgentTierManager() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-      if (!response.ok) throw new Error("Failed to update tier");
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to update tier");
+      }
       return response.json();
     },
     onSuccess: () => {

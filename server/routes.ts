@@ -5,6 +5,7 @@ import multer from "multer";
 import csv from "csv-parser";
 import { Readable } from "stream";
 import bcrypt from "bcryptjs";
+import nodemailer from "nodemailer";
 import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema, insertAirAncillaryRuleSchema, insertNonAirRateSchema, insertNonAirMarkupRuleSchema, insertBundleSchema, insertBundlePricingRuleSchema, insertOfferRuleSchema, insertOfferTraceSchema, insertAgentSchema, insertChannelPricingOverrideSchema, insertCohortSchema, insertAuditLogSchema, insertAgentTierSchema, insertAgentTierAssignmentSchema, insertTierAssignmentEngineSchema, insertCampaignSchema, insertCampaignMetricsSchema, insertCampaignDeliverySchema, insertSimulationSchema, insertInsightQuerySchema } from "../shared/schema";
 
 // Enhanced AI template generation function
@@ -3476,7 +3477,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // 3. Send the email using your email service (SendGrid, AWS SES, etc.)
       // 4. Record the delivery in campaign_deliveries table
 
-      // Mock email content generation
+      // Create email transporter using environment variables
+      const transporter = nodemailer.createTransporter({
+        host: process.env.SMTP_HOST || 'smtp.gmail.com',
+        port: parseInt(process.env.SMTP_PORT || '587'),
+        secure: process.env.SMTP_SECURE === 'true',
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      });
+
+      // Generate email content
       const emailContent = {
         subject: `${campaign.campaignName} - Special Offer`,
         htmlBody: `
@@ -3528,10 +3540,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         `
       };
 
-      // Mock email sending (in production, use actual email service)
-      console.log(`Sending email to ${recipientEmail}:`);
-      console.log(`Subject: ${emailContent.subject}`);
-      console.log(`Campaign: ${campaignCode}`);
+      // Send email using Nodemailer
+      const mailOptions = {
+        from: process.env.SMTP_FROM || process.env.SMTP_USER,
+        to: recipientEmail,
+        subject: emailContent.subject,
+        text: emailContent.textBody,
+        html: emailContent.htmlBody,
+      };
+
+      try {
+        const info = await transporter.sendMail(mailOptions);
+        console.log(`Email sent successfully to ${recipientEmail}:`, info.messageId);
+      } catch (emailError: any) {
+        console.error(`Failed to send email to ${recipientEmail}:`, emailError);
+        throw new Error(`Email sending failed: ${emailError.message}`);
+      }
 
       // Record the delivery
       const deliveryData = {

@@ -1569,7 +1569,7 @@ export class DatabaseStorage implements IStorage {
       return tier;
     } catch (error: any) {
       // Handle unique constraint violation
-      if (error.code === '23505' && error.constraint?.includes('tier_code')) {
+      if (error.code === '23505' && (error.constraint?.includes('tier_code') || error.message?.includes('tier_code'))) {
         throw new Error(`Tier code '${tierData.tierCode}' already exists`);
       }
       throw error;

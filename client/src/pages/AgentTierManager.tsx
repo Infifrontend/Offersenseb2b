@@ -57,11 +57,11 @@ const tierFormSchema = z.object({
   displayName: z.string().min(1, "Display name is required"),
   kpiWindow: z.enum(["MONTHLY", "QUARTERLY"]),
   kpiThresholds: z.object({
-    totalBookingValueMin: z.number().min(0, "Must be a positive number"),
-    totalBookingsMin: z.number().min(0, "Must be a positive number"),
-    avgBookingsPerMonthMin: z.number().min(0, "Must be a positive number"),
-    avgSearchesPerMonthMin: z.number().min(0, "Must be a positive number"),
-    conversionPctMin: z.number().min(0, "Must be between 0 and 100").max(100, "Must be between 0 and 100"),
+    totalBookingValueMin: z.number().min(0),
+    totalBookingsMin: z.number().min(0),
+    avgBookingsPerMonthMin: z.number().min(0),
+    avgSearchesPerMonthMin: z.number().min(0),
+    conversionPctMin: z.number().min(0).max(100),
   }),
   defaultPricingPolicy: z
     .object({

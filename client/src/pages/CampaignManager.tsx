@@ -390,40 +390,6 @@ export default function CampaignManager() {
     enabled: !!selectedCampaign,
   });
 
-  // Define active campaigns first
-  const activeCampaigns = campaigns.filter(
-    (c: Campaign) => c.status === "ACTIVE",
-  );
-
-  // Fetch metrics for all active campaigns for performance dashboard
-  const { data: allCampaignMetrics = {} } = useQuery({
-    queryKey: ["campaign-performance-metrics", activeCampaigns.map(c => c.campaignCode)],
-    queryFn: async () => {
-      if (activeCampaigns.length === 0) return {};
-      
-      const metricsPromises = activeCampaigns.map(async (campaign) => {
-        try {
-          const response = await fetch(`/api/campaigns/${campaign.campaignCode}/metrics`);
-          if (response.ok) {
-            const data = await response.json();
-            return { campaignCode: campaign.campaignCode, metrics: data.aggregated };
-          }
-        } catch (error) {
-          console.error(`Error fetching metrics for ${campaign.campaignCode}:`, error);
-        }
-        return { campaignCode: campaign.campaignCode, metrics: null };
-      });
-
-      const results = await Promise.all(metricsPromises);
-      return results.reduce((acc, { campaignCode, metrics }) => {
-        acc[campaignCode] = metrics;
-        return acc;
-      }, {} as Record<string, any>);
-    },
-    enabled: activeCampaigns.length > 0,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  });
-
   // Mutations
   const createCampaignMutation = useMutation({
     mutationFn: async (data: CampaignFormData) => {
@@ -708,6 +674,35 @@ export default function CampaignManager() {
     message.success("WhatsApp template selected");
   };
 
+  const handleSimulateMetrics = async (campaignCode: string, type: string) => {
+    try {
+      const response = await fetch(`/api/campaigns/${campaignCode}/simulate-metrics`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ type }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        message.success(`Simulated ${type} for campaign metrics`);
+        
+        // Refresh campaign metrics if performance modal is open
+        if (selectedCampaign && selectedCampaign.campaignCode === campaignCode) {
+          // Trigger a refetch of campaign metrics
+          window.location.reload();
+        }
+      } else {
+        const errorData = await response.json();
+        message.error(errorData.message || `Failed to simulate ${type}`);
+      }
+    } catch (error) {
+      console.error(`Error simulating ${type}:`, error);
+      message.error(`Failed to simulate ${type}`);
+    }
+  };
+
   // Table columns
   const campaignColumns = [
     {
@@ -899,6 +894,10 @@ export default function CampaignManager() {
     return acc;
   }, {});
 
+  const activeCampaigns = campaigns.filter(
+    (c: Campaign) => c.status === "ACTIVE",
+  );
+
   if (campaignsLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -964,14 +963,14 @@ export default function CampaignManager() {
         </TabsContent>
 
         <TabsContent value="performance">
-          <div className="space-y-6">
+          <div className="space-y-4">
             <div>
               <h3 className="text-lg font-semibold">
-                Campaign Performance Dashboard
+                Campaign Performance Overview
               </h3>
               <p className="text-sm text-muted-foreground">
                 Monitor campaign effectiveness, conversion rates, and revenue
-                impact across all active campaigns.
+                impact.
               </p>
             </div>
 
@@ -983,218 +982,81 @@ export default function CampaignManager() {
                 showIcon
               />
             ) : (
-              <div className="space-y-6">
-                {activeCampaigns.map((campaign: Campaign) => (
-                  <AntCard key={campaign.id} className="w-full">
-                    <div className="space-y-4">
-                      {/* Campaign Header */}
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h4 className="text-lg font-semibold text-gray-900">
-                            {campaign.campaignName}
-                          </h4>
-                          <p className="text-sm text-gray-500 uppercase tracking-wide">
-                            {campaign.campaignCode}
-                          </p>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RangePicker
-                            size="small"
-                            defaultValue={[dayjs().subtract(30, "days"), dayjs()]}
-                            className="w-60"
-                          />
+              <Row gutter={16}>
+                {activeCampaigns.slice(0, 3).map((campaign: Campaign) => (
+                  <Col span={8} key={campaign.id}>
+                    <AntCard
+                      title={campaign.campaignName}
+                      extra={
+                        <Space>
                           <AntButton
                             size="small"
-                            icon={<BarChart3 className="w-3 h-3" />}
                             onClick={() => handleViewPerformance(campaign)}
                           >
                             View Details
                           </AntButton>
+                        </Space>
+                      }
+                    >
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span>Status:</span>
+                          <AntBadge status="success" text={campaign.status} />
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Duration:</span>
+                          <span className="text-sm">
+                            {dayjs(campaign.lifecycle.startDate).format(
+                              "MMM DD",
+                            )}{" "}
+                            -{" "}
+                            {dayjs(campaign.lifecycle.endDate).format("MMM DD")}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Offer:</span>
+                          <Tag color="orange">
+                            {campaign.offer.type === "PERCENT"
+                              ? `${campaign.offer.value}% Off`
+                              : campaign.offer.type === "AMOUNT"
+                                ? `$${campaign.offer.value} Off`
+                                : `$${campaign.offer.specialPrice}`}
+                          </Tag>
+                        </div>
+                        <Divider style={{ margin: "8px 0" }} />
+                        <div className="text-xs text-gray-600">
+                          <div className="flex justify-between">
+                            <span>Test Metrics:</span>
+                          </div>
+                          <Space size="small" className="mt-1">
+                            <AntButton 
+                              size="small" 
+                              type="text"
+                              onClick={() => handleSimulateMetrics(campaign.campaignCode, 'opens')}
+                            >
+                              📧 Opens
+                            </AntButton>
+                            <AntButton 
+                              size="small" 
+                              type="text"
+                              onClick={() => handleSimulateMetrics(campaign.campaignCode, 'clicks')}
+                            >
+                              👆 Clicks
+                            </AntButton>
+                            <AntButton 
+                              size="small" 
+                              type="text"
+                              onClick={() => handleSimulateMetrics(campaign.campaignCode, 'purchases')}
+                            >
+                              💰 Buys
+                            </AntButton>
+                          </Space>
                         </div>
                       </div>
-
-                      {/* Performance Metrics Cards */}
-                      <div className="grid grid-cols-6 gap-4">
-                        {(() => {
-                          const metrics = allCampaignMetrics[campaign.campaignCode] || {};
-                          return (
-                            <>
-                              {/* Sent */}
-                              <div className="bg-gray-50 p-4 rounded-lg border">
-                                <div className="flex items-center space-x-2 mb-2">
-                                  <Send className="w-4 h-4 text-gray-600" />
-                                  <span className="text-sm text-gray-600 font-medium">Sent</span>
-                                </div>
-                                <div className="text-2xl font-bold text-gray-900">
-                                  {(metrics.sent || 0).toLocaleString()}
-                                </div>
-                              </div>
-
-                              {/* Delivered */}
-                              <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                                <div className="flex items-center space-x-2 mb-2">
-                                  <CheckCircle className="w-4 h-4 text-green-600" />
-                                  <span className="text-sm text-green-700 font-medium">Delivered</span>
-                                </div>
-                                <div className="text-2xl font-bold text-green-800">
-                                  {(metrics.delivered || 0).toLocaleString()}
-                                </div>
-                              </div>
-
-                              {/* Opened */}
-                              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                                <div className="flex items-center space-x-2 mb-2">
-                                  <Eye className="w-4 h-4 text-blue-600" />
-                                  <span className="text-sm text-blue-700 font-medium">Opened</span>
-                                </div>
-                                <div className="text-2xl font-bold text-blue-800">
-                                  {(metrics.opened || 0).toLocaleString()}
-                                </div>
-                              </div>
-
-                              {/* Clicked */}
-                              <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-                                <div className="flex items-center space-x-2 mb-2">
-                                  <MousePointer className="w-4 h-4 text-purple-600" />
-                                  <span className="text-sm text-purple-700 font-medium">Clicked</span>
-                                </div>
-                                <div className="text-2xl font-bold text-purple-800">
-                                  {(metrics.clicked || 0).toLocaleString()}
-                                </div>
-                              </div>
-
-                              {/* Purchased */}
-                              <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
-                                <div className="flex items-center space-x-2 mb-2">
-                                  <ShoppingCart className="w-4 h-4 text-orange-600" />
-                                  <span className="text-sm text-orange-700 font-medium">Purchased</span>
-                                </div>
-                                <div className="text-2xl font-bold text-orange-800">
-                                  {(metrics.purchased || 0).toLocaleString()}
-                                </div>
-                              </div>
-
-                              {/* Revenue Uplift */}
-                              <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                                <div className="flex items-center space-x-2 mb-2">
-                                  <DollarSign className="w-4 h-4 text-green-600" />
-                                  <span className="text-sm text-green-700 font-medium">Revenue Uplift</span>
-                                </div>
-                                <div className="text-2xl font-bold text-green-800">
-                                  {formatCurrency(metrics.revenueUplift || 0)}
-                                </div>
-                              </div>
-                            </>
-                          );
-                        })()}
-                      </div>
-
-                      {/* Performance Rates */}
-                      <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-200">
-                        {(() => {
-                          const metrics = allCampaignMetrics[campaign.campaignCode] || {};
-                          return (
-                            <>
-                              {/* Delivery Rate */}
-                              <div className="text-center">
-                                <div className="text-sm text-gray-600 mb-1">Delivery Rate</div>
-                                <div className="text-lg font-semibold text-gray-900">
-                                  {metrics.deliveryRate || 0}%
-                                </div>
-                                <Progress
-                                  percent={metrics.deliveryRate || 0}
-                                  size="small"
-                                  status="active"
-                                  strokeColor="#10b981"
-                                />
-                              </div>
-
-                              {/* Open Rate */}
-                              <div className="text-center">
-                                <div className="text-sm text-gray-600 mb-1">Open Rate</div>
-                                <div className="text-lg font-semibold text-gray-900">
-                                  {metrics.openRate || 0}%
-                                </div>
-                                <Progress
-                                  percent={metrics.openRate || 0}
-                                  size="small"
-                                  status="active"
-                                  strokeColor="#3b82f6"
-                                />
-                              </div>
-
-                              {/* Attach Rate */}
-                              <div className="text-center">
-                                <div className="text-sm text-gray-600 mb-1">Attach Rate</div>
-                                <div className="text-lg font-semibold text-gray-900">
-                                  {metrics.attachRate || 0}%
-                                </div>
-                                <Progress
-                                  percent={metrics.attachRate || 0}
-                                  size="small"
-                                  status="active"
-                                  strokeColor="#f59e0b"
-                                />
-                              </div>
-                            </>
-                          );
-                        })()}
-                      </div>
-
-                      {/* Campaign Details */}
-                      <div className="bg-gray-50 p-3 rounded-lg">
-                        <div className="grid grid-cols-4 gap-4 text-sm">
-                          <div>
-                            <span className="text-gray-600">Status:</span>
-                            <div className="mt-1">
-                              <AntBadge
-                                status={getStatusColor(campaign.status) as any}
-                                text={campaign.status}
-                              />
-                            </div>
-                          </div>
-                          <div>
-                            <span className="text-gray-600">Duration:</span>
-                            <div className="mt-1 font-medium">
-                              {dayjs(campaign.lifecycle.startDate).format("MMM DD")} -{" "}
-                              {dayjs(campaign.lifecycle.endDate).format("MMM DD, YYYY")}
-                            </div>
-                          </div>
-                          <div>
-                            <span className="text-gray-600">Offer:</span>
-                            <div className="mt-1">
-                              <Tag color="orange" size="small">
-                                {campaign.offer.type === "PERCENT"
-                                  ? `${campaign.offer.value}% Off`
-                                  : campaign.offer.type === "AMOUNT"
-                                    ? `$${campaign.offer.value} Off`
-                                    : `$${campaign.offer.specialPrice}`}
-                              </Tag>
-                            </div>
-                          </div>
-                          <div>
-                            <span className="text-gray-600">Channels:</span>
-                            <div className="mt-1 flex flex-wrap gap-1">
-                              {campaign.comms.portalBanner && (
-                                <Tag size="small">Portal</Tag>
-                              )}
-                              {campaign.comms.emailTemplateId && (
-                                <Tag size="small">Email</Tag>
-                              )}
-                              {campaign.comms.whatsappTemplateId && (
-                                <Tag size="small">WhatsApp</Tag>
-                              )}
-                              {campaign.comms.apiPush && (
-                                <Tag size="small">API</Tag>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </AntCard>
+                    </AntCard>
+                  </Col>
                 ))}
-              </div>
+              </Row>
             )}
           </div>
         </TabsContent>

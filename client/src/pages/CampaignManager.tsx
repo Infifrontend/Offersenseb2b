@@ -390,6 +390,11 @@ export default function CampaignManager() {
     enabled: !!selectedCampaign,
   });
 
+  // Define active campaigns first
+  const activeCampaigns = campaigns.filter(
+    (c: Campaign) => c.status === "ACTIVE",
+  );
+
   // Fetch metrics for all active campaigns for performance dashboard
   const { data: allCampaignMetrics = {} } = useQuery({
     queryKey: ["campaign-performance-metrics", activeCampaigns.map(c => c.campaignCode)],
@@ -893,10 +898,6 @@ export default function CampaignManager() {
     acc[campaign.status] = (acc[campaign.status] || 0) + 1;
     return acc;
   }, {});
-
-  const activeCampaigns = campaigns.filter(
-    (c: Campaign) => c.status === "ACTIVE",
-  );
 
   if (campaignsLoading) {
     return (

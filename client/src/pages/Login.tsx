@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
@@ -14,7 +13,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Eye, EyeOff, Shield, Plane, MapPin, Globe } from "lucide-react";
+import {
+  Loader2,
+  Eye,
+  EyeOff,
+  Shield,
+  Plane,
+  MapPin,
+  Globe,
+} from "lucide-react";
 
 interface LoginCredentials {
   username: string;
@@ -31,11 +38,11 @@ interface AuthResponse {
 }
 
 const backgroundImages = [
-  'https://images.unsplash.com/photo-1488646953014-85cb44e25828?ixlib=rb-4.0.3&auto=format&fit=crop&w=2340&q=80', // Seychelles beach
-  'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=2340&q=80', // Mountain landscape
-  'https://images.unsplash.com/photo-1539650116574-75c0c6d73f6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2340&q=80', // City skyline
-  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2340&q=80', // Tropical beach
-  'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2340&q=80', // Forest path
+  "https://images.unsplash.com/photo-1488646953014-85cb44e25828?ixlib=rb-4.0.3&auto=format&fit=crop&w=2340&q=80", // Seychelles beach
+  "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=2340&q=80", // Mountain landscape
+  "https://images.unsplash.com/photo-1539650116574-75c0c6d73f6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2340&q=80", // City skyline
+  "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2340&q=80", // Tropical beach
+  "https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2340&q=80", // Forest path
 ];
 
 export default function Login() {
@@ -53,7 +60,9 @@ export default function Login() {
   // Cycle through background images
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentBgIndex((prevIndex) => (prevIndex + 1) % backgroundImages.length);
+      setCurrentBgIndex(
+        (prevIndex) => (prevIndex + 1) % backgroundImages.length,
+      );
     }, 8000);
 
     return () => clearInterval(interval);
@@ -152,13 +161,13 @@ export default function Login() {
           <div
             key={index}
             className={`absolute inset-0 transition-opacity duration-2000 ease-in-out ${
-              index === currentBgIndex ? 'opacity-100' : 'opacity-0'
+              index === currentBgIndex ? "opacity-100" : "opacity-0"
             }`}
             style={{
               backgroundImage: `url(${image})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
             }}
           />
         ))}
@@ -188,21 +197,25 @@ export default function Login() {
 
       {/* Content */}
       <div className="relative z-10 min-h-screen flex items-center justify-center px-4">
-        <div className={`w-full max-w-md transform transition-all duration-1000 ease-out ${
-          isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-        }`}>
+        <div
+          className={`w-full max-w-md transform transition-all duration-1000 ease-out ${
+            isLoaded ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+          }`}
+        >
           {/* Header */}
           <div className="text-center mb-8">
-            <div className={`flex items-center justify-center mb-6 transform transition-all duration-1200 delay-300 ease-out ${
-              isLoaded ? 'scale-100 opacity-100' : 'scale-75 opacity-0'
-            }`}>
-              <div className="bg-gradient-to-r from-orange-500 to-red-500 p-4 rounded-full shadow-2xl backdrop-blur-sm border border-white/20 hover:scale-110 transition-transform duration-300">
-                <Shield className="h-10 w-10 text-white drop-shadow-lg" />
-              </div>
-            </div>
-            <div className={`transform transition-all duration-1000 delay-500 ease-out ${
-              isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-            }`}>
+            <div
+              className={`flex items-center justify-center mb-6 transform transition-all duration-1200 delay-300 ease-out ${
+                isLoaded ? "scale-100 opacity-100" : "scale-75 opacity-0"
+              }`}
+            ></div>
+            <div
+              className={`transform transition-all duration-1000 delay-500 ease-out ${
+                isLoaded
+                  ? "translate-y-0 opacity-100"
+                  : "translate-y-4 opacity-0"
+              }`}
+            >
               <h1 className="text-4xl font-bold text-white mb-2 drop-shadow-2xl">
                 OfferSense
               </h1>
@@ -216,9 +229,11 @@ export default function Login() {
           </div>
 
           {/* Login Card */}
-          <div className={`transform transition-all duration-1000 delay-700 ease-out ${
-            isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
-          }`}>
+          <div
+            className={`transform transition-all duration-1000 delay-700 ease-out ${
+              isLoaded ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+            }`}
+          >
             <Card className="shadow-2xl backdrop-blur-lg bg-white/95 border-0 hover:shadow-3xl transition-all duration-300">
               <CardHeader className="space-y-1 pb-6">
                 <CardTitle className="text-2xl text-center font-bold text-gray-800">
@@ -232,7 +247,10 @@ export default function Login() {
                 <form onSubmit={handleSubmit} className="space-y-5">
                   {/* Username Field */}
                   <div className="space-y-2">
-                    <Label htmlFor="username" className="text-gray-700 font-medium">
+                    <Label
+                      htmlFor="username"
+                      className="text-gray-700 font-medium"
+                    >
                       Username
                     </Label>
                     <Input
@@ -244,20 +262,25 @@ export default function Login() {
                         handleInputChange("username", e.target.value)
                       }
                       className={`h-12 transition-all duration-200 focus:ring-2 focus:ring-orange-500/50 ${
-                        errors.username 
-                          ? "border-red-500 focus:border-red-500" 
+                        errors.username
+                          ? "border-red-500 focus:border-red-500"
                           : "border-gray-300 focus:border-orange-500"
                       }`}
                       disabled={loginMutation.isPending}
                     />
                     {errors.username && (
-                      <p className="text-sm text-red-500 animate-pulse">{errors.username}</p>
+                      <p className="text-sm text-red-500 animate-pulse">
+                        {errors.username}
+                      </p>
                     )}
                   </div>
 
                   {/* Password Field */}
                   <div className="space-y-2">
-                    <Label htmlFor="password" className="text-gray-700 font-medium">
+                    <Label
+                      htmlFor="password"
+                      className="text-gray-700 font-medium"
+                    >
                       Password
                     </Label>
                     <div className="relative">
@@ -270,8 +293,8 @@ export default function Login() {
                           handleInputChange("password", e.target.value)
                         }
                         className={`h-12 pr-12 transition-all duration-200 focus:ring-2 focus:ring-orange-500/50 ${
-                          errors.password 
-                            ? "border-red-500 focus:border-red-500" 
+                          errors.password
+                            ? "border-red-500 focus:border-red-500"
                             : "border-gray-300 focus:border-orange-500"
                         }`}
                         disabled={loginMutation.isPending}
@@ -290,7 +313,9 @@ export default function Login() {
                       </button>
                     </div>
                     {errors.password && (
-                      <p className="text-sm text-red-500 animate-pulse">{errors.password}</p>
+                      <p className="text-sm text-red-500 animate-pulse">
+                        {errors.password}
+                      </p>
                     )}
                   </div>
 
@@ -318,9 +343,11 @@ export default function Login() {
           </div>
 
           {/* Footer */}
-          <div className={`text-center mt-8 transform transition-all duration-1000 delay-1000 ease-out ${
-            isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-          }`}>
+          <div
+            className={`text-center mt-8 transform transition-all duration-1000 delay-1000 ease-out ${
+              isLoaded ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
+            }`}
+          >
             <p className="text-sm text-white/80 drop-shadow">
               © 2025 OfferSense. Empowering travel experiences worldwide.
             </p>

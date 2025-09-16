@@ -644,11 +644,14 @@ export default function CampaignManager() {
       });
 
       if (response.ok) {
+        const successData = await response.json();
         message.success(`Email sent successfully to ${recipientEmail}`);
         setMailModalVisible(false);
         setRecipientEmail("");
+        setSelectedCampaignForMail(null);
       } else {
         const errorData = await response.json();
+        console.error("Email sending error:", errorData);
         message.error(errorData.message || "Failed to send email");
       }
     } catch (error) {

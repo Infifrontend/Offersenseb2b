@@ -73,8 +73,13 @@ import {
 import { SendOutlined } from "@ant-design/icons";
 
 // Import shadcn/ui components
-import { Badge } from '@/components/ui/badge';
-import { Tabs as ShadcnTabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from "@/components/ui/badge";
+import {
+  Tabs as ShadcnTabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 
 // Register Chart.js components
 ChartJS.register(
@@ -282,19 +287,21 @@ export default function CampaignManager() {
   // Template generation states
   const [templateGenerationState, setTemplateGenerationState] = useState({
     email: { loading: false, templates: [] as any[] },
-    whatsapp: { loading: false, templates: [] as any[] }
+    whatsapp: { loading: false, templates: [] as any[] },
   });
   const [emailPreviewVisible, setEmailPreviewVisible] = useState(false);
   const [whatsappPreviewVisible, setWhatsappPreviewVisible] = useState(false);
   const [selectedEmailTemplate, setSelectedEmailTemplate] = useState<any>(null);
-  const [selectedWhatsappTemplate, setSelectedWhatsappTemplate] = useState<any>(null);
-  const [customEmailPrompt, setCustomEmailPrompt] = useState('');
-  const [customWhatsappPrompt, setCustomWhatsappPrompt] = useState('');
+  const [selectedWhatsappTemplate, setSelectedWhatsappTemplate] =
+    useState<any>(null);
+  const [customEmailPrompt, setCustomEmailPrompt] = useState("");
+  const [customWhatsappPrompt, setCustomWhatsappPrompt] = useState("");
 
   // Mail sending modal states
   const [mailModalVisible, setMailModalVisible] = useState(false);
-  const [selectedCampaignForMail, setSelectedCampaignForMail] = useState<Campaign | null>(null);
-  const [recipientEmail, setRecipientEmail] = useState('');
+  const [selectedCampaignForMail, setSelectedCampaignForMail] =
+    useState<Campaign | null>(null);
+  const [recipientEmail, setRecipientEmail] = useState("");
   const [sendingMail, setSendingMail] = useState(false);
 
   const queryClient = useQueryClient();
@@ -520,10 +527,10 @@ export default function CampaignManager() {
   };
 
   // Template generation handler
-  const handleGenerateTemplate = async (type: 'email' | 'whatsapp') => {
-    setTemplateGenerationState(prev => ({
+  const handleGenerateTemplate = async (type: "email" | "whatsapp") => {
+    setTemplateGenerationState((prev) => ({
       ...prev,
-      [type]: { ...prev[type], loading: true }
+      [type]: { ...prev[type], loading: true },
     }));
 
     try {
@@ -532,62 +539,65 @@ export default function CampaignManager() {
 
       // Build comprehensive context for AI generation
       const context = {
-        campaignName: formValues.campaignName || 'New Campaign',
-        campaignCode: formValues.campaignCode || 'CAMPAIGN_001',
-        offerType: formValues.offer?.type || 'PERCENT',
+        campaignName: formValues.campaignName || "New Campaign",
+        campaignCode: formValues.campaignCode || "CAMPAIGN_001",
+        offerType: formValues.offer?.type || "PERCENT",
         offerValue: formValues.offer?.value || 10,
         specialPrice: formValues.offer?.specialPrice,
         products: {
           ancillaries: formValues.products?.ancillaries || [],
-          bundles: formValues.products?.bundles || []
+          bundles: formValues.products?.bundles || [],
         },
         target: {
           agentTiers: formValues.target?.agentTiers || [],
           cohorts: formValues.target?.cohorts || [],
           pos: formValues.target?.pos || [],
-          channel: formValues.target?.channel || []
+          channel: formValues.target?.channel || [],
         },
         lifecycle: {
-          startDate: formValues.lifecycle?.startDate?.format('YYYY-MM-DD'),
-          endDate: formValues.lifecycle?.endDate?.format('YYYY-MM-DD')
+          startDate: formValues.lifecycle?.startDate?.format("YYYY-MM-DD"),
+          endDate: formValues.lifecycle?.endDate?.format("YYYY-MM-DD"),
         },
-        companyName: 'OfferSense',
-        brandTone: type === 'email' ? 'professional' : 'friendly',
-        urgency: 'medium',
+        companyName: "OfferSense",
+        brandTone: type === "email" ? "professional" : "friendly",
+        urgency: "medium",
         personalization: true,
-        customPrompt: type === 'email' ? customEmailPrompt : customWhatsappPrompt
+        customPrompt:
+          type === "email" ? customEmailPrompt : customWhatsappPrompt,
       };
 
-      const response = await fetch('/api/ai/generate-templates', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, context })
+      const response = await fetch("/api/ai/generate-templates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type, context }),
       });
 
-      if (!response.ok) throw new Error('Failed to generate templates');
+      if (!response.ok) throw new Error("Failed to generate templates");
 
       const generatedTemplates = await response.json();
 
-      setTemplateGenerationState(prev => ({
+      setTemplateGenerationState((prev) => ({
         ...prev,
-        [type]: { loading: false, templates: generatedTemplates }
+        [type]: { loading: false, templates: generatedTemplates },
       }));
 
-      message.success(`Generated ${generatedTemplates.length} ${type} templates`);
+      message.success(
+        `Generated ${generatedTemplates.length} ${type} templates`,
+      );
 
       // Auto-open preview modal if templates were generated
       if (generatedTemplates.length > 0) {
-        if (type === 'email') {
+        if (type === "email") {
           setEmailPreviewVisible(true);
         } else {
           setWhatsappPreviewVisible(true);
         }
       }
     } catch (error: any) {
-      message.error(error.message || 'Failed to generate templates');
-      setTemplateGenerationState(prev => ({
+      message.error(error.message || "Failed to generate templates");
+      setTemplateGenerationState((prev) => ({
         ...prev,
-        [type]: { ...prev[type], loading: false }
+        [type]: { ...prev[type], loading: false },
       }));
     }
   };
@@ -597,34 +607,34 @@ export default function CampaignManager() {
     setSelectedEmailTemplate(template);
     campaignForm.setFieldsValue({
       comms: {
-        ...campaignForm.getFieldValue('comms'),
-        emailTemplateId: template.id
-      }
+        ...campaignForm.getFieldValue("comms"),
+        emailTemplateId: template.id,
+      },
     });
     setEmailPreviewVisible(false);
-    message.success('Email template selected');
+    message.success("Email template selected");
   };
 
   // Mail sending handlers
   const handleOpenMailModal = (campaign: Campaign) => {
     setSelectedCampaignForMail(campaign);
     setMailModalVisible(true);
-    setRecipientEmail('');
+    setRecipientEmail("");
   };
 
   const handleSendMail = async () => {
     if (!recipientEmail || !selectedCampaignForMail) {
-      message.error('Please enter a valid email address');
+      message.error("Please enter a valid email address");
       return;
     }
 
     setSendingMail(true);
     try {
       // In a real implementation, this would call your email API
-      const response = await fetch('/api/campaigns/send-email', {
-        method: 'POST',
+      const response = await fetch("/api/campaigns/send-email", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           campaignCode: selectedCampaignForMail.campaignCode,
@@ -636,13 +646,13 @@ export default function CampaignManager() {
       if (response.ok) {
         message.success(`Email sent successfully to ${recipientEmail}`);
         setMailModalVisible(false);
-        setRecipientEmail('');
+        setRecipientEmail("");
       } else {
-        message.error('Failed to send email');
+        message.error("Failed to send email");
       }
     } catch (error) {
-      console.error('Error sending email:', error);
-      message.error('Failed to send email');
+      console.error("Error sending email:", error);
+      message.error("Failed to send email");
     } finally {
       setSendingMail(false);
     }
@@ -652,12 +662,12 @@ export default function CampaignManager() {
     setSelectedWhatsappTemplate(template);
     campaignForm.setFieldsValue({
       comms: {
-        ...campaignForm.getFieldValue('comms'),
-        whatsappTemplateId: template.id
-      }
+        ...campaignForm.getFieldValue("comms"),
+        whatsappTemplateId: template.id,
+      },
     });
     setWhatsappPreviewVisible(false);
-    message.success('WhatsApp template selected');
+    message.success("WhatsApp template selected");
   };
 
   // Table columns
@@ -996,8 +1006,8 @@ export default function CampaignManager() {
           setIsCampaignModalVisible(false);
           setEditingCampaign(null);
           campaignForm.resetFields();
-          setCustomEmailPrompt('');
-          setCustomWhatsappPrompt('');
+          setCustomEmailPrompt("");
+          setCustomWhatsappPrompt("");
           setSelectedEmailTemplate(null);
           setSelectedWhatsappTemplate(null);
         }}
@@ -1109,9 +1119,11 @@ export default function CampaignManager() {
                   loading={isAncillariesLoading}
                   showSearch
                   filterOption={(input, option) =>
-                    option?.children?.props?.children?.[0]?.props?.children?.[0]?.toLowerCase()
+                    option?.children?.props?.children?.[0]?.props?.children?.[0]
+                      ?.toLowerCase()
                       .includes(input.toLowerCase()) ||
-                    option?.children?.props?.children?.[1]?.props?.children?.[0]?.toLowerCase()
+                    option?.children?.props?.children?.[1]?.props?.children?.[0]
+                      ?.toLowerCase()
                       .includes(input.toLowerCase())
                   }
                 >
@@ -1311,45 +1323,61 @@ export default function CampaignManager() {
 
                       {templateGenerationState.email.templates.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {templateGenerationState.email.templates.map((template, index) => (
-                            <div
-                              key={index}
-                              className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-md ${
-                                selectedEmailTemplate?.subject === template.subject
-                                  ? 'border-blue-500 bg-blue-100'
-                                  : 'border-gray-200 bg-white hover:border-blue-300'
-                              }`}
-                              onClick={() => handleSelectEmailTemplate(template)}
-                            >
-                              <div className="flex items-start justify-between">
-                                <div className="flex-1">
-                                  <h5 className="font-medium text-sm text-gray-900 mb-1">
-                                    {template.subject}
-                                  </h5>
-                                  <p className="text-xs text-gray-600 mb-2 line-clamp-2">
-                                    {template.name}
-                                  </p>
-                                  <div className="flex gap-1">
-                                    <Badge variant="outline" className="text-xs">
-                                      {template.tone}
-                                    </Badge>
-                                    <Badge variant="outline" className="text-xs text-blue-600">
-                                      {template.estimatedOpenRate}
-                                    </Badge>
+                          {templateGenerationState.email.templates.map(
+                            (template, index) => (
+                              <div
+                                key={index}
+                                className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-md ${
+                                  selectedEmailTemplate?.subject ===
+                                  template.subject
+                                    ? "border-blue-500 bg-blue-100"
+                                    : "border-gray-200 bg-white hover:border-blue-300"
+                                }`}
+                                onClick={() =>
+                                  handleSelectEmailTemplate(template)
+                                }
+                              >
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <h5 className="font-medium text-sm text-gray-900 mb-1">
+                                      {template.subject}
+                                    </h5>
+                                    <p className="text-xs text-gray-600 mb-2 line-clamp-2">
+                                      {template.name}
+                                    </p>
+                                    <div className="flex gap-1">
+                                      <Badge
+                                        variant="outline"
+                                        className="text-xs"
+                                      >
+                                        {template.tone}
+                                      </Badge>
+                                      <Badge
+                                        variant="outline"
+                                        className="text-xs text-blue-600"
+                                      >
+                                        {template.estimatedOpenRate}
+                                      </Badge>
+                                    </div>
                                   </div>
+                                  {selectedEmailTemplate?.subject ===
+                                    template.subject && (
+                                    <CheckCircle className="w-4 h-4 text-blue-600 flex-shrink-0 ml-2" />
+                                  )}
                                 </div>
-                                {selectedEmailTemplate?.subject === template.subject && (
-                                  <CheckCircle className="w-4 h-4 text-blue-600 flex-shrink-0 ml-2" />
-                                )}
                               </div>
-                            </div>
-                          ))}
+                            ),
+                          )}
                         </div>
                       ) : (
                         <div className="text-center py-6 text-gray-500">
                           <Mail className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                          <p className="text-sm">No email templates available</p>
-                          <p className="text-xs">Generate templates using AI below</p>
+                          <p className="text-sm">
+                            No email templates available
+                          </p>
+                          <p className="text-xs">
+                            Generate templates using AI below
+                          </p>
                         </div>
                       )}
                     </div>
@@ -1371,22 +1399,27 @@ export default function CampaignManager() {
                             rows={3}
                             className="text-sm"
                             value={customEmailPrompt}
-                            onChange={(e) => setCustomEmailPrompt(e.target.value)}
+                            onChange={(e) =>
+                              setCustomEmailPrompt(e.target.value)
+                            }
                           />
                         </AntForm.Item>
 
                         <div className="flex items-center justify-between">
                           <div className="text-xs text-gray-600">
-                            <strong>AI will use:</strong> Campaign details, offers, products, and target audience
+                            <strong>AI will use:</strong> Campaign details,
+                            offers, products, and target audience
                           </div>
                           <AntButton
                             type="primary"
                             icon={<MessageSquare className="w-4 h-4" />}
-                            onClick={() => handleGenerateTemplate('email')}
+                            onClick={() => handleGenerateTemplate("email")}
                             loading={templateGenerationState.email.loading}
                             className="bg-gradient-to-r from-purple-600 to-pink-600 border-none"
                           >
-                            {templateGenerationState.email.loading ? 'Generating...' : 'Generate AI Templates'}
+                            {templateGenerationState.email.loading
+                              ? "Generating..."
+                              : "Generate AI Templates"}
                           </AntButton>
                         </div>
                       </div>
@@ -1400,8 +1433,12 @@ export default function CampaignManager() {
                             <h4 className="text-sm font-medium text-green-800 mb-1">
                               ✓ Selected Email Template
                             </h4>
-                            <p className="text-sm text-green-700">{selectedEmailTemplate.subject}</p>
-                            <p className="text-xs text-green-600 mt-1">{selectedEmailTemplate.name}</p>
+                            <p className="text-sm text-green-700">
+                              {selectedEmailTemplate.subject}
+                            </p>
+                            <p className="text-xs text-green-600 mt-1">
+                              {selectedEmailTemplate.name}
+                            </p>
                           </div>
                           <AntButton
                             size="small"
@@ -1437,45 +1474,61 @@ export default function CampaignManager() {
 
                       {templateGenerationState.whatsapp.templates.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {templateGenerationState.whatsapp.templates.map((template, index) => (
-                            <div
-                              key={index}
-                              className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-md ${
-                                selectedWhatsappTemplate?.message === template.message
-                                  ? 'border-green-500 bg-green-100'
-                                  : 'border-gray-200 bg-white hover:border-green-300'
-                              }`}
-                              onClick={() => handleSelectWhatsappTemplate(template)}
-                            >
-                              <div className="flex items-start justify-between">
-                                <div className="flex-1">
-                                  <h5 className="font-medium text-sm text-gray-900 mb-1">
-                                    {template.name}
-                                  </h5>
-                                  <p className="text-xs text-gray-600 mb-2 line-clamp-2">
-                                    {template.message.substring(0, 80)}...
-                                  </p>
-                                  <div className="flex gap-1">
-                                    <Badge variant="outline" className="text-xs">
-                                      {template.style}
-                                    </Badge>
-                                    <Badge variant="outline" className={`text-xs ${template.message.length <= 160 ? 'text-green-600' : 'text-orange-600'}`}>
-                                      {template.message.length} chars
-                                    </Badge>
+                          {templateGenerationState.whatsapp.templates.map(
+                            (template, index) => (
+                              <div
+                                key={index}
+                                className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-md ${
+                                  selectedWhatsappTemplate?.message ===
+                                  template.message
+                                    ? "border-green-500 bg-green-100"
+                                    : "border-gray-200 bg-white hover:border-green-300"
+                                }`}
+                                onClick={() =>
+                                  handleSelectWhatsappTemplate(template)
+                                }
+                              >
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <h5 className="font-medium text-sm text-gray-900 mb-1">
+                                      {template.name}
+                                    </h5>
+                                    <p className="text-xs text-gray-600 mb-2 line-clamp-2">
+                                      {template.message.substring(0, 80)}...
+                                    </p>
+                                    <div className="flex gap-1">
+                                      <Badge
+                                        variant="outline"
+                                        className="text-xs"
+                                      >
+                                        {template.style}
+                                      </Badge>
+                                      <Badge
+                                        variant="outline"
+                                        className={`text-xs ${template.message.length <= 160 ? "text-green-600" : "text-orange-600"}`}
+                                      >
+                                        {template.message.length} chars
+                                      </Badge>
+                                    </div>
                                   </div>
+                                  {selectedWhatsappTemplate?.message ===
+                                    template.message && (
+                                    <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0 ml-2" />
+                                  )}
                                 </div>
-                                {selectedWhatsappTemplate?.message === template.message && (
-                                  <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0 ml-2" />
-                                )}
                               </div>
-                            </div>
-                          ))}
+                            ),
+                          )}
                         </div>
                       ) : (
                         <div className="text-center py-6 text-gray-500">
                           <Smartphone className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                          <p className="text-sm">No WhatsApp templates available</p>
-                          <p className="text-xs">Generate templates using AI below</p>
+                          <p className="text-sm">
+                            No WhatsApp templates available
+                          </p>
+                          <p className="text-xs">
+                            Generate templates using AI below
+                          </p>
                         </div>
                       )}
                     </div>
@@ -1497,22 +1550,27 @@ export default function CampaignManager() {
                             rows={3}
                             className="text-sm"
                             value={customWhatsappPrompt}
-                            onChange={(e) => setCustomWhatsappPrompt(e.target.value)}
+                            onChange={(e) =>
+                              setCustomWhatsappPrompt(e.target.value)
+                            }
                           />
                         </AntForm.Item>
 
                         <div className="flex items-center justify-between">
                           <div className="text-xs text-gray-600">
-                            <strong>AI will optimize for:</strong> Character limit, mobile format, and engagement
+                            <strong>AI will optimize for:</strong> Character
+                            limit, mobile format, and engagement
                           </div>
                           <AntButton
                             type="primary"
                             icon={<Smartphone className="w-4 h-4" />}
-                            onClick={() => handleGenerateTemplate('whatsapp')}
+                            onClick={() => handleGenerateTemplate("whatsapp")}
                             loading={templateGenerationState.whatsapp.loading}
                             className="bg-gradient-to-r from-green-600 to-emerald-600 border-none"
                           >
-                            {templateGenerationState.whatsapp.loading ? 'Generating...' : 'Generate AI Templates'}
+                            {templateGenerationState.whatsapp.loading
+                              ? "Generating..."
+                              : "Generate AI Templates"}
                           </AntButton>
                         </div>
                       </div>
@@ -1526,9 +1584,12 @@ export default function CampaignManager() {
                             <h4 className="text-sm font-medium text-blue-800 mb-1">
                               ✓ Selected WhatsApp Template
                             </h4>
-                            <p className="text-sm text-blue-700">{selectedWhatsappTemplate.name}</p>
+                            <p className="text-sm text-blue-700">
+                              {selectedWhatsappTemplate.name}
+                            </p>
                             <p className="text-xs text-blue-600 mt-1">
-                              {selectedWhatsappTemplate.message.length} characters • {selectedWhatsappTemplate.style}
+                              {selectedWhatsappTemplate.message.length}{" "}
+                              characters • {selectedWhatsappTemplate.style}
                             </p>
                           </div>
                           <AntButton
@@ -1789,11 +1850,11 @@ export default function CampaignManager() {
           <AntButton
             key="regenerate"
             icon={<MessageSquare className="w-4 h-4" />}
-            onClick={() => handleGenerateTemplate('email')}
+            onClick={() => handleGenerateTemplate("email")}
             loading={templateGenerationState.email.loading}
           >
             Generate New Templates
-          </AntButton>
+          </AntButton>,
         ]}
         width={900}
         className="email-template-modal"
@@ -1801,13 +1862,17 @@ export default function CampaignManager() {
         {templateGenerationState.email.templates.length === 0 ? (
           <div className="text-center py-12">
             <Mail className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No Email Templates Generated</h3>
-            <p className="text-gray-500 mb-4">Generate AI-powered email templates based on your campaign details</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No Email Templates Generated
+            </h3>
+            <p className="text-gray-500 mb-4">
+              Generate AI-powered email templates based on your campaign details
+            </p>
             <AntButton
               type="primary"
               size="large"
               icon={<MessageSquare className="w-4 h-4" />}
-              onClick={() => handleGenerateTemplate('email')}
+              onClick={() => handleGenerateTemplate("email")}
               loading={templateGenerationState.email.loading}
             >
               Generate Email Templates
@@ -1817,109 +1882,209 @@ export default function CampaignManager() {
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-500">
-                {templateGenerationState.email.templates.length} templates available
+                {templateGenerationState.email.templates.length} templates
+                available
               </span>
             </div>
 
             <ShadcnTabs defaultValue="0" className="w-full">
               <TabsList className="grid w-full grid-cols-3">
-                {templateGenerationState.email.templates.map((template, index) => (
-                  <TabsTrigger key={index} value={index.toString()} className="flex items-center space-x-2">
-                    <span>Template {index + 1}</span>
-                    {selectedEmailTemplate?.subject === template.subject && (
-                      <CheckCircle className="w-3 h-3 text-green-600" />
-                    )}
-                  </TabsTrigger>
-                ))}
+                {templateGenerationState.email.templates.map(
+                  (template, index) => (
+                    <TabsTrigger
+                      key={index}
+                      value={index.toString()}
+                      className="flex items-center space-x-2"
+                    >
+                      <span>Template {index + 1}</span>
+                      {selectedEmailTemplate?.subject === template.subject && (
+                        <CheckCircle className="w-3 h-3 text-green-600" />
+                      )}
+                    </TabsTrigger>
+                  ),
+                )}
               </TabsList>
 
-              {templateGenerationState.email.templates.map((template, index) => (
-                <TabsContent key={index} value={index.toString()} className="mt-6">
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h4 className="font-medium text-gray-900 text-lg mb-2">{template.subject}</h4>
-                        <div className="flex items-center space-x-2 mb-3">
-                          <Badge variant="outline" className="text-blue-600 border-blue-600">{template.tone}</Badge>
-                          <Badge variant="outline" className="text-purple-600 border-purple-600">{template.estimatedOpenRate} open rate</Badge>
-                          <Badge variant="outline" className="text-orange-600 border-orange-600">{template.estimatedClickRate} click rate</Badge>
+              {templateGenerationState.email.templates.map(
+                (template, index) => (
+                  <TabsContent
+                    key={index}
+                    value={index.toString()}
+                    className="mt-6"
+                  >
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-gray-900 text-lg mb-2">
+                            {template.subject}
+                          </h4>
+                          <div className="flex items-center space-x-2 mb-3">
+                            <Badge
+                              variant="outline"
+                              className="text-blue-600 border-blue-600"
+                            >
+                              {template.tone}
+                            </Badge>
+                            <Badge
+                              variant="outline"
+                              className="text-purple-600 border-purple-600"
+                            >
+                              {template.estimatedOpenRate} open rate
+                            </Badge>
+                            <Badge
+                              variant="outline"
+                              className="text-orange-600 border-orange-600"
+                            >
+                              {template.estimatedClickRate} click rate
+                            </Badge>
+                          </div>
                         </div>
+                        <AntButton
+                          type={
+                            selectedEmailTemplate?.subject === template.subject
+                              ? "default"
+                              : "primary"
+                          }
+                          size="large"
+                          onClick={() => handleSelectEmailTemplate(template)}
+                          icon={
+                            selectedEmailTemplate?.subject ===
+                            template.subject ? (
+                              <CheckCircle className="w-4 h-4" />
+                            ) : null
+                          }
+                        >
+                          {selectedEmailTemplate?.subject === template.subject
+                            ? "Selected"
+                            : "Select This Template"}
+                        </AntButton>
                       </div>
-                      <AntButton
-                        type={selectedEmailTemplate?.subject === template.subject ? "default" : "primary"}
-                        size="large"
-                        onClick={() => handleSelectEmailTemplate(template)}
-                        icon={selectedEmailTemplate?.subject === template.subject ? <CheckCircle className="w-4 h-4" /> : null}
-                      >
-                        {selectedEmailTemplate?.subject === template.subject ? 'Selected' : 'Select This Template'}
-                      </AntButton>
-                    </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <strong className="text-sm text-gray-600">Subject Line:</strong>
-                        <div className="mt-2 p-3 bg-gray-50 rounded-lg text-sm font-medium">
-                          {template.subject}
-                        </div>
-                      </div>
-                      <div>
-                        <strong className="text-sm text-gray-600">Template Details:</strong>
-                        <div className="mt-2 text-sm text-gray-700 space-y-2">
-                          <div>Tone: <span className="font-medium capitalize">{template.tone}</span></div>
-                          <div>Call to Action: <span className="font-medium">{template.callToAction}</span></div>
-                          <div>Reading Time: <span className="font-medium">30-45 seconds</span></div>
-                          <div>Variables: <span className="font-medium">{template.variables?.length || 0} dynamic fields</span></div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <div className="grid grid-cols-3 gap-4 text-center">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                          <div className="text-xs text-gray-500">Personalization Level</div>
-                          <div className="font-medium text-green-600">High</div>
+                          <strong className="text-sm text-gray-600">
+                            Subject Line:
+                          </strong>
+                          <div className="mt-2 p-3 bg-gray-50 rounded-lg text-sm font-medium">
+                            {template.subject}
+                          </div>
                         </div>
                         <div>
-                          <div className="text-xs text-gray-500">Mobile Optimized</div>
-                          <div className="font-medium text-green-600">Yes</div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-gray-500">Spam Score</div>
-                          <div className="font-medium text-green-600">Low</div>
+                          <strong className="text-sm text-gray-600">
+                            Template Details:
+                          </strong>
+                          <div className="mt-2 text-sm text-gray-700 space-y-2">
+                            <div>
+                              Tone:{" "}
+                              <span className="font-medium capitalize">
+                                {template.tone}
+                              </span>
+                            </div>
+                            <div>
+                              Call to Action:{" "}
+                              <span className="font-medium">
+                                {template.callToAction}
+                              </span>
+                            </div>
+                            <div>
+                              Reading Time:{" "}
+                              <span className="font-medium">30-45 seconds</span>
+                            </div>
+                            <div>
+                              Variables:{" "}
+                              <span className="font-medium">
+                                {template.variables?.length || 0} dynamic fields
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {template.variables && template.variables.length > 0 && (
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <div className="grid grid-cols-3 gap-4 text-center">
+                          <div>
+                            <div className="text-xs text-gray-500">
+                              Personalization Level
+                            </div>
+                            <div className="font-medium text-green-600">
+                              High
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-gray-500">
+                              Mobile Optimized
+                            </div>
+                            <div className="font-medium text-green-600">
+                              Yes
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-gray-500">
+                              Spam Score
+                            </div>
+                            <div className="font-medium text-green-600">
+                              Low
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {template.variables && template.variables.length > 0 && (
+                        <div>
+                          <strong className="text-sm text-gray-600">
+                            Dynamic Variables:
+                          </strong>
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {template.variables.map(
+                              (variable: string, i: number) => (
+                                <Badge
+                                  key={i}
+                                  variant="outline"
+                                  className="text-blue-600 border-blue-600"
+                                >
+                                  {variable}
+                                </Badge>
+                              ),
+                            )}
+                          </div>
+                        </div>
+                      )}
+
                       <div>
-                        <strong className="text-sm text-gray-600">Dynamic Variables:</strong>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {template.variables.map((variable: string, i: number) => (
-                            <Badge key={i} variant="outline" className="text-blue-600 border-blue-600">{variable}</Badge>
-                          ))}
+                        <div className="flex justify-between items-center mb-3">
+                          <strong className="text-sm text-gray-600">
+                            Email Preview:
+                          </strong>
+                          <div className="flex space-x-2">
+                            <AntButton
+                              size="small"
+                              ghost
+                              icon={<Eye className="w-3 h-3" />}
+                            >
+                              Full Preview
+                            </AntButton>
+                            <AntButton
+                              size="small"
+                              ghost
+                              icon={<Send className="w-3 h-3" />}
+                            >
+                              Test Send
+                            </AntButton>
+                          </div>
                         </div>
-                      </div>
-                    )}
-
-                    <div>
-                      <div className="flex justify-between items-center mb-3">
-                        <strong className="text-sm text-gray-600">Email Preview:</strong>
-                        <div className="flex space-x-2">
-                          <AntButton size="small" ghost icon={<Eye className="w-3 h-3" />}>
-                            Full Preview
-                          </AntButton>
-                          <AntButton size="small" ghost icon={<Send className="w-3 h-3" />}>
-                            Test Send
-                          </AntButton>
+                        <div className="p-4 bg-white border rounded-lg shadow-sm max-h-80 overflow-y-auto">
+                          <div
+                            className="email-preview"
+                            dangerouslySetInnerHTML={{
+                              __html: template.htmlContent,
+                            }}
+                          />
                         </div>
-                      </div>
-                      <div className="p-4 bg-white border rounded-lg shadow-sm max-h-80 overflow-y-auto">
-                        <div className="email-preview" dangerouslySetInnerHTML={{ __html: template.htmlContent }} />
                       </div>
                     </div>
-                  </div>
-                </TabsContent>
-              ))}
+                  </TabsContent>
+                ),
+              )}
             </ShadcnTabs>
           </div>
         )}
@@ -1937,7 +2102,7 @@ export default function CampaignManager() {
         onCancel={() => {
           setMailModalVisible(false);
           setSelectedCampaignForMail(null);
-          setRecipientEmail('');
+          setRecipientEmail("");
         }}
         footer={[
           <AntButton key="cancel" onClick={() => setMailModalVisible(false)}>
@@ -1949,25 +2114,33 @@ export default function CampaignManager() {
             icon={<Send className="w-4 h-4" />}
             onClick={handleSendMail}
             loading={sendingMail}
-            disabled={!recipientEmail || !selectedCampaignForMail?.comms.emailTemplateId}
+            disabled={
+              !recipientEmail || !selectedCampaignForMail?.comms.emailTemplateId
+            }
           >
             Send Mail
-          </AntButton>
+          </AntButton>,
         ]}
         width={800}
       >
         {selectedCampaignForMail && (
           <div className="space-y-6">
             <div className="bg-blue-50 p-4 rounded-lg">
-              <h4 className="font-medium text-blue-900 mb-2">Campaign Details</h4>
+              <h4 className="font-medium text-blue-900 mb-2">
+                Campaign Details
+              </h4>
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
                   <span className="text-gray-600">Campaign:</span>
-                  <div className="font-medium">{selectedCampaignForMail.campaignName}</div>
+                  <div className="font-medium">
+                    {selectedCampaignForMail.campaignName}
+                  </div>
                 </div>
                 <div>
                   <span className="text-gray-600">Code:</span>
-                  <div className="font-medium">{selectedCampaignForMail.campaignCode}</div>
+                  <div className="font-medium">
+                    {selectedCampaignForMail.campaignCode}
+                  </div>
                 </div>
                 <div>
                   <span className="text-gray-600">Offer:</span>
@@ -1981,7 +2154,12 @@ export default function CampaignManager() {
                 </div>
                 <div>
                   <span className="text-gray-600">Status:</span>
-                  <AntBadge status={getStatusColor(selectedCampaignForMail.status) as any} text={selectedCampaignForMail.status} />
+                  <AntBadge
+                    status={
+                      getStatusColor(selectedCampaignForMail.status) as any
+                    }
+                    text={selectedCampaignForMail.status}
+                  />
                 </div>
               </div>
             </div>
@@ -1989,20 +2167,35 @@ export default function CampaignManager() {
             {selectedCampaignForMail.comms.emailTemplateId ? (
               <div className="space-y-4">
                 <div>
-                  <strong className="text-sm text-gray-600 mb-3 block">Email Template Preview:</strong>
+                  <strong className="text-sm text-gray-600 mb-3 block">
+                    Email Template Preview:
+                  </strong>
                   <div className="border rounded-lg p-4 bg-white max-h-80 overflow-y-auto">
                     <div className="mb-4 pb-3 border-b">
                       <div className="text-sm text-gray-500 mb-1">Subject:</div>
                       <div className="font-medium text-gray-900">
-                        🎯 Exclusive {selectedCampaignForMail.offer.type === "PERCENT"
+                        🎯 Exclusive{" "}
+                        {selectedCampaignForMail.offer.type === "PERCENT"
                           ? `${selectedCampaignForMail.offer.value}% discount`
                           : selectedCampaignForMail.offer.type === "AMOUNT"
                             ? `$${selectedCampaignForMail.offer.value} off`
-                            : `special price of $${selectedCampaignForMail.offer.specialPrice}`} on {
-                              [...(selectedCampaignForMail.products.ancillaries || []), ...(selectedCampaignForMail.products.bundles || [])].length > 0
-                                ? [...(selectedCampaignForMail.products.ancillaries || []), ...(selectedCampaignForMail.products.bundles || [])].slice(0, 2).join(", ")
-                                : "travel services"
-                            } - Limited Time!
+                            : `special price of $${selectedCampaignForMail.offer.specialPrice}`}{" "}
+                        on{" "}
+                        {[
+                          ...(selectedCampaignForMail.products.ancillaries ||
+                            []),
+                          ...(selectedCampaignForMail.products.bundles || []),
+                        ].length > 0
+                          ? [
+                              ...(selectedCampaignForMail.products
+                                .ancillaries || []),
+                              ...(selectedCampaignForMail.products.bundles ||
+                                []),
+                            ]
+                              .slice(0, 2)
+                              .join(", ")
+                          : "travel services"}{" "}
+                        - Limited Time!
                       </div>
                     </div>
                     <div
@@ -2019,15 +2212,29 @@ export default function CampaignManager() {
                               <div style="background: #f8f9ff; border-left: 4px solid #667eea; padding: 20px; margin: 20px 0;">
                                 <h3 style="color: #667eea; margin: 0 0 10px;">🎉 Special Offer</h3>
                                 <p style="font-size: 18px; font-weight: bold; color: #333; margin: 0;">
-                                  Get ${selectedCampaignForMail.offer.type === "PERCENT"
-                                    ? `${selectedCampaignForMail.offer.value}% discount`
-                                    : selectedCampaignForMail.offer.type === "AMOUNT"
-                                      ? `$${selectedCampaignForMail.offer.value} off`
-                                      : `special price of $${selectedCampaignForMail.offer.specialPrice}`} on ${
-                                        [...(selectedCampaignForMail.products.ancillaries || []), ...(selectedCampaignForMail.products.bundles || [])].length > 0
-                                          ? [...(selectedCampaignForMail.products.ancillaries || []), ...(selectedCampaignForMail.products.bundles || [])].join(", ")
-                                          : "our premium travel services"
-                                      }
+                                  Get ${
+                                    selectedCampaignForMail.offer.type ===
+                                    "PERCENT"
+                                      ? `${selectedCampaignForMail.offer.value}% discount`
+                                      : selectedCampaignForMail.offer.type ===
+                                          "AMOUNT"
+                                        ? `$${selectedCampaignForMail.offer.value} off`
+                                        : `special price of $${selectedCampaignForMail.offer.specialPrice}`
+                                  } on ${
+                                    [
+                                      ...(selectedCampaignForMail.products
+                                        .ancillaries || []),
+                                      ...(selectedCampaignForMail.products
+                                        .bundles || []),
+                                    ].length > 0
+                                      ? [
+                                          ...(selectedCampaignForMail.products
+                                            .ancillaries || []),
+                                          ...(selectedCampaignForMail.products
+                                            .bundles || []),
+                                        ].join(", ")
+                                      : "our premium travel services"
+                                  }
                                 </p>
                               </div>
                               <p style="color: #666; line-height: 1.6;">
@@ -2047,7 +2254,7 @@ export default function CampaignManager() {
                               <p>Best regards,<br>The OfferSense Team</p>
                             </div>
                           </div>
-                        `
+                        `,
                       }}
                     />
                   </div>
@@ -2096,17 +2303,20 @@ export default function CampaignManager() {
         open={whatsappPreviewVisible}
         onCancel={() => setWhatsappPreviewVisible(false)}
         footer={[
-          <AntButton key="cancel" onClick={() => setWhatsappPreviewVisible(false)}>
+          <AntButton
+            key="cancel"
+            onClick={() => setWhatsappPreviewVisible(false)}
+          >
             Cancel
           </AntButton>,
           <AntButton
             key="regenerate"
             icon={<Smartphone className="w-4 h-4" />}
-            onClick={() => handleGenerateTemplate('whatsapp')}
+            onClick={() => handleGenerateTemplate("whatsapp")}
             loading={templateGenerationState.whatsapp.loading}
           >
             Generate New Templates
-          </AntButton>
+          </AntButton>,
         ]}
         width={700}
         className="whatsapp-template-modal"
@@ -2114,13 +2324,18 @@ export default function CampaignManager() {
         {templateGenerationState.whatsapp.templates.length === 0 ? (
           <div className="text-center py-12">
             <Smartphone className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No WhatsApp Templates Generated</h3>
-            <p className="text-gray-500 mb-4">Generate AI-powered WhatsApp templates optimized for mobile engagement</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No WhatsApp Templates Generated
+            </h3>
+            <p className="text-gray-500 mb-4">
+              Generate AI-powered WhatsApp templates optimized for mobile
+              engagement
+            </p>
             <AntButton
               type="primary"
               size="large"
               icon={<Smartphone className="w-4 h-4" />}
-              onClick={() => handleGenerateTemplate('whatsapp')}
+              onClick={() => handleGenerateTemplate("whatsapp")}
               loading={templateGenerationState.whatsapp.loading}
             >
               Generate WhatsApp Templates
@@ -2130,141 +2345,254 @@ export default function CampaignManager() {
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-500">
-                {templateGenerationState.whatsapp.templates.length} templates available
+                {templateGenerationState.whatsapp.templates.length} templates
+                available
               </span>
             </div>
 
             <ShadcnTabs defaultValue="0" className="w-full">
               <TabsList className="grid w-full grid-cols-3">
-                {templateGenerationState.whatsapp.templates.map((template, index) => (
-                  <TabsTrigger key={index} value={index.toString()} className="flex items-center space-x-2">
-                    <span>Template {index + 1}</span>
-                    {selectedWhatsappTemplate?.message === template.message && (
-                      <CheckCircle className="w-3 h-3 text-green-600" />
-                    )}
-                  </TabsTrigger>
-                ))}
+                {templateGenerationState.whatsapp.templates.map(
+                  (template, index) => (
+                    <TabsTrigger
+                      key={index}
+                      value={index.toString()}
+                      className="flex items-center space-x-2"
+                    >
+                      <span>Template {index + 1}</span>
+                      {selectedWhatsappTemplate?.message ===
+                        template.message && (
+                        <CheckCircle className="w-3 h-3 text-green-600" />
+                      )}
+                    </TabsTrigger>
+                  ),
+                )}
               </TabsList>
 
-              {templateGenerationState.whatsapp.templates.map((template, index) => (
-                <TabsContent key={index} value={index.toString()} className="mt-6">
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h4 className="font-medium text-gray-900 text-lg mb-2">{template.name}</h4>
-                        <div className="flex items-center space-x-2 mb-3">
-                          <Badge variant="outline" className="text-green-600 border-green-600">{template.style}</Badge>
-                          <Badge variant="outline" className="text-purple-600 border-purple-600">{template.estimatedDeliveryRate} delivery</Badge>
-                          <Badge variant="outline" className="text-orange-600 border-orange-600">{template.estimatedReadRate} read rate</Badge>
+              {templateGenerationState.whatsapp.templates.map(
+                (template, index) => (
+                  <TabsContent
+                    key={index}
+                    value={index.toString()}
+                    className="mt-6"
+                  >
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-gray-900 text-lg mb-2">
+                            {template.name}
+                          </h4>
+                          <div className="flex items-center space-x-2 mb-3">
+                            <Badge
+                              variant="outline"
+                              className="text-green-600 border-green-600"
+                            >
+                              {template.style}
+                            </Badge>
+                            <Badge
+                              variant="outline"
+                              className="text-purple-600 border-purple-600"
+                            >
+                              {template.estimatedDeliveryRate} delivery
+                            </Badge>
+                            <Badge
+                              variant="outline"
+                              className="text-orange-600 border-orange-600"
+                            >
+                              {template.estimatedReadRate} read rate
+                            </Badge>
+                          </div>
                         </div>
+                        <AntButton
+                          type={
+                            selectedWhatsappTemplate?.message ===
+                            template.message
+                              ? "default"
+                              : "primary"
+                          }
+                          size="large"
+                          onClick={() => handleSelectWhatsappTemplate(template)}
+                          icon={
+                            selectedWhatsappTemplate?.message ===
+                            template.message ? (
+                              <CheckCircle className="w-4 h-4" />
+                            ) : null
+                          }
+                        >
+                          {selectedWhatsappTemplate?.message ===
+                          template.message
+                            ? "Selected"
+                            : "Select This Template"}
+                        </AntButton>
                       </div>
-                      <AntButton
-                        type={selectedWhatsappTemplate?.message === template.message ? "default" : "primary"}
-                        size="large"
-                        onClick={() => handleSelectWhatsappTemplate(template)}
-                        icon={selectedWhatsappTemplate?.message === template.message ? <CheckCircle className="w-4 h-4" /> : null}
-                      >
-                        {selectedWhatsappTemplate?.message === template.message ? 'Selected' : 'Select This Template'}
-                      </AntButton>
-                    </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <strong className="text-sm text-gray-600">Message Length:</strong>
-                        <div className={`mt-2 p-3 bg-gray-50 rounded-lg text-sm ${template.message.length > 160 ? 'border-l-4 border-orange-500' : 'border-l-4 border-green-500'}`}>
-                          {template.message.length} characters
-                          {template.message.length > 160 && <div className="text-orange-600 mt-1">(May be split into multiple messages)</div>}
-                        </div>
-                      </div>
-                      <div>
-                        <strong className="text-sm text-gray-600">Template Details:</strong>
-                        <div className="mt-2 text-sm text-gray-700 space-y-2">
-                          <div>Style: <span className="font-medium capitalize">{template.style}</span></div>
-                          <div>Delivery Rate: <span className="font-medium">{template.estimatedDeliveryRate}</span></div>
-                          <div>Read Rate: <span className="font-medium">{template.estimatedReadRate}</span></div>
-                          <div>Variables: <span className="font-medium">{template.variables?.length || 0} dynamic fields</span></div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <div className="grid grid-cols-3 gap-4 text-center">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                          <div className="text-xs text-gray-500">Mobile Optimized</div>
-                          <div className="font-medium text-green-600">Yes</div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-gray-500">Character Limit</div>
-                          <div className={`font-medium ${template.message.length > 160 ? 'text-orange-600' : 'text-green-600'}`}>
-                            {template.message.length <= 160 ? 'Within Limit' : 'Over Limit'}
+                          <strong className="text-sm text-gray-600">
+                            Message Length:
+                          </strong>
+                          <div
+                            className={`mt-2 p-3 bg-gray-50 rounded-lg text-sm ${template.message.length > 160 ? "border-l-4 border-orange-500" : "border-l-4 border-green-500"}`}
+                          >
+                            {template.message.length} characters
+                            {template.message.length > 160 && (
+                              <div className="text-orange-600 mt-1">
+                                (May be split into multiple messages)
+                              </div>
+                            )}
                           </div>
                         </div>
                         <div>
-                          <div className="text-xs text-gray-500">Engagement Score</div>
-                          <div className="font-medium text-green-600">High</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {template.variables && template.variables.length > 0 && (
-                      <div>
-                        <strong className="text-sm text-gray-600">Dynamic Variables:</strong>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {template.variables.map((variable: string, i: number) => (
-                            <Badge key={i} variant="outline" className="text-blue-600 border-blue-600">{variable}</Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    <div>
-                      <div className="flex justify-between items-center mb-3">
-                        <strong className="text-sm text-gray-600">WhatsApp Preview:</strong>
-                        <div className="flex space-x-2">
-                          <AntButton size="small" ghost icon={<Eye className="w-3 h-3" />}>
-                            Full Preview
-                          </AntButton>
-                          <AntButton size="small" ghost icon={<Send className="w-3 h-3" />}>
-                            Test Send
-                          </AntButton>
-                        </div>
-                      </div>
-                      {/* Mobile WhatsApp Preview */}
-                      <div className="flex justify-center">
-                        <div className="bg-gray-100 p-4 rounded-lg max-w-sm w-full">
-                          <div className="bg-white rounded-lg shadow-sm">
-                            {/* WhatsApp Header */}
-                            <div className="bg-green-600 text-white p-2 rounded-t-lg flex items-center space-x-2">
-                              <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                                <span className="text-xs font-bold">OS</span>
-                              </div>
-                              <div>
-                                <div className="text-sm font-medium">OfferSense</div>
-                                <div className="text-xs opacity-90">Online</div>
-                              </div>
+                          <strong className="text-sm text-gray-600">
+                            Template Details:
+                          </strong>
+                          <div className="mt-2 text-sm text-gray-700 space-y-2">
+                            <div>
+                              Style:{" "}
+                              <span className="font-medium capitalize">
+                                {template.style}
+                              </span>
                             </div>
-
-                            {/* Message Bubble */}
-                            <div className="p-3">
-                              <div className="bg-green-100 p-3 rounded-lg max-w-full">
-                                <div className="text-sm whitespace-pre-wrap text-gray-800">
-                                  {template.message}
-                                </div>
-                                <div className="text-xs text-gray-500 mt-2 text-right">
-                                  {new Date().toLocaleTimeString('en-US', {
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                  })} ✓✓
-                                </div>
-                              </div>
+                            <div>
+                              Delivery Rate:{" "}
+                              <span className="font-medium">
+                                {template.estimatedDeliveryRate}
+                              </span>
+                            </div>
+                            <div>
+                              Read Rate:{" "}
+                              <span className="font-medium">
+                                {template.estimatedReadRate}
+                              </span>
+                            </div>
+                            <div>
+                              Variables:{" "}
+                              <span className="font-medium">
+                                {template.variables?.length || 0} dynamic fields
+                              </span>
                             </div>
                           </div>
                         </div>
                       </div>
+
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <div className="grid grid-cols-3 gap-4 text-center">
+                          <div>
+                            <div className="text-xs text-gray-500">
+                              Mobile Optimized
+                            </div>
+                            <div className="font-medium text-green-600">
+                              Yes
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-gray-500">
+                              Character Limit
+                            </div>
+                            <div
+                              className={`font-medium ${template.message.length > 160 ? "text-orange-600" : "text-green-600"}`}
+                            >
+                              {template.message.length <= 160
+                                ? "Within Limit"
+                                : "Over Limit"}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-gray-500">
+                              Engagement Score
+                            </div>
+                            <div className="font-medium text-green-600">
+                              High
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {template.variables && template.variables.length > 0 && (
+                        <div>
+                          <strong className="text-sm text-gray-600">
+                            Dynamic Variables:
+                          </strong>
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {template.variables.map(
+                              (variable: string, i: number) => (
+                                <Badge
+                                  key={i}
+                                  variant="outline"
+                                  className="text-blue-600 border-blue-600"
+                                >
+                                  {variable}
+                                </Badge>
+                              ),
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      <div>
+                        <div className="flex justify-between items-center mb-3">
+                          <strong className="text-sm text-gray-600">
+                            WhatsApp Preview:
+                          </strong>
+                          <div className="flex space-x-2">
+                            <AntButton
+                              size="small"
+                              ghost
+                              icon={<Eye className="w-3 h-3" />}
+                            >
+                              Full Preview
+                            </AntButton>
+                            <AntButton
+                              size="small"
+                              ghost
+                              icon={<Send className="w-3 h-3" />}
+                            >
+                              Test Send
+                            </AntButton>
+                          </div>
+                        </div>
+                        {/* Mobile WhatsApp Preview */}
+                        <div className="flex justify-center">
+                          <div className="bg-gray-100 p-4 rounded-lg max-w-sm w-full">
+                            <div className="bg-white rounded-lg shadow-sm">
+                              {/* WhatsApp Header */}
+                              <div className="bg-green-600 text-white p-2 rounded-t-lg flex items-center space-x-2">
+                                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                                  <span className="text-xs font-bold">OS</span>
+                                </div>
+                                <div>
+                                  <div className="text-sm font-medium">
+                                    OfferSense
+                                  </div>
+                                  <div className="text-xs opacity-90">
+                                    Online
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Message Bubble */}
+                              <div className="p-3">
+                                <div className="bg-green-100 p-3 rounded-lg max-w-full">
+                                  <div className="text-sm whitespace-pre-wrap text-gray-800">
+                                    {template.message}
+                                  </div>
+                                  <div className="text-xs text-gray-500 mt-2 text-right">
+                                    {new Date().toLocaleTimeString("en-US", {
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    })}{" "}
+                                    ✓✓
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </TabsContent>
-              ))}
+                  </TabsContent>
+                ),
+              )}
             </ShadcnTabs>
           </div>
         )}

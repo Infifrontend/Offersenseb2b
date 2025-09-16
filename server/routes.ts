@@ -2524,7 +2524,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get aggregated metrics from database or generate mock data if none exists
       const metrics = await storage.getCampaignMetrics(campaignCode, filters);
-      
+
       // If no metrics exist, create sample data for demonstration
       if (metrics.length === 0) {
         // Generate sample metrics data
@@ -2534,7 +2534,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const clicked = Math.floor(opened * 0.15); // 15% click rate
         const purchased = Math.floor(clicked * 0.08); // 8% purchase rate
         const revenueUplift = Math.floor(Math.random() * 50000) + 10000;
-        
+
         const aggregatedMetrics = {
           sent,
           delivered,
@@ -4377,22 +4377,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const campaign = campaigns[0];
 
-      // In a real implementation, you would:
-      // 1. Retrieve the email template from your template system
-      // 2. Populate the template with campaign data
-      // 3. Send the email using your email service (SendGrid, AWS SES, etc.)
-      // 4. Record the delivery in campaign_deliveries table
+      // Create delivery record first
+      const deliveryData = {
+        campaignCode,
+        bookingReference: `DEMO-${Date.now()}`,
+        agentId: "demo-agent",
+        recipientEmail,
+        deliveryChannel: "EMAIL",
+        deliveryStatus: "PENDING",
+      };
 
-      // Create email transporter using environment variables
-      const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST || "smtp.gmail.com",
-        port: parseInt(process.env.SMTP_PORT || "587"),
-        secure: process.env.SMTP_SECURE === "true",
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
-        },
-      });
+      const delivery = await storage.insertCampaignDelivery(deliveryData);
 
       // Generate email content
       const emailContent = {
@@ -4416,10 +4411,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
               </div>
               <p>Valid from ${campaign.lifecycle.startDate} to ${campaign.lifecycle.endDate}</p>
               <div style="text-align: center; margin: 30px 0;">
-                <a href="#" style="background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px;">
+                <a href="/api/campaigns/track/${delivery.id}/click" style="background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px;">
                   Claim Your Offer
                 </a>
               </div>
+              <img src="/api/campaigns/track/${delivery.id}/open" width="1" height="1" style="display: none;" />
             </div>
             <div style="background: #f5f5f5; padding: 20px; text-align: center; color: #666;">
               <p>Best regards,<br>The OfferSense Team</p>
@@ -4446,6 +4442,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         `,
       };
 
+      // Create email transporter using environment variables
+      const transporter = nodemailer.createTransporter({
+        host: process.env.SMTP_HOST || "smtp.gmail.com",
+        port: parseInt(process.env.SMTP_PORT || "587"),
+        secure: process.env.SMTP_SECURE === "true",
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      });
+
       // Send email using Nodemailer
       const mailOptions = {
         from: `"OfferSense Campaign" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
@@ -4461,22 +4468,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
           `Email sent successfully to ${recipientEmail}:`,
           info.messageId,
         );
+
+        // Record SENT event
+        await storage.recordCampaignEvent(campaignCode, delivery.id, "SENT");
+
+        // Simulate DELIVERED event after a short delay (in real implementation, this would come from email service webhook)
+        setTimeout(async () => {
+          try {
+            await storage.recordCampaignEvent(campaignCode, delivery.id, "DELIVERED");
+          } catch (error) {
+            console.error("Error recording delivered event:", error);
+          }
+        }, 2000);
+
       } catch (emailError: any) {
         console.error(`Failed to send email to ${recipientEmail}:`, emailError);
         throw new Error(`Email sending failed: ${emailError.message}`);
       }
-
-      // Record the delivery
-      const deliveryData = {
-        campaignCode,
-        bookingReference: `DEMO-${Date.now()}`,
-        agentId: "demo-agent",
-        deliveryChannel: "EMAIL",
-        deliveryStatus: "SENT",
-        sentAt: new Date(),
-      };
-
-      await storage.insertCampaignDelivery(deliveryData);
 
       res.json({
         success: true,
@@ -4485,13 +4493,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
           subject: emailContent.subject,
           preview: emailContent.htmlBody.substring(0, 200) + "...",
         },
-        deliveryId: deliveryData.bookingReference,
+        deliveryId: delivery.id,
       });
     } catch (error: any) {
       console.error("Email sending error:", error);
       res
         .status(500)
         .json({ message: "Failed to send email", error: error.message });
+    }
+  });
+
+  // Track email open
+  app.get("/api/campaigns/track/:deliveryId/open", async (req, res) => {
+    try {
+      const { deliveryId } = req.params;
+
+      // Get delivery record
+      const delivery = await storage.getCampaignDeliveryById(deliveryId);
+      if (delivery && !delivery.openedAt) {
+        await storage.recordCampaignEvent(delivery.campaignCode, deliveryId, "OPENED");
+      }
+
+      // Return 1x1 transparent pixel
+      const pixel = Buffer.from([
+        0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x01, 0x00, 0x01, 0x00,
+        0x80, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x21,
+        0xF9, 0x04, 0x01, 0x00, 0x00, 0x00, 0x00, 0x2C, 0x00, 0x00,
+        0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x02, 0x02, 0x04,
+        0x01, 0x00, 0x3B
+      ]);
+
+      res.set('Content-Type', 'image/gif');
+      res.set('Content-Length', pixel.length.toString());
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.end(pixel);
+    } catch (error: any) {
+      console.error("Error tracking email open:", error);
+      res.status(200).end(); // Don't fail the email display
+    }
+  });
+
+  // Track email click
+  app.get("/api/campaigns/track/:deliveryId/click", async (req, res) => {
+    try {
+      const { deliveryId } = req.params;
+
+      // Get delivery record
+      const delivery = await storage.getCampaignDeliveryById(deliveryId);
+      if (delivery && !delivery.clickedAt) {
+        await storage.recordCampaignEvent(delivery.campaignCode, deliveryId, "CLICKED");
+      }
+
+      // Redirect to offer page or landing page
+      res.redirect("https://cleartrip.com/offers");
+    } catch (error: any) {
+      console.error("Error tracking email click:", error);
+      res.redirect("https://cleartrip.com/offers"); // Still redirect even if tracking fails
+    }
+  });
+
+  // Record purchase event
+  app.post("/api/campaigns/track/:deliveryId/purchase", async (req, res) => {
+    try {
+      const { deliveryId } = req.params;
+      const { purchaseAmount } = req.body;
+
+      // Get delivery record
+      const delivery = await storage.getCampaignDeliveryById(deliveryId);
+      if (delivery) {
+        await storage.recordCampaignEvent(delivery.campaignCode, deliveryId, "PURCHASED", {
+          purchaseAmount: parseFloat(purchaseAmount) || 0
+        });
+      }
+
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Error tracking purchase:", error);
+      res.status(500).json({ message: "Failed to track purchase", error: error.message });
     }
   });
 

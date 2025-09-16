@@ -1561,11 +1561,11 @@ export class DatabaseStorage implements IStorage {
         .set({ ...tierData, updatedAt: new Date() })
         .where(eq(agentTiers.id, id))
         .returning();
-      
+
       if (!tier) {
         throw new Error('Tier not found');
       }
-      
+
       return tier;
     } catch (error: any) {
       // Handle unique constraint violation
@@ -1940,21 +1940,24 @@ export class DatabaseStorage implements IStorage {
 
   // Campaign Metrics operations
   async getCampaignMetrics(campaignCode: string, filters: any = {}): Promise<CampaignMetrics[]> {
-    let query = this.db.select().from(campaignMetrics).where(eq(campaignMetrics.campaignCode, campaignCode));
+    try {
+      let query = this.db
+        .select()
+        .from(campaignMetrics)
+        .where(eq(campaignMetrics.campaignCode, campaignCode));
 
-    const conditions = [];
-    if (filters.startDate) {
-      conditions.push(gte(campaignMetrics.date, filters.startDate));
-    }
-    if (filters.endDate) {
-      conditions.push(lte(campaignMetrics.date, filters.endDate));
-    }
+      if (filters?.startDate) {
+        query = query.where(gte(campaignMetrics.date, filters.startDate));
+      }
+      if (filters?.endDate) {
+        query = query.where(lte(campaignMetrics.date, filters.endDate));
+      }
 
-    if (conditions.length > 0) {
-      query = query.where(and(eq(campaignMetrics.campaignCode, campaignCode), ...conditions));
+      return await query;
+    } catch (error: any) {
+      console.error("Error fetching campaign metrics:", error);
+      throw new Error(`Failed to fetch campaign metrics: ${error.message}`);
     }
-
-    return await query.orderBy(desc(campaignMetrics.date));
   }
 
   async insertCampaignMetrics(metricsData: InsertCampaignMetrics): Promise<CampaignMetrics> {
@@ -1962,13 +1965,74 @@ export class DatabaseStorage implements IStorage {
     return metrics;
   }
 
-  async updateCampaignMetrics(campaignCode: string, date: string, metricsData: Partial<InsertCampaignMetrics>): Promise<CampaignMetrics> {
-    const [metrics] = await this.db
-      .update(campaignMetrics)
-      .set(metricsData)
-      .where(and(eq(campaignMetrics.campaignCode, campaignCode), eq(campaignMetrics.date, date)))
-      .returning();
-    return metrics;
+  // Update campaign metrics counts
+  async updateCampaignMetrics(campaignCode: string, metricType: string, amount: number = 1): Promise<void> {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+
+      // Check if metrics record exists for today
+      const existingMetrics = await this.db
+        .select()
+        .from(campaignMetrics)
+        .where(
+          and(
+            eq(campaignMetrics.campaignCode, campaignCode),
+            eq(campaignMetrics.date, today)
+          )
+        )
+        .limit(1);
+
+      if (existingMetrics.length === 0) {
+        // Create new metrics record for today
+        await this.db.insert(campaignMetrics).values({
+          campaignCode,
+          date: today,
+          sent: metricType === 'sent' ? amount : 0,
+          delivered: metricType === 'delivered' ? amount : 0,
+          opened: metricType === 'opened' ? amount : 0,
+          clicked: metricType === 'clicked' ? amount : 0,
+          purchased: metricType === 'purchased' ? amount : 0,
+          revenueUplift: metricType === 'revenue' ? amount.toString() : "0",
+        });
+      } else {
+        // Update existing metrics record
+        const updateData: any = {};
+
+        switch (metricType) {
+          case 'sent':
+            updateData.sent = sql`${campaignMetrics.sent} + ${amount}`;
+            break;
+          case 'delivered':
+            updateData.delivered = sql`${campaignMetrics.delivered} + ${amount}`;
+            break;
+          case 'opened':
+            updateData.opened = sql`${campaignMetrics.opened} + ${amount}`;
+            break;
+          case 'clicked':
+            updateData.clicked = sql`${campaignMetrics.clicked} + ${amount}`;
+            break;
+          case 'purchased':
+            updateData.purchased = sql`${campaignMetrics.purchased} + ${amount}`;
+            break;
+          case 'revenue':
+            updateData.revenueUplift = sql`${campaignMetrics.revenueUplift} + ${amount}`;
+            break;
+        }
+
+        await this.db
+          .update(campaignMetrics)
+          .set(updateData)
+          .where(
+            and(
+              eq(campaignMetrics.campaignCode, campaignCode),
+              eq(campaignMetrics.date, today)
+            )
+          );
+      }
+    } catch (error: any) {
+      console.error("Error updating campaign metrics:", error);
+      throw new Error(`Failed to update campaign metrics: ${error.message}`);
+    }
   }
 
   // Campaign Delivery operations
@@ -2018,13 +2082,115 @@ export class DatabaseStorage implements IStorage {
     return delivery;
   }
 
-  async recordDeliveryEvent(deliveryId: string, event: string, data?: any) {
-    await this.db.update(campaignDeliveries)
-      .set({
-        [`${event.toLowerCase()}At`]: new Date(),
-        ...(event === "PURCHASED" && data?.amount && { purchaseAmount: data.amount.toString() })
-      })
-      .where(eq(campaignDeliveries.id, deliveryId));
+  // Get campaign delivery by ID
+  async getCampaignDeliveryById(deliveryId: string): Promise<CampaignDelivery | null> {
+    try {
+      const deliveries = await this.db
+        .select()
+        .from(campaignDeliveries)
+        .where(eq(campaignDeliveries.id, deliveryId))
+        .limit(1);
+
+      return deliveries[0] || null;
+    } catch (error: any) {
+      console.error("Error fetching campaign delivery:", error);
+      throw new Error(`Failed to fetch campaign delivery: ${error.message}`);
+    }
+  }
+
+  // Record campaign delivery event
+  async recordCampaignEvent(
+    campaignCode: string, 
+    deliveryId: string, 
+    eventType: string, 
+    data?: any
+  ): Promise<void> {
+    try {
+      const now = new Date();
+
+      // Update delivery record
+      const updateData: any = {};
+      switch (eventType) {
+        case 'SENT':
+          updateData.deliveryStatus = 'SENT';
+          updateData.sentAt = now;
+          break;
+        case 'DELIVERED':
+          updateData.deliveryStatus = 'DELIVERED';
+          updateData.deliveredAt = now;
+          break;
+        case 'OPENED':
+          updateData.openedAt = now;
+          break;
+        case 'CLICKED':
+          updateData.clickedAt = now;
+          break;
+        case 'PURCHASED':
+          updateData.purchasedAt = now;
+          if (data?.purchaseAmount) {
+            updateData.purchaseAmount = data.purchaseAmount.toString();
+          }
+          break;
+      }
+
+      if (Object.keys(updateData).length > 0) {
+        await this.db
+          .update(campaignDeliveries)
+          .set(updateData)
+          .where(eq(campaignDeliveries.id, deliveryId));
+      }
+
+      // Update campaign metrics
+      const metricMap: Record<string, string> = {
+        'SENT': 'sent',
+        'DELIVERED': 'delivered',
+        'OPENED': 'opened',
+        'CLICKED': 'clicked',
+        'PURCHASED': 'purchased'
+      };
+
+      if (metricMap[eventType]) {
+        await this.updateCampaignMetrics(campaignCode, metricMap[eventType]);
+      }
+
+      if (eventType === 'PURCHASED' && data?.purchaseAmount) {
+        await this.updateCampaignMetrics(campaignCode, 'revenue', data.purchaseAmount);
+      }
+    } catch (error: any) {
+      console.error("Error recording campaign event:", error);
+      throw new Error(`Failed to record campaign event: ${error.message}`);
+    }
+  }
+
+  // Record delivery event (opened, clicked, purchased)
+  async recordDeliveryEvent(deliveryId: string, event: string, data?: any): Promise<void> {
+    try {
+      const updateData: any = {};
+      const now = new Date();
+
+      switch (event) {
+        case "OPENED":
+          updateData.openedAt = now;
+          break;
+        case "CLICKED":
+          updateData.clickedAt = now;
+          break;
+        case "PURCHASED":
+          updateData.purchasedAt = now;
+          if (data?.purchaseAmount) {
+            updateData.purchaseAmount = data.purchaseAmount.toString();
+          }
+          break;
+      }
+
+      await this.db
+        .update(campaignDeliveries)
+        .set(updateData)
+        .where(eq(campaignDeliveries.id, deliveryId));
+    } catch (error: any) {
+      console.error("Error recording delivery event:", error);
+      throw new Error(`Failed to record delivery event: ${error.message}`);
+    }
   }
 
   // Simulation methods

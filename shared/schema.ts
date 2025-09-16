@@ -646,9 +646,8 @@ export const campaignDeliveries = pgTable("campaign_deliveries", {
   campaignCode: varchar("campaign_code", { length: 50 }).notNull(),
   bookingReference: varchar("booking_reference", { length: 50 }).notNull(),
   agentId: varchar("agent_id", { length: 50 }).notNull(),
-  deliveryChannel: varchar("delivery_channel", { length: 20 }).notNull(),
-  deliveryStatus: varchar("delivery_status", { length: 20 }).default("PENDING"),
-  recipientEmail: varchar("recipient_email", { length: 255 }),
+  deliveryChannel: varchar("delivery_channel", { length: 20 }).notNull(), // PORTAL | EMAIL | WHATSAPP | API
+  deliveryStatus: varchar("delivery_status", { length: 20 }).default("PENDING"), // PENDING | SENT | DELIVERED | FAILED
   sentAt: timestamp("sent_at"),
   deliveredAt: timestamp("delivered_at"),
   openedAt: timestamp("opened_at"),

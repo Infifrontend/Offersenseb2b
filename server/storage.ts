@@ -232,14 +232,11 @@ export interface IStorage {
   getCampaignMetrics(campaignCode: string, filters?: any): Promise<CampaignMetrics[]>;
   insertCampaignMetrics(metricsData: InsertCampaignMetrics): Promise<CampaignMetrics>;
   updateCampaignMetrics(campaignCode: string, date: string, metricsData: Partial<InsertCampaignMetrics>): Promise<CampaignMetrics>;
-  updateCampaignMetricsIncrement(campaignCode: string, date: string, increments: any): Promise<void>;
 
   // Campaign Delivery operations
   getCampaignDeliveries(campaignCode: string, filters?: any): Promise<CampaignDelivery[]>;
   insertCampaignDelivery(deliveryData: InsertCampaignDelivery): Promise<CampaignDelivery>;
-  getCampaignDeliveryById(id: string): Promise<CampaignDelivery | null>;
   updateDeliveryStatus(id: string, status: string, timestamp?: Date): Promise<CampaignDelivery>;
-  updateDeliveryPurchase(id: string, amount: number, timestamp: Date): Promise<CampaignDelivery>;
   recordDeliveryEvent(deliveryId: string, event: string, data?: any): Promise<void>;
 
   // Simulation methods
@@ -1564,11 +1561,11 @@ export class DatabaseStorage implements IStorage {
         .set({ ...tierData, updatedAt: new Date() })
         .where(eq(agentTiers.id, id))
         .returning();
-
+      
       if (!tier) {
         throw new Error('Tier not found');
       }
-
+      
       return tier;
     } catch (error: any) {
       // Handle unique constraint violation
@@ -2001,152 +1998,34 @@ export class DatabaseStorage implements IStorage {
     return delivery;
   }
 
-  async getCampaignDeliveryById(id: string): Promise<CampaignDelivery | null> {
-    try {
-      const result = await this.db
-        .select()
-        .from(campaignDeliveries)
-        .where(eq(campaignDeliveries.bookingReference, id))
-        .limit(1);
-
-      return result.length > 0 ? result[0] : null;
-    } catch (error) {
-      console.error("Error fetching campaign delivery by ID:", error);
-      return null;
-    }
-  }
-
   async updateDeliveryStatus(id: string, status: string, timestamp?: Date): Promise<CampaignDelivery> {
     const updateData: any = { deliveryStatus: status };
 
-    if (timestamp) {
-      if (status === "SENT") updateData.sentAt = timestamp;
-      if (status === "DELIVERED") updateData.deliveredAt = timestamp;
+    switch (status) {
+      case 'SENT':
+        updateData.sentAt = timestamp || new Date();
+        break;
+      case 'DELIVERED':
+        updateData.deliveredAt = timestamp || new Date();
+        break;
     }
 
-    const result = await this.db
+    const [delivery] = await this.db
       .update(campaignDeliveries)
       .set(updateData)
-      .where(eq(campaignDeliveries.bookingReference, id))
+      .where(eq(campaignDeliveries.id, id))
       .returning();
-
-    if (!result.length) {
-      throw new Error("Delivery not found");
-    }
-
-    return result[0];
+    return delivery;
   }
 
-  async updateDeliveryPurchase(id: string, amount: number, timestamp: Date): Promise<CampaignDelivery> {
-    const result = await this.db
-      .update(campaignDeliveries)
+  async recordDeliveryEvent(deliveryId: string, event: string, data?: any) {
+    await this.db.update(campaignDeliveries)
       .set({
-        purchasedAt: timestamp,
-        purchaseAmount: amount.toString()
+        [`${event.toLowerCase()}At`]: new Date(),
+        ...(event === "PURCHASED" && data?.amount && { purchaseAmount: data.amount.toString() })
       })
-      .where(eq(campaignDeliveries.bookingReference, id))
-      .returning();
-
-    if (!result.length) {
-      throw new Error("Delivery not found");
-    }
-
-    return result[0];
+      .where(eq(campaignDeliveries.id, deliveryId));
   }
-
-  async recordDeliveryEvent(deliveryId: string, event: string, data?: any): Promise<void> {
-    const updateData: any = {};
-    const timestamp = new Date();
-
-    switch (event) {
-      case "OPENED":
-        updateData.openedAt = timestamp;
-        break;
-      case "CLICKED":
-        updateData.clickedAt = timestamp;
-        break;
-      case "PURCHASED":
-        updateData.purchasedAt = timestamp;
-        if (data?.amount) {
-          updateData.purchaseAmount = data.amount.toString();
-        }
-        break;
-    }
-
-    await this.db
-      .update(campaignDeliveries)
-      .set(updateData)
-      .where(eq(campaignDeliveries.bookingReference, deliveryId));
-  }
-
-  async updateCampaignMetricsIncrement(campaignCode: string, date: string, increments: any): Promise<void> {
-    try {
-      // First, try to get existing metrics for this date
-      const existing = await this.db
-        .select()
-        .from(campaignMetrics)
-        .where(
-          and(
-            eq(campaignMetrics.campaignCode, campaignCode),
-            eq(campaignMetrics.date, date)
-          )
-        )
-        .limit(1);
-
-      if (existing.length > 0) {
-        // Update existing record
-        const current = existing[0];
-        const updateData: any = {};
-
-        if (increments.sent) updateData.sent = (current.sent || 0) + increments.sent;
-        if (increments.delivered) updateData.delivered = (current.delivered || 0) + increments.delivered;
-        if (increments.opened) updateData.opened = (current.opened || 0) + increments.opened;
-        if (increments.clicked) updateData.clicked = (current.clicked || 0) + increments.clicked;
-        if (increments.purchased) updateData.purchased = (current.purchased || 0) + increments.purchased;
-        if (increments.revenueUplift) {
-          const currentRevenue = parseFloat(current.revenueUplift || "0");
-          updateData.revenueUplift = (currentRevenue + increments.revenueUplift).toString();
-        }
-
-        // Calculate attach rate and ROI
-        const newSent = updateData.sent !== undefined ? updateData.sent : (current.sent || 0);
-        const newPurchased = updateData.purchased !== undefined ? updateData.purchased : (current.purchased || 0);
-        const newRevenue = updateData.revenueUplift !== undefined ? parseFloat(updateData.revenueUplift) : parseFloat(current.revenueUplift || "0");
-
-        if (newSent > 0) {
-          updateData.attachRate = ((newPurchased / newSent) * 100).toFixed(2);
-        }
-        if (newRevenue > 0) {
-          updateData.roi = (newRevenue / 1000).toFixed(2); // Assuming $1000 campaign cost
-        }
-
-        await this.db
-          .update(campaignMetrics)
-          .set(updateData)
-          .where(eq(campaignMetrics.id, current.id));
-      } else {
-        // Create new record
-        const newMetrics = {
-          campaignCode,
-          date,
-          sent: increments.sent || 0,
-          delivered: increments.delivered || 0,
-          opened: increments.opened || 0,
-          clicked: increments.clicked || 0,
-          purchased: increments.purchased || 0,
-          revenueUplift: (increments.revenueUplift || 0).toString(),
-          attachRate: increments.sent > 0 ? (((increments.purchased || 0) / increments.sent) * 100).toFixed(2) : "0",
-          roi: increments.revenueUplift > 0 ? (increments.revenueUplift / 1000).toFixed(2) : "0",
-        };
-
-        await this.db.insert(campaignMetrics).values(newMetrics);
-      }
-    } catch (error) {
-      console.error("Error updating campaign metrics:", error);
-      throw error;
-    }
-  }
-
 
   // Simulation methods
   async getSimulations(filters: any = {}): Promise<Simulation[]> {

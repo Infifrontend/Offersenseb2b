@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+
+  offersenseb2b:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /app
+    container_name: offersenseb2b
+    env_file:
+      - .env
+    networks:
+      - sharednet # Use the existing external network
+    environment:
+      NODE_ENV: development
+    ports:
+      - "3000:5000"
+    volumes:
+      - ./:/app/
+      - /app/node_modules
+    command: sh -c "npm run build && npm run dev"
+    # command: ["sleep", "infinity"] # Override the command to do nothing
+
+
+networks:
+  sharednet:
+    external: true

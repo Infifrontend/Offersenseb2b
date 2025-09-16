@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+
+  offersenseb2b:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /app
+    container_name: offersenseb2b
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: development
+    ports:
+      - 3000:5000
+      - 4983:4983
+    volumes:
+      - ./:/app/
+      - /app/node_modules
+    command: npm run dev
+
+  

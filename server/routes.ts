@@ -421,10 +421,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const fares = await storage.getNegotiatedFares(filters);
       res.json(fares);
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to fetch negotiated fares",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch negotiated fares",
+          error: error.message,
+        });
     }
   });
 
@@ -1018,10 +1020,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(fare);
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to update fare status",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to update fare status",
+          error: error.message,
+        });
     }
   });
 
@@ -1046,10 +1050,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rules = await storage.getDynamicDiscountRules(filters);
       res.json(rules);
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to fetch discount rules",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch discount rules",
+          error: error.message,
+        });
     }
   });
 
@@ -1179,10 +1185,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json(rule);
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to update rule status",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to update rule status",
+          error: error.message,
+        });
     }
   });
 
@@ -1207,10 +1215,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rules = await storage.getAirAncillaryRules(filters);
       res.json(rules);
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to fetch air ancillary rules",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch air ancillary rules",
+          error: error.message,
+        });
     }
   });
 
@@ -1334,10 +1344,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json(rule);
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to update rule status",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to update rule status",
+          error: error.message,
+        });
     }
   });
 
@@ -1377,10 +1389,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }, []);
       res.json(products);
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to fetch ancillary products",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch ancillary products",
+          error: error.message,
+        });
     }
   });
 
@@ -1393,10 +1407,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rates = await storage.getNonAirRates(filters);
       res.json(rates);
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to fetch non-air rates",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch non-air rates",
+          error: error.message,
+        });
     }
   });
 
@@ -1472,10 +1488,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 },
               });
             } catch (error: any) {
-              res.status(500).json({
-                message: "Failed to insert rates",
-                error: error.message,
-              });
+              res
+                .status(500)
+                .json({
+                  message: "Failed to insert rates",
+                  error: error.message,
+                });
             }
           });
       } catch (error: any) {
@@ -1527,10 +1545,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rate = await storage.updateNonAirRateStatus(req.params.id, status);
       res.json(rate);
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to update rate status",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to update rate status",
+          error: error.message,
+        });
     }
   });
 
@@ -1555,10 +1575,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rules = await storage.getNonAirMarkupRules(filters);
       res.json(rules);
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to fetch markup rules",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch markup rules",
+          error: error.message,
+        });
     }
   });
 
@@ -1679,10 +1701,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json(rule);
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to update rule status",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to update rule status",
+          error: error.message,
+        });
     }
   });
 
@@ -1815,10 +1839,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rule = await storage.insertBundlePricingRule(validatedData);
       res.status(201).json(rule);
     } catch (error: any) {
-      res.status(400).json({
-        message: "Invalid bundle pricing rule data",
-        error: error.message,
-      });
+      res
+        .status(400)
+        .json({
+          message: "Invalid bundle pricing rule data",
+          error: error.message,
+        });
     }
   });
 
@@ -1862,10 +1888,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         bundleCode: rule.bundleCode,
       });
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to simulate bundle pricing rule",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to simulate bundle pricing rule",
+          error: error.message,
+        });
     }
   });
 
@@ -1880,10 +1908,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(rule);
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to fetch bundle pricing rule",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch bundle pricing rule",
+          error: error.message,
+        });
     }
   });
 
@@ -1897,10 +1927,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json(rule);
     } catch (error: any) {
-      res.status(400).json({
-        message: "Failed to update bundle pricing rule",
-        error: error.message,
-      });
+      res
+        .status(400)
+        .json({
+          message: "Failed to update bundle pricing rule",
+          error: error.message,
+        });
     }
   });
 
@@ -1920,10 +1952,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json(rule);
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to update bundle pricing rule status",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to update bundle pricing rule status",
+          error: error.message,
+        });
     }
   });
 
@@ -1933,10 +1967,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteBundlePricingRule(req.params.id);
       res.status(204).send();
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to delete bundle pricing rule",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to delete bundle pricing rule",
+          error: error.message,
+        });
     }
   });
 
@@ -2024,10 +2060,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const bundle = await storage.updateBundleStatus(req.params.id, status);
       res.json(bundle);
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to update bundle status",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to update bundle status",
+          error: error.message,
+        });
     }
   });
 
@@ -2178,10 +2216,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json(rule);
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to update rule status",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to update rule status",
+          error: error.message,
+        });
     }
   });
 
@@ -2472,10 +2512,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const traces = await storage.getOfferTraces(filters);
       res.json(traces);
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to fetch offer traces",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch offer traces",
+          error: error.message,
+        });
     }
   });
 
@@ -2485,10 +2527,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteOfferTrace(req.params.id);
       res.status(204).send();
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to delete offer trace",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to delete offer trace",
+          error: error.message,
+        });
     }
   });
 
@@ -2571,10 +2615,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const agent = await storage.updateAgentStatus(req.params.id, status);
       res.json(agent);
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to update agent status",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to update agent status",
+          error: error.message,
+        });
     }
   });
 
@@ -2599,10 +2645,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const overrides = await storage.getChannelPricingOverrides(filters);
       res.json(overrides);
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to fetch channel overrides",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch channel overrides",
+          error: error.message,
+        });
     }
   });
 
@@ -2625,10 +2673,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.insertChannelPricingOverride(validatedData);
       res.status(201).json(override);
     } catch (error: any) {
-      res.status(400).json({
-        message: "Invalid channel override data",
-        error: error.message,
-      });
+      res
+        .status(400)
+        .json({
+          message: "Invalid channel override data",
+          error: error.message,
+        });
     }
   });
 
@@ -2638,9 +2688,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { basePrice, currency, overrideId } = req.body;
 
       if (!basePrice || !currency || !overrideId) {
-        return res.status(400).json({
-          message: "basePrice, currency, and overrideId are required",
-        });
+        return res
+          .status(400)
+          .json({
+            message: "basePrice, currency, and overrideId are required",
+          });
       }
 
       const override = await storage.getChannelPricingOverrideById(overrideId);
@@ -2671,10 +2723,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         productScope: override.productScope,
       });
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to simulate channel override",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to simulate channel override",
+          error: error.message,
+        });
     }
   });
 
@@ -2689,10 +2743,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(override);
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to fetch channel override",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch channel override",
+          error: error.message,
+        });
     }
   });
 
@@ -2706,10 +2762,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json(override);
     } catch (error: any) {
-      res.status(400).json({
-        message: "Failed to update channel override",
-        error: error.message,
-      });
+      res
+        .status(400)
+        .json({
+          message: "Failed to update channel override",
+          error: error.message,
+        });
     }
   });
 
@@ -2729,10 +2787,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json(override);
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to update channel override status",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to update channel override status",
+          error: error.message,
+        });
     }
   });
 
@@ -2742,10 +2802,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteChannelPricingOverride(req.params.id);
       res.status(204).send();
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to delete channel override",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to delete channel override",
+          error: error.message,
+        });
     }
   });
 
@@ -2828,10 +2890,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const cohort = await storage.updateCohortStatus(req.params.id, status);
       res.json(cohort);
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to update cohort status",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to update cohort status",
+          error: error.message,
+        });
     }
   });
 
@@ -2900,10 +2964,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         matchedCount: matchedCohorts.length,
       });
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to simulate cohort assignment",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to simulate cohort assignment",
+          error: error.message,
+        });
     }
   });
 
@@ -3034,10 +3100,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json(logs);
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to fetch entity audit logs",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch entity audit logs",
+          error: error.message,
+        });
     }
   });
 
@@ -3132,9 +3200,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.header("x-user") || "system";
 
       if (!justification) {
-        return res.status(400).json({
-          message: "Justification is required for rollback operations",
-        });
+        return res
+          .status(400)
+          .json({
+            message: "Justification is required for rollback operations",
+          });
       }
 
       // Get the audit log entry
@@ -3349,9 +3419,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           );
           break;
         default:
-          return res.status(400).json({
-            message: `Rollback not supported for module: ${auditLog.module}`,
-          });
+          return res
+            .status(400)
+            .json({
+              message: `Rollback not supported for module: ${auditLog.module}`,
+            });
       }
 
       res.json({
@@ -3377,10 +3449,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const engines = await storage.getTierAssignmentEngines(filters);
       res.json(engines);
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to fetch assignment engines",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch assignment engines",
+          error: error.message,
+        });
     }
   });
 
@@ -3481,10 +3555,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json(engine);
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to update engine status",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to update engine status",
+          error: error.message,
+        });
     }
   });
 
@@ -3546,10 +3622,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(assignments);
     } catch (error: any) {
       console.error("API: Error fetching tier assignments:", error);
-      res.status(500).json({
-        message: "Failed to fetch tier assignments",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch tier assignments",
+          error: error.message,
+        });
     }
   });
 
@@ -3605,10 +3683,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.status(201).json(assignment);
     } catch (error: any) {
-      res.status(400).json({
-        message: "Failed to override tier assignment",
-        error: error.message,
-      });
+      res
+        .status(400)
+        .json({
+          message: "Failed to override tier assignment",
+          error: error.message,
+        });
     }
   });
 
@@ -3756,10 +3836,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         tierChangeRequired: currentAssignment?.tierCode !== recommendedTier,
       });
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to evaluate agent tier",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to evaluate agent tier",
+          error: error.message,
+        });
     }
   });
 
@@ -3855,10 +3937,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const tier = await storage.updateAgentTierStatus(req.params.id, status);
       res.json(tier);
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to update tier status",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to update tier status",
+          error: error.message,
+        });
     }
   });
 
@@ -3936,10 +4020,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json(campaign);
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to deactivate campaign",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to deactivate campaign",
+          error: error.message,
+        });
     }
   });
 
@@ -3993,10 +4079,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json(campaign);
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to update campaign status",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to update campaign status",
+          error: error.message,
+        });
     }
   });
 
@@ -4060,10 +4148,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         daily: metrics,
       });
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to fetch campaign metrics",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch campaign metrics",
+          error: error.message,
+        });
     }
   });
 
@@ -4096,10 +4186,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json(deliveries);
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to fetch campaign deliveries",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch campaign deliveries",
+          error: error.message,
+        });
     }
   });
 
@@ -4137,10 +4229,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json(delivery);
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to update delivery status",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to update delivery status",
+          error: error.message,
+        });
     }
   });
 
@@ -4155,149 +4249,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.recordDeliveryEvent(req.params.id, event, data);
       res.json({ success: true });
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to record delivery event",
-        error: error.message,
-      });
-    }
-  });
-
-  // Email tracking endpoints
-  app.get("/api/campaigns/track/open/:deliveryId", async (req, res) => {
-    try {
-      const { deliveryId } = req.params;
-      
-      // Record the open event
-      await storage.recordDeliveryEvent(deliveryId, "OPENED");
-      
-      // Get delivery to update campaign metrics
-      const delivery = await storage.getCampaignDeliveryById(deliveryId);
-      if (delivery) {
-        const today = new Date().toISOString().split('T')[0];
-        await storage.updateCampaignMetricsIncrement(delivery.campaignCode, today, {
-          opened: 1
+      res
+        .status(500)
+        .json({
+          message: "Failed to record delivery event",
+          error: error.message,
         });
-      }
-      
-      // Return 1x1 transparent pixel
-      const pixel = Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64');
-      res.writeHead(200, {
-        'Content-Type': 'image/gif',
-        'Content-Length': pixel.length,
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
-      });
-      res.end(pixel);
-    } catch (error: any) {
-      console.error("Error tracking email open:", error);
-      // Still return pixel even on error
-      const pixel = Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64');
-      res.writeHead(200, {
-        'Content-Type': 'image/gif',
-        'Content-Length': pixel.length
-      });
-      res.end(pixel);
-    }
-  });
-
-  app.get("/api/campaigns/track/click/:deliveryId", async (req, res) => {
-    try {
-      const { deliveryId } = req.params;
-      
-      // Record the click event
-      await storage.recordDeliveryEvent(deliveryId, "CLICKED");
-      
-      // Get delivery to update campaign metrics
-      const delivery = await storage.getCampaignDeliveryById(deliveryId);
-      if (delivery) {
-        const today = new Date().toISOString().split('T')[0];
-        await storage.updateCampaignMetricsIncrement(delivery.campaignCode, today, {
-          clicked: 1
-        });
-      }
-      
-      // Redirect to offer page or show thank you message
-      res.redirect('/?utm_source=email&utm_campaign=' + (delivery?.campaignCode || 'unknown'));
-    } catch (error: any) {
-      console.error("Error tracking email click:", error);
-      res.redirect('/?utm_source=email&error=tracking');
-    }
-  });
-
-  // Purchase tracking endpoint
-  app.post("/api/campaigns/track/purchase/:deliveryId", async (req, res) => {
-    try {
-      const { deliveryId } = req.params;
-      const { amount, currency, bookingReference } = req.body;
-      
-      // Record the purchase event
-      await storage.recordDeliveryEvent(deliveryId, "PURCHASED", {
-        amount: amount || 0,
-        currency: currency || 'USD',
-        bookingReference
-      });
-      
-      // Update delivery with purchase info
-      await storage.updateDeliveryPurchase(deliveryId, amount, new Date());
-      
-      // Get delivery to update campaign metrics
-      const delivery = await storage.getCampaignDeliveryById(deliveryId);
-      if (delivery) {
-        const today = new Date().toISOString().split('T')[0];
-        await storage.updateCampaignMetricsIncrement(delivery.campaignCode, today, {
-          purchased: 1,
-          revenueUplift: amount || 0
-        });
-      }
-      
-      res.json({ success: true, message: "Purchase tracked successfully" });
-    } catch (error: any) {
-      console.error("Error tracking purchase:", error);
-      res.status(500).json({
-        message: "Failed to track purchase",
-        error: error.message,
-      });
-    }
-  });
-
-  // Test endpoints to simulate metrics (for demo purposes)
-  app.post("/api/campaigns/:campaignCode/simulate-metrics", async (req, res) => {
-    try {
-      const { campaignCode } = req.params;
-      const { type } = req.body; // 'opens', 'clicks', 'purchases'
-      
-      const today = new Date().toISOString().split('T')[0];
-      let updateData = {};
-      
-      switch (type) {
-        case 'opens':
-          updateData = { opened: Math.floor(Math.random() * 5) + 1 };
-          break;
-        case 'clicks':
-          updateData = { clicked: Math.floor(Math.random() * 3) + 1 };
-          break;
-        case 'purchases':
-          const purchaseCount = Math.floor(Math.random() * 2) + 1;
-          const revenue = purchaseCount * (Math.floor(Math.random() * 500) + 100);
-          updateData = { purchased: purchaseCount, revenueUplift: revenue };
-          break;
-        default:
-          return res.status(400).json({ message: "Invalid simulation type" });
-      }
-      
-      await storage.updateCampaignMetricsIncrement(campaignCode, today, updateData);
-      
-      res.json({ 
-        success: true, 
-        message: `Simulated ${type} for campaign ${campaignCode}`,
-        data: updateData
-      });
-    } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to simulate metrics",
-        error: error.message,
-      });
     }
   });
 
@@ -4307,9 +4264,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { campaignCode, recipientEmail, templateId } = req.body;
 
       if (!campaignCode || !recipientEmail || !templateId) {
-        return res.status(400).json({
-          message: "campaignCode, recipientEmail, and templateId are required",
-        });
+        return res
+          .status(400)
+          .json({
+            message:
+              "campaignCode, recipientEmail, and templateId are required",
+          });
       }
 
       // Get campaign details
@@ -4319,25 +4279,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const campaign = campaigns[0];
-      const deliveryId = `DEL-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+
+      // In a real implementation, you would:
+      // 1. Retrieve the email template from your template system
+      // 2. Populate the template with campaign data
+      // 3. Send the email using your email service (SendGrid, AWS SES, etc.)
+      // 4. Record the delivery in campaign_deliveries table
 
       // Create email transporter using environment variables
       const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST || "smtp.gmail.com",
         port: parseInt(process.env.SMTP_PORT || "587"),
-        secure: false, // for port 587 use TLS, not SSL
+        secure: process.env.SMTP_SECURE === "true",
         auth: {
           user: process.env.SMTP_USER,
           pass: process.env.SMTP_PASS,
         },
       });
 
-      // Generate tracking URLs for opens and clicks
-      const trackingBaseUrl = process.env.TRACKING_BASE_URL || `${req.protocol}://${req.get('host')}`;
-      const openTrackingUrl = `${trackingBaseUrl}/api/campaigns/track/open/${deliveryId}`;
-      const clickTrackingUrl = `${trackingBaseUrl}/api/campaigns/track/click/${deliveryId}`;
-
-      // Generate email content with tracking
+      // Generate email content
       const emailContent = {
         subject: `${campaign.campaignName} - Special Offer`,
         htmlBody: `
@@ -4359,7 +4319,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               </div>
               <p>Valid from ${campaign.lifecycle.startDate} to ${campaign.lifecycle.endDate}</p>
               <div style="text-align: center; margin: 30px 0;">
-                <a href="${clickTrackingUrl}" style="background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px;">
+                <a href="#" style="background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px;">
                   Claim Your Offer
                 </a>
               </div>
@@ -4367,8 +4327,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             <div style="background: #f5f5f5; padding: 20px; text-align: center; color: #666;">
               <p>Best regards,<br>The OfferSense Team</p>
             </div>
-            <!-- Open tracking pixel -->
-            <img src="${openTrackingUrl}" width="1" height="1" style="display:none;" />
           </div>
         `,
         textBody: `
@@ -4386,24 +4344,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           Valid from ${campaign.lifecycle.startDate} to ${campaign.lifecycle.endDate}
 
-          Claim your offer: ${clickTrackingUrl}
-
           Best regards,
           The OfferSense Team
         `,
       };
-
-      // Record the delivery BEFORE sending
-      const deliveryData = {
-        campaignCode,
-        bookingReference: deliveryId,
-        agentId: "demo-agent",
-        deliveryChannel: "EMAIL",
-        deliveryStatus: "PENDING",
-        recipientEmail: recipientEmail,
-      };
-
-      await storage.insertCampaignDelivery(deliveryData);
 
       // Send email using Nodemailer
       const mailOptions = {
@@ -4414,49 +4358,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         html: emailContent.htmlBody,
       };
 
-      let emailSent = false;
       try {
         const info = await transporter.sendMail(mailOptions);
-        console.log(`Email sent successfully to ${recipientEmail}:`, info.messageId);
-        emailSent = true;
-        
-        // Update delivery status to SENT
-        await storage.updateDeliveryStatus(deliveryId, "SENT", new Date());
-        
-        // Simulate delivery after 2-5 seconds (in real scenario, this would be webhook from email provider)
-        setTimeout(async () => {
-          try {
-            await storage.updateDeliveryStatus(deliveryId, "DELIVERED", new Date());
-            console.log(`Email delivery confirmed for ${recipientEmail}`);
-          } catch (error) {
-            console.error("Error updating delivery status:", error);
-          }
-        }, Math.random() * 3000 + 2000);
-        
+        console.log(
+          `Email sent successfully to ${recipientEmail}:`,
+          info.messageId,
+        );
       } catch (emailError: any) {
         console.error(`Failed to send email to ${recipientEmail}:`, emailError);
-        await storage.updateDeliveryStatus(deliveryId, "FAILED", new Date());
         throw new Error(`Email sending failed: ${emailError.message}`);
       }
 
-      // Update campaign metrics for today
-      const today = new Date().toISOString().split('T')[0];
-      await storage.updateCampaignMetricsIncrement(campaignCode, today, {
-        sent: 1
-      });
+      // Record the delivery
+      const deliveryData = {
+        campaignCode,
+        bookingReference: `DEMO-${Date.now()}`,
+        agentId: "demo-agent",
+        deliveryChannel: "EMAIL",
+        deliveryStatus: "SENT",
+        sentAt: new Date(),
+      };
 
-      // If delivered successfully, increment delivered count after short delay
-      if (emailSent) {
-        setTimeout(async () => {
-          try {
-            await storage.updateCampaignMetricsIncrement(campaignCode, today, {
-              delivered: 1
-            });
-          } catch (error) {
-            console.error("Error updating delivered metrics:", error);
-          }
-        }, Math.random() * 3000 + 2000);
-      }
+      await storage.insertCampaignDelivery(deliveryData);
 
       res.json({
         success: true,
@@ -4465,11 +4388,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           subject: emailContent.subject,
           preview: emailContent.htmlBody.substring(0, 200) + "...",
         },
-        deliveryId: deliveryId,
-        trackingUrls: {
-          openTracking: openTrackingUrl,
-          clickTracking: clickTrackingUrl
-        }
+        deliveryId: deliveryData.bookingReference,
       });
     } catch (error: any) {
       console.error("Email sending error:", error);
@@ -4568,10 +4487,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json(simulation);
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to update simulation status",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to update simulation status",
+          error: error.message,
+        });
     }
   });
 
@@ -4593,10 +4514,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const queries = await storage.getInsightQueries(filters);
       res.json(queries);
     } catch (error: any) {
-      res.status(500).json({
-        message: "Failed to fetch insight queries",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch insight queries",
+          error: error.message,
+        });
     }
   });
 

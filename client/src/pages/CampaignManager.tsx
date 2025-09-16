@@ -674,35 +674,6 @@ export default function CampaignManager() {
     message.success("WhatsApp template selected");
   };
 
-  const handleSimulateMetrics = async (campaignCode: string, type: string) => {
-    try {
-      const response = await fetch(`/api/campaigns/${campaignCode}/simulate-metrics`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ type }),
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        message.success(`Simulated ${type} for campaign metrics`);
-        
-        // Refresh campaign metrics if performance modal is open
-        if (selectedCampaign && selectedCampaign.campaignCode === campaignCode) {
-          // Trigger a refetch of campaign metrics
-          window.location.reload();
-        }
-      } else {
-        const errorData = await response.json();
-        message.error(errorData.message || `Failed to simulate ${type}`);
-      }
-    } catch (error) {
-      console.error(`Error simulating ${type}:`, error);
-      message.error(`Failed to simulate ${type}`);
-    }
-  };
-
   // Table columns
   const campaignColumns = [
     {
@@ -988,14 +959,12 @@ export default function CampaignManager() {
                     <AntCard
                       title={campaign.campaignName}
                       extra={
-                        <Space>
-                          <AntButton
-                            size="small"
-                            onClick={() => handleViewPerformance(campaign)}
-                          >
-                            View Details
-                          </AntButton>
-                        </Space>
+                        <AntButton
+                          size="small"
+                          onClick={() => handleViewPerformance(campaign)}
+                        >
+                          View Details
+                        </AntButton>
                       }
                     >
                       <div className="space-y-2">
@@ -1022,35 +991,6 @@ export default function CampaignManager() {
                                 ? `$${campaign.offer.value} Off`
                                 : `$${campaign.offer.specialPrice}`}
                           </Tag>
-                        </div>
-                        <Divider style={{ margin: "8px 0" }} />
-                        <div className="text-xs text-gray-600">
-                          <div className="flex justify-between">
-                            <span>Test Metrics:</span>
-                          </div>
-                          <Space size="small" className="mt-1">
-                            <AntButton 
-                              size="small" 
-                              type="text"
-                              onClick={() => handleSimulateMetrics(campaign.campaignCode, 'opens')}
-                            >
-                              📧 Opens
-                            </AntButton>
-                            <AntButton 
-                              size="small" 
-                              type="text"
-                              onClick={() => handleSimulateMetrics(campaign.campaignCode, 'clicks')}
-                            >
-                              👆 Clicks
-                            </AntButton>
-                            <AntButton 
-                              size="small" 
-                              type="text"
-                              onClick={() => handleSimulateMetrics(campaign.campaignCode, 'purchases')}
-                            >
-                              💰 Buys
-                            </AntButton>
-                          </Space>
                         </div>
                       </div>
                     </AntCard>

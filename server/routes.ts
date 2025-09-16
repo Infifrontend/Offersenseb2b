@@ -4162,6 +4162,145 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Email tracking endpoints
+  app.get("/api/campaigns/track/open/:deliveryId", async (req, res) => {
+    try {
+      const { deliveryId } = req.params;
+      
+      // Record the open event
+      await storage.recordDeliveryEvent(deliveryId, "OPENED");
+      
+      // Get delivery to update campaign metrics
+      const delivery = await storage.getCampaignDeliveryById(deliveryId);
+      if (delivery) {
+        const today = new Date().toISOString().split('T')[0];
+        await storage.updateCampaignMetricsIncrement(delivery.campaignCode, today, {
+          opened: 1
+        });
+      }
+      
+      // Return 1x1 transparent pixel
+      const pixel = Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64');
+      res.writeHead(200, {
+        'Content-Type': 'image/gif',
+        'Content-Length': pixel.length,
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
+      res.end(pixel);
+    } catch (error: any) {
+      console.error("Error tracking email open:", error);
+      // Still return pixel even on error
+      const pixel = Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64');
+      res.writeHead(200, {
+        'Content-Type': 'image/gif',
+        'Content-Length': pixel.length
+      });
+      res.end(pixel);
+    }
+  });
+
+  app.get("/api/campaigns/track/click/:deliveryId", async (req, res) => {
+    try {
+      const { deliveryId } = req.params;
+      
+      // Record the click event
+      await storage.recordDeliveryEvent(deliveryId, "CLICKED");
+      
+      // Get delivery to update campaign metrics
+      const delivery = await storage.getCampaignDeliveryById(deliveryId);
+      if (delivery) {
+        const today = new Date().toISOString().split('T')[0];
+        await storage.updateCampaignMetricsIncrement(delivery.campaignCode, today, {
+          clicked: 1
+        });
+      }
+      
+      // Redirect to offer page or show thank you message
+      res.redirect('/?utm_source=email&utm_campaign=' + (delivery?.campaignCode || 'unknown'));
+    } catch (error: any) {
+      console.error("Error tracking email click:", error);
+      res.redirect('/?utm_source=email&error=tracking');
+    }
+  });
+
+  // Purchase tracking endpoint
+  app.post("/api/campaigns/track/purchase/:deliveryId", async (req, res) => {
+    try {
+      const { deliveryId } = req.params;
+      const { amount, currency, bookingReference } = req.body;
+      
+      // Record the purchase event
+      await storage.recordDeliveryEvent(deliveryId, "PURCHASED", {
+        amount: amount || 0,
+        currency: currency || 'USD',
+        bookingReference
+      });
+      
+      // Update delivery with purchase info
+      await storage.updateDeliveryPurchase(deliveryId, amount, new Date());
+      
+      // Get delivery to update campaign metrics
+      const delivery = await storage.getCampaignDeliveryById(deliveryId);
+      if (delivery) {
+        const today = new Date().toISOString().split('T')[0];
+        await storage.updateCampaignMetricsIncrement(delivery.campaignCode, today, {
+          purchased: 1,
+          revenueUplift: amount || 0
+        });
+      }
+      
+      res.json({ success: true, message: "Purchase tracked successfully" });
+    } catch (error: any) {
+      console.error("Error tracking purchase:", error);
+      res.status(500).json({
+        message: "Failed to track purchase",
+        error: error.message,
+      });
+    }
+  });
+
+  // Test endpoints to simulate metrics (for demo purposes)
+  app.post("/api/campaigns/:campaignCode/simulate-metrics", async (req, res) => {
+    try {
+      const { campaignCode } = req.params;
+      const { type } = req.body; // 'opens', 'clicks', 'purchases'
+      
+      const today = new Date().toISOString().split('T')[0];
+      let updateData = {};
+      
+      switch (type) {
+        case 'opens':
+          updateData = { opened: Math.floor(Math.random() * 5) + 1 };
+          break;
+        case 'clicks':
+          updateData = { clicked: Math.floor(Math.random() * 3) + 1 };
+          break;
+        case 'purchases':
+          const purchaseCount = Math.floor(Math.random() * 2) + 1;
+          const revenue = purchaseCount * (Math.floor(Math.random() * 500) + 100);
+          updateData = { purchased: purchaseCount, revenueUplift: revenue };
+          break;
+        default:
+          return res.status(400).json({ message: "Invalid simulation type" });
+      }
+      
+      await storage.updateCampaignMetricsIncrement(campaignCode, today, updateData);
+      
+      res.json({ 
+        success: true, 
+        message: `Simulated ${type} for campaign ${campaignCode}`,
+        data: updateData
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        message: "Failed to simulate metrics",
+        error: error.message,
+      });
+    }
+  });
+
   // Send campaign email
   app.post("/api/campaigns/send-email", async (req, res) => {
     try {
@@ -4180,12 +4319,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const campaign = campaigns[0];
-
-      // In a real implementation, you would:
-      // 1. Retrieve the email template from your template system
-      // 2. Populate the template with campaign data
-      // 3. Send the email using your email service (SendGrid, AWS SES, etc.)
-      // 4. Record the delivery in campaign_deliveries table
+      const deliveryId = `DEL-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
 
       // Create email transporter using environment variables
       const transporter = nodemailer.createTransport({
@@ -4198,7 +4332,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
 
-      // Generate email content
+      // Generate tracking URLs for opens and clicks
+      const trackingBaseUrl = process.env.TRACKING_BASE_URL || `${req.protocol}://${req.get('host')}`;
+      const openTrackingUrl = `${trackingBaseUrl}/api/campaigns/track/open/${deliveryId}`;
+      const clickTrackingUrl = `${trackingBaseUrl}/api/campaigns/track/click/${deliveryId}`;
+
+      // Generate email content with tracking
       const emailContent = {
         subject: `${campaign.campaignName} - Special Offer`,
         htmlBody: `
@@ -4220,7 +4359,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               </div>
               <p>Valid from ${campaign.lifecycle.startDate} to ${campaign.lifecycle.endDate}</p>
               <div style="text-align: center; margin: 30px 0;">
-                <a href="#" style="background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px;">
+                <a href="${clickTrackingUrl}" style="background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px;">
                   Claim Your Offer
                 </a>
               </div>
@@ -4228,6 +4367,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             <div style="background: #f5f5f5; padding: 20px; text-align: center; color: #666;">
               <p>Best regards,<br>The OfferSense Team</p>
             </div>
+            <!-- Open tracking pixel -->
+            <img src="${openTrackingUrl}" width="1" height="1" style="display:none;" />
           </div>
         `,
         textBody: `
@@ -4245,10 +4386,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           Valid from ${campaign.lifecycle.startDate} to ${campaign.lifecycle.endDate}
 
+          Claim your offer: ${clickTrackingUrl}
+
           Best regards,
           The OfferSense Team
         `,
       };
+
+      // Record the delivery BEFORE sending
+      const deliveryData = {
+        campaignCode,
+        bookingReference: deliveryId,
+        agentId: "demo-agent",
+        deliveryChannel: "EMAIL",
+        deliveryStatus: "PENDING",
+        recipientEmail: recipientEmail,
+      };
+
+      await storage.insertCampaignDelivery(deliveryData);
 
       // Send email using Nodemailer
       const mailOptions = {
@@ -4259,28 +4414,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
         html: emailContent.htmlBody,
       };
 
+      let emailSent = false;
       try {
         const info = await transporter.sendMail(mailOptions);
-        console.log(
-          `Email sent successfully to ${recipientEmail}:`,
-          info.messageId,
-        );
+        console.log(`Email sent successfully to ${recipientEmail}:`, info.messageId);
+        emailSent = true;
+        
+        // Update delivery status to SENT
+        await storage.updateDeliveryStatus(deliveryId, "SENT", new Date());
+        
+        // Simulate delivery after 2-5 seconds (in real scenario, this would be webhook from email provider)
+        setTimeout(async () => {
+          try {
+            await storage.updateDeliveryStatus(deliveryId, "DELIVERED", new Date());
+            console.log(`Email delivery confirmed for ${recipientEmail}`);
+          } catch (error) {
+            console.error("Error updating delivery status:", error);
+          }
+        }, Math.random() * 3000 + 2000);
+        
       } catch (emailError: any) {
         console.error(`Failed to send email to ${recipientEmail}:`, emailError);
+        await storage.updateDeliveryStatus(deliveryId, "FAILED", new Date());
         throw new Error(`Email sending failed: ${emailError.message}`);
       }
 
-      // Record the delivery
-      const deliveryData = {
-        campaignCode,
-        bookingReference: `DEMO-${Date.now()}`,
-        agentId: "demo-agent",
-        deliveryChannel: "EMAIL",
-        deliveryStatus: "SENT",
-        sentAt: new Date(),
-      };
+      // Update campaign metrics for today
+      const today = new Date().toISOString().split('T')[0];
+      await storage.updateCampaignMetricsIncrement(campaignCode, today, {
+        sent: 1
+      });
 
-      await storage.insertCampaignDelivery(deliveryData);
+      // If delivered successfully, increment delivered count after short delay
+      if (emailSent) {
+        setTimeout(async () => {
+          try {
+            await storage.updateCampaignMetricsIncrement(campaignCode, today, {
+              delivered: 1
+            });
+          } catch (error) {
+            console.error("Error updating delivered metrics:", error);
+          }
+        }, Math.random() * 3000 + 2000);
+      }
 
       res.json({
         success: true,
@@ -4289,7 +4465,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           subject: emailContent.subject,
           preview: emailContent.htmlBody.substring(0, 200) + "...",
         },
-        deliveryId: deliveryData.bookingReference,
+        deliveryId: deliveryId,
+        trackingUrls: {
+          openTracking: openTrackingUrl,
+          clickTracking: clickTrackingUrl
+        }
       });
     } catch (error: any) {
       console.error("Email sending error:", error);

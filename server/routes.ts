@@ -6,7 +6,29 @@ import csv from "csv-parser";
 import { Readable } from "stream";
 import bcrypt from "bcryptjs";
 import nodemailer from "nodemailer";
-import { insertNegotiatedFareSchema, insertDynamicDiscountRuleSchema, insertAirAncillaryRuleSchema, insertNonAirRateSchema, insertNonAirMarkupRuleSchema, insertBundleSchema, insertBundlePricingRuleSchema, insertOfferRuleSchema, insertOfferTraceSchema, insertAgentSchema, insertChannelPricingOverrideSchema, insertCohortSchema, insertAuditLogSchema, insertAgentTierSchema, insertAgentTierAssignmentSchema, insertTierAssignmentEngineSchema, insertCampaignSchema, insertCampaignMetricsSchema, insertCampaignDeliverySchema, insertSimulationSchema, insertInsightQuerySchema } from "../shared/schema";
+import {
+  insertNegotiatedFareSchema,
+  insertDynamicDiscountRuleSchema,
+  insertAirAncillaryRuleSchema,
+  insertNonAirRateSchema,
+  insertNonAirMarkupRuleSchema,
+  insertBundleSchema,
+  insertBundlePricingRuleSchema,
+  insertOfferRuleSchema,
+  insertOfferTraceSchema,
+  insertAgentSchema,
+  insertChannelPricingOverrideSchema,
+  insertCohortSchema,
+  insertAuditLogSchema,
+  insertAgentTierSchema,
+  insertAgentTierAssignmentSchema,
+  insertTierAssignmentEngineSchema,
+  insertCampaignSchema,
+  insertCampaignMetricsSchema,
+  insertCampaignDeliverySchema,
+  insertSimulationSchema,
+  insertInsightQuerySchema,
+} from "../shared/schema";
 
 // Enhanced AI template generation function
 async function generateAITemplates(type: string, context: any): Promise<any[]> {
@@ -14,35 +36,40 @@ async function generateAITemplates(type: string, context: any): Promise<any[]> {
 
   // Extract campaign details for template generation
   const {
-    campaignName = 'Special Campaign',
-    offerType = 'PERCENT',
+    campaignName = "Special Campaign",
+    offerType = "PERCENT",
     offerValue,
     specialPrice,
     products = { ancillaries: [], bundles: [] },
     target = { agentTiers: [], cohorts: [] },
-    companyName = 'OfferSense',
-    brandTone = 'professional',
-    urgency = 'medium'
+    companyName = "OfferSense",
+    brandTone = "professional",
+    urgency = "medium",
   } = context;
 
   // Generate offer text
   const getOfferText = () => {
-    if (offerType === 'PERCENT') return `${offerValue}% discount`;
-    if (offerType === 'AMOUNT') return `$${offerValue} off`;
-    if (offerType === 'SPECIAL_PRICE') return `special price of $${specialPrice}`;
-    return 'exclusive offer';
+    if (offerType === "PERCENT") return `${offerValue}% discount`;
+    if (offerType === "AMOUNT") return `$${offerValue} off`;
+    if (offerType === "SPECIAL_PRICE")
+      return `special price of $${specialPrice}`;
+    return "exclusive offer";
   };
 
   // Generate product mentions
   const getProductMentions = () => {
-    const allProducts = [...(products.ancillaries || []), ...(products.bundles || [])];
-    if (allProducts.length === 0) return 'travel services';
+    const allProducts = [
+      ...(products.ancillaries || []),
+      ...(products.bundles || []),
+    ];
+    if (allProducts.length === 0) return "travel services";
     if (allProducts.length === 1) return allProducts[0];
-    if (allProducts.length === 2) return `${allProducts[0]} and ${allProducts[1]}`;
+    if (allProducts.length === 2)
+      return `${allProducts[0]} and ${allProducts[1]}`;
     return `${allProducts[0]}, ${allProducts[1]} and more`;
   };
 
-  if (type === 'email') {
+  if (type === "email") {
     return [
       {
         id: `email_template_1_${Date.now()}`,
@@ -86,11 +113,11 @@ async function generateAITemplates(type: string, context: any): Promise<any[]> {
             </div>
           </div>
         `,
-        tone: 'professional',
-        callToAction: 'Claim Your Offer Now',
-        variables: ['campaignName', 'offerValue', 'customerName'],
-        estimatedOpenRate: '24%',
-        estimatedClickRate: '3.2%'
+        tone: "professional",
+        callToAction: "Claim Your Offer Now",
+        variables: ["campaignName", "offerValue", "customerName"],
+        estimatedOpenRate: "24%",
+        estimatedClickRate: "3.2%",
       },
       {
         id: `email_template_2_${Date.now()}`,
@@ -137,11 +164,11 @@ async function generateAITemplates(type: string, context: any): Promise<any[]> {
             </div>
           </div>
         `,
-        tone: 'urgent',
-        callToAction: 'SECURE MY DISCOUNT NOW',
-        variables: ['offerValue', 'expiryTime', 'customerName'],
-        estimatedOpenRate: '31%',
-        estimatedClickRate: '5.8%'
+        tone: "urgent",
+        callToAction: "SECURE MY DISCOUNT NOW",
+        variables: ["offerValue", "expiryTime", "customerName"],
+        estimatedOpenRate: "31%",
+        estimatedClickRate: "5.8%",
       },
       {
         id: `email_template_3_${Date.now()}`,
@@ -202,59 +229,56 @@ async function generateAITemplates(type: string, context: any): Promise<any[]> {
             </div>
           </div>
         `,
-        tone: 'friendly',
-        callToAction: 'Explore This Offer',
-        variables: ['customerName', 'travelHistory', 'offerDetails'],
-        estimatedOpenRate: '28%',
-        estimatedClickRate: '4.1%'
-      }
+        tone: "friendly",
+        callToAction: "Explore This Offer",
+        variables: ["customerName", "travelHistory", "offerDetails"],
+        estimatedOpenRate: "28%",
+        estimatedClickRate: "4.1%",
+      },
     ];
-  } 
-
-  else if (type === 'whatsapp') {
+  } else if (type === "whatsapp") {
     return [
       {
         id: `whatsapp_template_1_${Date.now()}`,
         name: "Quick Offer Alert",
         message: `🎯 Hi! Exclusive ${getOfferText()} on ${getProductMentions()} - just for you!\n\n✈️ Perfect for your next trip\n⏰ Limited time offer\n\nInterested? Reply YES for details!`,
-        style: 'conversational',
-        variables: ['customerName', 'offerValue', 'productName'],
-        estimatedDeliveryRate: '98%',
-        estimatedReadRate: '87%'
+        style: "conversational",
+        variables: ["customerName", "offerValue", "productName"],
+        estimatedDeliveryRate: "98%",
+        estimatedReadRate: "87%",
       },
       {
         id: `whatsapp_template_2_${Date.now()}`,
         name: "Friendly Reminder",
         message: `Hey! 👋 Don't miss out on our ${campaignName}!\n\n🔥 ${getOfferText()} on ${getProductMentions()}\n📅 Valid until tomorrow\n\nBook now: [LINK]\n\nQuestions? Just reply here! 😊`,
-        style: 'friendly',
-        variables: ['campaignName', 'offerDetails', 'expiryDate'],
-        estimatedDeliveryRate: '98%',
-        estimatedReadRate: '85%'
+        style: "friendly",
+        variables: ["campaignName", "offerDetails", "expiryDate"],
+        estimatedDeliveryRate: "98%",
+        estimatedReadRate: "85%",
       },
       {
         id: `whatsapp_template_3_${Date.now()}`,
         name: "Urgent Alert",
         message: `⚡ LAST CHANCE! Your ${getOfferText()} expires in 6 hours!\n\n${getProductMentions().toUpperCase()} - Special pricing\n\n👆 Don't wait - secure now!\nReply BOOK to claim`,
-        style: 'urgent',
-        variables: ['offerValue', 'expiryTime', 'productCode'],
-        estimatedDeliveryRate: '98%',
-        estimatedReadRate: '92%'
+        style: "urgent",
+        variables: ["offerValue", "expiryTime", "productCode"],
+        estimatedDeliveryRate: "98%",
+        estimatedReadRate: "92%",
       },
       {
         id: `whatsapp_template_4_${Date.now()}`,
         name: "Value Proposition",
         message: `✈️ Planning your next trip?\n\nWe've got something special:\n🎁 ${getOfferText()} on ${getProductMentions()}\n💰 Save big on premium services\n🌟 Trusted by 50,000+ travelers\n\nReady to save? Reply YES`,
-        style: 'informative',
-        variables: ['offerType', 'savings', 'customerCount'],
-        estimatedDeliveryRate: '98%',
-        estimatedReadRate: '83%'
-      }
+        style: "informative",
+        variables: ["offerType", "savings", "customerCount"],
+        estimatedDeliveryRate: "98%",
+        estimatedReadRate: "83%",
+      },
     ];
   }
 
   return [];
 }
-
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -269,7 +293,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!username || !password) {
         return res.status(400).json({
           success: false,
-          message: "Username and password are required"
+          message: "Username and password are required",
         });
       }
 
@@ -279,7 +303,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!user) {
         return res.status(401).json({
           success: false,
-          message: "Invalid username or password"
+          message: "Invalid username or password",
         });
       }
 
@@ -289,7 +313,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!isValidPassword) {
         return res.status(401).json({
           success: false,
-          message: "Invalid username or password"
+          message: "Invalid username or password",
         });
       }
 
@@ -298,14 +322,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: true,
         user: {
           id: user.id,
-          username: user.username
-        }
+          username: user.username,
+        },
       });
     } catch (error: any) {
       console.error("Login error:", error);
       res.status(500).json({
         success: false,
-        message: "Internal server error"
+        message: "Internal server error",
       });
     }
   });
@@ -318,14 +342,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!username || !password) {
         return res.status(400).json({
           success: false,
-          message: "Username and password are required"
+          message: "Username and password are required",
         });
       }
 
       if (password.length < 6) {
         return res.status(400).json({
           success: false,
-          message: "Password must be at least 6 characters long"
+          message: "Password must be at least 6 characters long",
         });
       }
 
@@ -334,7 +358,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (existingUser) {
         return res.status(409).json({
           success: false,
-          message: "Username already exists"
+          message: "Username already exists",
         });
       }
 
@@ -344,21 +368,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create user
       const user = await storage.createUser({
         username,
-        password: hashedPassword
+        password: hashedPassword,
       });
 
       res.status(201).json({
         success: true,
         user: {
           id: user.id,
-          username: user.username
-        }
+          username: user.username,
+        },
       });
     } catch (error: any) {
       console.error("Registration error:", error);
       res.status(500).json({
         success: false,
-        message: "Internal server error"
+        message: "Internal server error",
       });
     }
   });
@@ -369,11 +393,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { type, context } = req.body;
 
       if (!type || !context) {
-        return res.status(400).json({ message: "Type and context are required" });
+        return res
+          .status(400)
+          .json({ message: "Type and context are required" });
       }
 
-      if (!['email', 'whatsapp'].includes(type)) {
-        return res.status(400).json({ message: "Type must be 'email' or 'whatsapp'" });
+      if (!["email", "whatsapp"].includes(type)) {
+        return res
+          .status(400)
+          .json({ message: "Type must be 'email' or 'whatsapp'" });
       }
 
       const templates = await generateAITemplates(type, context);
@@ -393,7 +421,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const fares = await storage.getNegotiatedFares(filters);
       res.json(fares);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch negotiated fares", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch negotiated fares",
+          error: error.message,
+        });
     }
   });
 
@@ -406,9 +439,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check for conflicts
       const conflicts = await storage.checkFareConflicts(validatedData);
       if (conflicts.length > 0) {
-        return res.status(409).json({ 
-          message: "Fare conflicts detected", 
-          conflicts 
+        return res.status(409).json({
+          message: "Fare conflicts detected",
+          conflicts,
         });
       }
 
@@ -422,12 +455,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ipAddress: req.ip,
           userAgent: req.get("User-Agent"),
           sessionId: req.sessionID || "unknown",
-        }
+        },
       );
 
       res.status(201).json(fare);
     } catch (error: any) {
-      res.status(400).json({ message: "Invalid fare data", error: error.message });
+      res
+        .status(400)
+        .json({ message: "Invalid fare data", error: error.message });
     }
   });
 
@@ -435,9 +470,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/negofares/upload", upload.single("file"), async (req, res) => {
     try {
       if (!req.file) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           success: false,
-          message: "No file uploaded. Please select a file." 
+          message: "No file uploaded. Please select a file.",
         });
       }
 
@@ -446,10 +481,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const conflicts: any[] = [];
       let rowNumber = 1; // Track row numbers for better error reporting
 
-      console.log(`Processing CSV upload: ${req.file.originalname} (${req.file.size} bytes)`);
+      console.log(
+        `Processing CSV upload: ${req.file.originalname} (${req.file.size} bytes)`,
+      );
 
       try {
-        const csvContent = req.file.buffer.toString('utf8');
+        const csvContent = req.file.buffer.toString("utf8");
 
         // Parse CSV
         const stream = Readable.from(csvContent);
@@ -461,64 +498,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
               rowNumber++;
               try {
                 // Log the raw data for debugging
-                console.log(`Processing row ${rowNumber}:`, JSON.stringify(data, null, 2));
+                console.log(
+                  `Processing row ${rowNumber}:`,
+                  JSON.stringify(data, null, 2),
+                );
 
                 // Validate required fields against negotiated_fares table structure
                 const validationErrors: string[] = [];
 
                 // Validate airlineCode (2 characters)
                 if (!data.airlineCode || data.airlineCode.trim().length !== 2) {
-                  validationErrors.push('airlineCode must be exactly 2 characters');
+                  validationErrors.push(
+                    "airlineCode must be exactly 2 characters",
+                  );
                 }
 
                 // Validate fareCode (required, max 50 chars)
                 if (!data.fareCode || data.fareCode.trim().length === 0) {
-                  validationErrors.push('fareCode is required');
+                  validationErrors.push("fareCode is required");
                 } else if (data.fareCode.trim().length > 50) {
-                  validationErrors.push('fareCode must be 50 characters or less');
+                  validationErrors.push(
+                    "fareCode must be 50 characters or less",
+                  );
                 }
 
                 // Validate origin/destination (3 characters)
                 if (!data.origin || data.origin.trim().length !== 3) {
-                  validationErrors.push('origin must be exactly 3 characters');
+                  validationErrors.push("origin must be exactly 3 characters");
                 }
                 if (!data.destination || data.destination.trim().length !== 3) {
-                  validationErrors.push('destination must be exactly 3 characters');
+                  validationErrors.push(
+                    "destination must be exactly 3 characters",
+                  );
                 }
 
                 // Validate tripType
-                const validTripTypes = ['ONE_WAY', 'ROUND_TRIP', 'MULTI_CITY'];
-                if (!data.tripType || !validTripTypes.includes(data.tripType.trim().toUpperCase())) {
-                  validationErrors.push(`tripType must be one of: ${validTripTypes.join(', ')}`);
+                const validTripTypes = ["ONE_WAY", "ROUND_TRIP", "MULTI_CITY"];
+                if (
+                  !data.tripType ||
+                  !validTripTypes.includes(data.tripType.trim().toUpperCase())
+                ) {
+                  validationErrors.push(
+                    `tripType must be one of: ${validTripTypes.join(", ")}`,
+                  );
                 }
 
                 // Validate cabinClass
-                const validCabinClasses = ['ECONOMY', 'PREMIUM_ECONOMY', 'BUSINESS', 'FIRST'];
-                if (!data.cabinClass || !validCabinClasses.includes(data.cabinClass.trim().toUpperCase())) {
-                  validationErrors.push(`cabinClass must be one of: ${validCabinClasses.join(', ')}`);
+                const validCabinClasses = [
+                  "ECONOMY",
+                  "PREMIUM_ECONOMY",
+                  "BUSINESS",
+                  "FIRST",
+                ];
+                if (
+                  !data.cabinClass ||
+                  !validCabinClasses.includes(
+                    data.cabinClass.trim().toUpperCase(),
+                  )
+                ) {
+                  validationErrors.push(
+                    `cabinClass must be one of: ${validCabinClasses.join(", ")}`,
+                  );
                 }
 
                 // Validate baseNetFare (numeric)
                 if (!data.baseNetFare || isNaN(parseFloat(data.baseNetFare))) {
-                  validationErrors.push('baseNetFare must be a valid number');
+                  validationErrors.push("baseNetFare must be a valid number");
                 } else if (parseFloat(data.baseNetFare) < 0) {
-                  validationErrors.push('baseNetFare must be positive');
+                  validationErrors.push("baseNetFare must be positive");
                 }
 
                 // Validate currency (3 characters)
                 if (!data.currency || data.currency.trim().length !== 3) {
-                  validationErrors.push('currency must be exactly 3 characters');
+                  validationErrors.push(
+                    "currency must be exactly 3 characters",
+                  );
                 }
 
                 // Validate dates
-                const dateFields = ['bookingStartDate', 'bookingEndDate', 'travelStartDate', 'travelEndDate'];
+                const dateFields = [
+                  "bookingStartDate",
+                  "bookingEndDate",
+                  "travelStartDate",
+                  "travelEndDate",
+                ];
                 for (const field of dateFields) {
                   if (!data[field]) {
                     validationErrors.push(`${field} is required`);
                   } else {
                     const date = new Date(data[field]);
                     if (isNaN(date.getTime())) {
-                      validationErrors.push(`${field} must be a valid date (YYYY-MM-DD format)`);
+                      validationErrors.push(
+                        `${field} must be a valid date (YYYY-MM-DD format)`,
+                      );
                     }
                   }
                 }
@@ -527,16 +599,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 if (data.bookingStartDate && data.bookingEndDate) {
                   const startDate = new Date(data.bookingStartDate);
                   const endDate = new Date(data.bookingEndDate);
-                  if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime()) && startDate > endDate) {
-                    validationErrors.push('bookingStartDate cannot be after bookingEndDate');
+                  if (
+                    !isNaN(startDate.getTime()) &&
+                    !isNaN(endDate.getTime()) &&
+                    startDate > endDate
+                  ) {
+                    validationErrors.push(
+                      "bookingStartDate cannot be after bookingEndDate",
+                    );
                   }
                 }
 
                 if (data.travelStartDate && data.travelEndDate) {
                   const startDate = new Date(data.travelStartDate);
                   const endDate = new Date(data.travelEndDate);
-                  if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime()) && startDate > endDate) {
-                    validationErrors.push('travelStartDate cannot be after travelEndDate');
+                  if (
+                    !isNaN(startDate.getTime()) &&
+                    !isNaN(endDate.getTime()) &&
+                    startDate > endDate
+                  ) {
+                    validationErrors.push(
+                      "travelStartDate cannot be after travelEndDate",
+                    );
                   }
                 }
 
@@ -548,11 +632,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     const posString = data.pos.replace(/\"\"/g, '"'); // Convert double quotes to single quotes
                     posArray = JSON.parse(posString);
                     if (!Array.isArray(posArray) || posArray.length === 0) {
-                      validationErrors.push('pos must be a non-empty JSON array of country codes');
+                      validationErrors.push(
+                        "pos must be a non-empty JSON array of country codes",
+                      );
                     }
                   } catch (parseError) {
-                    console.error('POS parsing error:', parseError, 'Original value:', data.pos);
-                    validationErrors.push('pos must be valid JSON array format');
+                    console.error(
+                      "POS parsing error:",
+                      parseError,
+                      "Original value:",
+                      data.pos,
+                    );
+                    validationErrors.push(
+                      "pos must be valid JSON array format",
+                    );
                   }
                 }
 
@@ -561,77 +654,150 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 if (data.eligibleAgentTiers) {
                   try {
                     // Handle the specific format from your CSV: "[""GOLD"",""SILVER""]"
-                    const tiersString = data.eligibleAgentTiers.replace(/\"\"/g, '"'); // Convert double quotes to single quotes
+                    const tiersString = data.eligibleAgentTiers.replace(
+                      /\"\"/g,
+                      '"',
+                    ); // Convert double quotes to single quotes
                     agentTiers = JSON.parse(tiersString);
                     if (!Array.isArray(agentTiers)) {
-                      validationErrors.push('eligibleAgentTiers must be a JSON array');
+                      validationErrors.push(
+                        "eligibleAgentTiers must be a JSON array",
+                      );
                     } else {
-                      const validTiers = ['PLATINUM', 'GOLD', 'SILVER', 'BRONZE'];
-                      const invalidTiers = agentTiers.filter(tier => !validTiers.includes(tier));
+                      const validTiers = [
+                        "PLATINUM",
+                        "GOLD",
+                        "SILVER",
+                        "BRONZE",
+                      ];
+                      const invalidTiers = agentTiers.filter(
+                        (tier) => !validTiers.includes(tier),
+                      );
                       if (invalidTiers.length > 0) {
-                        validationErrors.push(`Invalid agent tiers: ${invalidTiers.join(', ')}. Must be one of: ${validTiers.join(', ')}`);
+                        validationErrors.push(
+                          `Invalid agent tiers: ${invalidTiers.join(", ")}. Must be one of: ${validTiers.join(", ")}`,
+                        );
                       }
                     }
                   } catch (parseError) {
-                    console.error('Agent tiers parsing error:', parseError, 'Original value:', data.eligibleAgentTiers);
-                    validationErrors.push('eligibleAgentTiers must be valid JSON array format');
+                    console.error(
+                      "Agent tiers parsing error:",
+                      parseError,
+                      "Original value:",
+                      data.eligibleAgentTiers,
+                    );
+                    validationErrors.push(
+                      "eligibleAgentTiers must be valid JSON array format",
+                    );
                   }
                 }
 
                 // Validate eligibleCohorts (optional)
                 let cohorts = [];
-                if (data.eligibleCohorts && data.eligibleCohorts.trim() !== '' && data.eligibleCohorts !== '[]') {
+                if (
+                  data.eligibleCohorts &&
+                  data.eligibleCohorts.trim() !== "" &&
+                  data.eligibleCohorts !== "[]"
+                ) {
                   try {
-                    const cohortsString = data.eligibleCohorts.replace(/\"\"/g, '"');
+                    const cohortsString = data.eligibleCohorts.replace(
+                      /\"\"/g,
+                      '"',
+                    );
                     cohorts = JSON.parse(cohortsString);
                     if (!Array.isArray(cohorts)) {
-                      validationErrors.push('eligibleCohorts must be a JSON array');
+                      validationErrors.push(
+                        "eligibleCohorts must be a JSON array",
+                      );
                     } else {
                       // Validate cohort code format
-                      const invalidCohorts = cohorts.filter(cohort => 
-                        typeof cohort !== 'string' || cohort.length === 0 || cohort.length > 50
+                      const invalidCohorts = cohorts.filter(
+                        (cohort) =>
+                          typeof cohort !== "string" ||
+                          cohort.length === 0 ||
+                          cohort.length > 50,
                       );
                       if (invalidCohorts.length > 0) {
-                        validationErrors.push('All cohort codes must be non-empty strings (max 50 chars)');
+                        validationErrors.push(
+                          "All cohort codes must be non-empty strings (max 50 chars)",
+                        );
                       }
                     }
                   } catch (parseError) {
-                    console.error('Cohorts parsing error:', parseError, 'Original value:', data.eligibleCohorts);
-                    validationErrors.push('eligibleCohorts must be valid JSON array format');
+                    console.error(
+                      "Cohorts parsing error:",
+                      parseError,
+                      "Original value:",
+                      data.eligibleCohorts,
+                    );
+                    validationErrors.push(
+                      "eligibleCohorts must be valid JSON array format",
+                    );
                   }
                 }
 
                 // Validate blackoutDates (optional)
                 let blackoutDatesArray = [];
-                if (data.blackoutDates && data.blackoutDates.trim() !== '' && data.blackoutDates !== '[]') {
+                if (
+                  data.blackoutDates &&
+                  data.blackoutDates.trim() !== "" &&
+                  data.blackoutDates !== "[]"
+                ) {
                   try {
-                    const blackoutString = data.blackoutDates.replace(/\"\"/g, '"');
+                    const blackoutString = data.blackoutDates.replace(
+                      /\"\"/g,
+                      '"',
+                    );
                     blackoutDatesArray = JSON.parse(blackoutString);
                     if (!Array.isArray(blackoutDatesArray)) {
-                      validationErrors.push('blackoutDates must be a JSON array');
+                      validationErrors.push(
+                        "blackoutDates must be a JSON array",
+                      );
                     }
                   } catch (parseError) {
-                    console.error('Blackout dates parsing error:', parseError, 'Original value:', data.blackoutDates);
-                    validationErrors.push('blackoutDates must be valid JSON array format');
+                    console.error(
+                      "Blackout dates parsing error:",
+                      parseError,
+                      "Original value:",
+                      data.blackoutDates,
+                    );
+                    validationErrors.push(
+                      "blackoutDates must be valid JSON array format",
+                    );
                   }
                 }
 
                 // Validate optional numeric fields
-                if (data.seatAllotment && data.seatAllotment.trim() !== '' && (isNaN(parseInt(data.seatAllotment)) || parseInt(data.seatAllotment) < 0)) {
-                  validationErrors.push('seatAllotment must be a positive integer');
+                if (
+                  data.seatAllotment &&
+                  data.seatAllotment.trim() !== "" &&
+                  (isNaN(parseInt(data.seatAllotment)) ||
+                    parseInt(data.seatAllotment) < 0)
+                ) {
+                  validationErrors.push(
+                    "seatAllotment must be a positive integer",
+                  );
                 }
-                if (data.minStay && data.minStay.trim() !== '' && (isNaN(parseInt(data.minStay)) || parseInt(data.minStay) < 0)) {
-                  validationErrors.push('minStay must be a positive integer');
+                if (
+                  data.minStay &&
+                  data.minStay.trim() !== "" &&
+                  (isNaN(parseInt(data.minStay)) || parseInt(data.minStay) < 0)
+                ) {
+                  validationErrors.push("minStay must be a positive integer");
                 }
-                if (data.maxStay && data.maxStay.trim() !== '' && (isNaN(parseInt(data.maxStay)) || parseInt(data.maxStay) < 0)) {
-                  validationErrors.push('maxStay must be a positive integer');
+                if (
+                  data.maxStay &&
+                  data.maxStay.trim() !== "" &&
+                  (isNaN(parseInt(data.maxStay)) || parseInt(data.maxStay) < 0)
+                ) {
+                  validationErrors.push("maxStay must be a positive integer");
                 }
 
                 if (validationErrors.length > 0) {
-                  errors.push({ 
+                  errors.push({
                     row: rowNumber,
-                    data, 
-                    error: validationErrors.join('; ') 
+                    data,
+                    error: validationErrors.join("; "),
                   });
                   return;
                 }
@@ -651,39 +817,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   travelStartDate: data.travelStartDate.trim(),
                   travelEndDate: data.travelEndDate.trim(),
                   pos: posArray.length > 0 ? posArray : ["US"],
-                  seatAllotment: data.seatAllotment && data.seatAllotment.trim() !== '' ? parseInt(data.seatAllotment) : null,
-                  minStay: data.minStay && data.minStay.trim() !== '' ? parseInt(data.minStay) : null,
-                  maxStay: data.maxStay && data.maxStay.trim() !== '' ? parseInt(data.maxStay) : null,
-                  blackoutDates: blackoutDatesArray.length > 0 ? blackoutDatesArray : null,
-                  eligibleAgentTiers: agentTiers.length > 0 ? agentTiers : ["BRONZE"],
+                  seatAllotment:
+                    data.seatAllotment && data.seatAllotment.trim() !== ""
+                      ? parseInt(data.seatAllotment)
+                      : null,
+                  minStay:
+                    data.minStay && data.minStay.trim() !== ""
+                      ? parseInt(data.minStay)
+                      : null,
+                  maxStay:
+                    data.maxStay && data.maxStay.trim() !== ""
+                      ? parseInt(data.maxStay)
+                      : null,
+                  blackoutDates:
+                    blackoutDatesArray.length > 0 ? blackoutDatesArray : null,
+                  eligibleAgentTiers:
+                    agentTiers.length > 0 ? agentTiers : ["BRONZE"],
                   eligibleCohorts: cohorts.length > 0 ? cohorts : null,
                   remarks: data.remarks?.trim() || null,
                 };
 
                 // Final schema validation
-                const validatedData = insertNegotiatedFareSchema.parse(transformedData);
+                const validatedData =
+                  insertNegotiatedFareSchema.parse(transformedData);
 
                 // Check for business logic conflicts
-                const fareConflicts = await storage.checkFareConflicts(validatedData);
+                const fareConflicts =
+                  await storage.checkFareConflicts(validatedData);
                 if (fareConflicts.length > 0) {
-                  conflicts.push({ 
+                  conflicts.push({
                     row: rowNumber,
                     data: {
                       fareCode: validatedData.fareCode,
                       route: `${validatedData.origin}-${validatedData.destination}`,
-                      cabinClass: validatedData.cabinClass
-                    }, 
-                    conflicts: fareConflicts.map(c => `Overlapping with existing fare: ${c.fareCode} (${c.origin}-${c.destination})`)
+                      cabinClass: validatedData.cabinClass,
+                    },
+                    conflicts: fareConflicts.map(
+                      (c) =>
+                        `Overlapping with existing fare: ${c.fareCode} (${c.origin}-${c.destination})`,
+                    ),
                   });
                 } else {
                   results.push(validatedData);
                 }
               } catch (error: any) {
                 console.error(`Error processing row ${rowNumber}:`, error);
-                errors.push({ 
+                errors.push({
                   row: rowNumber,
-                  data, 
-                  error: `Schema validation failed: ${error.message}` 
+                  data,
+                  error: `Schema validation failed: ${error.message}`,
                 });
               }
             })
@@ -691,7 +873,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .on("error", reject);
         });
 
-        console.log(`CSV processing complete: ${results.length} valid, ${errors.length} errors, ${conflicts.length} conflicts`);
+        console.log(
+          `CSV processing complete: ${results.length} valid, ${errors.length} errors, ${conflicts.length} conflicts`,
+        );
 
         // Insert valid fares with transaction handling
         const insertedFares: any[] = [];
@@ -705,28 +889,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
               fareCode: fare.fareCode,
               route: `${fare.origin}-${fare.destination}`,
               baseNetFare: fare.baseNetFare,
-              currency: fare.currency
+              currency: fare.currency,
             });
           } catch (insertError: any) {
-            console.error('Error inserting fare:', insertError);
-            insertionErrors.push({ 
+            console.error("Error inserting fare:", insertError);
+            insertionErrors.push({
               fareCode: fareData.fareCode,
               route: `${fareData.origin}-${fareData.destination}`,
-              error: `Database insertion failed: ${insertError.message}` 
+              error: `Database insertion failed: ${insertError.message}`,
             });
           }
         }
 
         // Add insertion errors to main errors array
-        errors.push(...insertionErrors.map(err => ({
-          data: { fareCode: err.fareCode, route: err.route },
-          error: err.error
-        })));
+        errors.push(
+          ...insertionErrors.map((err) => ({
+            data: { fareCode: err.fareCode, route: err.route },
+            error: err.error,
+          })),
+        );
 
-        const totalProcessed = insertedFares.length + errors.length + conflicts.length;
-        const successMessage = insertedFares.length > 0 
-          ? `Upload completed! ${insertedFares.length} of ${totalProcessed} records successfully processed.`
-          : `Upload completed with issues. ${totalProcessed} records processed, but none were saved due to validation errors.`;
+        const totalProcessed =
+          insertedFares.length + errors.length + conflicts.length;
+        const successMessage =
+          insertedFares.length > 0
+            ? `Upload completed! ${insertedFares.length} of ${totalProcessed} records successfully processed.`
+            : `Upload completed with issues. ${totalProcessed} records processed, but none were saved due to validation errors.`;
 
         res.json({
           success: insertedFares.length > 0,
@@ -741,20 +929,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
             errors,
           },
         });
-
       } catch (parseError: any) {
-        console.error('File parsing error:', parseError);
-        res.status(400).json({ 
+        console.error("File parsing error:", parseError);
+        res.status(400).json({
           success: false,
-          message: `Failed to parse file: ${parseError.message}. Please ensure the file is properly formatted.` 
+          message: `Failed to parse file: ${parseError.message}. Please ensure the file is properly formatted.`,
         });
       }
     } catch (error: any) {
-      console.error('Upload processing error:', error);
-      res.status(500).json({ 
+      console.error("Upload processing error:", error);
+      res.status(500).json({
         success: false,
-        message: "Internal server error during upload processing", 
-        error: error.message 
+        message: "Internal server error during upload processing",
+        error: error.message,
       });
     }
   });
@@ -768,7 +955,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(fare);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch fare", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to fetch fare", error: error.message });
     }
   });
 
@@ -791,12 +980,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userAgent: req.get("User-Agent"),
           sessionId: req.sessionID || "unknown",
         },
-        () => storage.getNegotiatedFareById(req.params.id)
+        () => storage.getNegotiatedFareById(req.params.id),
       );
 
       res.json(fare);
     } catch (error: any) {
-      res.status(400).json({ message: "Failed to update fare", error: error.message });
+      res
+        .status(400)
+        .json({ message: "Failed to update fare", error: error.message });
     }
   });
 
@@ -807,7 +998,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.header("x-user") || "system";
 
       if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
-        return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
+        return res
+          .status(400)
+          .json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
       }
 
       const fare = await storage.withAuditLog(
@@ -822,12 +1015,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userAgent: req.get("User-Agent"),
           sessionId: req.sessionID || "unknown",
         },
-        () => storage.getNegotiatedFareById(req.params.id)
+        () => storage.getNegotiatedFareById(req.params.id),
       );
 
       res.json(fare);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to update fare status", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to update fare status",
+          error: error.message,
+        });
     }
   });
 
@@ -837,7 +1035,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteNegotiatedFare(req.params.id);
       res.status(204).send();
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to delete fare", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to delete fare", error: error.message });
     }
   });
 
@@ -850,7 +1050,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rules = await storage.getDynamicDiscountRules(filters);
       res.json(rules);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch discount rules", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch discount rules",
+          error: error.message,
+        });
     }
   });
 
@@ -865,9 +1070,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check for conflicts
       const conflicts = await storage.checkDiscountRuleConflicts(validatedData);
       if (conflicts.length > 0) {
-        return res.status(409).json({ 
-          message: "Rule conflicts detected", 
-          conflicts 
+        return res.status(409).json({
+          message: "Rule conflicts detected",
+          conflicts,
         });
       }
 
@@ -880,14 +1085,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (error.errors && Array.isArray(error.errors)) {
         // Zod validation errors
-        return res.status(400).json({ 
-          message: "Validation failed", 
+        return res.status(400).json({
+          message: "Validation failed",
           errors: error.errors,
-          error: error.message 
+          error: error.message,
         });
       }
 
-      res.status(400).json({ message: "Invalid rule data", error: error.message });
+      res
+        .status(400)
+        .json({ message: "Invalid rule data", error: error.message });
     }
   });
 
@@ -897,7 +1104,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { baseFare, currency, ruleId } = req.body;
 
       if (!baseFare || !currency || !ruleId) {
-        return res.status(400).json({ message: "baseFare, currency, and ruleId are required" });
+        return res
+          .status(400)
+          .json({ message: "baseFare, currency, and ruleId are required" });
       }
 
       const rule = await storage.getDynamicDiscountRuleById(ruleId);
@@ -917,13 +1126,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         adjustedFare: Math.round(adjustedFare * 100) / 100,
         adjustment: {
           type: rule.adjustmentType,
-          value: parseFloat(rule.adjustmentValue)
+          value: parseFloat(rule.adjustmentValue),
         },
         currency,
-        ruleApplied: rule.ruleCode
+        ruleApplied: rule.ruleCode,
       });
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to simulate rule", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to simulate rule", error: error.message });
     }
   });
 
@@ -936,7 +1147,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(rule);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch rule", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to fetch rule", error: error.message });
     }
   });
 
@@ -944,10 +1157,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/dynamic-discount-rules/:id", async (req, res) => {
     try {
       const validatedData = insertDynamicDiscountRuleSchema.parse(req.body);
-      const rule = await storage.updateDynamicDiscountRule(req.params.id, validatedData);
+      const rule = await storage.updateDynamicDiscountRule(
+        req.params.id,
+        validatedData,
+      );
       res.json(rule);
     } catch (error: any) {
-      res.status(400).json({ message: "Failed to update rule", error: error.message });
+      res
+        .status(400)
+        .json({ message: "Failed to update rule", error: error.message });
     }
   });
 
@@ -956,13 +1174,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { status } = req.body;
       if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
-        return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
+        return res
+          .status(400)
+          .json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
       }
 
-      const rule = await storage.updateDynamicDiscountRuleStatus(req.params.id, status);
+      const rule = await storage.updateDynamicDiscountRuleStatus(
+        req.params.id,
+        status,
+      );
       res.json(rule);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to update rule status", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to update rule status",
+          error: error.message,
+        });
     }
   });
 
@@ -972,7 +1200,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteDynamicDiscountRule(req.params.id);
       res.status(204).send();
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to delete rule", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to delete rule", error: error.message });
     }
   });
 
@@ -985,7 +1215,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rules = await storage.getAirAncillaryRules(filters);
       res.json(rules);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch air ancillary rules", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch air ancillary rules",
+          error: error.message,
+        });
     }
   });
 
@@ -995,18 +1230,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertAirAncillaryRuleSchema.parse(req.body);
 
       // Check for conflicts
-      const conflicts = await storage.checkAirAncillaryRuleConflicts(validatedData);
+      const conflicts =
+        await storage.checkAirAncillaryRuleConflicts(validatedData);
       if (conflicts.length > 0) {
-        return res.status(409).json({ 
-          message: "Rule conflicts detected", 
-          conflicts 
+        return res.status(409).json({
+          message: "Rule conflicts detected",
+          conflicts,
         });
       }
 
       const rule = await storage.insertAirAncillaryRule(validatedData);
       res.status(201).json(rule);
     } catch (error: any) {
-      res.status(400).json({ message: "Invalid rule data", error: error.message });
+      res
+        .status(400)
+        .json({ message: "Invalid rule data", error: error.message });
     }
   });
 
@@ -1016,7 +1254,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { basePrice, currency, ruleId } = req.body;
 
       if (!basePrice || !currency || !ruleId) {
-        return res.status(400).json({ message: "basePrice, currency, and ruleId are required" });
+        return res
+          .status(400)
+          .json({ message: "basePrice, currency, and ruleId are required" });
       }
 
       const rule = await storage.getAirAncillaryRuleById(ruleId);
@@ -1044,14 +1284,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         discount: Math.round(discount * 100) / 100,
         adjustment: {
           type: rule.adjustmentType,
-          value: rule.adjustmentValue ? parseFloat(rule.adjustmentValue) : 0
+          value: rule.adjustmentValue ? parseFloat(rule.adjustmentValue) : 0,
         },
         currency,
         ruleApplied: rule.ruleCode,
-        ancillaryCode: rule.ancillaryCode
+        ancillaryCode: rule.ancillaryCode,
       });
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to simulate rule", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to simulate rule", error: error.message });
     }
   });
 
@@ -1064,7 +1306,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(rule);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch rule", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to fetch rule", error: error.message });
     }
   });
 
@@ -1072,10 +1316,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/air-ancillary-rules/:id", async (req, res) => {
     try {
       const validatedData = insertAirAncillaryRuleSchema.parse(req.body);
-      const rule = await storage.updateAirAncillaryRule(req.params.id, validatedData);
+      const rule = await storage.updateAirAncillaryRule(
+        req.params.id,
+        validatedData,
+      );
       res.json(rule);
     } catch (error: any) {
-      res.status(400).json({ message: "Failed to update rule", error: error.message });
+      res
+        .status(400)
+        .json({ message: "Failed to update rule", error: error.message });
     }
   });
 
@@ -1084,13 +1333,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { status } = req.body;
       if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
-        return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
+        return res
+          .status(400)
+          .json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
       }
 
-      const rule = await storage.updateAirAncillaryRuleStatus(req.params.id, status);
+      const rule = await storage.updateAirAncillaryRuleStatus(
+        req.params.id,
+        status,
+      );
       res.json(rule);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to update rule status", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to update rule status",
+          error: error.message,
+        });
     }
   });
 
@@ -1100,7 +1359,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteAirAncillaryRule(req.params.id);
       res.status(204).send();
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to delete rule", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to delete rule", error: error.message });
     }
   });
 
@@ -1110,7 +1371,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rules = await storage.getAirAncillaryRules({ status: "ACTIVE" });
       // Group by ancillary code and return unique ancillary products
       const products = rules.reduce((acc: any[], rule) => {
-        const existing = acc.find(p => p.ancillaryCode === rule.ancillaryCode);
+        const existing = acc.find(
+          (p) => p.ancillaryCode === rule.ancillaryCode,
+        );
         if (!existing) {
           acc.push({
             id: rule.id,
@@ -1119,14 +1382,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
             adjustmentType: rule.adjustmentType,
             adjustmentValue: rule.adjustmentValue,
             pos: rule.pos,
-            agentTier: rule.agentTier
+            agentTier: rule.agentTier,
           });
         }
         return acc;
       }, []);
       res.json(products);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch ancillary products", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch ancillary products",
+          error: error.message,
+        });
     }
   });
 
@@ -1139,7 +1407,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rates = await storage.getNonAirRates(filters);
       res.json(rates);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch non-air rates", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch non-air rates",
+          error: error.message,
+        });
     }
   });
 
@@ -1150,72 +1423,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rate = await storage.insertNonAirRate(validatedData);
       res.status(201).json(rate);
     } catch (error: any) {
-      res.status(400).json({ message: "Invalid rate data", error: error.message });
+      res
+        .status(400)
+        .json({ message: "Invalid rate data", error: error.message });
     }
   });
 
   // Upload CSV/Excel file for non-air rates
-  app.post("/api/nonair/rates/upload", upload.single("file"), async (req, res) => {
-    try {
-      if (!req.file) {
-        return res.status(400).json({ message: "No file uploaded" });
-      }
+  app.post(
+    "/api/nonair/rates/upload",
+    upload.single("file"),
+    async (req, res) => {
+      try {
+        if (!req.file) {
+          return res.status(400).json({ message: "No file uploaded" });
+        }
 
-      const results: any[] = [];
-      const errors: any[] = [];
+        const results: any[] = [];
+        const errors: any[] = [];
 
-      // Parse CSV
-      const stream = Readable.from(req.file.buffer.toString());
+        // Parse CSV
+        const stream = Readable.from(req.file.buffer.toString());
 
-      stream
-        .pipe(csv())
-        .on("data", async (data) => {
-          try {
-            // Transform CSV data to match schema
-            const transformedData = {
-              supplierCode: data.supplierCode,
-              productCode: data.productCode,
-              productName: data.productName,
-              netRate: data.netRate,
-              currency: data.currency,
-              region: JSON.parse(data.region || "[]"),
-              validFrom: data.validFrom,
-              validTo: data.validTo,
-              inventory: data.inventory ? parseInt(data.inventory) : null,
-            };
+        stream
+          .pipe(csv())
+          .on("data", async (data) => {
+            try {
+              // Transform CSV data to match schema
+              const transformedData = {
+                supplierCode: data.supplierCode,
+                productCode: data.productCode,
+                productName: data.productName,
+                netRate: data.netRate,
+                currency: data.currency,
+                region: JSON.parse(data.region || "[]"),
+                validFrom: data.validFrom,
+                validTo: data.validTo,
+                inventory: data.inventory ? parseInt(data.inventory) : null,
+              };
 
-            const validatedData = insertNonAirRateSchema.parse(transformedData);
-            results.push(validatedData);
-          } catch (error: any) {
-            errors.push({ data, error: error.message });
-          }
-        })
-        .on("end", async () => {
-          try {
-            // Insert valid rates
-            const insertedRates: any[] = [];
-            for (const rateData of results) {
-              const rate = await storage.insertNonAirRate(rateData);
-              insertedRates.push(rate);
+              const validatedData =
+                insertNonAirRateSchema.parse(transformedData);
+              results.push(validatedData);
+            } catch (error: any) {
+              errors.push({ data, error: error.message });
             }
+          })
+          .on("end", async () => {
+            try {
+              // Insert valid rates
+              const insertedRates: any[] = [];
+              for (const rateData of results) {
+                const rate = await storage.insertNonAirRate(rateData);
+                insertedRates.push(rate);
+              }
 
-            res.json({
-              success: true,
-              inserted: insertedRates.length,
-              errors: errors.length,
-              data: {
-                insertedRates,
-                errors,
-              },
-            });
-          } catch (error: any) {
-            res.status(500).json({ message: "Failed to insert rates", error: error.message });
-          }
-        });
-    } catch (error: any) {
-      res.status(500).json({ message: "Failed to process upload", error: error.message });
-    }
-  });
+              res.json({
+                success: true,
+                inserted: insertedRates.length,
+                errors: errors.length,
+                data: {
+                  insertedRates,
+                  errors,
+                },
+              });
+            } catch (error: any) {
+              res
+                .status(500)
+                .json({
+                  message: "Failed to insert rates",
+                  error: error.message,
+                });
+            }
+          });
+      } catch (error: any) {
+        res
+          .status(500)
+          .json({ message: "Failed to process upload", error: error.message });
+      }
+    },
+  );
 
   // Get rate by ID
   app.get("/api/nonair/rates/:id", async (req, res) => {
@@ -1226,7 +1513,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(rate);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch rate", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to fetch rate", error: error.message });
     }
   });
 
@@ -1237,7 +1526,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rate = await storage.updateNonAirRate(req.params.id, validatedData);
       res.json(rate);
     } catch (error: any) {
-      res.status(400).json({ message: "Failed to update rate", error: error.message });
+      res
+        .status(400)
+        .json({ message: "Failed to update rate", error: error.message });
     }
   });
 
@@ -1246,13 +1537,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { status } = req.body;
       if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
-        return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
+        return res
+          .status(400)
+          .json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
       }
 
       const rate = await storage.updateNonAirRateStatus(req.params.id, status);
       res.json(rate);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to update rate status", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to update rate status",
+          error: error.message,
+        });
     }
   });
 
@@ -1262,7 +1560,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteNonAirRate(req.params.id);
       res.status(204).send();
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to delete rate", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to delete rate", error: error.message });
     }
   });
 
@@ -1275,7 +1575,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rules = await storage.getNonAirMarkupRules(filters);
       res.json(rules);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch markup rules", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch markup rules",
+          error: error.message,
+        });
     }
   });
 
@@ -1285,18 +1590,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertNonAirMarkupRuleSchema.parse(req.body);
 
       // Check for conflicts
-      const conflicts = await storage.checkNonAirMarkupRuleConflicts(validatedData);
+      const conflicts =
+        await storage.checkNonAirMarkupRuleConflicts(validatedData);
       if (conflicts.length > 0) {
-        return res.status(409).json({ 
-          message: "Rule conflicts detected", 
-          conflicts 
+        return res.status(409).json({
+          message: "Rule conflicts detected",
+          conflicts,
         });
       }
 
       const rule = await storage.insertNonAirMarkupRule(validatedData);
       res.status(201).json(rule);
     } catch (error: any) {
-      res.status(400).json({ message: "Invalid rule data", error: error.message });
+      res
+        .status(400)
+        .json({ message: "Invalid rule data", error: error.message });
     }
   });
 
@@ -1306,7 +1614,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { baseRate, currency, ruleId } = req.body;
 
       if (!baseRate || !currency || !ruleId) {
-        return res.status(400).json({ message: "baseRate, currency, and ruleId are required" });
+        return res
+          .status(400)
+          .json({ message: "baseRate, currency, and ruleId are required" });
       }
 
       const rule = await storage.getNonAirMarkupRuleById(ruleId);
@@ -1331,14 +1641,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         markup: Math.round(markup * 100) / 100,
         adjustment: {
           type: rule.adjustmentType,
-          value: parseFloat(rule.adjustmentValue)
+          value: parseFloat(rule.adjustmentValue),
         },
         currency,
         ruleApplied: rule.ruleCode,
-        productCode: rule.productCode
+        productCode: rule.productCode,
       });
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to simulate rule", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to simulate rule", error: error.message });
     }
   });
 
@@ -1351,7 +1663,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(rule);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch rule", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to fetch rule", error: error.message });
     }
   });
 
@@ -1359,10 +1673,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/nonair/rules/:id", async (req, res) => {
     try {
       const validatedData = insertNonAirMarkupRuleSchema.parse(req.body);
-      const rule = await storage.updateNonAirMarkupRule(req.params.id, validatedData);
+      const rule = await storage.updateNonAirMarkupRule(
+        req.params.id,
+        validatedData,
+      );
       res.json(rule);
     } catch (error: any) {
-      res.status(400).json({ message: "Failed to update rule", error: error.message });
+      res
+        .status(400)
+        .json({ message: "Failed to update rule", error: error.message });
     }
   });
 
@@ -1371,13 +1690,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { status } = req.body;
       if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
-        return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
+        return res
+          .status(400)
+          .json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
       }
 
-      const rule = await storage.updateNonAirMarkupRuleStatus(req.params.id, status);
+      const rule = await storage.updateNonAirMarkupRuleStatus(
+        req.params.id,
+        status,
+      );
       res.json(rule);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to update rule status", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to update rule status",
+          error: error.message,
+        });
     }
   });
 
@@ -1387,13 +1716,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteNonAirMarkupRule(req.params.id);
       res.status(204).send();
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to delete rule", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to delete rule", error: error.message });
     }
   });
 
   // Bundle Pricing Rules Routes (Register BEFORE general bundle routes to avoid conflicts)
 
-  // Get all bundle pricing rules with optional filters  
+  // Get all bundle pricing rules with optional filters
   app.get("/api/bundles/pricing", async (req, res) => {
     try {
       const filters = req.query || {};
@@ -1410,11 +1741,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // If no pricing rules exist and no specific filters, create sample data
       if (rules.length === 0 && Object.keys(filters).length === 0) {
-        console.log("API: No bundle pricing rules found, creating sample rules...");
+        console.log(
+          "API: No bundle pricing rules found, creating sample rules...",
+        );
 
         // First ensure we have sample bundles
         const existingBundles = await storage.getBundles({ status: "ACTIVE" });
-        const bundleCodes = existingBundles.map(b => b.bundleCode);
+        const bundleCodes = existingBundles.map((b) => b.bundleCode);
 
         if (bundleCodes.length > 0) {
           try {
@@ -1427,17 +1760,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 priority: 1,
                 status: "ACTIVE",
                 validFrom: "2024-01-01",
-                validTo: "2024-12-31"
+                validTo: "2024-12-31",
               },
               {
                 ruleCode: "BUNDLE_DISC_15",
                 bundleCode: bundleCodes[1] || bundleCodes[0],
-                discountType: "PERCENT", 
+                discountType: "PERCENT",
                 discountValue: "15.00",
                 priority: 2,
                 status: "ACTIVE",
                 validFrom: "2024-01-01",
-                validTo: "2024-12-31"
+                validTo: "2024-12-31",
               },
               {
                 ruleCode: "BUNDLE_DISC_FLAT_500",
@@ -1447,8 +1780,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 priority: 3,
                 status: "ACTIVE",
                 validFrom: "2024-01-01",
-                validTo: "2024-12-31"
-              }
+                validTo: "2024-12-31",
+              },
             ];
 
             for (const ruleData of samplePricingRules) {
@@ -1456,15 +1789,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 await storage.insertBundlePricingRule(ruleData);
                 console.log(`API: Created pricing rule: ${ruleData.ruleCode}`);
               } catch (ruleError) {
-                console.error(`API: Error creating pricing rule ${ruleData.ruleCode}:`, ruleError);
+                console.error(
+                  `API: Error creating pricing rule ${ruleData.ruleCode}:`,
+                  ruleError,
+                );
               }
             }
 
             // Refetch after creating samples
             rules = await storage.getBundlePricingRules(filters);
-            console.log(`API: After sample creation: ${rules?.length || 0} bundle pricing rules`);
+            console.log(
+              `API: After sample creation: ${rules?.length || 0} bundle pricing rules`,
+            );
           } catch (createError: any) {
-            console.error("API: Error creating sample bundle pricing rules:", createError);
+            console.error(
+              "API: Error creating sample bundle pricing rules:",
+              createError,
+            );
           }
         }
       }
@@ -1473,9 +1814,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(rules);
     } catch (error: any) {
       console.error("API: Error in /api/bundles/pricing endpoint:", error);
-      res.status(500).json({ 
-        message: "Failed to fetch bundle pricing rules", 
-        error: error.message
+      res.status(500).json({
+        message: "Failed to fetch bundle pricing rules",
+        error: error.message,
       });
     }
   });
@@ -1486,18 +1827,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertBundlePricingRuleSchema.parse(req.body);
 
       // Check for conflicts
-      const conflicts = await storage.checkBundlePricingRuleConflicts(validatedData);
+      const conflicts =
+        await storage.checkBundlePricingRuleConflicts(validatedData);
       if (conflicts.length > 0) {
-        return res.status(409).json({ 
-          message: "Bundle pricing rule conflicts detected", 
-          conflicts 
+        return res.status(409).json({
+          message: "Bundle pricing rule conflicts detected",
+          conflicts,
         });
       }
 
       const rule = await storage.insertBundlePricingRule(validatedData);
       res.status(201).json(rule);
     } catch (error: any) {
-      res.status(400).json({ message: "Invalid bundle pricing rule data", error: error.message });
+      res
+        .status(400)
+        .json({
+          message: "Invalid bundle pricing rule data",
+          error: error.message,
+        });
     }
   });
 
@@ -1507,12 +1854,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { basePrice, currency, ruleId } = req.body;
 
       if (!basePrice || !currency || !ruleId) {
-        return res.status(400).json({ message: "basePrice, currency, and ruleId are required" });
+        return res
+          .status(400)
+          .json({ message: "basePrice, currency, and ruleId are required" });
       }
 
       const rule = await storage.getBundlePricingRuleById(ruleId);
       if (!rule) {
-        return res.status(404).json({ message: "Bundle pricing rule not found" });
+        return res
+          .status(404)
+          .json({ message: "Bundle pricing rule not found" });
       }
 
       let adjustedPrice = parseFloat(basePrice);
@@ -1534,10 +1885,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         discountValue: parseFloat(rule.discountValue),
         currency,
         ruleApplied: rule.ruleCode,
-        bundleCode: rule.bundleCode
+        bundleCode: rule.bundleCode,
       });
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to simulate bundle pricing rule", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to simulate bundle pricing rule",
+          error: error.message,
+        });
     }
   });
 
@@ -1546,11 +1902,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const rule = await storage.getBundlePricingRuleById(req.params.id);
       if (!rule) {
-        return res.status(404).json({ message: "Bundle pricing rule not found" });
+        return res
+          .status(404)
+          .json({ message: "Bundle pricing rule not found" });
       }
       res.json(rule);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch bundle pricing rule", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch bundle pricing rule",
+          error: error.message,
+        });
     }
   });
 
@@ -1558,10 +1921,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/bundles/pricing/:id", async (req, res) => {
     try {
       const validatedData = insertBundlePricingRuleSchema.parse(req.body);
-      const rule = await storage.updateBundlePricingRule(req.params.id, validatedData);
+      const rule = await storage.updateBundlePricingRule(
+        req.params.id,
+        validatedData,
+      );
       res.json(rule);
     } catch (error: any) {
-      res.status(400).json({ message: "Failed to update bundle pricing rule", error: error.message });
+      res
+        .status(400)
+        .json({
+          message: "Failed to update bundle pricing rule",
+          error: error.message,
+        });
     }
   });
 
@@ -1570,13 +1941,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { status } = req.body;
       if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
-        return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
+        return res
+          .status(400)
+          .json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
       }
 
-      const rule = await storage.updateBundlePricingRuleStatus(req.params.id, status);
+      const rule = await storage.updateBundlePricingRuleStatus(
+        req.params.id,
+        status,
+      );
       res.json(rule);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to update bundle pricing rule status", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to update bundle pricing rule status",
+          error: error.message,
+        });
     }
   });
 
@@ -1586,11 +1967,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteBundlePricingRule(req.params.id);
       res.status(204).send();
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to delete bundle pricing rule", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to delete bundle pricing rule",
+          error: error.message,
+        });
     }
   });
 
-  console.log("Bundle pricing routes registered successfully at /api/bundles/pricing");
+  console.log(
+    "Bundle pricing routes registered successfully at /api/bundles/pricing",
+  );
 
   // Bundle Routes (General bundle routes - placed AFTER pricing routes)
 
@@ -1602,7 +1990,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const bundles = await storage.getBundles(filters);
       res.json(bundles);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch bundles", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to fetch bundles", error: error.message });
     }
   });
 
@@ -1614,16 +2004,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check for conflicts
       const conflicts = await storage.checkBundleConflicts(validatedData);
       if (conflicts.length > 0) {
-        return res.status(409).json({ 
-          message: "Bundle conflicts detected", 
-          conflicts 
+        return res.status(409).json({
+          message: "Bundle conflicts detected",
+          conflicts,
         });
       }
 
       const bundle = await storage.insertBundle(validatedData);
       res.status(201).json(bundle);
     } catch (error: any) {
-      res.status(400).json({ message: "Invalid bundle data", error: error.message });
+      res
+        .status(400)
+        .json({ message: "Invalid bundle data", error: error.message });
     }
   });
 
@@ -1636,7 +2028,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(bundle);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch bundle", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to fetch bundle", error: error.message });
     }
   });
 
@@ -1647,7 +2041,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const bundle = await storage.updateBundle(req.params.id, validatedData);
       res.json(bundle);
     } catch (error: any) {
-      res.status(400).json({ message: "Failed to update bundle", error: error.message });
+      res
+        .status(400)
+        .json({ message: "Failed to update bundle", error: error.message });
     }
   });
 
@@ -1656,13 +2052,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { status } = req.body;
       if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
-        return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
+        return res
+          .status(400)
+          .json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
       }
 
       const bundle = await storage.updateBundleStatus(req.params.id, status);
       res.json(bundle);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to update bundle status", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to update bundle status",
+          error: error.message,
+        });
     }
   });
 
@@ -1672,7 +2075,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteBundle(req.params.id);
       res.status(204).send();
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to delete bundle", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to delete bundle", error: error.message });
     }
   });
 
@@ -1685,7 +2090,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rules = await storage.getOfferRules(filters);
       res.json(rules);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch offer rules", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to fetch offer rules", error: error.message });
     }
   });
 
@@ -1700,9 +2107,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check for conflicts
       const conflicts = await storage.checkOfferRuleConflicts(validatedData);
       if (conflicts.length > 0) {
-        return res.status(409).json({ 
-          message: "Rule conflicts detected", 
-          conflicts 
+        return res.status(409).json({
+          message: "Rule conflicts detected",
+          conflicts,
         });
       }
 
@@ -1715,14 +2122,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (error.errors && Array.isArray(error.errors)) {
         // Zod validation errors
-        return res.status(400).json({ 
-          message: "Validation failed", 
+        return res.status(400).json({
+          message: "Validation failed",
           errors: error.errors,
-          error: error.message 
+          error: error.message,
         });
       }
 
-      res.status(400).json({ message: "Invalid rule data", error: error.message });
+      res
+        .status(400)
+        .json({ message: "Invalid rule data", error: error.message });
     }
   });
 
@@ -1732,7 +2141,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { ruleId, context } = req.body;
 
       if (!ruleId || !context) {
-        return res.status(400).json({ message: "ruleId and context are required" });
+        return res
+          .status(400)
+          .json({ message: "ruleId and context are required" });
       }
 
       const rule = await storage.getOfferRuleById(ruleId);
@@ -1748,12 +2159,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         conditions: rule.conditions,
         actions: rule.actions,
         context,
-        result: "Rule would be applied based on matching conditions"
+        result: "Rule would be applied based on matching conditions",
       };
 
       res.json(simulation);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to simulate rule", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to simulate rule", error: error.message });
     }
   });
 
@@ -1766,7 +2179,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(rule);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch rule", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to fetch rule", error: error.message });
     }
   });
 
@@ -1777,7 +2192,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rule = await storage.updateOfferRule(req.params.id, validatedData);
       res.json(rule);
     } catch (error: any) {
-      res.status(400).json({ message: "Failed to update rule", error: error.message });
+      res
+        .status(400)
+        .json({ message: "Failed to update rule", error: error.message });
     }
   });
 
@@ -1785,14 +2202,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/offer-rules/:id/status", async (req, res) => {
     try {
       const { status, approver } = req.body;
-      if (!status || !["DRAFT", "PENDING_APPROVAL", "ACTIVE", "INACTIVE"].includes(status)) {
+      if (
+        !status ||
+        !["DRAFT", "PENDING_APPROVAL", "ACTIVE", "INACTIVE"].includes(status)
+      ) {
         return res.status(400).json({ message: "Invalid status" });
       }
 
-      const rule = await storage.updateOfferRuleStatus(req.params.id, status, approver);
+      const rule = await storage.updateOfferRuleStatus(
+        req.params.id,
+        status,
+        approver,
+      );
       res.json(rule);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to update rule status", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to update rule status",
+          error: error.message,
+        });
     }
   });
 
@@ -1802,7 +2231,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteOfferRule(req.params.id);
       res.status(204).send();
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to delete rule", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to delete rule", error: error.message });
     }
   });
 
@@ -1811,10 +2242,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Compose offer for agent
   app.post("/api/offer/compose", async (req, res) => {
     try {
-      const { origin, destination, tripType, pax, cabinClass, dates, channel, agentId } = req.body;
+      const {
+        origin,
+        destination,
+        tripType,
+        pax,
+        cabinClass,
+        dates,
+        channel,
+        agentId,
+      } = req.body;
 
       if (!origin || !destination || !agentId) {
-        return res.status(400).json({ message: "origin, destination, and agentId are required" });
+        return res
+          .status(400)
+          .json({ message: "origin, destination, and agentId are required" });
       }
 
       // Generate trace ID
@@ -1831,10 +2273,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         destination,
         cabinClass,
         tripType,
-        status: "ACTIVE"
+        status: "ACTIVE",
       };
 
-      const negotiatedFares = await storage.getNegotiatedFares(negotiatedFareFilters);
+      const negotiatedFares = await storage.getNegotiatedFares(
+        negotiatedFareFilters,
+      );
       let fareSource = "API";
       let basePrice = 8500; // Mock API fare price
       let adjustments = [];
@@ -1851,14 +2295,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         cabinClass,
         tripType,
         channel,
-        status: "ACTIVE"
+        status: "ACTIVE",
       };
 
-      const discountRules = await storage.getDynamicDiscountRules(discountFilters);
+      const discountRules =
+        await storage.getDynamicDiscountRules(discountFilters);
 
       for (const rule of discountRules) {
         // Check if rule applies to agent tier
-        const agentTierArray = Array.isArray(rule.agentTier) ? rule.agentTier : [];
+        const agentTierArray = Array.isArray(rule.agentTier)
+          ? rule.agentTier
+          : [];
         const posArray = Array.isArray(rule.pos) ? rule.pos : [];
 
         if (agentTierArray.includes(agentTier)) {
@@ -1873,7 +2320,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               value: adjustmentValue,
               originalPrice: originalPrice,
               adjustedPrice: basePrice,
-              priority: rule.priority
+              priority: rule.priority,
             });
           } else if (rule.adjustmentType === "AMOUNT") {
             const adjustmentValue = parseFloat(rule.adjustmentValue);
@@ -1885,7 +2332,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               value: adjustmentValue,
               originalPrice: originalPrice,
               adjustedPrice: basePrice,
-              priority: rule.priority
+              priority: rule.priority,
             });
           }
         }
@@ -1893,14 +2340,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Step 3: Add ancillary offers
       const ancillaryFilters = {
-        status: "ACTIVE"
+        status: "ACTIVE",
       };
 
-      const ancillaryRules = await storage.getAirAncillaryRules(ancillaryFilters);
+      const ancillaryRules =
+        await storage.getAirAncillaryRules(ancillaryFilters);
       const ancillaries = [];
 
       for (const rule of ancillaryRules) {
-        const agentTierArray = Array.isArray(rule.agentTier) ? rule.agentTier : [];
+        const agentTierArray = Array.isArray(rule.agentTier)
+          ? rule.agentTier
+          : [];
 
         if (agentTierArray.includes(agentTier)) {
           let baseAncillaryPrice = 2000; // Mock base price
@@ -1910,8 +2360,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (rule.adjustmentType === "FREE") {
             sellPrice = 0;
             discount = baseAncillaryPrice;
-          } else if (rule.adjustmentType === "PERCENT" && rule.adjustmentValue) {
-            discount = baseAncillaryPrice * (parseFloat(rule.adjustmentValue) / 100);
+          } else if (
+            rule.adjustmentType === "PERCENT" &&
+            rule.adjustmentValue
+          ) {
+            discount =
+              baseAncillaryPrice * (parseFloat(rule.adjustmentValue) / 100);
             sellPrice = baseAncillaryPrice - discount;
           } else if (rule.adjustmentType === "AMOUNT" && rule.adjustmentValue) {
             discount = parseFloat(rule.adjustmentValue);
@@ -1922,37 +2376,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
             code: rule.ancillaryCode,
             base: baseAncillaryPrice,
             discount: Math.round(discount),
-            sell: Math.round(sellPrice)
+            sell: Math.round(sellPrice),
           });
         }
       }
 
       // Step 4: Add bundle offers
       const bundleFilters = {
-        status: "ACTIVE"
+        status: "ACTIVE",
       };
 
       const availableBundles = await storage.getBundles(bundleFilters);
       const bundles = [];
 
       for (const bundle of availableBundles) {
-        const agentTierArray = Array.isArray(bundle.agentTier) ? bundle.agentTier : [];
+        const agentTierArray = Array.isArray(bundle.agentTier)
+          ? bundle.agentTier
+          : [];
         const posArray = Array.isArray(bundle.pos) ? bundle.pos : [];
 
         if (agentTierArray.includes(agentTier)) {
           const bundlePricingFilters = {
             bundleCode: bundle.bundleCode,
-            status: "ACTIVE"
+            status: "ACTIVE",
           };
 
-          const pricingRules = await storage.getBundlePricingRules(bundlePricingFilters);
+          const pricingRules =
+            await storage.getBundlePricingRules(bundlePricingFilters);
           let bundlePrice = 3000; // Mock base bundle price
           let saveVsIndiv = 600;
 
           if (pricingRules.length > 0) {
             const rule = pricingRules[0];
             if (rule.discountType === "PERCENT") {
-              const discount = bundlePrice * (parseFloat(rule.discountValue) / 100);
+              const discount =
+                bundlePrice * (parseFloat(rule.discountValue) / 100);
               bundlePrice = bundlePrice - discount;
               saveVsIndiv = Math.round(discount);
             } else if (rule.discountType === "AMOUNT") {
@@ -1965,15 +2423,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
           bundles.push({
             code: bundle.bundleCode,
             sell: Math.round(bundlePrice),
-            saveVsIndiv: saveVsIndiv
+            saveVsIndiv: saveVsIndiv,
           });
         }
       }
 
       // Step 5: Calculate final offer price and commission
-      const ancillaryTotal = ancillaries.reduce((total, anc) => total + anc.sell, 0);
-      const bundleTotal = bundles.reduce((total, bundle) => total + bundle.sell, 0);
-      const finalOfferPrice = Math.round(basePrice + ancillaryTotal + bundleTotal);
+      const ancillaryTotal = ancillaries.reduce(
+        (total, anc) => total + anc.sell,
+        0,
+      );
+      const bundleTotal = bundles.reduce(
+        (total, bundle) => total + bundle.sell,
+        0,
+      );
+      const finalOfferPrice = Math.round(
+        basePrice + ancillaryTotal + bundleTotal,
+      );
       const commission = Math.round(finalOfferPrice * 0.03); // 3% commission
 
       // Create offer trace
@@ -1987,7 +2453,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           pax: pax || [{ type: "ADT", count: 1 }],
           cabinClass: cabinClass || "ECONOMY",
           dates: dates || { depart: "2025-11-10", return: "2025-11-20" },
-          channel: channel || "PORTAL"
+          channel: channel || "PORTAL",
         },
         agentTier,
         cohorts,
@@ -1998,7 +2464,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         bundles,
         finalOfferPrice: finalOfferPrice.toString(),
         commission: commission.toString(),
-        auditTraceId
+        auditTraceId,
       };
 
       const savedTrace = await storage.insertOfferTrace(offerTrace);
@@ -2015,10 +2481,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         bundles,
         finalOfferPrice,
         commission,
-        auditTraceId
+        auditTraceId,
       });
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to compose offer", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to compose offer", error: error.message });
     }
   });
 
@@ -2031,7 +2499,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(trace);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch offer trace", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to fetch offer trace", error: error.message });
     }
   });
 
@@ -2042,7 +2512,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const traces = await storage.getOfferTraces(filters);
       res.json(traces);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch offer traces", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch offer traces",
+          error: error.message,
+        });
     }
   });
 
@@ -2052,7 +2527,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteOfferTrace(req.params.id);
       res.status(204).send();
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to delete offer trace", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to delete offer trace",
+          error: error.message,
+        });
     }
   });
 
@@ -2065,7 +2545,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const agents = await storage.getAgents(filters);
       res.json(agents);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch agents", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to fetch agents", error: error.message });
     }
   });
 
@@ -2077,16 +2559,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check for conflicts
       const conflicts = await storage.checkAgentConflicts(validatedData);
       if (conflicts.length > 0) {
-        return res.status(409).json({ 
-          message: "Agent conflicts detected", 
-          conflicts 
+        return res.status(409).json({
+          message: "Agent conflicts detected",
+          conflicts,
         });
       }
 
       const agent = await storage.insertAgent(validatedData);
       res.status(201).json(agent);
     } catch (error: any) {
-      res.status(400).json({ message: "Invalid agent data", error: error.message });
+      res
+        .status(400)
+        .json({ message: "Invalid agent data", error: error.message });
     }
   });
 
@@ -2099,7 +2583,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(agent);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch agent", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to fetch agent", error: error.message });
     }
   });
 
@@ -2110,7 +2596,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const agent = await storage.updateAgent(req.params.id, validatedData);
       res.json(agent);
     } catch (error: any) {
-      res.status(400).json({ message: "Failed to update agent", error: error.message });
+      res
+        .status(400)
+        .json({ message: "Failed to update agent", error: error.message });
     }
   });
 
@@ -2119,13 +2607,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { status } = req.body;
       if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
-        return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
+        return res
+          .status(400)
+          .json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
       }
 
       const agent = await storage.updateAgentStatus(req.params.id, status);
       res.json(agent);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to update agent status", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to update agent status",
+          error: error.message,
+        });
     }
   });
 
@@ -2135,7 +2630,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteAgent(req.params.id);
       res.status(204).send();
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to delete agent", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to delete agent", error: error.message });
     }
   });
 
@@ -2148,7 +2645,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const overrides = await storage.getChannelPricingOverrides(filters);
       res.json(overrides);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch channel overrides", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch channel overrides",
+          error: error.message,
+        });
     }
   });
 
@@ -2158,18 +2660,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertChannelPricingOverrideSchema.parse(req.body);
 
       // Check for conflicts
-      const conflicts = await storage.checkChannelPricingOverrideConflicts(validatedData);
+      const conflicts =
+        await storage.checkChannelPricingOverrideConflicts(validatedData);
       if (conflicts.length > 0) {
-        return res.status(409).json({ 
-          message: "Channel override conflicts detected", 
-          conflicts 
+        return res.status(409).json({
+          message: "Channel override conflicts detected",
+          conflicts,
         });
       }
 
-      const override = await storage.insertChannelPricingOverride(validatedData);
+      const override =
+        await storage.insertChannelPricingOverride(validatedData);
       res.status(201).json(override);
     } catch (error: any) {
-      res.status(400).json({ message: "Invalid channel override data", error: error.message });
+      res
+        .status(400)
+        .json({
+          message: "Invalid channel override data",
+          error: error.message,
+        });
     }
   });
 
@@ -2179,7 +2688,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { basePrice, currency, overrideId } = req.body;
 
       if (!basePrice || !currency || !overrideId) {
-        return res.status(400).json({ message: "basePrice, currency, and overrideId are required" });
+        return res
+          .status(400)
+          .json({
+            message: "basePrice, currency, and overrideId are required",
+          });
       }
 
       const override = await storage.getChannelPricingOverrideById(overrideId);
@@ -2207,23 +2720,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         currency,
         overrideApplied: override.overrideCode,
         channel: override.channel,
-        productScope: override.productScope
+        productScope: override.productScope,
       });
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to simulate channel override", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to simulate channel override",
+          error: error.message,
+        });
     }
   });
 
   // Get channel override by ID
   app.get("/api/channel-overrides/:id", async (req, res) => {
     try {
-      const override = await storage.getChannelPricingOverrideById(req.params.id);
+      const override = await storage.getChannelPricingOverrideById(
+        req.params.id,
+      );
       if (!override) {
         return res.status(404).json({ message: "Channel override not found" });
       }
       res.json(override);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch channel override", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch channel override",
+          error: error.message,
+        });
     }
   });
 
@@ -2231,10 +2756,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/channel-overrides/:id", async (req, res) => {
     try {
       const validatedData = insertChannelPricingOverrideSchema.parse(req.body);
-      const override = await storage.updateChannelPricingOverride(req.params.id, validatedData);
+      const override = await storage.updateChannelPricingOverride(
+        req.params.id,
+        validatedData,
+      );
       res.json(override);
     } catch (error: any) {
-      res.status(400).json({ message: "Failed to update channel override", error: error.message });
+      res
+        .status(400)
+        .json({
+          message: "Failed to update channel override",
+          error: error.message,
+        });
     }
   });
 
@@ -2243,13 +2776,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { status } = req.body;
       if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
-        return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
+        return res
+          .status(400)
+          .json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
       }
 
-      const override = await storage.updateChannelPricingOverrideStatus(req.params.id, status);
+      const override = await storage.updateChannelPricingOverrideStatus(
+        req.params.id,
+        status,
+      );
       res.json(override);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to update channel override status", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to update channel override status",
+          error: error.message,
+        });
     }
   });
 
@@ -2259,7 +2802,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteChannelPricingOverride(req.params.id);
       res.status(204).send();
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to delete channel override", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to delete channel override",
+          error: error.message,
+        });
     }
   });
 
@@ -2272,7 +2820,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const cohorts = await storage.getCohorts(filters);
       res.json(cohorts);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch cohorts", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to fetch cohorts", error: error.message });
     }
   });
 
@@ -2284,16 +2834,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check for conflicts
       const conflicts = await storage.checkCohortConflicts(validatedData);
       if (conflicts.length > 0) {
-        return res.status(409).json({ 
-          message: "Cohort conflicts detected", 
-          conflicts 
+        return res.status(409).json({
+          message: "Cohort conflicts detected",
+          conflicts,
         });
       }
 
       const cohort = await storage.insertCohort(validatedData);
       res.status(201).json(cohort);
     } catch (error: any) {
-      res.status(400).json({ message: "Invalid cohort data", error: error.message });
+      res
+        .status(400)
+        .json({ message: "Invalid cohort data", error: error.message });
     }
   });
 
@@ -2306,7 +2858,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(cohort);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch cohort", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to fetch cohort", error: error.message });
     }
   });
 
@@ -2317,7 +2871,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const cohort = await storage.updateCohort(req.params.id, validatedData);
       res.json(cohort);
     } catch (error: any) {
-      res.status(400).json({ message: "Failed to update cohort", error: error.message });
+      res
+        .status(400)
+        .json({ message: "Failed to update cohort", error: error.message });
     }
   });
 
@@ -2326,13 +2882,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { status } = req.body;
       if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
-        return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
+        return res
+          .status(400)
+          .json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
       }
 
       const cohort = await storage.updateCohortStatus(req.params.id, status);
       res.json(cohort);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to update cohort status", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to update cohort status",
+          error: error.message,
+        });
     }
   });
 
@@ -2342,7 +2905,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteCohort(req.params.id);
       res.status(204).send();
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to delete cohort", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to delete cohort", error: error.message });
     }
   });
 
@@ -2382,8 +2947,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Check booking window criteria
         if (criteria.bookingWindow && searchContext.bookingDaysAhead) {
           const bookingDays = searchContext.bookingDaysAhead;
-          matches = matches && 
-            bookingDays >= criteria.bookingWindow.min && 
+          matches =
+            matches &&
+            bookingDays >= criteria.bookingWindow.min &&
             bookingDays <= criteria.bookingWindow.max;
         }
 
@@ -2395,10 +2961,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         searchContext,
         matchedCohorts,
-        matchedCount: matchedCohorts.length
+        matchedCount: matchedCohorts.length,
       });
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to simulate cohort assignment", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to simulate cohort assignment",
+          error: error.message,
+        });
     }
   });
 
@@ -2420,11 +2991,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             type: "SEASON",
             criteria: {
               season: "FESTIVE",
-              pos: ["IN", "AE", "US"]
+              pos: ["IN", "AE", "US"],
             },
             description: "Customers active during festive season",
             status: "ACTIVE",
-            createdBy: "system"
+            createdBy: "system",
           },
           {
             cohortCode: "PORTAL_USERS",
@@ -2432,11 +3003,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             type: "CHANNEL",
             criteria: {
               channel: "PORTAL",
-              bookingFrequency: "HIGH"
+              bookingFrequency: "HIGH",
             },
             description: "Frequent portal users",
             status: "ACTIVE",
-            createdBy: "system"
+            createdBy: "system",
           },
           {
             cohortCode: "HIGH_VALUE",
@@ -2445,13 +3016,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             criteria: {
               behavior: {
                 averageBookingValue: { min: 50000, max: 999999 },
-                bookingFrequency: "HIGH"
-              }
+                bookingFrequency: "HIGH",
+              },
             },
             description: "High value frequent travelers",
             status: "ACTIVE",
-            createdBy: "system"
-          }
+            createdBy: "system",
+          },
         ];
 
         try {
@@ -2473,11 +3044,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json([]);
       }
 
-      const cohortList = cohorts.map(cohort => ({
+      const cohortList = cohorts.map((cohort) => ({
         code: cohort.cohortCode,
         name: cohort.cohortName,
         id: cohort.id,
-        type: cohort.type
+        type: cohort.type,
       }));
 
       console.log("Returning cohorts:", cohortList);
@@ -2498,7 +3069,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const logs = await storage.getAuditLogs(filters);
       res.json(logs);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch audit logs", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to fetch audit logs", error: error.message });
     }
   });
 
@@ -2511,7 +3084,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(log);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch audit log", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to fetch audit log", error: error.message });
     }
   });
 
@@ -2519,10 +3094,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/audit-logs/entity/:entityId", async (req, res) => {
     try {
       const { module } = req.query;
-      const logs = await storage.getAuditLogsByEntity(req.params.entityId, module as string);
+      const logs = await storage.getAuditLogsByEntity(
+        req.params.entityId,
+        module as string,
+      );
       res.json(logs);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch entity audit logs", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch entity audit logs",
+          error: error.message,
+        });
     }
   });
 
@@ -2545,7 +3128,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const log = await storage.createAuditLog(auditData);
       res.status(201).json(log);
     } catch (error: any) {
-      res.status(400).json({ message: "Failed to create audit log", error: error.message });
+      res
+        .status(400)
+        .json({ message: "Failed to create audit log", error: error.message });
     }
   });
 
@@ -2563,29 +3148,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         "entityId",
         "action",
         "justification",
-        "changes"
+        "changes",
       ];
 
       const csvRows = [
         headers.join(","),
-        ...logs.map(log => [
-          log.timestamp?.toISOString() || "",
-          log.user,
-          log.module,
-          log.entityId,
-          log.action,
-          `"${log.justification || ""}"`,
-          `"${JSON.stringify(log.diff || {}).replace(/"/g, '""')}"`
-        ].join(","))
+        ...logs.map((log) =>
+          [
+            log.timestamp?.toISOString() || "",
+            log.user,
+            log.module,
+            log.entityId,
+            log.action,
+            `"${log.justification || ""}"`,
+            `"${JSON.stringify(log.diff || {}).replace(/"/g, '""')}"`,
+          ].join(","),
+        ),
       ];
 
       const csvContent = csvRows.join("\n");
 
       res.setHeader("Content-Type", "text/csv");
-      res.setHeader("Content-Disposition", "attachment; filename=audit_logs.csv");
+      res.setHeader(
+        "Content-Disposition",
+        "attachment; filename=audit_logs.csv",
+      );
       res.send(csvContent);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to export audit logs", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to export audit logs", error: error.message });
     }
   });
 
@@ -2595,7 +3187,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteAuditLog(req.params.id);
       res.status(204).send();
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to delete audit log", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to delete audit log", error: error.message });
     }
   });
 
@@ -2606,7 +3200,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.header("x-user") || "system";
 
       if (!justification) {
-        return res.status(400).json({ message: "Justification is required for rollback operations" });
+        return res
+          .status(400)
+          .json({
+            message: "Justification is required for rollback operations",
+          });
       }
 
       // Get the audit log entry
@@ -2616,7 +3214,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       if (!auditLog.beforeData) {
-        return res.status(400).json({ message: "No previous version available for rollback" });
+        return res
+          .status(400)
+          .json({ message: "No previous version available for rollback" });
       }
 
       // Perform rollback based on module type
@@ -2624,7 +3224,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       switch (auditLog.module) {
         case "NegotiatedFare":
           result = await storage.withAuditLog(
-            () => storage.updateNegotiatedFare(auditLog.entityId, auditLog.beforeData),
+            () =>
+              storage.updateNegotiatedFare(
+                auditLog.entityId,
+                auditLog.beforeData,
+              ),
             {
               user,
               module: auditLog.module,
@@ -2635,12 +3239,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
               userAgent: req.get("User-Agent"),
               sessionId: req.sessionID || "unknown",
             },
-            () => storage.getNegotiatedFareById(auditLog.entityId)
+            () => storage.getNegotiatedFareById(auditLog.entityId),
           );
           break;
         case "DynamicDiscountRule":
           result = await storage.withAuditLog(
-            () => storage.updateDynamicDiscountRule(auditLog.entityId, auditLog.beforeData),
+            () =>
+              storage.updateDynamicDiscountRule(
+                auditLog.entityId,
+                auditLog.beforeData,
+              ),
             {
               user,
               module: auditLog.module,
@@ -2651,12 +3259,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
               userAgent: req.get("User-Agent"),
               sessionId: req.sessionID || "unknown",
             },
-            () => storage.getDynamicDiscountRuleById(auditLog.entityId)
+            () => storage.getDynamicDiscountRuleById(auditLog.entityId),
           );
           break;
         case "AirAncillaryRule":
           result = await storage.withAuditLog(
-            () => storage.updateAirAncillaryRule(auditLog.entityId, auditLog.beforeData),
+            () =>
+              storage.updateAirAncillaryRule(
+                auditLog.entityId,
+                auditLog.beforeData,
+              ),
             {
               user,
               module: auditLog.module,
@@ -2667,12 +3279,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               userAgent: req.get("User-Agent"),
               sessionId: req.sessionID || "unknown",
             },
-            () => storage.getAirAncillaryRuleById(auditLog.entityId)
+            () => storage.getAirAncillaryRuleById(auditLog.entityId),
           );
           break;
         case "NonAirRate":
           result = await storage.withAuditLog(
-            () => storage.updateNonAirRate(auditLog.entityId, auditLog.beforeData),
+            () =>
+              storage.updateNonAirRate(auditLog.entityId, auditLog.beforeData),
             {
               user,
               module: auditLog.module,
@@ -2683,7 +3296,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               userAgent: req.get("User-Agent"),
               sessionId: req.sessionID || "unknown",
             },
-            () => storage.getNonAirRateById(auditLog.entityId)
+            () => storage.getNonAirRateById(auditLog.entityId),
           );
           break;
         case "Bundle":
@@ -2699,12 +3312,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               userAgent: req.get("User-Agent"),
               sessionId: req.sessionID || "unknown",
             },
-            () => storage.getBundleById(auditLog.entityId)
+            () => storage.getBundleById(auditLog.entityId),
           );
           break;
         case "OfferRule":
           result = await storage.withAuditLog(
-            () => storage.updateOfferRule(auditLog.entityId, auditLog.beforeData),
+            () =>
+              storage.updateOfferRule(auditLog.entityId, auditLog.beforeData),
             {
               user,
               module: auditLog.module,
@@ -2715,12 +3329,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
               userAgent: req.get("User-Agent"),
               sessionId: req.sessionID || "unknown",
             },
-            () => storage.getOfferRuleById(auditLog.entityId)
+            () => storage.getOfferRuleById(auditLog.entityId),
           );
           break;
         case "OfferComposer":
           result = await storage.withAuditLog(
-            () => storage.updateOfferComposer(auditLog.entityId, auditLog.beforeData),
+            () =>
+              storage.updateOfferComposer(
+                auditLog.entityId,
+                auditLog.beforeData,
+              ),
             {
               user,
               module: auditLog.module,
@@ -2731,7 +3349,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               userAgent: req.get("User-Agent"),
               sessionId: req.sessionID || "unknown",
             },
-            () => storage.getOfferComposerById(auditLog.entityId)
+            () => storage.getOfferComposerById(auditLog.entityId),
           );
           break;
         case "Agent":
@@ -2747,7 +3365,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               userAgent: req.get("User-Agent"),
               sessionId: req.sessionID || "unknown",
             },
-            () => storage.getAgentById(auditLog.entityId)
+            () => storage.getAgentById(auditLog.entityId),
           );
           break;
         case "Cohort":
@@ -2763,12 +3381,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               userAgent: req.get("User-Agent"),
               sessionId: req.sessionID || "unknown",
             },
-            () => storage.getCohortById(auditLog.entityId)
+            () => storage.getCohortById(auditLog.entityId),
           );
           break;
         case "Campaign":
           result = await storage.withAuditLog(
-            () => storage.updateCampaign(auditLog.entityId, auditLog.beforeData),
+            () =>
+              storage.updateCampaign(auditLog.entityId, auditLog.beforeData),
             {
               user,
               module: auditLog.module,
@@ -2779,12 +3398,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               userAgent: req.get("User-Agent"),
               sessionId: req.sessionID || "unknown",
             },
-            () => storage.getCampaignById(auditLog.entityId)
+            () => storage.getCampaignById(auditLog.entityId),
           );
           break;
         case "AgentTier":
           result = await storage.withAuditLog(
-            () => storage.updateAgentTier(auditLog.entityId, auditLog.beforeData),
+            () =>
+              storage.updateAgentTier(auditLog.entityId, auditLog.beforeData),
             {
               user,
               module: auditLog.module,
@@ -2795,20 +3415,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
               userAgent: req.get("User-Agent"),
               sessionId: req.sessionID || "unknown",
             },
-            () => storage.getAgentTierById(auditLog.entityId)
+            () => storage.getAgentTierById(auditLog.entityId),
           );
           break;
         default:
-          return res.status(400).json({ message: `Rollback not supported for module: ${auditLog.module}` });
+          return res
+            .status(400)
+            .json({
+              message: `Rollback not supported for module: ${auditLog.module}`,
+            });
       }
 
       res.json({
         success: true,
         message: "Entity successfully rolled back",
-        result
+        result,
       });
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to rollback entity", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to rollback entity", error: error.message });
     }
   });
 
@@ -2823,7 +3449,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const engines = await storage.getTierAssignmentEngines(filters);
       res.json(engines);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch assignment engines", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch assignment engines",
+          error: error.message,
+        });
     }
   });
 
@@ -2834,11 +3465,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertTierAssignmentEngineSchema.parse(req.body);
 
       // Check for conflicts
-      const conflicts = await storage.checkTierAssignmentEngineConflicts(validatedData);
+      const conflicts =
+        await storage.checkTierAssignmentEngineConflicts(validatedData);
       if (conflicts.length > 0) {
-        return res.status(409).json({ 
-          message: "Engine conflicts detected", 
-          conflicts 
+        return res.status(409).json({
+          message: "Engine conflicts detected",
+          conflicts,
         });
       }
 
@@ -2849,13 +3481,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("API: Error creating tier assignment engine:", error);
       if (error.errors && Array.isArray(error.errors)) {
         // Zod validation errors
-        return res.status(400).json({ 
-          message: "Validation failed", 
+        return res.status(400).json({
+          message: "Validation failed",
           errors: error.errors,
-          error: error.message 
+          error: error.message,
         });
       }
-      res.status(400).json({ message: "Invalid engine data", error: error.message });
+      res
+        .status(400)
+        .json({ message: "Invalid engine data", error: error.message });
     }
   });
 
@@ -2868,29 +3502,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(engine);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch engine", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to fetch engine", error: error.message });
     }
   });
 
   // Update assignment engine
   app.put("/api/tiers/engines/:id", async (req, res) => {
     try {
-      console.log("API: Updating tier assignment engine:", req.params.id, req.body);
+      console.log(
+        "API: Updating tier assignment engine:",
+        req.params.id,
+        req.body,
+      );
       const validatedData = insertTierAssignmentEngineSchema.parse(req.body);
-      const engine = await storage.updateTierAssignmentEngine(req.params.id, validatedData);
+      const engine = await storage.updateTierAssignmentEngine(
+        req.params.id,
+        validatedData,
+      );
       console.log("API: Successfully updated tier assignment engine:", engine);
       res.json(engine);
     } catch (error: any) {
       console.error("API: Error updating tier assignment engine:", error);
       if (error.errors && Array.isArray(error.errors)) {
         // Zod validation errors
-        return res.status(400).json({ 
-          message: "Validation failed", 
+        return res.status(400).json({
+          message: "Validation failed",
           errors: error.errors,
-          error: error.message 
+          error: error.message,
         });
       }
-      res.status(400).json({ message: "Failed to update engine", error: error.message });
+      res
+        .status(400)
+        .json({ message: "Failed to update engine", error: error.message });
     }
   });
 
@@ -2899,13 +3544,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { status } = req.body;
       if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
-        return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
+        return res
+          .status(400)
+          .json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
       }
 
-      const engine = await storage.updateTierAssignmentEngineStatus(req.params.id, status);
+      const engine = await storage.updateTierAssignmentEngineStatus(
+        req.params.id,
+        status,
+      );
       res.json(engine);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to update engine status", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to update engine status",
+          error: error.message,
+        });
     }
   });
 
@@ -2923,14 +3578,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.updateEngineRunTimestamps(req.params.id, now, nextRun);
 
       // In a real implementation, this would trigger the actual tier assignment process
-      res.json({ 
-        success: true, 
+      res.json({
+        success: true,
         message: "Engine run initiated successfully",
         lastRunAt: now.toISOString(),
-        nextRunAt: nextRun.toISOString()
+        nextRunAt: nextRun.toISOString(),
       });
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to run engine", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to run engine", error: error.message });
     }
   });
 
@@ -2940,7 +3597,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteTierAssignmentEngine(req.params.id);
       res.status(204).send();
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to delete engine", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to delete engine", error: error.message });
     }
   });
 
@@ -2963,18 +3622,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(assignments);
     } catch (error: any) {
       console.error("API: Error fetching tier assignments:", error);
-      res.status(500).json({ message: "Failed to fetch tier assignments", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch tier assignments",
+          error: error.message,
+        });
     }
   });
 
   // Assign tier to agent (manual override)
   app.post("/api/tiers/override", async (req, res) => {
     try {
-      const { agentId, tierCode, effectiveFrom, justification, assignedBy } = req.body;
+      const { agentId, tierCode, effectiveFrom, justification, assignedBy } =
+        req.body;
 
-      if (!agentId || !tierCode || !effectiveFrom || !justification || !assignedBy) {
-        return res.status(400).json({ 
-          message: "agentId, tierCode, effectiveFrom, justification, and assignedBy are required" 
+      if (
+        !agentId ||
+        !tierCode ||
+        !effectiveFrom ||
+        !justification ||
+        !assignedBy
+      ) {
+        return res.status(400).json({
+          message:
+            "agentId, tierCode, effectiveFrom, justification, and assignedBy are required",
         });
       }
 
@@ -2992,7 +3664,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: "ACTIVE" as const,
       };
 
-      const assignment = await storage.insertAgentTierAssignment(assignmentData);
+      const assignment =
+        await storage.insertAgentTierAssignment(assignmentData);
 
       // Create audit log
       const auditData = {
@@ -3010,7 +3683,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.status(201).json(assignment);
     } catch (error: any) {
-      res.status(400).json({ message: "Failed to override tier assignment", error: error.message });
+      res
+        .status(400)
+        .json({
+          message: "Failed to override tier assignment",
+          error: error.message,
+        });
     }
   });
 
@@ -3019,9 +3697,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { agentIds, effectiveFrom, assignedBy } = req.body;
 
-      if (!agentIds || !Array.isArray(agentIds) || !effectiveFrom || !assignedBy) {
-        return res.status(400).json({ 
-          message: "agentIds (array), effectiveFrom, and assignedBy are required" 
+      if (
+        !agentIds ||
+        !Array.isArray(agentIds) ||
+        !effectiveFrom ||
+        !assignedBy
+      ) {
+        return res.status(400).json({
+          message:
+            "agentIds (array), effectiveFrom, and assignedBy are required",
         });
       }
 
@@ -3031,13 +3715,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       for (const agentId of agentIds) {
         try {
           // Calculate KPIs for agent
-          const kpiData = await storage.calculateAgentKPIs(agentId, 'QUARTERLY');
+          const kpiData = await storage.calculateAgentKPIs(
+            agentId,
+            "QUARTERLY",
+          );
 
           // Evaluate tier based on KPIs
-          const recommendedTier = await storage.evaluateAgentTier(agentId, kpiData);
+          const recommendedTier = await storage.evaluateAgentTier(
+            agentId,
+            kpiData,
+          );
 
           // Check if tier has changed
-          const currentAssignment = await storage.getCurrentAgentTierAssignment(agentId);
+          const currentAssignment =
+            await storage.getCurrentAgentTierAssignment(agentId);
           if (currentAssignment?.tierCode === recommendedTier) {
             continue; // No change needed
           }
@@ -3057,7 +3748,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             status: "ACTIVE" as const,
           };
 
-          const assignment = await storage.insertAgentTierAssignment(assignmentData);
+          const assignment =
+            await storage.insertAgentTierAssignment(assignmentData);
           assignments.push(assignment);
 
           // Create audit log
@@ -3089,20 +3781,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to assign tiers", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to assign tiers", error: error.message });
     }
   });
 
   // Get current tier for specific agent
   app.get("/api/agents/:agentId/tier", async (req, res) => {
     try {
-      const assignment = await storage.getCurrentAgentTierAssignment(req.params.agentId);
+      const assignment = await storage.getCurrentAgentTierAssignment(
+        req.params.agentId,
+      );
       if (!assignment) {
-        return res.status(404).json({ message: "No active tier assignment found" });
+        return res
+          .status(404)
+          .json({ message: "No active tier assignment found" });
       }
       res.json(assignment);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch agent tier", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to fetch agent tier", error: error.message });
     }
   });
 
@@ -3112,7 +3812,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { agentId, window } = req.body;
 
       if (!agentId || !window) {
-        return res.status(400).json({ message: "agentId and window are required" });
+        return res
+          .status(400)
+          .json({ message: "agentId and window are required" });
       }
 
       // Calculate KPIs
@@ -3122,7 +3824,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const recommendedTier = await storage.evaluateAgentTier(agentId, kpiData);
 
       // Get current assignment
-      const currentAssignment = await storage.getCurrentAgentTierAssignment(agentId);
+      const currentAssignment =
+        await storage.getCurrentAgentTierAssignment(agentId);
 
       res.json({
         agentId,
@@ -3133,7 +3836,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         tierChangeRequired: currentAssignment?.tierCode !== recommendedTier,
       });
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to evaluate agent tier", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to evaluate agent tier",
+          error: error.message,
+        });
     }
   });
 
@@ -3146,7 +3854,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const tiers = await storage.getAgentTiers(filters);
       res.json(tiers);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch agent tiers", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to fetch agent tiers", error: error.message });
     }
   });
 
@@ -3158,16 +3868,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check for conflicts
       const conflicts = await storage.checkTierConflicts(validatedData);
       if (conflicts.length > 0) {
-        return res.status(409).json({ 
-          message: "Tier conflicts detected", 
-          conflicts 
+        return res.status(409).json({
+          message: "Tier conflicts detected",
+          conflicts,
         });
       }
 
       const tier = await storage.insertAgentTier(validatedData);
       res.status(201).json(tier);
     } catch (error: any) {
-      res.status(400).json({ message: "Invalid tier data", error: error.message });
+      res
+        .status(400)
+        .json({ message: "Invalid tier data", error: error.message });
     }
   });
 
@@ -3180,7 +3892,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(tier);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch tier", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to fetch tier", error: error.message });
     }
   });
 
@@ -3190,18 +3904,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertAgentTierSchema.parse(req.body);
 
       // Always check for conflicts but exclude the current tier
-      const conflicts = await storage.checkTierConflicts(validatedData, req.params.id);
+      const conflicts = await storage.checkTierConflicts(
+        validatedData,
+        req.params.id,
+      );
       if (conflicts.length > 0) {
-        return res.status(409).json({ 
-          message: "Tier conflicts detected", 
-          conflicts 
+        return res.status(409).json({
+          message: "Tier conflicts detected",
+          conflicts,
         });
       }
 
       const tier = await storage.updateAgentTier(req.params.id, validatedData);
       res.json(tier);
     } catch (error: any) {
-      res.status(400).json({ message: "Failed to update tier", error: error.message });
+      res
+        .status(400)
+        .json({ message: "Failed to update tier", error: error.message });
     }
   });
 
@@ -3210,13 +3929,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { status } = req.body;
       if (!status || !["ACTIVE", "INACTIVE"].includes(status)) {
-        return res.status(400).json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
+        return res
+          .status(400)
+          .json({ message: "Invalid status. Must be ACTIVE or INACTIVE" });
       }
 
       const tier = await storage.updateAgentTierStatus(req.params.id, status);
       res.json(tier);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to update tier status", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to update tier status",
+          error: error.message,
+        });
     }
   });
 
@@ -3226,11 +3952,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteAgentTier(req.params.id);
       res.status(204).send();
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to delete tier", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to delete tier", error: error.message });
     }
   });
-
-
 
   // Campaign Management Routes
 
@@ -3241,7 +3967,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const campaigns = await storage.getCampaigns(filters);
       res.json(campaigns);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch campaigns", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to fetch campaigns", error: error.message });
     }
   });
 
@@ -3253,36 +3981,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check for conflicts
       const conflicts = await storage.checkCampaignConflicts(validatedData);
       if (conflicts.length > 0) {
-        return res.status(409).json({ 
-          message: "Campaign conflicts detected", 
-          conflicts 
+        return res.status(409).json({
+          message: "Campaign conflicts detected",
+          conflicts,
         });
       }
 
       const campaign = await storage.insertCampaign(validatedData);
       res.status(201).json(campaign);
     } catch (error: any) {
-      res.status(400).json({ message: "Invalid campaign data", error: error.message });
+      res
+        .status(400)
+        .json({ message: "Invalid campaign data", error: error.message });
     }
   });
 
   // Activate campaign
   app.post("/api/campaigns/:id/activate", async (req, res) => {
     try {
-      const campaign = await storage.updateCampaignStatus(req.params.id, "ACTIVE");
+      const campaign = await storage.updateCampaignStatus(
+        req.params.id,
+        "ACTIVE",
+      );
       res.json(campaign);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to activate campaign", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to activate campaign", error: error.message });
     }
   });
 
   // Deactivate campaign
   app.post("/api/campaigns/:id/deactivate", async (req, res) => {
     try {
-      const campaign = await storage.updateCampaignStatus(req.params.id, "PAUSED");
+      const campaign = await storage.updateCampaignStatus(
+        req.params.id,
+        "PAUSED",
+      );
       res.json(campaign);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to deactivate campaign", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to deactivate campaign",
+          error: error.message,
+        });
     }
   });
 
@@ -3295,7 +4038,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(campaign);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch campaign", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to fetch campaign", error: error.message });
     }
   });
 
@@ -3303,10 +4048,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/campaigns/:id", async (req, res) => {
     try {
       const validatedData = insertCampaignSchema.parse(req.body);
-      const campaign = await storage.updateCampaign(req.params.id, validatedData);
+      const campaign = await storage.updateCampaign(
+        req.params.id,
+        validatedData,
+      );
       res.json(campaign);
     } catch (error: any) {
-      res.status(400).json({ message: "Failed to update campaign", error: error.message });
+      res
+        .status(400)
+        .json({ message: "Failed to update campaign", error: error.message });
     }
   });
 
@@ -3314,14 +4064,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/campaigns/:id/status", async (req, res) => {
     try {
       const { status } = req.body;
-      if (!status || !["DRAFT", "ACTIVE", "PAUSED", "COMPLETED", "CANCELLED"].includes(status)) {
+      if (
+        !status ||
+        !["DRAFT", "ACTIVE", "PAUSED", "COMPLETED", "CANCELLED"].includes(
+          status,
+        )
+      ) {
         return res.status(400).json({ message: "Invalid status" });
       }
 
-      const campaign = await storage.updateCampaignStatus(req.params.id, status);
+      const campaign = await storage.updateCampaignStatus(
+        req.params.id,
+        status,
+      );
       res.json(campaign);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to update campaign status", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to update campaign status",
+          error: error.message,
+        });
     }
   });
 
@@ -3331,7 +4094,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteCampaign(req.params.id);
       res.status(204).send();
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to delete campaign", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to delete campaign", error: error.message });
     }
   });
 
@@ -3341,27 +4106,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/campaigns/:campaignCode/metrics", async (req, res) => {
     try {
       const filters = req.query;
-      const metrics = await storage.getCampaignMetrics(req.params.campaignCode, filters);
+      const metrics = await storage.getCampaignMetrics(
+        req.params.campaignCode,
+        filters,
+      );
 
       // Calculate aggregated metrics
-      const aggregated = metrics.reduce((acc, metric) => {
-        acc.sent += metric.sent || 0;
-        acc.delivered += metric.delivered || 0;
-        acc.opened += metric.opened || 0;
-        acc.clicked += metric.clicked || 0;
-        acc.purchased += metric.purchased || 0;
-        acc.revenueUplift += parseFloat(metric.revenueUplift || "0");
-        return acc;
-      }, {
-        sent: 0,
-        delivered: 0,
-        opened: 0,
-        clicked: 0,
-        purchased: 0,
-        revenueUplift: 0,
-        attachRate: 0,
-        roi: 0
-      });
+      const aggregated = metrics.reduce(
+        (acc, metric) => {
+          acc.sent += metric.sent || 0;
+          acc.delivered += metric.delivered || 0;
+          acc.opened += metric.opened || 0;
+          acc.clicked += metric.clicked || 0;
+          acc.purchased += metric.purchased || 0;
+          acc.revenueUplift += parseFloat(metric.revenueUplift || "0");
+          return acc;
+        },
+        {
+          sent: 0,
+          delivered: 0,
+          opened: 0,
+          clicked: 0,
+          purchased: 0,
+          revenueUplift: 0,
+          attachRate: 0,
+          roi: 0,
+        },
+      );
 
       // Calculate rates
       if (aggregated.sent > 0) {
@@ -3374,10 +4145,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({
         aggregated,
-        daily: metrics
+        daily: metrics,
       });
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch campaign metrics", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch campaign metrics",
+          error: error.message,
+        });
     }
   });
 
@@ -3386,13 +4162,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertCampaignMetricsSchema.parse({
         ...req.body,
-        campaignCode: req.params.campaignCode
+        campaignCode: req.params.campaignCode,
       });
 
       const metrics = await storage.insertCampaignMetrics(validatedData);
       res.status(201).json(metrics);
     } catch (error: any) {
-      res.status(400).json({ message: "Invalid metrics data", error: error.message });
+      res
+        .status(400)
+        .json({ message: "Invalid metrics data", error: error.message });
     }
   });
 
@@ -3402,10 +4180,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/campaigns/:campaignCode/deliveries", async (req, res) => {
     try {
       const filters = req.query;
-      const deliveries = await storage.getCampaignDeliveries(req.params.campaignCode, filters);
+      const deliveries = await storage.getCampaignDeliveries(
+        req.params.campaignCode,
+        filters,
+      );
       res.json(deliveries);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch campaign deliveries", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch campaign deliveries",
+          error: error.message,
+        });
     }
   });
 
@@ -3414,13 +4200,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertCampaignDeliverySchema.parse({
         ...req.body,
-        campaignCode: req.params.campaignCode
+        campaignCode: req.params.campaignCode,
       });
 
       const delivery = await storage.insertCampaignDelivery(validatedData);
       res.status(201).json(delivery);
     } catch (error: any) {
-      res.status(400).json({ message: "Invalid delivery data", error: error.message });
+      res
+        .status(400)
+        .json({ message: "Invalid delivery data", error: error.message });
     }
   });
 
@@ -3428,14 +4216,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/campaigns/deliveries/:id/status", async (req, res) => {
     try {
       const { status } = req.body;
-      if (!status || !["PENDING", "SENT", "DELIVERED", "FAILED"].includes(status)) {
+      if (
+        !status ||
+        !["PENDING", "SENT", "DELIVERED", "FAILED"].includes(status)
+      ) {
         return res.status(400).json({ message: "Invalid delivery status" });
       }
 
-      const delivery = await storage.updateDeliveryStatus(req.params.id, status);
+      const delivery = await storage.updateDeliveryStatus(
+        req.params.id,
+        status,
+      );
       res.json(delivery);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to update delivery status", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to update delivery status",
+          error: error.message,
+        });
     }
   });
 
@@ -3450,7 +4249,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.recordDeliveryEvent(req.params.id, event, data);
       res.json({ success: true });
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to record delivery event", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to record delivery event",
+          error: error.message,
+        });
     }
   });
 
@@ -3460,7 +4264,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { campaignCode, recipientEmail, templateId } = req.body;
 
       if (!campaignCode || !recipientEmail || !templateId) {
-        return res.status(400).json({ message: "campaignCode, recipientEmail, and templateId are required" });
+        return res
+          .status(400)
+          .json({
+            message:
+              "campaignCode, recipientEmail, and templateId are required",
+          });
       }
 
       // Get campaign details
@@ -3479,9 +4288,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create email transporter using environment variables
       const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST || 'smtp.gmail.com',
-        port: parseInt(process.env.SMTP_PORT || '587'),
-        secure: process.env.SMTP_SECURE === 'true',
+        host: process.env.SMTP_HOST || "smtp.gmail.com",
+        port: parseInt(process.env.SMTP_PORT || "587"),
+        secure: process.env.SMTP_SECURE === "true",
         auth: {
           user: process.env.SMTP_USER,
           pass: process.env.SMTP_PASS,
@@ -3537,7 +4346,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           Best regards,
           The OfferSense Team
-        `
+        `,
       };
 
       // Send email using Nodemailer
@@ -3551,7 +4360,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       try {
         const info = await transporter.sendMail(mailOptions);
-        console.log(`Email sent successfully to ${recipientEmail}:`, info.messageId);
+        console.log(
+          `Email sent successfully to ${recipientEmail}:`,
+          info.messageId,
+        );
       } catch (emailError: any) {
         console.error(`Failed to send email to ${recipientEmail}:`, emailError);
         throw new Error(`Email sending failed: ${emailError.message}`);
@@ -3580,7 +4392,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error: any) {
       console.error("Email sending error:", error);
-      res.status(500).json({ message: "Failed to send email", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to send email", error: error.message });
     }
   });
 
@@ -3593,7 +4407,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const simulations = await storage.getSimulations(filters);
       res.json(simulations);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch simulations", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to fetch simulations", error: error.message });
     }
   });
 
@@ -3604,12 +4420,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const simulation = await storage.insertSimulation({
         ...validatedData,
-        createdBy: user
+        createdBy: user,
       });
 
       res.status(201).json(simulation);
     } catch (error: any) {
-      res.status(400).json({ message: "Invalid simulation data", error: error.message });
+      res
+        .status(400)
+        .json({ message: "Invalid simulation data", error: error.message });
     }
   });
 
@@ -3621,17 +4439,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(simulation);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch simulation", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to fetch simulation", error: error.message });
     }
   });
 
   app.put("/api/simulations/:id", async (req, res) => {
     try {
       const validatedData = insertSimulationSchema.parse(req.body);
-      const simulation = await storage.updateSimulation(req.params.id, validatedData);
+      const simulation = await storage.updateSimulation(
+        req.params.id,
+        validatedData,
+      );
       res.json(simulation);
     } catch (error: any) {
-      res.status(400).json({ message: "Failed to update simulation", error: error.message });
+      res
+        .status(400)
+        .json({ message: "Failed to update simulation", error: error.message });
     }
   });
 
@@ -3640,21 +4465,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.runSimulation(req.params.id);
       res.json(result);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to run simulation", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to run simulation", error: error.message });
     }
   });
 
   app.patch("/api/simulations/:id/status", async (req, res) => {
     try {
       const { status } = req.body;
-      if (!status || !["DRAFT", "RUNNING", "COMPLETED", "CANCELLED"].includes(status)) {
+      if (
+        !status ||
+        !["DRAFT", "RUNNING", "COMPLETED", "CANCELLED"].includes(status)
+      ) {
         return res.status(400).json({ message: "Invalid status" });
       }
 
-      const simulation = await storage.updateSimulationStatus(req.params.id, status);
+      const simulation = await storage.updateSimulationStatus(
+        req.params.id,
+        status,
+      );
       res.json(simulation);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to update simulation status", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to update simulation status",
+          error: error.message,
+        });
     }
   });
 
@@ -3663,7 +4501,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteSimulation(req.params.id);
       res.status(204).send();
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to delete simulation", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to delete simulation", error: error.message });
     }
   });
 
@@ -3674,7 +4514,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const queries = await storage.getInsightQueries(filters);
       res.json(queries);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch insight queries", error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Failed to fetch insight queries",
+          error: error.message,
+        });
     }
   });
 
@@ -3691,7 +4536,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const query = await storage.insertInsightQuery({
         queryText,
         filters,
-        createdBy: user
+        createdBy: user,
       });
 
       // Process query asynchronously
@@ -3699,14 +4544,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const result = await storage.processInsightQuery(query.id);
         res.json(result);
       } catch (processingError: any) {
-        res.status(500).json({ 
-          message: "Query processing failed", 
+        res.status(500).json({
+          message: "Query processing failed",
           error: processingError.message,
-          queryId: query.id 
+          queryId: query.id,
         });
       }
     } catch (error: any) {
-      res.status(400).json({ message: "Invalid query data", error: error.message });
+      res
+        .status(400)
+        .json({ message: "Invalid query data", error: error.message });
     }
   });
 
@@ -3718,7 +4565,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(query);
     } catch (error: any) {
-      res.status(500).json({ message: "Failed to fetch query", error: error.message });
+      res
+        .status(500)
+        .json({ message: "Failed to fetch query", error: error.message });
     }
   });
 

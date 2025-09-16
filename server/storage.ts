@@ -1850,13 +1850,21 @@ export class DatabaseStorage implements IStorage {
   async checkTierConflicts(tierData: InsertAgentTier, excludeId?: string): Promise<any[]> {
     const conflicts = [];
 
-    // Check for duplicate tier code
-    const existingTier = await this.getAgentTierByCode(tierData.tierCode);
-    if (existingTier && existingTier.id !== excludeId) {
+    // Check for duplicate tier code, excluding the current tier if updating
+    const existingTiers = await this.db
+      .select()
+      .from(agentTiers)
+      .where(eq(agentTiers.tierCode, tierData.tierCode));
+
+    const conflictingTiers = excludeId 
+      ? existingTiers.filter(tier => tier.id !== excludeId)
+      : existingTiers;
+
+    if (conflictingTiers.length > 0) {
       conflicts.push({
         type: 'DUPLICATE_TIER_CODE',
         message: `Tier with code ${tierData.tierCode} already exists`,
-        conflictingTier: existingTier
+        conflictingTier: conflictingTiers[0]
       });
     }
 

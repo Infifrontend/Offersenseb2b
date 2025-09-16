@@ -421,8 +421,7 @@ export default function CampaignManager() {
       }, {} as Record<string, any>);
     },
     enabled: activeCampaigns.length > 0,
-    refetchInterval: 30000, // Refresh every 30 seconds
-    staleTime: 1000 * 60 * 2, // 2 minutes
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   // Mutations
@@ -684,18 +683,6 @@ export default function CampaignManager() {
         setMailModalVisible(false);
         setRecipientEmail("");
         setSelectedCampaignForMail(null);
-        
-        // Refresh campaign metrics to show updated counts
-        queryClient.invalidateQueries({ 
-          queryKey: ["campaign-performance-metrics"] 
-        });
-        
-        // If performance modal is open for this campaign, refresh those metrics too
-        if (selectedCampaign?.campaignCode === selectedCampaignForMail.campaignCode) {
-          queryClient.invalidateQueries({ 
-            queryKey: ["/api/campaigns/metrics", selectedCampaign.campaignCode, metricsDateRange] 
-          });
-        }
       } else {
         const errorData = await response.json();
         console.error("Email sending error:", errorData);

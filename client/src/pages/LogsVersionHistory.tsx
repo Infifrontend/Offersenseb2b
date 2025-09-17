@@ -379,7 +379,12 @@ export default function LogsVersionHistory() {
                 </div>
                 <div>
                   <Label htmlFor="module">Module</Label>
-                  <Select value={moduleFilter || "all"} onValueChange={(value) => setModuleFilter(value === "all" ? "" : value)}>
+                  <Select
+                    value={moduleFilter || "all"}
+                    onValueChange={(value) =>
+                      setModuleFilter(value === "all" ? "" : value)
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="All modules" />
                     </SelectTrigger>
@@ -397,7 +402,9 @@ export default function LogsVersionHistory() {
                       <SelectItem value="NonAirRate">Non-Air Markup</SelectItem>
                       <SelectItem value="Bundle">Bundling Engine</SelectItem>
                       <SelectItem value="OfferRule">Rule Builder</SelectItem>
-                      <SelectItem value="OfferComposer">Offer Composer</SelectItem>
+                      <SelectItem value="OfferComposer">
+                        Offer Composer
+                      </SelectItem>
                       <SelectItem value="Agent">Agents & Channels</SelectItem>
                       <SelectItem value="Cohort">Cohorts</SelectItem>
                       <SelectItem value="Campaign">Campaigns</SelectItem>
@@ -407,7 +414,12 @@ export default function LogsVersionHistory() {
                 </div>
                 <div>
                   <Label htmlFor="action">Action</Label>
-                  <Select value={actionFilter || "all"} onValueChange={(value) => setActionFilter(value === "all" ? "" : value)}>
+                  <Select
+                    value={actionFilter || "all"}
+                    onValueChange={(value) =>
+                      setActionFilter(value === "all" ? "" : value)
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="All actions" />
                     </SelectTrigger>
@@ -416,7 +428,9 @@ export default function LogsVersionHistory() {
                       <SelectItem value="CREATED">Created</SelectItem>
                       <SelectItem value="UPDATED">Updated</SelectItem>
                       <SelectItem value="DELETED">Deleted</SelectItem>
-                      <SelectItem value="STATUS_CHANGED">Status Changed</SelectItem>
+                      <SelectItem value="STATUS_CHANGED">
+                        Status Changed
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -505,7 +519,9 @@ export default function LogsVersionHistory() {
                     <TableHead className="min-w-[110px]">Module</TableHead>
                     <TableHead className="min-w-[120px]">Entity ID</TableHead>
                     <TableHead className="min-w-[90px]">Action</TableHead>
-                    <TableHead className="min-w-[150px]">Justification</TableHead>
+                    <TableHead className="min-w-[150px]">
+                      Justification
+                    </TableHead>
                     <TableHead className="min-w-[80px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -530,7 +546,10 @@ export default function LogsVersionHistory() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="text-xs whitespace-nowrap">
+                        <Badge
+                          variant="outline"
+                          className="text-xs whitespace-nowrap"
+                        >
                           {log.module}
                         </Badge>
                       </TableCell>
@@ -544,18 +563,24 @@ export default function LogsVersionHistory() {
                           }}
                           title={log.entityId}
                         >
-                          {log.entityId.length > 10 
-                            ? `${log.entityId.substring(0, 10)}...` 
+                          {log.entityId.length > 10
+                            ? `${log.entityId.substring(0, 10)}...`
                             : log.entityId}
                         </Button>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={getActionVariant(log.action)} className="text-xs whitespace-nowrap">
+                        <Badge
+                          variant={getActionVariant(log.action)}
+                          className="text-xs text-white whitespace-nowrap"
+                        >
                           {log.action}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <div className="text-sm truncate max-w-[150px]" title={log.justification || "-"}>
+                        <div
+                          className="text-sm truncate max-w-[150px]"
+                          title={log.justification || "-"}
+                        >
                           {log.justification || "-"}
                         </div>
                       </TableCell>

@@ -1244,7 +1244,7 @@ export default function AgentTierManager() {
                     formatter={(value) =>
                       `₹ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                     }
-                    parser={(value) => value!.replace(/[₹\s?|(,*)/g, "") as any}
+                    parser={(value) => value!.replace(/[₹\s?|(,*)]/g, "") as any}
                     style={{ width: "100%" }}
                   />
                 </AntForm.Item>

@@ -590,7 +590,7 @@ export default function OfferComposer() {
                     <div className="bg-gray-50 rounded-lg p-4 space-y-3">
                       <div className="flex justify-between items-center">
                         <span>Base Fare:</span>
-                        <span className="font-medium">USD {composedOffer.basePrice}</span>
+                        <span className="font-medium">₹{composedOffer.basePrice}</span>
                       </div>
 
                       {/* Adjustments */}
@@ -604,7 +604,7 @@ export default function OfferComposer() {
                                 {adj.rule}
                               </span>
                               <span className="text-green-600">
-                                {adj.type === "PERCENT" ? `+${adj.value}%` : `+$${adj.value}`}
+                                {adj.type === "PERCENT" ? `+${adj.value}%` : `+₹${adj.value}`}
                               </span>
                             </div>
                           ))}
@@ -625,12 +625,12 @@ export default function OfferComposer() {
                                 {anc.discount && anc.discount > 0 ? (
                                   <>
                                     <span className="line-through text-gray-400 mr-2">
-                                      USD {anc.base}
+                                      ₹{anc.base}
                                     </span>
-                                    <span className="text-green-600">USD {anc.sell}</span>
+                                    <span className="text-green-600">₹{anc.sell}</span>
                                   </>
                                 ) : (
-                                  <span>USD {anc.sell}</span>
+                                  <span>₹{anc.sell}</span>
                                 )}
                               </div>
                             </div>
@@ -649,10 +649,10 @@ export default function OfferComposer() {
                                 {bundle.code}
                               </span>
                               <div className="text-right">
-                                <span className="text-blue-600">USD {bundle.sell}</span>
+                                <span className="text-blue-600">₹{bundle.sell}</span>
                                 {bundle.saveVsIndiv && bundle.saveVsIndiv > 0 && (
                                   <div className="text-xs text-green-600">
-                                    Save USD {bundle.saveVsIndiv}
+                                    Save ₹{bundle.saveVsIndiv}
                                   </div>
                                 )}
                               </div>
@@ -663,12 +663,12 @@ export default function OfferComposer() {
 
                       <div className="border-t pt-3 flex justify-between items-center font-bold text-lg">
                         <span>Total Offer Price:</span>
-                        <span className="text-blue-600">USD {composedOffer.finalOfferPrice}</span>
+                        <span className="text-blue-600">₹{composedOffer.finalOfferPrice}</span>
                       </div>
 
                       <div className="flex justify-between items-center text-sm">
                         <span>Commission (3%):</span>
-                        <span className="font-medium text-green-600">USD {composedOffer.commission}</span>
+                        <span className="font-medium text-green-600">₹{composedOffer.commission}</span>
                       </div>
                     </div>
                   </div>
@@ -748,7 +748,7 @@ export default function OfferComposer() {
                           </Badge>
                         </TableCell>
                         <TableCell className="font-medium">
-                          USD {parseFloat(trace.finalOfferPrice).toLocaleString()}
+                          ₹{parseFloat(trace.finalOfferPrice).toLocaleString()}
                         </TableCell>
                         <TableCell className="text-sm text-gray-600">
                           {formatDate(trace.createdAt)}
@@ -881,7 +881,7 @@ export default function OfferComposer() {
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span>Base Fare:</span>
-                  <span className="font-medium">USD {parseFloat(selectedTrace.basePrice).toLocaleString()}</span>
+                  <span className="font-medium">₹{parseFloat(selectedTrace.basePrice).toLocaleString()}</span>
                 </div>
 
                 {selectedTrace.adjustments && selectedTrace.adjustments.length > 0 && (
@@ -891,7 +891,7 @@ export default function OfferComposer() {
                       <div key={index} className="flex justify-between items-center text-sm">
                         <span>{adj.rule}</span>
                         <span className="text-green-600">
-                          {adj.type === "PERCENT" ? `+${adj.value}%` : `+$${adj.value}`}
+                          {adj.type === "PERCENT" ? `+${adj.value}%` : `+₹${adj.value}`}
                         </span>
                       </div>
                     ))}
@@ -904,7 +904,7 @@ export default function OfferComposer() {
                     {selectedTrace.ancillaries.map((anc, index) => (
                       <div key={index} className="flex justify-between items-center text-sm">
                         <span>{anc.code}</span>
-                        <span>USD {anc.sell}</span>
+                        <span>₹{anc.sell}</span>
                       </div>
                     ))}
                   </div>
@@ -916,7 +916,7 @@ export default function OfferComposer() {
                     {selectedTrace.bundles.map((bundle, index) => (
                       <div key={index} className="flex justify-between items-center text-sm">
                         <span>{bundle.code}</span>
-                        <span>USD {bundle.sell}</span>
+                        <span>₹{bundle.sell}</span>
                       </div>
                     ))}
                   </div>
@@ -926,12 +926,12 @@ export default function OfferComposer() {
                 
                 <div className="flex justify-between items-center font-bold text-lg">
                   <span>Final Offer Price:</span>
-                  <span className="text-blue-600">USD {parseFloat(selectedTrace.finalOfferPrice).toLocaleString()}</span>
+                  <span className="text-blue-600">₹{parseFloat(selectedTrace.finalOfferPrice).toLocaleString()}</span>
                 </div>
 
                 <div className="flex justify-between items-center">
                   <span>Commission:</span>
-                  <span className="text-green-600 font-medium">USD {parseFloat(selectedTrace.commission).toLocaleString()}</span>
+                  <span className="text-green-600 font-medium">₹{parseFloat(selectedTrace.commission).toLocaleString()}</span>
                 </div>
               </div>
             </AntCard>

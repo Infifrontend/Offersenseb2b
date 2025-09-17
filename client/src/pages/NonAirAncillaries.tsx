@@ -596,7 +596,7 @@ export default function NonAirAncillaries() {
                           >
                             {rule.adjustmentType === "PERCENT"
                               ? `+${rule.adjustmentValue}%`
-                              : `+$${rule.adjustmentValue}`}
+                              : `+₹${rule.adjustmentValue} OFF`}
                           </div>
                         </div>
                       </TableCell>
@@ -1423,7 +1423,7 @@ export default function NonAirAncillaries() {
                   }`}>
                     {selectedRule.adjustmentType === "PERCENT"
                       ? `+${selectedRule.adjustmentValue}%`
-                      : `+$${selectedRule.adjustmentValue}`}
+                      : `+₹${selectedRule.adjustmentValue} OFF`}
                   </div>
                 </div>
                 <div>

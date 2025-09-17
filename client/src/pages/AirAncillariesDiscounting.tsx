@@ -653,7 +653,7 @@ export default function AirAncillariesDiscounting() {
                           ? "FREE"
                           : rule.adjustmentType === "PERCENT"
                             ? `${rule.adjustmentValue}% OFF`
-                            : `$${rule.adjustmentValue} OFF`}
+                            : `₹${rule.adjustmentValue} OFF`}
                       </div>
                     </div>
                   </TableCell>

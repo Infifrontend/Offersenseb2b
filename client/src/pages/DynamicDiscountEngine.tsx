@@ -669,7 +669,7 @@ export default function DynamicDiscountEngine() {
                       >
                         {rule.adjustmentType === "PERCENT"
                           ? `${parseFloat(rule.adjustmentValue) >= 0 ? "+" : ""}${rule.adjustmentValue}%`
-                          : `${parseFloat(rule.adjustmentValue) >= 0 ? "+" : ""}${rule.adjustmentValue}`}
+                          : `+₹${rule.adjustmentValue}`}
                       </div>
                     </div>
                   </TableCell>

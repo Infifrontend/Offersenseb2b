@@ -275,30 +275,30 @@ export default function NegotiatedFareManager() {
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append("file", file);
-      
+
       const response = await fetch("/api/negofares/upload", {
         method: "POST",
         body: formData,
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Upload failed");
       }
-      
+
       return response.json();
     },
     onSuccess: (data) => {
       setUploadResult(data);
       queryClient.invalidateQueries({ queryKey: ["/api/negofares"] });
-      
+
       // Show success message with details
       if (data.success) {
         const message = `Upload completed successfully! 
         ✅ ${data.inserted} records inserted
         ${data.conflicts > 0 ? `⚠️ ${data.conflicts} conflicts detected` : ''}
         ${data.errors > 0 ? `❌ ${data.errors} errors found` : ''}`;
-        
+
         // Use a more user-friendly notification
         alert(message);
       }
@@ -354,12 +354,12 @@ export default function NegotiatedFareManager() {
     if (file) {
       // Reset any previous upload results
       setUploadResult(null);
-      
+
       // Show confirmation dialog before upload
       const confirmed = window.confirm(
         `Are you sure you want to upload "${file.name}"?\n\nThis will process the file and update the negotiated fares database.`
       );
-      
+
       if (confirmed) {
         uploadMutation.mutate(file);
       } else {
@@ -399,19 +399,19 @@ export default function NegotiatedFareManager() {
     const sampleRows = [
       // Row 1: Basic economy fare - US domestic
       'AA,ECO001,JFK,LAX,ROUND_TRIP,ECONOMY,299.00,USD,2025-01-01,2025-12-31,2025-02-01,2025-11-30,"[""US"",""CA""]",50,7,30,"[]","[""GOLD"",""SILVER""]","[]","US domestic economy fare"',
-      
+
       // Row 2: Premium economy - International  
       'DL,PREM002,JFK,LHR,ROUND_TRIP,PREMIUM_ECONOMY,899.00,USD,2025-03-01,2025-10-31,2025-04-01,2025-09-30,"[""US"",""GB""]",25,3,21,"[]","[""PLATINUM"",""GOLD""]","[""FESTIVE_2025""]","Transatlantic premium economy"',
-      
+
       // Row 3: Business class with blackouts
       'UA,BIZ003,SFO,NRT,ONE_WAY,BUSINESS,1299.00,USD,2025-01-15,2025-11-15,2025-02-01,2025-10-31,"[""US"",""JP""]",10,1,14,"[""2025-07-04"",""2025-12-25""]","[""PLATINUM""]","[""HIGH_VALUE""]","Business class - holiday restrictions"',
-      
+
       // Row 4: First class luxury
       'SQ,FIRST004,SIN,LAX,ROUND_TRIP,FIRST,3999.00,USD,2025-02-01,2025-08-31,2025-03-01,2025-07-31,"[""SG"",""US""]",5,7,90,"[]","[""PLATINUM""]","[""PORTAL_USERS""]","Singapore Airlines first class"',
-      
+
       // Row 5: Regional economy with minimal data
       'AI,REG005,DEL,BOM,ONE_WAY,ECONOMY,89.00,USD,2025-01-01,2025-12-31,2025-01-01,2025-12-31,"[""IN""]",,,,,"[""BRONZE"",""SILVER""]",,"India domestic route"',
-      
+
       // Row 6: Multi-city flexible
       'EK,MULTI006,DXB,JFK,MULTI_CITY,BUSINESS,1899.00,USD,2025-01-01,2025-06-30,2025-02-15,2025-05-31,"[""AE"",""US""]",20,14,180,"[]","[""GOLD"",""PLATINUM""]","[]","Emirates multi-city business"'
     ];
@@ -421,9 +421,9 @@ export default function NegotiatedFareManager() {
       headers.join(","),
       ...sampleRows
     ];
-    
+
     const csvContent = csvRows.join("\n");
-    
+
     // Create and download the file
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
@@ -654,7 +654,7 @@ export default function NegotiatedFareManager() {
                 ✕ Close
               </button>
             </div>
-            
+
             <div className="space-y-3">
               {/* Summary Message */}
               <div className={`flex items-start gap-2 p-3 rounded-md ${
@@ -716,7 +716,7 @@ export default function NegotiatedFareManager() {
                   </div>
                 </details>
               )}
-              
+
               {/* Show conflicts if any */}
               {uploadResult.data?.conflicts && uploadResult.data.conflicts.length > 0 && (
                 <details className="bg-yellow-50 border border-yellow-200 rounded-md">
@@ -747,7 +747,7 @@ export default function NegotiatedFareManager() {
                   </div>
                 </details>
               )}
-              
+
               {/* Show validation errors if any */}
               {uploadResult.data?.errors && uploadResult.data.errors.length > 0 && (
                 <details className="bg-red-50 border border-red-200 rounded-md">

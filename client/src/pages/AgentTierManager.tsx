@@ -539,7 +539,7 @@ export default function AgentTierManager() {
           <Tag color={value < 0 ? "green" : value > 0 ? "red" : "blue"}>
             {value > 0 ? "+" : ""}
             {value}
-            {type === "PERCENT" ? "%" : " USD"}
+            {type === "PERCENT" ? "%" : " INR"}
           </Tag>
         );
       },
@@ -1235,16 +1235,16 @@ export default function AgentTierManager() {
               <Col span={12}>
                 <AntForm.Item
                   name={["kpiThresholds", "totalBookingValueMin"]}
-                  label="Min Total Booking Value ($)"
+                  label="Min Total Booking Value (₹)"
                   rules={[{ required: true, message: "Required" }]}
                 >
                   <InputNumber
                     placeholder="50000000"
                     min={0}
                     formatter={(value) =>
-                      `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                      `₹ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                     }
-                    parser={(value) => value!.replace(/\$\s?|(,*)/g, "") as any}
+                    parser={(value) => value!.replace(/[₹\s?|(,*)/g, "") as any}
                     style={{ width: "100%" }}
                   />
                 </AntForm.Item>
@@ -1694,7 +1694,7 @@ export default function AgentTierManager() {
                     {selectedTier.defaultPricingPolicy.value}
                     {selectedTier.defaultPricingPolicy.type === "PERCENT"
                       ? "%"
-                      : " USD"}
+                      : " INR"}
                   </Tag>
                 ) : (
                   "-"

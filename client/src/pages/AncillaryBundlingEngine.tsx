@@ -52,6 +52,7 @@ import {
   Settings,
   Play,
   Calendar,
+  IndianRupee,
 } from "lucide-react";
 import {
   Form as AntForm,
@@ -775,7 +776,7 @@ export default function AncillaryBundlingEngine() {
       key: "discount",
       render: (_: any, record: BundlePricingRule) => (
         <div className="flex items-center gap-1">
-          <DollarSign className="h-4 w-4" />
+          <IndianRupee className="h-4 w-4" />
           <span>
             {record.discountType === "PERCENT"
               ? `${record.discountValue}%`
@@ -892,7 +893,7 @@ export default function AncillaryBundlingEngine() {
             Bundle Definition
           </TabsTrigger>
           <TabsTrigger value="pricing" className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4" />
+            <IndianRupee className="h-4 w-4" />
             Pricing Rules
           </TabsTrigger>
         </TabsList>
@@ -1779,7 +1780,7 @@ export default function AncillaryBundlingEngine() {
                         </p>
                       </div>
                       <div className="text-red-600">
-                        <DollarSign className="h-4 w-4" />
+                        <IndianRupee className="h-4 w-4" />
                       </div>
                     </div>
                     <div className="text-center text-sm text-gray-500">

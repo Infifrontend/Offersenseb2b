@@ -50,9 +50,9 @@ async function generateAITemplates(type: string, context: any): Promise<any[]> {
   // Generate offer text
   const getOfferText = () => {
     if (offerType === "PERCENT") return `${offerValue}% discount`;
-    if (offerType === "AMOUNT") return `$${offerValue} off`;
+    if (offerType === "AMOUNT") return `₹${offerValue} off`;
     if (offerType === "SPECIAL_PRICE")
-      return `special price of $${specialPrice}`;
+      return `special price of ₹${specialPrice}`;
     return "exclusive offer";
   };
 
@@ -421,12 +421,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const fares = await storage.getNegotiatedFares(filters);
       res.json(fares);
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to fetch negotiated fares",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to fetch negotiated fares",
+        error: error.message,
+      });
     }
   });
 
@@ -1020,12 +1018,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(fare);
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to update fare status",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to update fare status",
+        error: error.message,
+      });
     }
   });
 
@@ -1050,12 +1046,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rules = await storage.getDynamicDiscountRules(filters);
       res.json(rules);
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to fetch discount rules",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to fetch discount rules",
+        error: error.message,
+      });
     }
   });
 
@@ -1185,12 +1179,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json(rule);
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to update rule status",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to update rule status",
+        error: error.message,
+      });
     }
   });
 
@@ -1215,12 +1207,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rules = await storage.getAirAncillaryRules(filters);
       res.json(rules);
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to fetch air ancillary rules",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to fetch air ancillary rules",
+        error: error.message,
+      });
     }
   });
 
@@ -1344,12 +1334,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json(rule);
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to update rule status",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to update rule status",
+        error: error.message,
+      });
     }
   });
 
@@ -1389,12 +1377,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }, []);
       res.json(products);
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to fetch ancillary products",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to fetch ancillary products",
+        error: error.message,
+      });
     }
   });
 
@@ -1407,12 +1393,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rates = await storage.getNonAirRates(filters);
       res.json(rates);
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to fetch non-air rates",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to fetch non-air rates",
+        error: error.message,
+      });
     }
   });
 
@@ -1488,12 +1472,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 },
               });
             } catch (error: any) {
-              res
-                .status(500)
-                .json({
-                  message: "Failed to insert rates",
-                  error: error.message,
-                });
+              res.status(500).json({
+                message: "Failed to insert rates",
+                error: error.message,
+              });
             }
           });
       } catch (error: any) {
@@ -1545,12 +1527,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rate = await storage.updateNonAirRateStatus(req.params.id, status);
       res.json(rate);
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to update rate status",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to update rate status",
+        error: error.message,
+      });
     }
   });
 
@@ -1575,12 +1555,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rules = await storage.getNonAirMarkupRules(filters);
       res.json(rules);
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to fetch markup rules",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to fetch markup rules",
+        error: error.message,
+      });
     }
   });
 
@@ -1701,12 +1679,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json(rule);
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to update rule status",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to update rule status",
+        error: error.message,
+      });
     }
   });
 
@@ -1839,12 +1815,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rule = await storage.insertBundlePricingRule(validatedData);
       res.status(201).json(rule);
     } catch (error: any) {
-      res
-        .status(400)
-        .json({
-          message: "Invalid bundle pricing rule data",
-          error: error.message,
-        });
+      res.status(400).json({
+        message: "Invalid bundle pricing rule data",
+        error: error.message,
+      });
     }
   });
 
@@ -1888,12 +1862,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         bundleCode: rule.bundleCode,
       });
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to simulate bundle pricing rule",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to simulate bundle pricing rule",
+        error: error.message,
+      });
     }
   });
 
@@ -1908,12 +1880,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(rule);
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to fetch bundle pricing rule",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to fetch bundle pricing rule",
+        error: error.message,
+      });
     }
   });
 
@@ -1927,12 +1897,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json(rule);
     } catch (error: any) {
-      res
-        .status(400)
-        .json({
-          message: "Failed to update bundle pricing rule",
-          error: error.message,
-        });
+      res.status(400).json({
+        message: "Failed to update bundle pricing rule",
+        error: error.message,
+      });
     }
   });
 
@@ -1952,12 +1920,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json(rule);
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to update bundle pricing rule status",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to update bundle pricing rule status",
+        error: error.message,
+      });
     }
   });
 
@@ -1967,12 +1933,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteBundlePricingRule(req.params.id);
       res.status(204).send();
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to delete bundle pricing rule",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to delete bundle pricing rule",
+        error: error.message,
+      });
     }
   });
 
@@ -2060,12 +2024,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const bundle = await storage.updateBundleStatus(req.params.id, status);
       res.json(bundle);
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to update bundle status",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to update bundle status",
+        error: error.message,
+      });
     }
   });
 
@@ -2216,12 +2178,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json(rule);
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to update rule status",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to update rule status",
+        error: error.message,
+      });
     }
   });
 
@@ -2512,12 +2472,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const traces = await storage.getOfferTraces(filters);
       res.json(traces);
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to fetch offer traces",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to fetch offer traces",
+        error: error.message,
+      });
     }
   });
 
@@ -2527,12 +2485,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteOfferTrace(req.params.id);
       res.status(204).send();
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to delete offer trace",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to delete offer trace",
+        error: error.message,
+      });
     }
   });
 
@@ -2615,12 +2571,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const agent = await storage.updateAgentStatus(req.params.id, status);
       res.json(agent);
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to update agent status",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to update agent status",
+        error: error.message,
+      });
     }
   });
 
@@ -2645,12 +2599,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const overrides = await storage.getChannelPricingOverrides(filters);
       res.json(overrides);
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to fetch channel overrides",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to fetch channel overrides",
+        error: error.message,
+      });
     }
   });
 
@@ -2673,12 +2625,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.insertChannelPricingOverride(validatedData);
       res.status(201).json(override);
     } catch (error: any) {
-      res
-        .status(400)
-        .json({
-          message: "Invalid channel override data",
-          error: error.message,
-        });
+      res.status(400).json({
+        message: "Invalid channel override data",
+        error: error.message,
+      });
     }
   });
 
@@ -2688,11 +2638,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { basePrice, currency, overrideId } = req.body;
 
       if (!basePrice || !currency || !overrideId) {
-        return res
-          .status(400)
-          .json({
-            message: "basePrice, currency, and overrideId are required",
-          });
+        return res.status(400).json({
+          message: "basePrice, currency, and overrideId are required",
+        });
       }
 
       const override = await storage.getChannelPricingOverrideById(overrideId);
@@ -2723,12 +2671,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         productScope: override.productScope,
       });
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to simulate channel override",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to simulate channel override",
+        error: error.message,
+      });
     }
   });
 
@@ -2743,12 +2689,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(override);
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to fetch channel override",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to fetch channel override",
+        error: error.message,
+      });
     }
   });
 
@@ -2762,12 +2706,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json(override);
     } catch (error: any) {
-      res
-        .status(400)
-        .json({
-          message: "Failed to update channel override",
-          error: error.message,
-        });
+      res.status(400).json({
+        message: "Failed to update channel override",
+        error: error.message,
+      });
     }
   });
 
@@ -2787,12 +2729,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json(override);
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to update channel override status",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to update channel override status",
+        error: error.message,
+      });
     }
   });
 
@@ -2802,12 +2742,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteChannelPricingOverride(req.params.id);
       res.status(204).send();
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to delete channel override",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to delete channel override",
+        error: error.message,
+      });
     }
   });
 
@@ -2890,12 +2828,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const cohort = await storage.updateCohortStatus(req.params.id, status);
       res.json(cohort);
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to update cohort status",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to update cohort status",
+        error: error.message,
+      });
     }
   });
 
@@ -2964,12 +2900,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         matchedCount: matchedCohorts.length,
       });
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to simulate cohort assignment",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to simulate cohort assignment",
+        error: error.message,
+      });
     }
   });
 
@@ -3100,12 +3034,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json(logs);
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to fetch entity audit logs",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to fetch entity audit logs",
+        error: error.message,
+      });
     }
   });
 
@@ -3200,11 +3132,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.header("x-user") || "system";
 
       if (!justification) {
-        return res
-          .status(400)
-          .json({
-            message: "Justification is required for rollback operations",
-          });
+        return res.status(400).json({
+          message: "Justification is required for rollback operations",
+        });
       }
 
       // Get the audit log entry
@@ -3419,11 +3349,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           );
           break;
         default:
-          return res
-            .status(400)
-            .json({
-              message: `Rollback not supported for module: ${auditLog.module}`,
-            });
+          return res.status(400).json({
+            message: `Rollback not supported for module: ${auditLog.module}`,
+          });
       }
 
       res.json({
@@ -3449,12 +3377,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const engines = await storage.getTierAssignmentEngines(filters);
       res.json(engines);
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to fetch assignment engines",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to fetch assignment engines",
+        error: error.message,
+      });
     }
   });
 
@@ -3555,12 +3481,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json(engine);
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to update engine status",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to update engine status",
+        error: error.message,
+      });
     }
   });
 
@@ -3622,12 +3546,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(assignments);
     } catch (error: any) {
       console.error("API: Error fetching tier assignments:", error);
-      res
-        .status(500)
-        .json({
-          message: "Failed to fetch tier assignments",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to fetch tier assignments",
+        error: error.message,
+      });
     }
   });
 
@@ -3683,12 +3605,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.status(201).json(assignment);
     } catch (error: any) {
-      res
-        .status(400)
-        .json({
-          message: "Failed to override tier assignment",
-          error: error.message,
-        });
+      res.status(400).json({
+        message: "Failed to override tier assignment",
+        error: error.message,
+      });
     }
   });
 
@@ -3836,12 +3756,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         tierChangeRequired: currentAssignment?.tierCode !== recommendedTier,
       });
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to evaluate agent tier",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to evaluate agent tier",
+        error: error.message,
+      });
     }
   });
 
@@ -3937,12 +3855,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const tier = await storage.updateAgentTierStatus(req.params.id, status);
       res.json(tier);
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to update tier status",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to update tier status",
+        error: error.message,
+      });
     }
   });
 
@@ -4020,12 +3936,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json(campaign);
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to deactivate campaign",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to deactivate campaign",
+        error: error.message,
+      });
     }
   });
 
@@ -4079,12 +3993,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json(campaign);
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to update campaign status",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to update campaign status",
+        error: error.message,
+      });
     }
   });
 
@@ -4148,12 +4060,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         daily: metrics,
       });
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to fetch campaign metrics",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to fetch campaign metrics",
+        error: error.message,
+      });
     }
   });
 
@@ -4186,12 +4096,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json(deliveries);
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to fetch campaign deliveries",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to fetch campaign deliveries",
+        error: error.message,
+      });
     }
   });
 
@@ -4229,12 +4137,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json(delivery);
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to update delivery status",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to update delivery status",
+        error: error.message,
+      });
     }
   });
 
@@ -4249,12 +4155,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.recordDeliveryEvent(req.params.id, event, data);
       res.json({ success: true });
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to record delivery event",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to record delivery event",
+        error: error.message,
+      });
     }
   });
 
@@ -4264,12 +4168,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { campaignCode, recipientEmail, templateId } = req.body;
 
       if (!campaignCode || !recipientEmail || !templateId) {
-        return res
-          .status(400)
-          .json({
-            message:
-              "campaignCode, recipientEmail, and templateId are required",
-          });
+        return res.status(400).json({
+          message: "campaignCode, recipientEmail, and templateId are required",
+        });
       }
 
       // Get campaign details
@@ -4313,7 +4214,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   campaign.offer.type === "PERCENT"
                     ? `${campaign.offer.value}% Off`
                     : campaign.offer.type === "AMOUNT"
-                      ? `$${campaign.offer.value} Off`
+                      ? `₹${campaign.offer.value} Off`
                       : `Special Price: $${campaign.offer.specialPrice}`
                 }</strong>
               </div>
@@ -4487,12 +4388,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       res.json(simulation);
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to update simulation status",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to update simulation status",
+        error: error.message,
+      });
     }
   });
 
@@ -4514,12 +4413,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const queries = await storage.getInsightQueries(filters);
       res.json(queries);
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to fetch insight queries",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Failed to fetch insight queries",
+        error: error.message,
+      });
     }
   });
 

@@ -47,6 +47,7 @@ import {
   Car,
   CreditCard,
   DollarSign,
+  IndianRupee,
 } from "lucide-react";
 import type { NonAirRate, NonAirMarkupRule } from "../../../shared/schema";
 import dayjs from "dayjs";
@@ -158,14 +159,16 @@ export default function NonAirAncillaries() {
   });
 
   // Fetch cohorts
-  const { data: availableCohorts = [], isLoading: isCohortsLoading } = useQuery({
-    queryKey: ["cohorts"],
-    queryFn: async () => {
-      const response = await fetch("/api/cohorts");
-      if (!response.ok) throw new Error("Failed to fetch cohorts");
-      return response.json();
+  const { data: availableCohorts = [], isLoading: isCohortsLoading } = useQuery(
+    {
+      queryKey: ["cohorts"],
+      queryFn: async () => {
+        const response = await fetch("/api/cohorts");
+        if (!response.ok) throw new Error("Failed to fetch cohorts");
+        return response.json();
+      },
     },
-  });
+  );
 
   // Create rate mutation
   const createRateMutation = useMutation({
@@ -1140,7 +1143,8 @@ export default function NonAirAncillaries() {
                     Product Name
                   </label>
                   <div className="font-medium text-gray-900">
-                    {selectedRate.productName || getProductLabel(selectedRate.productCode)}
+                    {selectedRate.productName ||
+                      getProductLabel(selectedRate.productCode)}
                   </div>
                   <div className="text-sm text-gray-500">
                     Code: {selectedRate.productCode}
@@ -1153,9 +1157,7 @@ export default function NonAirAncillaries() {
                   <div className="font-medium text-gray-900">
                     {selectedRate.supplierCode}
                   </div>
-                  <div className="text-sm text-gray-500">
-                    Supplier Code
-                  </div>
+                  <div className="text-sm text-gray-500">Supplier Code</div>
                 </div>
               </div>
             </div>
@@ -1163,7 +1165,7 @@ export default function NonAirAncillaries() {
             {/* Pricing Information */}
             <div className="bg-green-50 p-4 rounded-lg">
               <h4 className="text-sm font-semibold text-green-800 mb-3 flex items-center">
-                <DollarSign className="mr-2 h-4 w-4" />
+                <IndianRupee className="mr-2 h-4 w-4" />
                 Pricing Details
               </h4>
               <div className="grid grid-cols-2 gap-4">
@@ -1172,7 +1174,8 @@ export default function NonAirAncillaries() {
                     Net Rate
                   </label>
                   <div className="text-2xl font-bold text-green-600">
-                    {selectedRate.currency} {parseFloat(selectedRate.netRate).toFixed(2)}
+                    {selectedRate.currency}{" "}
+                    {parseFloat(selectedRate.netRate).toFixed(2)}
                   </div>
                   <div className="text-sm text-gray-500">
                     Base supplier rate
@@ -1185,9 +1188,7 @@ export default function NonAirAncillaries() {
                   <div className="font-medium text-gray-900">
                     {selectedRate.currency}
                   </div>
-                  <div className="text-sm text-gray-500">
-                    Pricing currency
-                  </div>
+                  <div className="text-sm text-gray-500">Pricing currency</div>
                 </div>
               </div>
             </div>
@@ -1204,8 +1205,8 @@ export default function NonAirAncillaries() {
                     Regions Available
                   </label>
                   <div className="flex flex-wrap gap-1 mt-1">
-                    {(Array.isArray(selectedRate.region) 
-                      ? selectedRate.region 
+                    {(Array.isArray(selectedRate.region)
+                      ? selectedRate.region
                       : [selectedRate.region]
                     ).map((region, index) => (
                       <Badge
@@ -1280,11 +1281,13 @@ export default function NonAirAncillaries() {
                   <div>
                     <Badge
                       variant={
-                        selectedRate.status === "ACTIVE" ? "default" : "secondary"
+                        selectedRate.status === "ACTIVE"
+                          ? "default"
+                          : "secondary"
                       }
                       className={
-                        selectedRate.status === "ACTIVE" 
-                          ? "bg-green-100 text-green-800 border-green-300" 
+                        selectedRate.status === "ACTIVE"
+                          ? "bg-green-100 text-green-800 border-green-300"
                           : ""
                       }
                     >
@@ -1308,7 +1311,9 @@ export default function NonAirAncillaries() {
                       <div>
                         <span className="text-gray-500">Created:</span>
                         <div className="text-gray-700">
-                          {new Date(selectedRate.createdAt).toLocaleDateString()}
+                          {new Date(
+                            selectedRate.createdAt,
+                          ).toLocaleDateString()}
                         </div>
                       </div>
                     )}
@@ -1316,7 +1321,9 @@ export default function NonAirAncillaries() {
                       <div>
                         <span className="text-gray-500">Updated:</span>
                         <div className="text-gray-700">
-                          {new Date(selectedRate.updatedAt).toLocaleDateString()}
+                          {new Date(
+                            selectedRate.updatedAt,
+                          ).toLocaleDateString()}
                         </div>
                       </div>
                     )}
@@ -1416,11 +1423,13 @@ export default function NonAirAncillaries() {
                   <label className="text-sm font-medium text-gray-700">
                     Adjustment Value
                   </label>
-                  <div className={`font-bold text-lg ${
-                    selectedRule.adjustmentType === "PERCENT"
-                      ? "text-blue-600"
-                      : "text-orange-600"
-                  }`}>
+                  <div
+                    className={`font-bold text-lg ${
+                      selectedRule.adjustmentType === "PERCENT"
+                        ? "text-blue-600"
+                        : "text-orange-600"
+                    }`}
+                  >
                     {selectedRule.adjustmentType === "PERCENT"
                       ? `+${selectedRule.adjustmentValue}%`
                       : `+₹${selectedRule.adjustmentValue} OFF`}
@@ -1489,32 +1498,39 @@ export default function NonAirAncillaries() {
                       ))}
                   </div>
                 </div>
-                {selectedRule.cohortCodes && selectedRule.cohortCodes.length > 0 && (
-                  <div>
-                    <label className="text-sm font-medium text-gray-700">
-                      Eligible Cohorts
-                    </label>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {selectedRule.cohortCodes.map((cohortCode, index) => {
-                        const cohort = availableCohorts.find((c: any) => 
-                          c.cohortName === cohortCode || c.cohortCode === cohortCode
-                        );
-                        return (
-                          <span
-                            key={index}
-                            className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-800"
-                            title={cohort ? `${cohort.cohortName} (${cohort.cohortCode})` : cohortCode}
-                          >
-                            {cohort ? cohort.cohortCode : cohortCode}
-                          </span>
-                        );
-                      })}
+                {selectedRule.cohortCodes &&
+                  selectedRule.cohortCodes.length > 0 && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">
+                        Eligible Cohorts
+                      </label>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {selectedRule.cohortCodes.map((cohortCode, index) => {
+                          const cohort = availableCohorts.find(
+                            (c: any) =>
+                              c.cohortName === cohortCode ||
+                              c.cohortCode === cohortCode,
+                          );
+                          return (
+                            <span
+                              key={index}
+                              className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-800"
+                              title={
+                                cohort
+                                  ? `${cohort.cohortName} (${cohort.cohortCode})`
+                                  : cohortCode
+                              }
+                            >
+                              {cohort ? cohort.cohortCode : cohortCode}
+                            </span>
+                          );
+                        })}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        This markup will only apply to users in these cohorts
+                      </div>
                     </div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      This markup will only apply to users in these cohorts
-                    </div>
-                  </div>
-                )}
+                  )}
               </div>
             </div>
 

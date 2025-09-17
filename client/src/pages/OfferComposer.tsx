@@ -16,6 +16,7 @@ import {
   Tag,
   Percent,
   Gift,
+  IndianRupee,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -110,7 +111,12 @@ interface OfferTrace {
   fareSource: string;
   basePrice: string;
   adjustments: { rule: string; type: string; value: number }[];
-  ancillaries: { code: string; base: number; discount?: number; sell: number }[];
+  ancillaries: {
+    code: string;
+    base: number;
+    discount?: number;
+    sell: number;
+  }[];
   bundles: { code: string; sell: number; saveVsIndiv?: number }[];
   finalOfferPrice: string;
   commission: string;
@@ -127,7 +133,12 @@ interface ComposedOffer {
   fareSource: string;
   basePrice: number;
   adjustments: { rule: string; type: string; value: number }[];
-  ancillaries: { code: string; base: number; discount?: number; sell: number }[];
+  ancillaries: {
+    code: string;
+    base: number;
+    discount?: number;
+    sell: number;
+  }[];
   bundles: { code: string; sell: number; saveVsIndiv?: number }[];
   finalOfferPrice: number;
   commission: number;
@@ -150,7 +161,9 @@ const airports = [
 export default function OfferComposer() {
   const [activeTab, setActiveTab] = useState("compose");
   const [filters, setFilters] = useState({});
-  const [composedOffer, setComposedOffer] = useState<ComposedOffer | null>(null);
+  const [composedOffer, setComposedOffer] = useState<ComposedOffer | null>(
+    null,
+  );
   const [isTraceModalOpen, setIsTraceModalOpen] = useState(false);
   const [selectedTrace, setSelectedTrace] = useState<OfferTrace | null>(null);
   const queryClient = useQueryClient();
@@ -182,9 +195,12 @@ export default function OfferComposer() {
   const composeOfferMutation = useMutation({
     mutationFn: async (data: OfferComposeData) => {
       const pax = [];
-      if (data.adultCount > 0) pax.push({ type: "ADT", count: data.adultCount });
-      if (data.childCount > 0) pax.push({ type: "CHD", count: data.childCount });
-      if (data.infantCount > 0) pax.push({ type: "INF", count: data.infantCount });
+      if (data.adultCount > 0)
+        pax.push({ type: "ADT", count: data.adultCount });
+      if (data.childCount > 0)
+        pax.push({ type: "CHD", count: data.childCount });
+      if (data.infantCount > 0)
+        pax.push({ type: "INF", count: data.infantCount });
 
       const requestData = {
         origin: data.origin,
@@ -245,11 +261,16 @@ export default function OfferComposer() {
 
   const getTierColor = (tier: string) => {
     switch (tier) {
-      case "PLATINUM": return "purple";
-      case "GOLD": return "gold";
-      case "SILVER": return "default";
-      case "BRONZE": return "orange";
-      default: return "default";
+      case "PLATINUM":
+        return "purple";
+      case "GOLD":
+        return "gold";
+      case "SILVER":
+        return "default";
+      case "BRONZE":
+        return "orange";
+      default:
+        return "default";
     }
   };
 
@@ -299,7 +320,10 @@ export default function OfferComposer() {
               </CardHeader>
               <CardContent>
                 <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-4"
+                  >
                     <div className="grid grid-cols-2 gap-4">
                       <FormField
                         control={form.control}
@@ -307,7 +331,10 @@ export default function OfferComposer() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Origin</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select origin" />
@@ -315,7 +342,10 @@ export default function OfferComposer() {
                               </FormControl>
                               <SelectContent>
                                 {airports.map((airport) => (
-                                  <SelectItem key={airport.code} value={airport.code}>
+                                  <SelectItem
+                                    key={airport.code}
+                                    value={airport.code}
+                                  >
                                     {airport.code} - {airport.name}
                                   </SelectItem>
                                 ))}
@@ -331,7 +361,10 @@ export default function OfferComposer() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Destination</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select destination" />
@@ -339,7 +372,10 @@ export default function OfferComposer() {
                               </FormControl>
                               <SelectContent>
                                 {airports.map((airport) => (
-                                  <SelectItem key={airport.code} value={airport.code}>
+                                  <SelectItem
+                                    key={airport.code}
+                                    value={airport.code}
+                                  >
                                     {airport.code} - {airport.name}
                                   </SelectItem>
                                 ))}
@@ -358,7 +394,10 @@ export default function OfferComposer() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Trip Type</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue />
@@ -366,8 +405,12 @@ export default function OfferComposer() {
                               </FormControl>
                               <SelectContent>
                                 <SelectItem value="ONE_WAY">One Way</SelectItem>
-                                <SelectItem value="ROUND_TRIP">Round Trip</SelectItem>
-                                <SelectItem value="MULTI_CITY">Multi City</SelectItem>
+                                <SelectItem value="ROUND_TRIP">
+                                  Round Trip
+                                </SelectItem>
+                                <SelectItem value="MULTI_CITY">
+                                  Multi City
+                                </SelectItem>
                               </SelectContent>
                             </Select>
                             <FormMessage />
@@ -380,7 +423,10 @@ export default function OfferComposer() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Cabin Class</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue />
@@ -388,8 +434,12 @@ export default function OfferComposer() {
                               </FormControl>
                               <SelectContent>
                                 <SelectItem value="ECONOMY">Economy</SelectItem>
-                                <SelectItem value="PREMIUM_ECONOMY">Premium Economy</SelectItem>
-                                <SelectItem value="BUSINESS">Business</SelectItem>
+                                <SelectItem value="PREMIUM_ECONOMY">
+                                  Premium Economy
+                                </SelectItem>
+                                <SelectItem value="BUSINESS">
+                                  Business
+                                </SelectItem>
                                 <SelectItem value="FIRST">First</SelectItem>
                               </SelectContent>
                             </Select>
@@ -442,7 +492,9 @@ export default function OfferComposer() {
                                 type="number"
                                 min="1"
                                 {...field}
-                                onChange={(e) => field.onChange(parseInt(e.target.value))}
+                                onChange={(e) =>
+                                  field.onChange(parseInt(e.target.value))
+                                }
                               />
                             </FormControl>
                             <FormMessage />
@@ -460,7 +512,9 @@ export default function OfferComposer() {
                                 type="number"
                                 min="0"
                                 {...field}
-                                onChange={(e) => field.onChange(parseInt(e.target.value))}
+                                onChange={(e) =>
+                                  field.onChange(parseInt(e.target.value))
+                                }
                               />
                             </FormControl>
                             <FormMessage />
@@ -478,7 +532,9 @@ export default function OfferComposer() {
                                 type="number"
                                 min="0"
                                 {...field}
-                                onChange={(e) => field.onChange(parseInt(e.target.value))}
+                                onChange={(e) =>
+                                  field.onChange(parseInt(e.target.value))
+                                }
                               />
                             </FormControl>
                             <FormMessage />
@@ -494,7 +550,10 @@ export default function OfferComposer() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Channel</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue />
@@ -530,7 +589,9 @@ export default function OfferComposer() {
                       className="w-full"
                       disabled={composeOfferMutation.isPending}
                     >
-                      {composeOfferMutation.isPending ? "Composing..." : "Compose Offer"}
+                      {composeOfferMutation.isPending
+                        ? "Composing..."
+                        : "Compose Offer"}
                     </Button>
                   </form>
                 </Form>
@@ -542,7 +603,7 @@ export default function OfferComposer() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <DollarSign className="h-5 w-5" />
+                    <IndianRupee className="h-5 w-5" />
                     Composed Offer
                   </CardTitle>
                   <CardDescription>
@@ -556,13 +617,19 @@ export default function OfferComposer() {
                       <div className="flex items-center gap-2">
                         <Crown className="h-4 w-4 text-yellow-500" />
                         <span className="font-medium">Agent Tier:</span>
-                        <Badge variant="secondary">{composedOffer.agentTier}</Badge>
+                        <Badge variant="secondary">
+                          {composedOffer.agentTier}
+                        </Badge>
                       </div>
                       <div className="flex items-center gap-2">
                         <Tag className="h-4 w-4 text-blue-500" />
                         <span className="font-medium">Fare Source:</span>
-                        <Badge 
-                          variant={composedOffer.fareSource === "NEGOTIATED" ? "default" : "outline"}
+                        <Badge
+                          variant={
+                            composedOffer.fareSource === "NEGOTIATED"
+                              ? "default"
+                              : "outline"
+                          }
                         >
                           {composedOffer.fareSource}
                         </Badge>
@@ -578,7 +645,11 @@ export default function OfferComposer() {
                         </div>
                         <div className="flex flex-wrap gap-1">
                           {composedOffer.cohorts.map((cohort, index) => (
-                            <Badge key={index} variant="outline" className="text-xs">
+                            <Badge
+                              key={index}
+                              variant="outline"
+                              className="text-xs"
+                            >
                               {cohort}
                             </Badge>
                           ))}
@@ -590,21 +661,30 @@ export default function OfferComposer() {
                     <div className="bg-gray-50 rounded-lg p-4 space-y-3">
                       <div className="flex justify-between items-center">
                         <span>Base Fare:</span>
-                        <span className="font-medium">₹{composedOffer.basePrice}</span>
+                        <span className="font-medium">
+                          ₹{composedOffer.basePrice}
+                        </span>
                       </div>
 
                       {/* Adjustments */}
                       {composedOffer.adjustments?.length > 0 && (
                         <>
-                          <div className="text-sm font-medium text-gray-600">Applied Adjustments:</div>
+                          <div className="text-sm font-medium text-gray-600">
+                            Applied Adjustments:
+                          </div>
                           {composedOffer.adjustments.map((adj, index) => (
-                            <div key={index} className="flex justify-between items-center text-sm">
+                            <div
+                              key={index}
+                              className="flex justify-between items-center text-sm"
+                            >
                               <span className="flex items-center gap-1">
                                 <Percent className="h-3 w-3" />
                                 {adj.rule}
                               </span>
                               <span className="text-green-600">
-                                {adj.type === "PERCENT" ? `+${adj.value}%` : `+₹${adj.value}`}
+                                {adj.type === "PERCENT"
+                                  ? `+${adj.value}%`
+                                  : `+₹${adj.value}`}
                               </span>
                             </div>
                           ))}
@@ -614,9 +694,14 @@ export default function OfferComposer() {
                       {/* Ancillaries */}
                       {composedOffer.ancillaries?.length > 0 && (
                         <>
-                          <div className="text-sm font-medium text-gray-600">Ancillaries:</div>
+                          <div className="text-sm font-medium text-gray-600">
+                            Ancillaries:
+                          </div>
                           {composedOffer.ancillaries.map((anc, index) => (
-                            <div key={index} className="flex justify-between items-center text-sm">
+                            <div
+                              key={index}
+                              className="flex justify-between items-center text-sm"
+                            >
                               <span className="flex items-center gap-1">
                                 <Package className="h-3 w-3" />
                                 {anc.code}
@@ -627,7 +712,9 @@ export default function OfferComposer() {
                                     <span className="line-through text-gray-400 mr-2">
                                       ₹{anc.base}
                                     </span>
-                                    <span className="text-green-600">₹{anc.sell}</span>
+                                    <span className="text-green-600">
+                                      ₹{anc.sell}
+                                    </span>
                                   </>
                                 ) : (
                                   <span>₹{anc.sell}</span>
@@ -641,20 +728,28 @@ export default function OfferComposer() {
                       {/* Bundles */}
                       {composedOffer.bundles?.length > 0 && (
                         <>
-                          <div className="text-sm font-medium text-gray-600">Bundles:</div>
+                          <div className="text-sm font-medium text-gray-600">
+                            Bundles:
+                          </div>
                           {composedOffer.bundles.map((bundle, index) => (
-                            <div key={index} className="flex justify-between items-center text-sm">
+                            <div
+                              key={index}
+                              className="flex justify-between items-center text-sm"
+                            >
                               <span className="flex items-center gap-1">
                                 <Gift className="h-3 w-3" />
                                 {bundle.code}
                               </span>
                               <div className="text-right">
-                                <span className="text-blue-600">₹{bundle.sell}</span>
-                                {bundle.saveVsIndiv && bundle.saveVsIndiv > 0 && (
-                                  <div className="text-xs text-green-600">
-                                    Save ₹{bundle.saveVsIndiv}
-                                  </div>
-                                )}
+                                <span className="text-blue-600">
+                                  ₹{bundle.sell}
+                                </span>
+                                {bundle.saveVsIndiv &&
+                                  bundle.saveVsIndiv > 0 && (
+                                    <div className="text-xs text-green-600">
+                                      Save ₹{bundle.saveVsIndiv}
+                                    </div>
+                                  )}
                               </div>
                             </div>
                           ))}
@@ -663,12 +758,16 @@ export default function OfferComposer() {
 
                       <div className="border-t pt-3 flex justify-between items-center font-bold text-lg">
                         <span>Total Offer Price:</span>
-                        <span className="text-blue-600">₹{composedOffer.finalOfferPrice}</span>
+                        <span className="text-blue-600">
+                          ₹{composedOffer.finalOfferPrice}
+                        </span>
                       </div>
 
                       <div className="flex justify-between items-center text-sm">
                         <span>Commission (3%):</span>
-                        <span className="font-medium text-green-600">₹{composedOffer.commission}</span>
+                        <span className="font-medium text-green-600">
+                          ₹{composedOffer.commission}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -682,7 +781,9 @@ export default function OfferComposer() {
           <div className="flex justify-between items-center">
             <div>
               <h2 className="text-2xl font-bold">Offer Traces</h2>
-              <p className="text-muted-foreground">View historical offer compositions</p>
+              <p className="text-muted-foreground">
+                View historical offer compositions
+              </p>
             </div>
             <div className="flex gap-2">
               <Select defaultValue="all-status">
@@ -736,13 +837,15 @@ export default function OfferComposer() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline">
-                            {trace.agentTier}
-                          </Badge>
+                          <Badge variant="outline">{trace.agentTier}</Badge>
                         </TableCell>
                         <TableCell>
-                          <Badge 
-                            variant={trace.fareSource === "NEGOTIATED" ? "default" : "outline"}
+                          <Badge
+                            variant={
+                              trace.fareSource === "NEGOTIATED"
+                                ? "default"
+                                : "outline"
+                            }
                           >
                             {trace.fareSource}
                           </Badge>
@@ -793,9 +896,7 @@ export default function OfferComposer() {
               <h3 className="text-lg font-semibold text-gray-900">
                 Offer Trace Details
               </h3>
-              <p className="text-sm text-gray-500">
-                {selectedTrace?.traceId}
-              </p>
+              <p className="text-sm text-gray-500">{selectedTrace?.traceId}</p>
             </div>
           </div>
         }
@@ -824,7 +925,8 @@ export default function OfferComposer() {
             <AntCard title="Search Parameters" size="small">
               <Descriptions column={2} size="small">
                 <Descriptions.Item label="Route">
-                  {selectedTrace.searchParams.origin} → {selectedTrace.searchParams.destination}
+                  {selectedTrace.searchParams.origin} →{" "}
+                  {selectedTrace.searchParams.destination}
                 </Descriptions.Item>
                 <Descriptions.Item label="Trip Type">
                   {selectedTrace.searchParams.tripType.replace("_", " ")}
@@ -836,11 +938,14 @@ export default function OfferComposer() {
                   {selectedTrace.searchParams.channel}
                 </Descriptions.Item>
                 <Descriptions.Item label="Passengers">
-                  {selectedTrace.searchParams.pax.map(p => `${p.count} ${p.type}`).join(", ")}
+                  {selectedTrace.searchParams.pax
+                    .map((p) => `${p.count} ${p.type}`)
+                    .join(", ")}
                 </Descriptions.Item>
                 <Descriptions.Item label="Dates">
                   {selectedTrace.searchParams.dates.depart}
-                  {selectedTrace.searchParams.dates.return && ` - ${selectedTrace.searchParams.dates.return}`}
+                  {selectedTrace.searchParams.dates.return &&
+                    ` - ${selectedTrace.searchParams.dates.return}`}
                 </Descriptions.Item>
               </Descriptions>
             </AntCard>
@@ -851,17 +956,17 @@ export default function OfferComposer() {
                 <Statistic
                   title="Agent ID"
                   value={selectedTrace.agentId}
-                  valueStyle={{ fontSize: '16px' }}
+                  valueStyle={{ fontSize: "16px" }}
                 />
                 <Statistic
                   title="Agent Tier"
                   value={selectedTrace.agentTier}
-                  valueStyle={{ fontSize: '16px' }}
+                  valueStyle={{ fontSize: "16px" }}
                 />
                 <Statistic
                   title="Fare Source"
                   value={selectedTrace.fareSource}
-                  valueStyle={{ fontSize: '16px' }}
+                  valueStyle={{ fontSize: "16px" }}
                 />
               </div>
               {selectedTrace.cohorts && selectedTrace.cohorts.length > 0 && (
@@ -869,7 +974,9 @@ export default function OfferComposer() {
                   <div className="text-sm font-medium mb-2">Cohorts:</div>
                   <div className="flex flex-wrap gap-1">
                     {selectedTrace.cohorts.map((cohort, index) => (
-                      <AntTag key={index} color="blue">{cohort}</AntTag>
+                      <AntTag key={index} color="blue">
+                        {cohort}
+                      </AntTag>
                     ))}
                   </div>
                 </div>
@@ -881,40 +988,59 @@ export default function OfferComposer() {
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span>Base Fare:</span>
-                  <span className="font-medium">₹{parseFloat(selectedTrace.basePrice).toLocaleString()}</span>
+                  <span className="font-medium">
+                    ₹{parseFloat(selectedTrace.basePrice).toLocaleString()}
+                  </span>
                 </div>
 
-                {selectedTrace.adjustments && selectedTrace.adjustments.length > 0 && (
-                  <div>
-                    <div className="text-sm font-medium mb-2">Applied Adjustments:</div>
-                    {selectedTrace.adjustments.map((adj, index) => (
-                      <div key={index} className="flex justify-between items-center text-sm">
-                        <span>{adj.rule}</span>
-                        <span className="text-green-600">
-                          {adj.type === "PERCENT" ? `+${adj.value}%` : `+₹${adj.value}`}
-                        </span>
+                {selectedTrace.adjustments &&
+                  selectedTrace.adjustments.length > 0 && (
+                    <div>
+                      <div className="text-sm font-medium mb-2">
+                        Applied Adjustments:
                       </div>
-                    ))}
-                  </div>
-                )}
+                      {selectedTrace.adjustments.map((adj, index) => (
+                        <div
+                          key={index}
+                          className="flex justify-between items-center text-sm"
+                        >
+                          <span>{adj.rule}</span>
+                          <span className="text-green-600">
+                            {adj.type === "PERCENT"
+                              ? `+${adj.value}%`
+                              : `+₹${adj.value}`}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
-                {selectedTrace.ancillaries && selectedTrace.ancillaries.length > 0 && (
-                  <div>
-                    <div className="text-sm font-medium mb-2">Ancillaries:</div>
-                    {selectedTrace.ancillaries.map((anc, index) => (
-                      <div key={index} className="flex justify-between items-center text-sm">
-                        <span>{anc.code}</span>
-                        <span>₹{anc.sell}</span>
+                {selectedTrace.ancillaries &&
+                  selectedTrace.ancillaries.length > 0 && (
+                    <div>
+                      <div className="text-sm font-medium mb-2">
+                        Ancillaries:
                       </div>
-                    ))}
-                  </div>
-                )}
+                      {selectedTrace.ancillaries.map((anc, index) => (
+                        <div
+                          key={index}
+                          className="flex justify-between items-center text-sm"
+                        >
+                          <span>{anc.code}</span>
+                          <span>₹{anc.sell}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
                 {selectedTrace.bundles && selectedTrace.bundles.length > 0 && (
                   <div>
                     <div className="text-sm font-medium mb-2">Bundles:</div>
                     {selectedTrace.bundles.map((bundle, index) => (
-                      <div key={index} className="flex justify-between items-center text-sm">
+                      <div
+                        key={index}
+                        className="flex justify-between items-center text-sm"
+                      >
                         <span>{bundle.code}</span>
                         <span>₹{bundle.sell}</span>
                       </div>
@@ -923,15 +1049,20 @@ export default function OfferComposer() {
                 )}
 
                 <Divider />
-                
+
                 <div className="flex justify-between items-center font-bold text-lg">
                   <span>Final Offer Price:</span>
-                  <span className="text-blue-600">₹{parseFloat(selectedTrace.finalOfferPrice).toLocaleString()}</span>
+                  <span className="text-blue-600">
+                    ₹
+                    {parseFloat(selectedTrace.finalOfferPrice).toLocaleString()}
+                  </span>
                 </div>
 
                 <div className="flex justify-between items-center">
                   <span>Commission:</span>
-                  <span className="text-green-600 font-medium">₹{parseFloat(selectedTrace.commission).toLocaleString()}</span>
+                  <span className="text-green-600 font-medium">
+                    ₹{parseFloat(selectedTrace.commission).toLocaleString()}
+                  </span>
                 </div>
               </div>
             </AntCard>
@@ -943,7 +1074,9 @@ export default function OfferComposer() {
                   {selectedTrace.auditTraceId}
                 </Descriptions.Item>
                 <Descriptions.Item label="Status">
-                  <AntTag color={selectedTrace.status === "ACTIVE" ? "green" : "red"}>
+                  <AntTag
+                    color={selectedTrace.status === "ACTIVE" ? "green" : "red"}
+                  >
                     {selectedTrace.status}
                   </AntTag>
                 </Descriptions.Item>

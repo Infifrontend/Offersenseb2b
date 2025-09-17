@@ -54,6 +54,7 @@ import {
   Clock,
   AlertCircle,
   Square,
+  IndianRupee,
 } from "lucide-react";
 import dayjs from "dayjs";
 import { z } from "zod";
@@ -639,7 +640,8 @@ export default function CampaignManager() {
         body: JSON.stringify({
           campaignCode: selectedCampaignForMail.campaignCode,
           recipientEmail,
-          templateId: selectedCampaignForMail.comms.emailTemplateId || "default",
+          templateId:
+            selectedCampaignForMail.comms.emailTemplateId || "default",
         }),
       });
 
@@ -749,13 +751,13 @@ export default function CampaignManager() {
         } else if (offer.type === "AMOUNT") {
           return (
             <Tag color="orange" size="small">
-              ${offer.value} Off
+              ₹{offer.value} Off
             </Tag>
           );
         } else if (offer.type === "SPECIAL_PRICE") {
           return (
             <Tag color="red" size="small">
-              ${offer.specialPrice}
+              ₹{offer.specialPrice}
             </Tag>
           );
         }
@@ -988,8 +990,8 @@ export default function CampaignManager() {
                             {campaign.offer.type === "PERCENT"
                               ? `${campaign.offer.value}% Off`
                               : campaign.offer.type === "AMOUNT"
-                                ? `$${campaign.offer.value} Off`
-                                : `$${campaign.offer.specialPrice}`}
+                                ? `₹${campaign.offer.value} Off`
+                                : `₹${campaign.offer.specialPrice}`}
                           </Tag>
                         </div>
                       </div>
@@ -1142,7 +1144,7 @@ export default function CampaignManager() {
                             ? "Free"
                             : rule.adjustmentType === "PERCENT"
                               ? `${rule.adjustmentValue}% discount`
-                              : `$${rule.adjustmentValue} discount`}{" "}
+                              : `₹${rule.adjustmentValue} discount`}{" "}
                           • {rule.pos?.join(", ")} •{" "}
                           {rule.agentTier?.join(", ")}
                         </div>
@@ -1207,7 +1209,7 @@ export default function CampaignManager() {
             <Col span={8}>
               <AntForm.Item name={["offer", "value"]} label="Discount Value">
                 <InputNumber
-                  placeholder="10 (for 10% or $10)"
+                  placeholder="10 (for 10% or ₹10)"
                   style={{ width: "100%" }}
                   min={0}
                 />
@@ -1733,10 +1735,8 @@ export default function CampaignManager() {
                     <AntCard size="small">
                       <Statistic
                         title="Revenue Uplift"
-                        value={formatCurrency(
-                          campaignMetrics.aggregated.revenueUplift,
-                        )}
-                        prefix={<DollarSign className="w-4 h-4" />}
+                        value={campaignMetrics.aggregated.revenueUplift}
+                        prefix={<IndianRupee className="w-4 h-4" />}
                         valueStyle={{ fontSize: "18px", color: "#52c41a" }}
                       />
                     </AntCard>
@@ -1804,8 +1804,8 @@ export default function CampaignManager() {
                       {selectedCampaign.offer.type === "PERCENT"
                         ? `${selectedCampaign.offer.value}% Off`
                         : selectedCampaign.offer.type === "AMOUNT"
-                          ? `$${selectedCampaign.offer.value} Off`
-                          : `$${selectedCampaign.offer.specialPrice}`}
+                          ? `₹${selectedCampaign.offer.value} Off`
+                          : `₹${selectedCampaign.offer.specialPrice}`}
                     </Descriptions.Item>
                     <Descriptions.Item label="Products">
                       {[
@@ -2150,8 +2150,8 @@ export default function CampaignManager() {
                     {selectedCampaignForMail.offer.type === "PERCENT"
                       ? `${selectedCampaignForMail.offer.value}% Off`
                       : selectedCampaignForMail.offer.type === "AMOUNT"
-                        ? `$${selectedCampaignForMail.offer.value} Off`
-                        : `$${selectedCampaignForMail.offer.specialPrice}`}
+                        ? `₹${selectedCampaignForMail.offer.value} Off`
+                        : `₹${selectedCampaignForMail.offer.specialPrice}`}
                   </div>
                 </div>
                 <div>
@@ -2179,19 +2179,17 @@ export default function CampaignManager() {
                       {selectedCampaignForMail.offer.type === "PERCENT"
                         ? `${selectedCampaignForMail.offer.value}% discount`
                         : selectedCampaignForMail.offer.type === "AMOUNT"
-                          ? `$${selectedCampaignForMail.offer.value} off`
-                          : `special price of $${selectedCampaignForMail.offer.specialPrice}`}{" "}
+                          ? `₹${selectedCampaignForMail.offer.value} off`
+                          : `special price of ₹${selectedCampaignForMail.offer.specialPrice}`}{" "}
                       on{" "}
                       {[
-                        ...(selectedCampaignForMail.products.ancillaries ||
-                          []),
+                        ...(selectedCampaignForMail.products.ancillaries || []),
                         ...(selectedCampaignForMail.products.bundles || []),
                       ].length > 0
                         ? [
-                            ...(selectedCampaignForMail.products
-                              .ancillaries || []),
-                            ...(selectedCampaignForMail.products.bundles ||
+                            ...(selectedCampaignForMail.products.ancillaries ||
                               []),
+                            ...(selectedCampaignForMail.products.bundles || []),
                           ]
                             .slice(0, 2)
                             .join(", ")
@@ -2219,8 +2217,8 @@ export default function CampaignManager() {
                                     ? `${selectedCampaignForMail.offer.value}% discount`
                                     : selectedCampaignForMail.offer.type ===
                                         "AMOUNT"
-                                      ? `$${selectedCampaignForMail.offer.value} off`
-                                      : `special price of $${selectedCampaignForMail.offer.specialPrice}`
+                                      ? `₹${selectedCampaignForMail.offer.value} off`
+                                      : `special price of ₹${selectedCampaignForMail.offer.specialPrice}`
                                 } on ${
                                   [
                                     ...(selectedCampaignForMail.products

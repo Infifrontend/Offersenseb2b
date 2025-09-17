@@ -57,6 +57,7 @@ import {
   Settings,
   ArrowUpRight,
   ArrowDownRight,
+  IndianRupee,
 } from "lucide-react";
 
 const COLORS = [
@@ -450,7 +451,8 @@ export default function Dashboard() {
               Total Revenue
             </CardTitle>
             <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-              <DollarSign className="h-5 w-5" />
+              <IndianRupee className="h-5 w-5" />
+              {/* <DollarSign className="h-5 w-5" /> */}
             </div>
           </CardHeader>
           <CardContent>
@@ -891,7 +893,8 @@ export default function Dashboard() {
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-3 text-xl font-bold text-slate-800">
                   <div className="p-2 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg">
-                    <DollarSign className="h-5 w-5 text-white" />
+                    {/* <DollarSign className="h-5 w-5 text-white" /> */}
+                    <IndianRupee className="h-5 w-5 text-white" />
                   </div>
                   Ancillary Revenue
                 </CardTitle>

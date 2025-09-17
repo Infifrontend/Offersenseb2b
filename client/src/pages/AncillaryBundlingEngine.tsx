@@ -303,12 +303,17 @@ export default function AncillaryBundlingEngine() {
 
         const response = await fetch(url);
         console.log("Response status:", response.status);
-        console.log("Response headers:", Object.fromEntries(response.headers.entries()));
+        console.log(
+          "Response headers:",
+          Object.fromEntries(response.headers.entries()),
+        );
 
         if (!response.ok) {
           const errorText = await response.text();
           console.error("Error response body:", errorText);
-          throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+          throw new Error(
+            `HTTP error! status: ${response.status} - ${errorText}`,
+          );
         }
 
         const data = await response.json();
@@ -320,7 +325,7 @@ export default function AncillaryBundlingEngine() {
         console.error("Error fetching bundle pricing rules:", error);
         // Try to fall back to a test endpoint to verify connectivity
         try {
-          const testResponse = await fetch('/api/test-bundles-pricing');
+          const testResponse = await fetch("/api/test-bundles-pricing");
           if (testResponse.ok) {
             console.log("Test endpoint works, main endpoint has issues");
           }
@@ -691,10 +696,14 @@ export default function AncillaryBundlingEngine() {
       ),
     },
     {
-      title: "Channel",
+      title: "Channel ",
       dataIndex: "channel",
       key: "channel",
-      render: (channel: string) => <Badge variant="secondary">{channel}</Badge>,
+      render: (channel: string) => (
+        <Badge variant="secondary" className="text-white">
+          {channel}
+        </Badge>
+      ),
     },
     {
       title: "Status",
@@ -933,11 +942,13 @@ export default function AncillaryBundlingEngine() {
                 onClick={async () => {
                   try {
                     console.log("Testing API endpoints...");
-                    const testResponse = await fetch('/api/test-bundles-pricing');
+                    const testResponse = await fetch(
+                      "/api/test-bundles-pricing",
+                    );
                     const testResult = await testResponse.text();
                     console.log("Test endpoint result:", testResult);
 
-                    const pricingResponse = await fetch('/api/bundles/pricing');
+                    const pricingResponse = await fetch("/api/bundles/pricing");
                     const pricingResult = await pricingResponse.text();
                     console.log("Pricing endpoint result:", pricingResult);
 
@@ -949,7 +960,10 @@ export default function AncillaryBundlingEngine() {
                     console.error("API test failed:", error);
                     toast({
                       title: "API Test Failed",
-                      description: error instanceof Error ? error.message : "Unknown error",
+                      description:
+                        error instanceof Error
+                          ? error.message
+                          : "Unknown error",
                       variant: "destructive",
                     });
                   }
@@ -1686,7 +1700,10 @@ export default function AncillaryBundlingEngine() {
                         Channel
                       </label>
                       <div className="mt-1">
-                        <Badge variant="secondary" className="text-sm">
+                        <Badge
+                          variant="secondary"
+                          className="text-sm text-white"
+                        >
                           {selectedBundle.channel}
                         </Badge>
                       </div>

@@ -244,7 +244,9 @@ export default function AgentTierManager() {
       if (!response.ok) {
         const errorText = await response.text();
         console.error("Failed to fetch assignments:", errorText);
-        throw new Error(`Failed to fetch assignments: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `Failed to fetch assignments: ${response.status} ${response.statusText}`,
+        );
       }
       const data = await response.json();
       console.log("Received tier assignments data:", data);
@@ -673,7 +675,9 @@ export default function AgentTierManager() {
       dataIndex: "schedule",
       key: "schedule",
       render: (schedule: string) => (
-        <code className="bg-gray-100 px-2 py-1 rounded text-xs">{schedule}</code>
+        <code className="bg-gray-100 px-2 py-1 rounded text-xs">
+          {schedule}
+        </code>
       ),
     },
     {
@@ -791,9 +795,12 @@ export default function AgentTierManager() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Agent Tier Manager</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Agent Tier Manager
+          </h1>
           <p className="text-sm text-gray-600">
-            Define agent tiers with eligibility rules based on KPIs and manage automatic tier assignments.
+            Define agent tiers with eligibility rules based on KPIs and manage
+            automatic tier assignments.
           </p>
         </div>
       </div>
@@ -863,8 +870,8 @@ export default function AgentTierManager() {
                       Agent Tier Definitions
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      Define tier criteria and KPI thresholds for automatic agent
-                      classification.
+                      Define tier criteria and KPI thresholds for automatic
+                      agent classification.
                     </p>
                   </div>
                   <AntButton
@@ -904,10 +911,12 @@ export default function AgentTierManager() {
                       View and manage current tier assignments for all agents.
                     </p>
                     {/* Debug info - remove in production */}
-                    {process.env.NODE_ENV === 'development' && (
+                    {process.env.NODE_ENV === "development" && (
                       <div className="text-xs text-gray-400 mt-1">
-                        Debug: {assignments.length} total assignments, {activeAssignments.length} active
-                        {assignmentsError && ` | Error: ${assignmentsError.message}`}
+                        Debug: {assignments.length} total assignments,{" "}
+                        {activeAssignments.length} active
+                        {assignmentsError &&
+                          ` | Error: ${assignmentsError.message}`}
                       </div>
                     )}
                   </div>
@@ -971,7 +980,8 @@ export default function AgentTierManager() {
                       Tier Assignment Engines
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      Configure automated tier assignment schedules and policies.
+                      Configure automated tier assignment schedules and
+                      policies.
                     </p>
                   </div>
                   <AntButton
@@ -1005,7 +1015,9 @@ export default function AgentTierManager() {
             children: (
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-lg font-semibold">Agent Tier Evaluation</h3>
+                  <h3 className="text-lg font-semibold">
+                    Agent Tier Evaluation
+                  </h3>
                   <p className="text-sm text-muted-foreground">
                     Evaluate individual agents against tier criteria and preview
                     tier recommendations.
@@ -1021,9 +1033,14 @@ export default function AgentTierManager() {
                   >
                     <AntForm.Item
                       name="agentId"
-                      rules={[{ required: true, message: "Agent ID is required" }]}
+                      rules={[
+                        { required: true, message: "Agent ID is required" },
+                      ]}
                     >
-                      <Input placeholder="Enter Agent ID" style={{ width: 200 }} />
+                      <Input
+                        placeholder="Enter Agent ID"
+                        style={{ width: 200 }}
+                      />
                     </AntForm.Item>
                     <AntForm.Item
                       name="window"
@@ -1035,7 +1052,9 @@ export default function AgentTierManager() {
                         placeholder="Select KPI Window"
                         style={{ width: 150 }}
                       >
-                        <AntSelect.Option value="MONTHLY">Monthly</AntSelect.Option>
+                        <AntSelect.Option value="MONTHLY">
+                          Monthly
+                        </AntSelect.Option>
                         <AntSelect.Option value="QUARTERLY">
                           Quarterly
                         </AntSelect.Option>
@@ -1112,7 +1131,9 @@ export default function AgentTierManager() {
                                   <Tag
                                     color={
                                       evaluationResult.currentTier
-                                        ? getTierColor(evaluationResult.currentTier)
+                                        ? getTierColor(
+                                            evaluationResult.currentTier,
+                                          )
                                         : "default"
                                     }
                                   >
@@ -1126,7 +1147,9 @@ export default function AgentTierManager() {
                                   Recommended
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  {getTierIcon(evaluationResult.recommendedTier)}
+                                  {getTierIcon(
+                                    evaluationResult.recommendedTier,
+                                  )}
                                   <Tag
                                     color={getTierColor(
                                       evaluationResult.recommendedTier,
@@ -1244,7 +1267,9 @@ export default function AgentTierManager() {
                     formatter={(value) =>
                       `₹ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                     }
-                    parser={(value) => value!.replace(/[₹\s?|(,*)]/g, "") as any}
+                    parser={(value) =>
+                      value!.replace(/[₹\s?|(,*)]/g, "") as any
+                    }
                     style={{ width: "100%" }}
                   />
                 </AntForm.Item>
